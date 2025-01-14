@@ -6,18 +6,18 @@ type FDNode = {
     id: string;
     label: string;
     columns: string[];
-}
+};
 
 export type FDEdge = {
     readonly id: string;
     readonly source: FDNode;
     readonly target: FDNode;
-}
+};
 
 export type FDGraph = {
     nodes: FDNode[];
     edges: FDEdge[];
-}
+};
 
 export function createFDGraph(payload: FDPayloadFromServer): FDGraph {
     const nodeMap = createNodes(payload);
@@ -30,7 +30,7 @@ export function createFDGraph(payload: FDPayloadFromServer): FDGraph {
 }
 
 function createNodes(payload: FDPayloadFromServer): Map<string, FDNode> {
-    const nodeMap: Map<string, FDNode> = new Map();
+    const nodeMap = new Map<string, FDNode>();
 
     Object.entries(payload.vertices).forEach(([ labelList, nodeFromServer ], index) => {
         const node: FDNode = {
@@ -52,7 +52,7 @@ function createEdges(payload: FDPayloadFromServer, nodes: Map<string, FDNode>): 
             const source = nodes.get(edgeFromServer.source);
             if (!source)
                 throw new Error(`Node ${edgeFromServer.source} not found`);
-                
+
             const target = nodes.get(edgeFromServer.destination);
             if (!target)
                 throw new Error(`Node ${edgeFromServer.destination} not found`);

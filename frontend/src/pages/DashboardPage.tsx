@@ -1,11 +1,10 @@
-import API from '@/utils/api';
-import { useNavigate } from 'react-router';
+import { API } from '@/utils/api';
 import { routes } from '@/router';
-import { Button, Col, Container, Row } from 'react-bootstrap';
 import { Workflow } from '@/types/workflow';
-import { Link } from 'react-router-dom';
-import rawAPI from '@/utils/api/rawAPI';
-import Portal, { portals } from '@/components/common/Portal';
+import { Link, useNavigate } from 'react-router-dom';
+import { rawAPI } from '@/utils/api/rawAPI';
+import { Portal, portals } from '@/components/common/Portal';
+import { Button } from '@nextui-org/react';
 
 export default function DashboardPage() {
     const navigate = useNavigate();
@@ -22,33 +21,32 @@ export default function DashboardPage() {
         <Portal to={portals.topbar} >
             <TopbarToolbar />
         </Portal>
-        <Container>
+        <div className='container'>
             <h1>A catching title!</h1>
-            <p className='mt-5'>
+            <p className='mt-12'>
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
             </p>
             <p>
                 Even more catching description. Wanna know more?
             </p>
-            <Row className='mt-5'>
-                <Col />
-                <Col lg={4} md={6} xs={12}>
+
+            <div className='mt-12 flex justify-center'>
+                <div className='md:w-1/2 lg:w-1/3'>
                     <Button
-                        className='w-100'
-                        onClick={continueToWorkflow}
+                        className='w-full'
+                        onPress={continueToWorkflow}
                     >
                         Sure thing!
                     </Button>
-                </Col>
-                <Col />
-            </Row>
-        </Container>
+                </div>
+            </div>
+        </div>
     </>);
 }
 
 function TopbarToolbar() {
     function resetDatabase() {
-        rawAPI.POST('/demo/initialize');
+        void rawAPI.POST('/demo/initialize');
     }
 
     return (
@@ -56,16 +54,16 @@ function TopbarToolbar() {
             <Link to={routes.root}>
                 Home
             </Link>
-            <Link to={routes.workflow.example} className='ms-3'>
+            <Link to={routes.workflow.example} className='ml-4'>
                 Workflow
             </Link>
-            <Link to={routes.worker.example} className='ms-3'>
+            <Link to={routes.worker.example} className='ml-4'>
                 Worker
             </Link>
-            <Link to={routes.assignment.example} className='ms-3'>
+            <Link to={routes.assignment.example} className='ml-4'>
                 Assignment
             </Link>
-            <Button onClick={resetDatabase} className='ms-3' variant='outline-primary'>
+            <Button onPress={resetDatabase} className='ml-4' color='primary' variant='bordered'>
                 Reset DB
             </Button>
         </div>

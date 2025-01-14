@@ -1,37 +1,34 @@
-import useDecisionContext, { DecisionPhase } from '@/context/DecisionProvider';
+import { DecisionPhase, useDecisionContext } from '@/context/DecisionProvider';
 import { DecisionStatus } from '@/types/decision';
-import { type ReactNode, useCallback, useMemo, useState } from 'react';
-import { Button, Card, Col, Form, Row } from 'react-bootstrap';
-import { useNavigate } from 'react-router';
-import { CreatableSelect } from '@/components/common/FormSelect';
-import { type SingleValue } from 'react-select';
+import { type ReactNode, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { TiPlus } from 'react-icons/ti';
 import { IoClose } from 'react-icons/io5';
 import { routes } from '@/router';
-import AssignmentVerdictLabel from './AssignmentVerdictLabel';
+import { AssignmentVerdictLabel } from './AssignmentVerdictLabel';
 import { type Assignment } from '@/types/assignment';
-import API from '@/utils/api';
+import { API } from '@/utils/api';
 import { TbPointFilled } from 'react-icons/tb';
-import SpinnerButton from './common/SpinnerButton';
+import { Button, Card, CardBody, CardFooter, CardHeader } from '@nextui-org/react';
 
 type AssignmentEvaluationProps = {
     assignment: Assignment;
     onEvaluated: (assignment: Assignment) => void;
 };
 
-export default function AssignmentEvaluation({ assignment, onEvaluated }: AssignmentEvaluationProps) {
+export function AssignmentEvaluation({ assignment, onEvaluated }: AssignmentEvaluationProps) {
     return (
-        <Row>
-            <Col xxl={6} xl={10} xs={12}>
+        <div className='grid grid-cols-12 gap-4'>
+            <div className='col-span-12 lg:col-span-10 xl:col-span-6'>
                 <ControlCard
                     assignment={assignment}
                     onEvaluated={onEvaluated}
                 />
-            </Col>
-            <Col xxl={6} xl={10} xs={12}>
+            </div>
+            <div className='col-span-12 lg:col-span-10 xl:col-span-6'>
                 <DecisionReasonsCard />
-            </Col>
-        </Row>
+            </div>
+        </div>
     );
 }
 
@@ -50,7 +47,7 @@ function ControlCard({ assignment, onEvaluated }: ControlCardProps) {
         // If the user select Rejected but then he don't provide any reasons, we evaluate as Accepted.
         if (status === DecisionStatus.Rejected && filteredColumns.length === 0)
             status = DecisionStatus.Accepted;
-            
+
         const columns = status === DecisionStatus.Rejected
             ? filteredColumns.map(column => ({ name: column.name, reasons: column.reasons }))
             : [];
@@ -72,64 +69,64 @@ function ControlCard({ assignment, onEvaluated }: ControlCardProps) {
         navigate(routes.worker.detail.resolve({ workerId: assignment.workerId }));
     }
 
-    return (<>
+    return (
         <Card>
-            <Card.Header>
-                <Card.Title>{titles[decision.phase]}</Card.Title>
-            </Card.Header>
-            <Card.Body>
+            <CardHeader>
+                {titles[decision.phase]}
+            </CardHeader>
+            <CardBody>
                 {bodies[decision.phase]}
                 {decision.phase === DecisionPhase.Finished && (<>
                     This example was evaluated as <AssignmentVerdictLabel verdict={assignment.verdict} />
                 </>)}
-            </Card.Body>
+            </CardBody>
             {decision.phase !== DecisionPhase.Finished && (
-                <Card.Footer>
+                <CardFooter>
                     {decision.phase === DecisionPhase.AnswerYesNo && (<>
-                        <SpinnerButton
-                            variant='success'
-                            onClick={() => evaluate(DecisionStatus.Accepted)}
-                            fetching={fetching}
+                        <Button
+                            color='success'
+                            onPress={() => evaluate(DecisionStatus.Accepted)}
+                            isLoading={fetching}
                         >
                             Yes, the row is possible
-                        </SpinnerButton>
-                        <Button className='ms-3' variant='danger' onClick={() => setDecision({ ...decision, phase: DecisionPhase.ProvideReason })}>
+                        </Button>
+                        <Button color='danger' className='ml-4' onPress={() => setDecision({ ...decision, phase: DecisionPhase.ProvideReason })}>
                             No, the row is invalid
                         </Button>
-                        <SpinnerButton
-                            className='ms-3'
-                            variant='warning'
-                            onClick={() => evaluate(DecisionStatus.Unanswered)}
-                            fetching={fetching}
+                        <Button
+                            className='ml-4'
+                            color='warning'
+                            onPress={() => evaluate(DecisionStatus.Unanswered)}
+                            isLoading={fetching}
                         >
                             {`I don't know ...`}
-                        </SpinnerButton>
+                        </Button>
                     </>)}
                     {decision.phase === DecisionPhase.ProvideReason && (<>
-                        <SpinnerButton
-                            onClick={() => evaluate(DecisionStatus.Rejected)}
-                            fetching={fetching}
+                        <Button
+                            onPress={() => evaluate(DecisionStatus.Rejected)}
+                            isLoading={fetching}
                         >
                             Submit
-                        </SpinnerButton>
-                        <SpinnerButton
-                            className='ms-3'
-                            variant='warning'
-                            onClick={() => evaluate(DecisionStatus.Unanswered)}
-                            fetching={fetching}
+                        </Button>
+                        <Button
+                            className='ml-4'
+                            color='warning'
+                            onPress={() => evaluate(DecisionStatus.Unanswered)}
+                            isLoading={fetching}
                         >
                             {`I don't know ...`}
-                        </SpinnerButton>
+                        </Button>
                     </>)}
                     {decision.phase === DecisionPhase.JustFinished && (<>
-                        <Button onClick={continueAccepted}>
+                        <Button onPress={continueAccepted}>
                             Go back and continue
                         </Button>
                     </>)}
-                </Card.Footer>
+                </CardFooter>
             )}
         </Card>
-    </>);
+    );
 }
 
 const titles: { [key in DecisionPhase]: string } = {
@@ -162,11 +159,11 @@ function DecisionReasonsCard() {
     const { decision, setDecision } = useDecisionContext();
     const selectedColumn = decision.selectedColumn && decision.rows[decision.selectedColumn.rowIndex].columns[decision.selectedColumn.colIndex];
     const isEditable = decision.phase === DecisionPhase.ProvideReason;
-    
+
     function setData(reasons: string[]) {
         if (!selectedColumn)
             return;
-        
+
         selectedColumn.reasons = reasons;
         setDecision({ ...decision });
     }
@@ -181,19 +178,17 @@ function DecisionReasonsCard() {
 
     return (
         <Card>
-            <Card.Header>
-                <Card.Title>
-                    {isEditable ? (<>
-                        Why is this column a negative example?
-                    </>) : (<>
-                        This column is {isNegative ? 'negative' : 'positive'}
-                    </>)}
-                </Card.Title>
-            </Card.Header>
-            <Card.Body>
+            <CardHeader>
+                {isEditable ? (<>
+                    Why is this column a negative example?
+                </>) : (<>
+                    This column is {isNegative ? 'negative' : 'positive'}
+                </>)}
+            </CardHeader>
+            <CardBody>
                 {isEditable ? (<>
                     <p>
-                        Please provide us with one or multiple reasons why the value <span className='fw-bold text-primary'>{selectedColumn.value}</span> {`isn't`} valid. You can select from the predefined reasons or you can type your own.
+                        Please provide us with one or multiple reasons why the value <span className='font-bold text-primary'>{selectedColumn.value}</span> {`isn't`} valid. You can select from the predefined reasons or you can type your own.
                     </p>
                     <DecisionReasonsForm key={selectedColumn.id} data={selectedColumn.reasons} setData={setData} />
                 </>) : (<>
@@ -202,7 +197,7 @@ function DecisionReasonsCard() {
                     </p>
                     <DecisionReasonsOverview key={selectedColumn.id} data={selectedColumn.reasons} />
                 </>)}
-            </Card.Body>
+            </CardBody>
         </Card>
     );
 }
@@ -210,7 +205,7 @@ function DecisionReasonsCard() {
 type DecisionReasonsFormProps = {
     data: string[];
     setData: (data: string[]) => void;
-}
+};
 
 function DecisionReasonsForm({ data, setData }: DecisionReasonsFormProps) {
     const [ editingIndex, setEditingIndex ] = useState<number | undefined>(data.length === 0 ? 0 : undefined);
@@ -226,10 +221,10 @@ function DecisionReasonsForm({ data, setData }: DecisionReasonsFormProps) {
 
         setEditingIndex(undefined);
         setIsAdding(false);
-            
-        if (!newValue) 
+
+        if (!newValue)
             return;
-        
+
         innerData[editingIndex] = newValue;
         setData(innerData.filter(reason => !!reason));
     }
@@ -249,30 +244,33 @@ function DecisionReasonsForm({ data, setData }: DecisionReasonsFormProps) {
         setIsAdding(false);
         setData(data.filter((_, i) => i !== index));
     }
-    
+
     return (<>
         {innerData.map((reason, index) => (
-            <Form.Group key={index}>
+            <div key={index}>
                 {index === editingIndex ? (
                     <ReasonSelect value={innerData[editingIndex]} onChange={finishEditingReason}/>
                 ) : (
                     <div className='fd-edit-reason-row'>
-                        <span className='d-flex align-items-center fw-bold'>
+                        <span className='flex items-center font-bold'>
+                            {/* TODO Replace by button. */}
                             <IoClose
                                 size={24}
-                                className='clickable text-danger me-2'
+                                className='cursor-pointer text-danger mr-2'
                                 onClick={() => deleteReason(index)}
                             />
-                            <span className='clickable' onClick={() => startEditingReason(index)}>{reason}</span>
+                            {/* TODO Replace by button. */}
+                            <span className='cursor-pointer' onClick={() => startEditingReason(index)}>{reason}</span>
                         </span>
                     </div>
                 )}
-            </Form.Group>
+            </div>
         ))}
         {!isAdding && (
             <div className='mt-2'>
-                <span className='d-flex align-items-center clickable text-primary' onClick={addReason}>
-                    <TiPlus size={20} className='me-2' /><span>Add reason</span>
+                {/* TODO Replace by button. */}
+                <span className='flex items-center cursor-pointer text-primary' onClick={addReason}>
+                    <TiPlus size={20} className='mr-2' /><span>Add reason</span>
                 </span>
             </div>
         )}
@@ -282,32 +280,35 @@ function DecisionReasonsForm({ data, setData }: DecisionReasonsFormProps) {
 type ReasonSelectProps = {
     value: string;
     onChange: (value: string) => void;
-}
+};
 
 function ReasonSelect({ value, onChange }: ReasonSelectProps) {
     const options = useMemo(() => (!value || predefinedReasons.includes(value)) ? predefinedOptions : [ ...predefinedOptions, valueToOption(value) ], [ value ]);
 
-    const handleChange = useCallback((option: SingleValue<Option>) => {
-        onChange(option ? option.value : '');
-    }, [ onChange ]);
+    // const handleChange = useCallback((option: SingleValue<Option>) => {
+    //     onChange(option ? option.value : '');
+    // }, [ onChange ]);
 
     return (
-        <CreatableSelect
-            openMenuOnFocus
-            options={options}
-            value={value ? valueToOption(value) : undefined}
-            onChange={handleChange}
-            onBlur={e => onChange(e.target.value)}
-            isValidNewOption={inputValue => !!inputValue}
-            placeholder='Select an option or provide a custom one ...'
-        />
+    // FIXME Replace with Autocomplete, or some entirely different ux.
+
+        // <CreatableSelect
+        //     openMenuOnFocus
+        //     options={options}
+        //     value={value ? valueToOption(value) : undefined}
+        //     onChange={handleChange}
+        //     onBlur={e => onChange(e.target.value)}
+        //     isValidNewOption={inputValue => !!inputValue}
+        //     placeholder='Select an option or provide a custom one ...'
+        // />
+        <div></div>
     );
 }
 
 type Option = {
     value: string;
     label: string;
-}
+};
 
 function valueToOption(value: string): Option {
     return {
@@ -329,19 +330,17 @@ const predefinedOptions = predefinedReasons.map(valueToOption);
 
 type DecisionReasonsOverviewProps = {
     data: string[];
-}
+};
 
 function DecisionReasonsOverview({ data }: DecisionReasonsOverviewProps) {
     return (<>
         {data.map((reason, index) => (
-            <Form.Group key={index}>
-                <div className='fd-edit-reason-row'>
-                    <span className='d-flex align-items-center fw-bold'>
-                        <TbPointFilled size={16} />
-                        <span>{reason}</span>
-                    </span>
-                </div>
-            </Form.Group>
+            <div key={index} className='fd-edit-reason-row'>
+                <span className='flex items-center font-bold'>
+                    <TbPointFilled size={16} />
+                    <span>{reason}</span>
+                </span>
+            </div>
         ))}
     </>);
 }

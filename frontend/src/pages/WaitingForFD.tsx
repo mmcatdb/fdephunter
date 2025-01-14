@@ -1,13 +1,13 @@
-import JobDisplay from '@/components/job/JobDisplay';
+import { JobDisplay } from '@/components/job/JobDisplay';
 import { useJob } from '@/hooks';
 import { type Job, JobState } from '@/types/job';
-import { Button, Col, Row } from 'react-bootstrap';
+import { Button } from '@nextui-org/react';
 
 type WaitingForFDProps = {
     workflowId: string;
     cachedJob?: Job;
     onNextStep: () => void;
-}
+};
 
 export default function WaitingForFD({ workflowId, cachedJob, onNextStep }: WaitingForFDProps) {
     const job = useJob(workflowId, cachedJob);
@@ -17,13 +17,13 @@ export default function WaitingForFD({ workflowId, cachedJob, onNextStep }: Wait
 
     return (<>
         <h1>Wait for FD discovery ...</h1>
-        <Row className='mt-5'>
-            <Col xxl={6} xl={8}>
-                <JobDisplay job={job} />
-            </Col>
-        </Row>
-        <div className='mt-5'>
-            <Button onClick={onNextStep} disabled={!job || job.state !== JobState.Finished}>
+
+        <div className='mt-12 lg:w-2/3 xl:w-1/2'>
+            <JobDisplay job={job} />
+        </div>
+
+        <div className='mt-12'>
+            <Button onPress={onNextStep} disabled={!job || job.state !== JobState.Finished}>
                 Go next
             </Button>
         </div>

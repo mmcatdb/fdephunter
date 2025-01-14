@@ -14,7 +14,7 @@ export type CreateJobResponse = {
     job: JobFromServer;
 };
 
-const workflows = {
+export const workflows = {
     create: POST<Empty, WorkflowFromServer, Empty>(
         () => `/workflows/create`,
     ),
@@ -46,5 +46,3 @@ const workflows = {
         u => `/workflows/${u.workflowId}/add-expert`,
     ),
 };
-
-export default workflows;

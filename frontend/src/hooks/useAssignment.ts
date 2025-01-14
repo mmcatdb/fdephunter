@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
-import API from '@/utils/api';
+import { API } from '@/utils/api';
 import { Assignment, type AssignmentInfo } from '@/types/assignment';
 
 type UseAssignmentReturn = {
     assignment: Assignment | undefined;
     setAssignment: (assignment: Assignment) => void;
-}
+};
 
 export function useAssignment(assignmentId: string): UseAssignmentReturn {
     const [ assignment, setAssignment ] = useState<Assignment>();
@@ -20,7 +20,7 @@ export function useAssignment(assignmentId: string): UseAssignmentReturn {
 
     useEffect(() => {
         const [ signal, abort ] = API.prepareAbort();
-        fetchAssignments(signal);
+        void fetchAssignments(signal);
 
         return abort;
     }, [ fetchAssignments ]);
@@ -44,7 +44,7 @@ export function useAnsweredAssignments(workerId: string): AssignmentInfo[] | und
 
     useEffect(() => {
         const [ signal, abort ] = API.prepareAbort();
-        fetchAssignments(signal);
+        void fetchAssignments(signal);
 
         return abort;
     }, [ fetchAssignments ]);

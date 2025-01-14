@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
-import API from '@/utils/api';
+import { API } from '@/utils/api';
 import { Class, Workflow } from '@/types/workflow';
 import { Job } from '@/types/job';
 
 type WorkflowCache = {
     job?: Job;
     classes?: Class[];
-}
+};
 
 type UseWorkflowReturn = {
     workflow?: Workflow;
@@ -27,19 +27,19 @@ export function useWorkflow(workflowId: string): UseWorkflowReturn {
 
     const fetchWorkflows = useCallback(async (signal?: AbortSignal) => {
         const response = await API.workflows.get(signal, { workflowId });
-        if (!response.status) 
+        if (!response.status)
             return;
 
         setWorkflow(Workflow.fromServer(response.data));
         setCache({
             job: response.data.job && Job.fromServer(response.data.job),
-            classes: response.data.classes && response.data.classes.map(Class.fromServer),
+            classes: response.data.classes?.map(Class.fromServer),
         });
     }, [ workflowId ]);
 
     useEffect(() => {
         const [ signal, abort ] = API.prepareAbort();
-        fetchWorkflows(signal);
+        void fetchWorkflows(signal);
 
         return abort;
     }, [ fetchWorkflows ]);

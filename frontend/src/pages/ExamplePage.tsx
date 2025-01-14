@@ -1,12 +1,12 @@
 import { routes } from '@/router';
 import { Workflow } from '@/types/workflow';
-import API from '@/utils/api';
+import { API } from '@/utils/api';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 
 type ExamplePageProps = {
     type: 'workflow' | 'worker' | 'assignment';
-}
+};
 
 export default function ExamplePage({ type }: ExamplePageProps) {
     const [ isError, setIsError ] = useState(false);
@@ -57,15 +57,15 @@ export default function ExamplePage({ type }: ExamplePageProps) {
         const [ signal, abort ] = API.prepareAbort();
 
         if (type === 'workflow') {
-            findRandomWorkflow(signal);
+            void findRandomWorkflow(signal);
             return abort;
         }
         if (type === 'worker') {
-            findRandomWorker(signal);
+            void findRandomWorker(signal);
             return abort;
         }
         if (type === 'assignment') {
-            findRandomAssignment(signal);
+            void findRandomAssignment(signal);
             return abort;
         }
     }, [ type ]);

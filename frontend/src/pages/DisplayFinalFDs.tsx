@@ -1,9 +1,9 @@
-import { Tab, Tabs } from 'react-bootstrap';
-import DatasetTableView from '@/components/dataset/DatasetTableView';
-import FDListView from '@/components/dataset/FDListView';
-import FDGraphView from '@/components/dataset/FDGraphView';
+import { DatasetTableView } from '@/components/dataset/DatasetTableView';
+import { FDListView } from '@/components/dataset/FDListView';
+import { FDGraphView } from '@/components/dataset/FDGraphView';
 import { useJobResult } from '@/hooks';
 import { type Workflow } from '@/types/workflow';
+import { Tab, Tabs } from '@nextui-org/react';
 
 export type DisplayFinalFDsProps = {
     workflow: Workflow;
@@ -12,19 +12,17 @@ export type DisplayFinalFDsProps = {
 export default function DisplayFinalFDs({ workflow }: DisplayFinalFDsProps) {
     const jobResult = useJobResult(workflow.id);
 
-    return (<>
-        <Tabs
-            defaultActiveKey='overview'
-        >
-            <Tab eventKey='table' title='Dataset' className='pt-3'>
+    return (
+        <Tabs defaultSelectedKey='overview'>
+            <Tab key='table' title='Dataset' className='pt-4'>
                 <DatasetTableView workflowId={workflow.id} />
             </Tab>
-            <Tab eventKey='list' title='Functional dependencies' className='pt-3'>
+            <Tab key='list' title='Functional dependencies' className='pt-4'>
                 <FDListView graph={jobResult?.fdGraph} />
             </Tab>
-            <Tab eventKey='graph' title='Graph view' className='pt-3'>
+            <Tab key='graph' title='Graph view' className='pt-4'>
                 <FDGraphView graph={jobResult?.fdGraph} />
             </Tab>
         </Tabs>
-    </>);
+    );
 }

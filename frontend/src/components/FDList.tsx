@@ -1,12 +1,12 @@
 import type { FDEdge, FDGraph } from '@/types/FD';
-import { Badge, Col, Row } from 'react-bootstrap';
+import { Badge } from '@nextui-org/react';
 import { FaArrowRight } from 'react-icons/fa';
 
 type FDListProps = {
     graph: FDGraph;
 };
 
-export default function FDList({ graph }: FDListProps) {
+export function FDList({ graph }: FDListProps) {
     return (
         <div>
             {graph.edges.map(edge => (
@@ -22,18 +22,22 @@ type FDRowProps = {
 
 function FDRow({ edge }: FDRowProps) {
     return (
-        <Row className='py-1'>
-            <Col xs={1}>{edge.id}</Col>
-            <Col xs={6}>{edge.source.columns.map(name => <ColumnNameBadge key={name} name={name} />)}</Col>
-            <Col xs={2}><FaArrowRight size={20} /></Col>
-            <Col xs={3}>{edge.target.columns.map(name => <ColumnNameBadge key={name} name={name} />)}</Col>
-        </Row>
+        <div className='py-1 grid grid-cols-12 gap-4'>
+            <div className='col-span-1'>{edge.id}</div>
+            <div className='col-span-6'>
+                {edge.source.columns.map(name => <ColumnNameBadge key={name} name={name} />)}
+            </div>
+            <div className='col-span-2'><FaArrowRight size={20} /></div>
+            <div className='col-span-3'>
+                {edge.target.columns.map(name => <ColumnNameBadge key={name} name={name} />)}
+            </div>
+        </div>
     );
 }
 
 type ColumnNameBadgeProps = {
     name: string;
-}
+};
 
 function ColumnNameBadge({ name }: ColumnNameBadgeProps) {
     return (

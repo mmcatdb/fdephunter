@@ -3,7 +3,7 @@ import { GET, POST } from '../routeFunctions';
 import { type AssignmentInit, type AssignmentFromServer, type AssignmentInfo } from '@/types/assignment';
 import { type DecisionInit } from '@/types/decision';
 
-const assignments = {
+export const assignments = {
     create: POST<Empty, AssignmentFromServer, AssignmentInit>(
         () => `/dummy/assignments`,
     ),
@@ -17,5 +17,3 @@ const assignments = {
         u => `/assignments/${u.assignmentId}/evaluate`,
     ),
 };
-
-export default assignments;

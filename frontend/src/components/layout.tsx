@@ -6,7 +6,7 @@ import { portals } from './common/Portal';
 type LayoutElementProps = {
     children?: ReactNode;
     className?: string;
-}
+};
 
 export function TopBar({ children, className }: LayoutElementProps) {
     return (
@@ -14,7 +14,7 @@ export function TopBar({ children, className }: LayoutElementProps) {
             <div id='top-bar-left'>
                 {children}
             </div>
-            <div id={portals.topbar} className='d-flex align-items-center justify-content-center flex-grow-1'/>
+            <div id={portals.topbar} className='grow flex items-center justify-center'/>
             <div id='top-bar-right' />
         </header>
     );
@@ -30,6 +30,7 @@ export function LeftBar({ children, className }: LayoutElementProps) {
     }, []);
 
     return (<>
+        {/* TODO Replace by button. */}
         <div className='fd-collapse-button' onClick={() => setIsCollapsed(!isCollapsed)}>
             <CollapseButton isCollapsed={isCollapsed} />
         </div>

@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
-import API from '@/utils/api';
+import { API } from '@/utils/api';
 import { Worker, type WorkerFromServer } from '@/types/worker';
 
 type UseWorkerReturn = {
     worker?: Worker;
     reload: (nextValue?: WorkerFromServer) => void;
-}
+};
 
 export function useWorker(workerId: string): UseWorkerReturn {
     const [ worker, setWorker ] = useState<Worker>();
@@ -15,9 +15,9 @@ export function useWorker(workerId: string): UseWorkerReturn {
             setWorker(Worker.fromServer(nextValue));
             return;
         }
-        
+
         const response = await API.workers.get(signal, { workerId });
-        if (!response.status) 
+        if (!response.status)
             return;
 
         setWorker(Worker.fromServer(response.data));
@@ -25,7 +25,7 @@ export function useWorker(workerId: string): UseWorkerReturn {
 
     useEffect(() => {
         const [ signal, abort ] = API.prepareAbort();
-        fetchWorker(undefined, signal);
+        void fetchWorker(undefined, signal);
 
         return abort;
     }, [ fetchWorker ]);
@@ -39,14 +39,14 @@ export function useWorker(workerId: string): UseWorkerReturn {
 type UseWorkersReturn = {
     workers: Worker[];
     setWorkers: (workers: Worker[]) => void;
-}
+};
 
 export function useWorkers(workflowId: string): UseWorkersReturn {
     const [ workers, setWorkers ] = useState<Worker[]>([]);
 
     const fetchWorkers = useCallback(async (signal?: AbortSignal) => {
         const response = await API.workflows.getAllWorkers(signal, { workflowId });
-        if (!response.status) 
+        if (!response.status)
             return;
 
         setWorkers(response.data.map(Worker.fromServer));
@@ -54,7 +54,7 @@ export function useWorkers(workflowId: string): UseWorkersReturn {
 
     useEffect(() => {
         const [ signal, abort ] = API.prepareAbort();
-        fetchWorkers(signal);
+        void fetchWorkers(signal);
 
         return abort;
     }, [ fetchWorkers ]);

@@ -4,9 +4,9 @@ import { createPortal } from 'react-dom';
 type PortalProps = {
     children?: ReactNode;
     to: string;
-}
+};
 
-export default function Portal({ children, to }: PortalProps) {
+export function Portal({ children, to }: PortalProps) {
     const [ target, setTarget ] = useState(document.getElementById(to));
 
     useEffect(() => {

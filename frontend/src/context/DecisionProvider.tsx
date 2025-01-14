@@ -1,4 +1,4 @@
-import React, { createContext, type ReactNode, useContext, useState } from 'react';
+import { createContext, type Dispatch, type ReactNode, type SetStateAction, useContext, useState } from 'react';
 import { type DatasetDataWithExamples } from '@/types/dataset';
 
 export type DecisionColumn = {
@@ -8,7 +8,7 @@ export type DecisionColumn = {
     value: string;
     reasons: string[];
 };
-    
+
 export type DecisionRow = {
     index: number;
     columns: DecisionColumn[];
@@ -32,16 +32,16 @@ export type DecisionState = {
 
 export type DecisionContext = {
     decision: DecisionState;
-    setDecision: React.Dispatch<React.SetStateAction<DecisionState>>;
+    setDecision: Dispatch<SetStateAction<DecisionState>>;
 };
 
 const decisionContext = createContext<DecisionContext | undefined>(undefined);
 
-interface DecisionProviderProps {
+type DecisionProviderProps = {
     children: ReactNode;
     data: DatasetDataWithExamples;
     isFinished: boolean;
-}
+};
 
 export function DecisionProvider({ children, data, isFinished }: DecisionProviderProps) {
     const [ decision, setDecision ] = useState<DecisionState>(createDefaultDecision(data, isFinished));
@@ -53,12 +53,16 @@ export function DecisionProvider({ children, data, isFinished }: DecisionProvide
     );
 }
 
-export default function useDecisionContext(): DecisionContext {
+export function useDecisionContext(): DecisionContext {
     const context = useContext(decisionContext);
     if (context === undefined)
         throw new Error('useContext must be used within an DecisionProvider');
 
     return context;
+}
+
+export function useTryDecisionContext(): DecisionContext | undefined {
+    return useContext(decisionContext);
 }
 
 function createDefaultDecision(data: DatasetDataWithExamples, isFinished: boolean): DecisionState {

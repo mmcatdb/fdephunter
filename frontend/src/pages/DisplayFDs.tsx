@@ -1,19 +1,16 @@
-import { Button, Form, Modal, Tab, Tabs } from 'react-bootstrap';
-import DatasetTableView from '@/components/dataset/DatasetTableView';
-import FDListView from '@/components/dataset/FDListView';
-import FDGraphView from '@/components/dataset/FDGraphView';
+import { useMemo, useState } from 'react';
+import { DatasetTableView } from '@/components/dataset/DatasetTableView';
+import { FDListView } from '@/components/dataset/FDListView';
+import { FDGraphView } from '@/components/dataset/FDGraphView';
 import { useApproaches, useClasses, useJobResult } from '@/hooks';
-import WorkersDistribution from '@/components/WorkersDistribution';
+import { WorkersDistribution } from '@/components/WorkersDistribution';
 import { Workflow, type Class } from '@/types/workflow';
-import { useCallback, useMemo, useState } from 'react';
 import { NegativeExampleState } from '@/types/negativeExample';
-import API from '@/utils/api';
+import { API } from '@/utils/api';
 import { Job } from '@/types/job';
 import { type Approach } from '@/types/approach';
-import { type SingleValue } from 'react-select';
-import { FormSelect } from '@/components/common/FormSelect';
-import SpinnerButton from '@/components/common/SpinnerButton';
-import { type Option, nameToOption } from './InitialSettings';
+import { nameToOption } from './InitialSettings';
+import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem, type SharedSelection, Tab, Tabs } from '@nextui-org/react';
 
 export type DisplayFDsProps = {
     workflow: Workflow;
@@ -49,28 +46,26 @@ export default function DisplayFDs({ workflow, chachedClasses, onNextStep }: Dis
     }
 
     return (<>
-        <Tabs
-            defaultActiveKey='overview'
-        >
-            <Tab eventKey='overview' title='Overview' className='pt-4'>
+        <Tabs defaultSelectedKey='overview'>
+            <Tab key='overview' title='Overview' className='pt-6'>
                 <WorkersDistribution workflow={workflow} classes={classes} />
             </Tab>
-            <Tab eventKey='table' title='Dataset' className='pt-3'>
+            <Tab key='table' title='Dataset' className='pt-4'>
                 <DatasetTableView workflowId={workflow.id} />
             </Tab>
-            <Tab eventKey='list' title='Functional dependencies' className='pt-3'>
+            <Tab key='list' title='Functional dependencies' className='pt-4'>
                 <FDListView graph={jobResult?.fdGraph} />
             </Tab>
-            <Tab eventKey='graph' title='Graph view' className='pt-3'>
+            <Tab key='graph' title='Graph view' className='pt-4'>
                 <FDGraphView graph={jobResult?.fdGraph} />
             </Tab>
         </Tabs>
-        <div className='mt-5'>
-            <Button onClick={() => setShowModal(true)} disabled={!canGoNext}>
+        <div className='mt-12'>
+            <Button onPress={() => setShowModal(true)} disabled={!canGoNext}>
                 Go next
             </Button>
         </div>
-        <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
             <RediscoveryFormModal onSubmit={runRediscovery} fetching={fetching} />
         </Modal>
     </>);
@@ -87,46 +82,53 @@ type RediscoveryFormModalProps = {
 
 export function RediscoveryFormModal({ onSubmit, fetching }: RediscoveryFormModalProps) {
     const availableApproaches = useApproaches();
-    const [ selectedApproach, setSelectedApproach ] = useState<Option>();
+    const [ selectedApproach, setSelectedApproach ] = useState(new Set<string>());
     const approachOptions = useMemo(() => availableApproaches?.map(a => nameToOption(a.name)), [ availableApproaches ]);
 
     function submit() {
         if (!availableApproaches)
             return;
 
-        const approach = availableApproaches.find(a => a.name === selectedApproach?.value);
+        const selectedApproachName = selectedApproach.values().next().value;
+        const approach = availableApproaches.find(a => a.name === selectedApproachName);
         if (!approach)
             return;
 
         onSubmit(approach);
     }
 
-    const handleApproachChange = useCallback((option: SingleValue<Option>) => {
-        setSelectedApproach(option ?? undefined);
-    }, []);
+    if (!approachOptions)
+        return null;
 
-    return (<>
-        <Modal.Header>
-            <Modal.Title>Execute rediscovery</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-            <Form.Group>
-                <Form.Label>Approach</Form.Label>
-                <FormSelect
-                    options={approachOptions}
-                    value={selectedApproach}
-                    onChange={handleApproachChange}
-                />
-            </Form.Group>
-        </Modal.Body>
-        <Modal.Footer className='justify-content-start'>
-            <SpinnerButton
-                onClick={submit}
-                fetching={fetching}
-                disabled={!selectedApproach}
-            >
-                Execute
-            </SpinnerButton>
-        </Modal.Footer>
-    </>);
+    return (
+        <ModalContent>
+            <ModalHeader>
+                Execute rediscovery
+            </ModalHeader>
+
+            <ModalBody>
+                <Select
+                    label='Approach'
+                    selectionMode='single'
+                    items={approachOptions}
+                    selectedKeys={selectedApproach}
+                    onSelectionChange={setSelectedApproach as (keys: SharedSelection) => void}
+                >
+                    {option => (
+                        <SelectItem key={option.key}>{option.label}</SelectItem>
+                    )}
+                </Select>
+            </ModalBody>
+
+            <ModalFooter className='justify-start'>
+                <Button
+                    onPress={submit}
+                    isLoading={fetching}
+                    disabled={!selectedApproach}
+                >
+                    Execute
+                </Button>
+            </ModalFooter>
+        </ModalContent>
+    );
 }

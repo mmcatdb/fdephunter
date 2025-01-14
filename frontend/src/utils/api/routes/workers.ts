@@ -3,7 +3,7 @@ import { GET, POST } from '../routeFunctions';
 import { type WorkerFromServer } from '@/types/worker';
 import { type UserFromServer } from '@/types/user';
 
-const workers = {
+export const workers = {
     get: GET<{ workerId: StringLike }, WorkerFromServer>(
         u => `/domain-experts/${u.workerId}`,
     ),
@@ -17,5 +17,3 @@ const workers = {
         () => `/users/experts`,
     ),
 };
-
-export default workers;

@@ -1,76 +1,73 @@
-import useDecisionContext, { DecisionPhase } from '@/context/DecisionProvider';
+import { DecisionPhase, type DecisionState, useDecisionContext, useTryDecisionContext } from '@/context/DecisionProvider';
 import type { DatasetRow, DatasetDataWithExamples, DatasetData } from '@/types/dataset';
+import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@nextui-org/react';
 import clsx from 'clsx';
-import { Table } from 'react-bootstrap';
+import { useMemo } from 'react';
 
 type DatasetTableProps = {
     data: DatasetData | DatasetDataWithExamples;
 };
 
-export default function DatasetTable({ data }: DatasetTableProps) {
+export function DatasetTable({ data }: DatasetTableProps) {
+    const items = useMemo(() => [
+        ...data.rows.map((row, index) => ({ row, index, isNegative: false })),
+        ...('examples' in data ? data.examples : []).map((row, index) => ({ row, index, isNegative: true })),
+    ], [ data ]);
+
+    const decision = useTryDecisionContext()?.decision;
+
     return (
-        <Table striped hover>
-            <thead>
-                <tr>
-                    {data.header.map((column, index) => (
-                        <th key={index}>{column}</th>
-                    ))}
-                </tr>
-            </thead>
-            <tbody>
-                {data.rows.map((row, index) => (
-                    <DatasetTableRow key={index} row={row} />
+        <Table isStriped>
+            <TableHeader>
+                {data.header.map((column, index) => (
+                    <TableColumn key={index}>{column}</TableColumn>
                 ))}
-                {'examples' in data && data.examples.map((row, index) => (
-                    <NegativeExampleRow key={index} rowIndex={index} value={row} />
-                ))}
-            </tbody>
+            </TableHeader>
+            <TableBody items={items}>
+                {({ row, index, isNegative }) => (
+                    isNegative
+                        ? negativeExampleRow(row, index, decision)
+                        : datasetTableRow(row, index)
+                )}
+            </TableBody>
         </Table>
     );
 }
 
-type DatasetTableRowProps = {
-    row: DatasetRow;
-};
-
-function DatasetTableRow({ row }: DatasetTableRowProps) {
+function datasetTableRow(row: DatasetRow, rowIndex: number) {
     return (
-        <tr>
-            {row.map((column, index) => (
-                <td key={index}>{column}</td>
+        <TableRow key={rowIndex}>
+            {row.map((column, colIndex) => (
+                <TableCell key={colIndex}>{column}</TableCell>
             ))}
-        </tr>
+        </TableRow>
     );
 }
 
-type NegativeExampleRowProps = {
-    rowIndex: number;
-    value: DatasetRow;
-};
-
-function NegativeExampleRow({ rowIndex, value }: NegativeExampleRowProps) {
-    const { decision } = useDecisionContext();
-
+function negativeExampleRow(row: DatasetRow, rowIndex: number, decision: DecisionState | undefined) {
+    if (!decision) 
+        throw new Error('Decision context is not available.');
+    
     if (decision.phase === DecisionPhase.AnswerYesNo) {
         return (
-            <tr className='fd-negative-example-row'>
-                {value.map((column, colIndex) => (
-                    <td key={colIndex} className='fd-column'>
+            <TableRow key={-rowIndex} className='fd-negative-example-row'>
+                {row.map((column, colIndex) => (
+                    <TableCell key={colIndex} className='fd-column'>
                         <div className='fd-column-inner'>
                             {column}
                         </div>
-                    </td>
+                    </TableCell>
                 ))}
-            </tr>
+            </TableRow>
         );
     }
 
     return (
-        <tr>
-            {value.map((column, colIndex) => (
+        <TableRow key={-rowIndex}>
+            {row.map((column, colIndex) => (
                 <NegativeExampleColumn key={colIndex} rowIndex={rowIndex} colIndex={colIndex} value={column} />
             ))}
-        </tr>
+        </TableRow>
     );
 }
 
@@ -78,7 +75,7 @@ type NegativeExampleColumnProps = {
     rowIndex: number;
     colIndex: number;
     value: string;
-}
+};
 
 function NegativeExampleColumn({ rowIndex, colIndex, value }: NegativeExampleColumnProps) {
     const { decision, setDecision } = useDecisionContext();
@@ -100,12 +97,13 @@ function NegativeExampleColumn({ rowIndex, colIndex, value }: NegativeExampleCol
 
     return (
         <td className={clsx('fd-column', isNegative ? 'negative' : 'positive', isSelected && 'selected')}>
+            {/* TODO Replace by button. */}
             <div className='fd-column-inner evaluated' onClick={columnClicked}>
                 <span className='fd-column-value'>{value}</span>
                 <div>
                     <span className='fd-column-reasons'>
                         <span>{isNegative ? 'Negative' : 'Positive'}</span>{' '}
-                        {isNegative && <span>(<span className='fw-bold'>{column.reasons.length}</span> {column.reasons.length === 1 ? 'reason' : 'reasons'})</span>}
+                        {isNegative && <span>(<span className='font-bold'>{column.reasons.length}</span> {column.reasons.length === 1 ? 'reason' : 'reasons'})</span>}
                     </span>
                 </div>
             </div>

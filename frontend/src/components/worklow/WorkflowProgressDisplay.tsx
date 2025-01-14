@@ -6,7 +6,7 @@ type WorkflowProgressDisplayProps = {
     currentStep: WorkflowState;
 };
 
-export default function WorkflowProgressDisplay({ currentStep }: WorkflowProgressDisplayProps) {
+export function WorkflowProgressDisplay({ currentStep }: WorkflowProgressDisplayProps) {
     const currentStepIndex = STEPS.findIndex(step => step === currentStep);
 
     return (

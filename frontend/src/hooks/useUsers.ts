@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import API from '@/utils/api';
+import { API } from '@/utils/api';
 import { User } from '@/types/user';
 
 
@@ -16,7 +16,7 @@ export function useUsers(): User[] | undefined {
 
     useEffect(() => {
         const [ signal, abort ] = API.prepareAbort();
-        fetchUsers(signal);
+        void fetchUsers(signal);
 
         return abort;
     }, [ fetchUsers ]);

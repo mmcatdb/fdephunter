@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Dataset } from '@/types/dataset';
-import API from '@/utils/api';
+import { API } from '@/utils/api';
 
 
 export function useDatasets(): Dataset[] | undefined {
@@ -8,7 +8,7 @@ export function useDatasets(): Dataset[] | undefined {
 
     async function fetchDatasets(signal?: AbortSignal) {
         const response = await API.datasets.getAll(signal, {});
-        if (!response.status) 
+        if (!response.status)
             return;
 
         setDatasets(response.data.map(Dataset.fromServer));
@@ -16,7 +16,7 @@ export function useDatasets(): Dataset[] | undefined {
 
     useEffect(() => {
         const [ signal, abort ] = API.prepareAbort();
-        fetchDatasets(signal);
+        void fetchDatasets(signal);
 
         return abort;
     }, []);

@@ -1,40 +1,34 @@
+import { useMemo, useState } from 'react';
 import { routes, type NamedParams } from '@/router';
 import { type User } from '@/types/user';
 import { Worker } from '@/types/worker';
 import { type WorkflowStats, type Workflow, type Class } from '@/types/workflow';
-import API from '@/utils/api';
-import { useCallback, useMemo, useState } from 'react';
-import { Card, Col, Form, Row } from 'react-bootstrap';
+import { API } from '@/utils/api';
 import { IoIosCheckmarkCircleOutline, IoIosCloseCircleOutline } from 'react-icons/io';
-import { useParams } from 'react-router';
-import { FormSelect } from './common/FormSelect';
 import { useUsers, useWorkers } from '@/hooks';
-import { type SingleValue } from 'react-select';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { NegativeExampleState } from '@/types/negativeExample';
 import { type IconType } from 'react-icons/lib';
 import { IoReloadCircleOutline, IoStopCircleOutline } from 'react-icons/io5';
-import SpinnerButton from './common/SpinnerButton';
+import { Button, Card, CardBody, CardFooter, CardHeader, Select, SelectItem, type SharedSelection } from '@nextui-org/react';
 
 type WorkersDistributionProps = {
     workflow: Workflow;
     classes: Class[];
 };
 
-export default function WorkersDistribution({ workflow, classes }: WorkersDistributionProps) {
+export function WorkersDistribution({ workflow, classes }: WorkersDistributionProps) {
     return (
-        <div>
-            <Row>
-                <Col>
-                    <WorkflowStatsCard stats={MOCK_WORKFLOW_STATS} />
-                    <div className='mt-3'>
-                        <WorkersOverviewCard />
-                    </div>
-                </Col>
-                <Col>
-                    <ClassStatsCard classes={classes} />
-                </Col>
-            </Row>
+        <div className='grid grid-cols-2 gap-4'>
+            <div>
+                <WorkflowStatsCard stats={MOCK_WORKFLOW_STATS} />
+                <div className='mt-3'>
+                    <WorkersOverviewCard />
+                </div>
+            </div>
+            <div>
+                <ClassStatsCard classes={classes} />
+            </div>
         </div>
     );
 }
@@ -57,52 +51,41 @@ function WorkersOverviewCard() {
 
     return (
         <Card>
-            <Card.Header>
-                <Card.Title>Workers</Card.Title>
-            </Card.Header>
-            <Card.Body>
+            <CardHeader>
+                Workers
+            </CardHeader>
+            <CardBody>
                 <WorkersTable workers={workers} />
-            </Card.Body>
-            <Card.Footer>
+            </CardBody>
+            <CardFooter>
                 <AddWorker onCreated={workerCreated} />
-            </Card.Footer>
+            </CardFooter>
         </Card>
     );
 }
 
 type WorkersTableProps = {
     workers: Worker[];
-}
+};
 
 function WorkersTable({ workers }: WorkersTableProps) {
     return (<>
-        <Row className='fw-bold'>
-            <Col>User</Col>
-            <Col className='text-center'>Link</Col>
-        </Row>
+        <div className='grid grid-cols-2 gap-4 font-bold'>
+            <div>User</div>
+            <div className='text-center'>Link</div>
+        </div>
+
         {workers.map(worker => (
-            <Row key={worker.id}>
-                <Col>{worker.user.name}</Col>
-                <Col className='text-center'>
+            <div key={worker.id} className='grid grid-cols-2 gap-4'>
+                <div>{worker.user.name}</div>
+                <div className='text-center'>
                     <Link to={routes.worker.detail.resolve({ workerId: worker.id })} target='_blank' rel='noreferrer'>
                         {routes.worker.detail.resolve({ workerId: worker.id })}
                     </Link>
-                </Col>
-            </Row>
+                </div>
+            </div>
         ))}
     </>);
-}
-
-type Option = {
-    label: string;
-    value: string;
-}
-
-function userToOption(user: User): Option {
-    return {
-        label: user.name,
-        value: user.id,
-    };
 }
 
 type AddWorkerProps = {
@@ -111,18 +94,15 @@ type AddWorkerProps = {
 
 function AddWorker({ onCreated }: AddWorkerProps) {
     const users = useUsers();
-    const [ selectedUser, setSelectedUser ] = useState<Option>();
+    const [ selectedUser, setSelectedUser ] = useState(new Set<string>());
     const userOptions = useMemo(() => users?.map(userToOption), [ users ]);
     const [ fetching, setFetching ] = useState(false);
 
-    const handleUserChange = useCallback((option: SingleValue<Option>) => {
-        setSelectedUser(option ?? undefined);
-    }, []);
-    
     const { workflowId } = useParams() as NamedParams<typeof routes.workflow.detail>;
 
     async function submit() {
-        const user = users?.find(u => u.id === selectedUser?.value);
+        const selectedUserId = selectedUser.values().next().value;
+        const user = users?.find(u => u.id === selectedUserId);
         if (!user)
             return;
 
@@ -135,30 +115,51 @@ function AddWorker({ onCreated }: AddWorkerProps) {
             return;
 
         onCreated(Worker.fromServer(response.data));
-        setSelectedUser(undefined);
+        setSelectedUser(new Set());
     }
 
-    return (<>
-        <Row className='pb-1'>
-            <Form.Group as={Col}>
-                <Form.Label>Add another user</Form.Label>
-                <FormSelect
-                    options={userOptions}
-                    value={selectedUser}
-                    onChange={handleUserChange}
-                />
-            </Form.Group>
-            <Col xs={4} className='d-flex align-items-end'>
-                <SpinnerButton
-                    className='w-100'
-                    onClick={submit}
-                    fetching={fetching}
+    if (!userOptions)
+        return null;
+
+    return (
+        <div className='pb-1 grid grid-cols-3 gap-4'>
+            <div className='col-span-2'>
+                <Select
+                    label='Add another user'
+                    selectionMode='single'
+                    items={userOptions}
+                    selectedKeys={selectedUser}
+                    onSelectionChange={setSelectedUser as (keys: SharedSelection) => void}
+                >
+                    {option => (
+                        <SelectItem key={option.key}>{option.label}</SelectItem>
+                    )}
+                </Select>
+            </div>
+
+            <div className='flex items-end'>
+                <Button
+                    className='w-full'
+                    onPress={submit}
+                    isLoading={fetching}
                 >
                     Add
-                </SpinnerButton>
-            </Col>
-        </Row>
-    </>);
+                </Button>
+            </div>
+        </div>
+    );
+}
+
+type Option = {
+    key: string;
+    label: string;
+};
+
+function userToOption(user: User): Option {
+    return {
+        key: user.id,
+        label: user.name,
+    };
 }
 
 type WorkflowStatsCardProps = {
@@ -168,66 +169,63 @@ type WorkflowStatsCardProps = {
 function WorkflowStatsCard({ stats }: WorkflowStatsCardProps) {
     return (
         <Card>
-            <Card.Header>
-                <Card.Title>
-                    Workflow statistics
-                </Card.Title>
-            </Card.Header>
-            <Card.Body>
-                <Row className='fw-bold'>
-                    <Col>Functional dependencies</Col>
-                    <Col>Evaluated examples</Col>
-                </Row>
-                <Row>
-                    <Col>Initial: {stats.FDsInitial}</Col>
-                    <Col>Positive: {stats.examplesPositive}</Col>
-                </Row>
-                <Row>
-                    <Col>Remaining: {stats.FDsRemaining}</Col>
-                    <Col>Negative: {stats.examplesNegative}</Col>
-                </Row>
-            </Card.Body>
+            <CardHeader>
+                Workflow statistics
+            </CardHeader>
+            <CardBody>
+                <div className='grid grid-cols-2 gap-4 font-bold'>
+                    <div className='w-1/2'>Functional dependencies</div>
+                    <div className='w-1/2'>Evaluated examples</div>
+                </div>
+                <div className='grid grid-cols-2 gap-4'>
+                    <div className='w-1/2'>Initial: {stats.FDsInitial}</div>
+                    <div className='w-1/2'>Positive: {stats.examplesPositive}</div>
+                </div>
+                <div className='grid grid-cols-2 gap-4'>
+                    <div className='w-1/2'>Remaining: {stats.FDsRemaining}</div>
+                    <div className='w-1/2'>Negative: {stats.examplesNegative}</div>
+                </div>
+            </CardBody>
         </Card>
     );
 }
 
 type ClassStatsCardProps = {
     classes: Class[];
-}
+};
 
 function ClassStatsCard({ classes }: ClassStatsCardProps) {
     console.log(classes);
 
     return (
         <Card>
-            <Card.Header>
-                <Card.Title>
-                    Class statistics
-                </Card.Title>
-            </Card.Header>
-            <Card.Body>
-                <Row className='fw-bold'>
-                    <Col>Name</Col>
-                    <Col xs={2} className='text-center'>Weight</Col>
-                    <Col xs={2} className='text-center'>Iteration</Col>
-                    <Col xs={2} className='text-center'>State</Col>
-                </Row>
+            <CardHeader>
+                Class statistics
+            </CardHeader>
+            <CardBody>
+                <div className='font-bold grid grid-cols-6 gap-4'>
+                    <div className='col-span-3'>Name</div>
+                    <div className='text-center'>Weight</div>
+                    <div className='text-center'>Iteration</div>
+                    <div className='text-center'>State</div>
+                </div>
+
                 {classes.map(c => (
-                    <Row key={c.id}>
-                        <Col>{c.label}</Col>
-                        <Col xs={2} className='text-center'>{c.weight}</Col>
-                        <Col xs={2} className='text-center'>{c.iteration}</Col>
-                        <Col xs={2} className='text-center'>{c.example && <ExampleStateIcon state={c.example.state} />}</Col>
-                    </Row>
+                    <div key={c.id} className='grid grid-cols-6 gap-4'>
+                        <div className='col-span-3'>{c.label}</div>
+                        <div className='text-center'>{c.weight}</div>
+                        <div className='text-center'>{c.iteration}</div>
+                        <div className='text-center'>{c.example && <ExampleStateIcon state={c.example.state} />}</div>
+                    </div>
                 ))}
-            </Card.Body>
+            </CardBody>
         </Card>
     );
 }
 
 type ExampleStateIconProps = {
     state: NegativeExampleState;
-}
+};
 
 export function ExampleStateIcon({ state }: ExampleStateIconProps) {
     const data = exampleStateData[state];
@@ -245,9 +243,9 @@ const exampleStateData: {
         icon: IconType;
     }
 } = {
-    [NegativeExampleState.New]: { icon: IoReloadCircleOutline, color: 'info' },
-    [NegativeExampleState.Rejected]: { icon: IoIosCloseCircleOutline, color: 'danger' },
-    [NegativeExampleState.Accepted]: { icon: IoIosCheckmarkCircleOutline, color: 'success' },
-    [NegativeExampleState.Answered]: { icon: IoReloadCircleOutline, color: 'info' },
-    [NegativeExampleState.Conflict]: { icon: IoStopCircleOutline, color: 'warning' },
+    [NegativeExampleState.New]: { icon: IoReloadCircleOutline, color: 'text-info' },
+    [NegativeExampleState.Rejected]: { icon: IoIosCloseCircleOutline, color: 'text-danger' },
+    [NegativeExampleState.Accepted]: { icon: IoIosCheckmarkCircleOutline, color: 'text-success' },
+    [NegativeExampleState.Answered]: { icon: IoReloadCircleOutline, color: 'text-info' },
+    [NegativeExampleState.Conflict]: { icon: IoStopCircleOutline, color: 'text-warning' },
 };

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import API from '@/utils/api';
+import { API } from '@/utils/api';
 import { JobResult } from '@/types/jobResult';
 
 export function useJobResult(worklflowId: string): JobResult | undefined {
@@ -15,7 +15,7 @@ export function useJobResult(worklflowId: string): JobResult | undefined {
 
     useEffect(() => {
         const [ signal, abort ] = API.prepareAbort();
-        fetchJobResult(signal);
+        void fetchJobResult(signal);
 
         return abort;
     }, [ fetchJobResult ]);

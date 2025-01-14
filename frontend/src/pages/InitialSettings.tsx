@@ -1,19 +1,16 @@
-import { useCallback, useMemo, useState } from 'react';
-import { Col, Container, Form, Row } from 'react-bootstrap';
+import { useMemo, useState } from 'react';
 import type { Dataset } from '@/types/dataset';
 import { useApproaches, useDatasets } from '@/hooks';
 import { type Approach } from '@/types/approach';
-import { FormSelect } from '@/components/common/FormSelect';
-import { type MultiValue, type SingleValue } from 'react-select';
-import SpinnerButton from '@/components/common/SpinnerButton';
 import { Workflow } from '@/types/workflow';
-import API from '@/utils/api';
+import { API } from '@/utils/api';
 import { Job } from '@/types/job';
+import { Button, Select, SelectItem, type SharedSelection } from '@nextui-org/react';
 
 type InitialSettingsProps = {
     workflow: Workflow;
     onNextStep: (workflow: Workflow, job: Job) => void;
-}
+};
 
 export default function InitialSettings({ workflow, onNextStep }: InitialSettingsProps) {
     const [ fetching, setFetching ] = useState(false);
@@ -36,16 +33,12 @@ export default function InitialSettings({ workflow, onNextStep }: InitialSetting
     }
 
     return (
-        <Container>
-            <Row>
-                <Col />
-                <Col lg={4} md={6} xs={12}>
-                    <h1>Initial settings</h1>
-                    <InitialSettingsForm onSubmit={runInitialDiscovery} fetching={fetching} />
-                </Col>
-                <Col />
-            </Row>
-        </Container>
+        <div className='container flex justify-center'>
+            <div className='md:w-1/2 lg:w-1/3'>
+                <h1>Initial settings</h1>
+                <InitialSettingsForm onSubmit={runInitialDiscovery} fetching={fetching} />
+            </div>
+        </div>
     );
 }
 
@@ -62,21 +55,22 @@ type InitialSettingsFormProps = {
 
 export function InitialSettingsForm({ onSubmit, fetching }: InitialSettingsFormProps) {
     const availableDatasets = useDatasets();
-    const [ selectedDatasets, setSelectedDatasets ] = useState<readonly Option[]>([]);
+    const [ selectedDatasets, setSelectedDatasets ] = useState(new Set<string>());
     const datasetOptions = useMemo(() => availableDatasets?.map(d => nameToOption(d.name)), [ availableDatasets ]);
-       
+
     const availableApproaches = useApproaches();
-    const [ selectedApproach, setSelectedApproach ] = useState<Option>();
+    const [ selectedApproach, setSelectedApproach ] = useState(new Set<string>());
     const approachOptions = useMemo(() => availableApproaches?.map(a => nameToOption(a.name)), [ availableApproaches ]);
 
     function submit() {
         if (!availableDatasets || !availableApproaches)
             return;
 
-        const datasets = selectedDatasets
-            .map(dataset => availableDatasets.find(d => d.name === dataset.value))
+        const datasets = [ ...selectedDatasets.values() ]
+            .map(dataset => availableDatasets.find(d => d.name === dataset))
             .filter((d): d is Dataset => !!d);
-        const approach = availableApproaches.find(a => a.name === selectedApproach?.value);
+        const selectedApproachName = selectedApproach.values().next().value;
+        const approach = availableApproaches.find(a => a.name === selectedApproachName);
 
         if (datasets.length === 0 || !approach)
             return;
@@ -88,51 +82,57 @@ export function InitialSettingsForm({ onSubmit, fetching }: InitialSettingsFormP
         });
     }
 
-    const handleDatasetChange = useCallback((options: MultiValue<Option>) => {
-        setSelectedDatasets(options);
-    }, []);
-
-    const handleApproachChange = useCallback((option: SingleValue<Option>) => {
-        setSelectedApproach(option ?? undefined);
-    }, []);
+    if (!datasetOptions || !approachOptions)
+        return null;
 
     return (<>
-        <Form.Group className='mt-3'>
-            <Form.Label>Datasets</Form.Label>
-            <FormSelect
-                options={datasetOptions}
-                value={selectedDatasets}
-                onChange={handleDatasetChange}
-                isMulti
-            />
-        </Form.Group>
-        <Form.Group className='mt-3'>
-            <Form.Label>Approach</Form.Label>
-            <FormSelect
-                options={approachOptions}
-                value={selectedApproach}
-                onChange={handleApproachChange}
-            />
-        </Form.Group>
-        <SpinnerButton
-            className='mt-5 w-100'
-            onClick={submit}
-            fetching={fetching}
-            disabled={!selectedApproach || selectedDatasets.length === 0}
+        <div className='mt-4'>
+            <Select
+                label='Datasets'
+                selectionMode='multiple'
+                items={datasetOptions}
+                selectedKeys={selectedDatasets}
+                onSelectionChange={setSelectedDatasets as (keys: SharedSelection) => void}
+            >
+                {option => (
+                    <SelectItem key={option.key}>{option.label}</SelectItem>
+                )}
+            </Select>
+        </div>
+
+        <div className='mt-4'>
+            <Select
+                label='Approach'
+                selectionMode='single'
+                items={approachOptions}
+                selectedKeys={selectedApproach}
+                onSelectionChange={setSelectedApproach as (keys: SharedSelection) => void}
+            >
+                {option => (
+                    <SelectItem key={option.key}>{option.label}</SelectItem>
+                )}
+            </Select>
+        </div>
+
+        <Button
+            className='mt-12 w-full'
+            onPress={submit}
+            isLoading={fetching}
+            disabled={selectedApproach.size === 0 || selectedDatasets.size === 0}
         >
             Run!
-        </SpinnerButton>
+        </Button>
     </>);
 }
 
 export type Option = {
-    value: string;
+    key: string;
     label: string;
 };
 
 export function nameToOption(name: string): Option {
     return {
-        value: name,
+        key: name,
         label: name,
     };
 }

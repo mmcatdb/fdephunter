@@ -2,7 +2,7 @@ import type { Empty, StringLike } from '@/types/api/routes';
 import { GET } from '../routeFunctions';
 import type { DatasetData, DatasetFromServer } from '@/types/dataset';
 
-const datasets = {
+export const datasets = {
     getAll: GET<Empty, DatasetFromServer[]>(
         () => `/datasets`,
     ),
@@ -13,5 +13,3 @@ const datasets = {
         u => `/datasets/assignments/${u.assignmentId}/data`,
     ),
 };
-
-export default datasets;

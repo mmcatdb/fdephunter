@@ -2,11 +2,11 @@ import { AssignmentVerdict } from '@/types/assignment';
 
 type AssignmentVerdictLabelProps = {
     verdict: AssignmentVerdict;
-}
+};
 
-export default function AssignmentVerdictLabel({ verdict }: AssignmentVerdictLabelProps) {
+export function AssignmentVerdictLabel({ verdict }: AssignmentVerdictLabelProps) {
     return (
-        <span className={`text-${verdictDescriptions[verdict].color}`}>
+        <span className={verdictDescriptions[verdict].color}>
             {verdictDescriptions[verdict].label}
         </span>
     );
@@ -18,8 +18,8 @@ const verdictDescriptions: {
         label: string;
     };
 } = {
-    [AssignmentVerdict.New]: { color: 'info', label: 'not evaluated' },
-    [AssignmentVerdict.Accepted]: { color: 'success', label: 'positive' },
-    [AssignmentVerdict.Rejected]: { color: 'danger', label: 'negative' },
-    [AssignmentVerdict.DontKnow]: { color: 'warning', label: 'uncertain' },
+    [AssignmentVerdict.New]: { color: 'text-info', label: 'not evaluated' },
+    [AssignmentVerdict.Accepted]: { color: 'text-success', label: 'positive' },
+    [AssignmentVerdict.Rejected]: { color: 'text-danger', label: 'negative' },
+    [AssignmentVerdict.DontKnow]: { color: 'text-warning', label: 'uncertain' },
 };

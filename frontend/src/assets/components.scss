@@ -19,7 +19,7 @@
     }
 
     & + .fd-column-name-badge {
-        @extend .ms-2;
+        @extend .ml-2;
     }
 }
 
@@ -172,66 +172,4 @@ $transition-short: 0.4s;
 .fd-column-reasons {
     display: inline-block;
     min-width: 140px;
-}
-
-// react-select
-
-.react-select-control, .react-select-control--focused {
-    border-radius: $input-border-radius !important;
-    border-width: $input-border-width !important;
-    background-color: $input-focus-bg !important;
-    color: $input-color !important;
-}
-
-.react-select-control {
-    border-color: $input-border-color !important;
-
-    &:hover {
-        border-color: $input-border-color !important;
-    }
-
-    .indicator-separator {
-        background-color: $body-color-dark !important;
-    }
-
-    .dropdown-indicator {
-        color: $body-color-dark !important;
-    }
-}
-
-.react-select-control--focused {
-    border-color: $input-focus-border-color !important;
-    box-shadow: $input-focus-box-shadow !important;
-
-    &:hover {
-        border-color: $input-focus-border-color !important;
-    }
-}
-
-.react-select-option {
-    color: $body-color !important;
-
-    &.focused {
-        background-color: $highlight-bg-color !important;
-    }
-
-    &:active, &.selected {
-        background-color: $highlight-bg-color-accent !important;
-    }
-
-    &.disabled {
-        background-color: $input-disabled-bg !important;
-    }
-}
-
-.react-select-menu {
-    z-index: 2 !important;
-}
-
-.react-select-value {
-    color: $body-color-dark !important;
-
-    input, .single-value {
-        color: $body-color-dark !important;
-    }
 }

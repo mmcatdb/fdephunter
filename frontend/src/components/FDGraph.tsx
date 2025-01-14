@@ -7,11 +7,11 @@ type FDGraphProps = {
     graph: FDGraphType;
 };
 
-export default function FDGraph({ graph }: FDGraphProps) {
+export function FDGraph({ graph }: FDGraphProps) {
     const rfGraph = useMemo(() => createRFGraph(graph), [ graph ]);
 
     return (
-        <div className='w-100' style={{ height: '700px' }}>
+        <div className='w-full h-[700px]'>
             <ReactFlow
                 fitView
                 nodes={rfGraph.nodes}

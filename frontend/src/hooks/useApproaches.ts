@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import API from '@/utils/api';
+import { API } from '@/utils/api';
 import { Approach } from '@/types/approach';
 
 
@@ -16,7 +16,7 @@ export function useApproaches(): Approach[] | undefined {
 
     useEffect(() => {
         const [ signal, abort ] = API.prepareAbort();
-        fetchApproaches(signal);
+        void fetchApproaches(signal);
 
         return abort;
     }, []);

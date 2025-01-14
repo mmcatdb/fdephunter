@@ -1,11 +1,11 @@
-import WorkflowProgressDisplay from '@/components/worklow/WorkflowProgressDisplay';
+import { WorkflowProgressDisplay } from '@/components/worklow/WorkflowProgressDisplay';
 import { type Job } from '@/types/job';
 import { type Workflow, WorkflowState } from '@/types/workflow';
 import { createPortal } from 'react-dom';
 import InitialSettings from '@/pages/InitialSettings';
 import WaitingForInitialFD from './WaitingForInitialFD';
 import { useWorkflow } from '@/hooks';
-import { useParams } from 'react-router';
+import { useParams } from 'react-router-dom';
 import { type NamedParams, type routes } from '@/router';
 import DisplayFDs from './DisplayFDs';
 import WaitingForFD from './WaitingForFD';
