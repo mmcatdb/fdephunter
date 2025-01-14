@@ -1,0 +1,7 @@
+# Java
+target
+
+# Datasets and other resources
+/data
+/logs
+/results

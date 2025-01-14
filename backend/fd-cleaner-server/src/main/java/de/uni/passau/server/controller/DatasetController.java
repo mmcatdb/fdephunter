@@ -1,0 +1,129 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+
+package de.uni.passau.server.controller;
+
+import de.uni.passau.server.clientdto.DatasetData;
+import de.uni.passau.server.workflow.model.DatasetNode;
+import de.uni.passau.server.workflow.service.DatasetService;
+import de.uni.passau.server.workflow.service.WorkflowService;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+/**
+ *
+ * @author pavel.koupil
+ */
+@RestController
+@RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+public class DatasetController {
+    
+    @SuppressWarnings({ "java:s1068", "unused" })
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatasetController.class);
+
+    @Autowired
+    private DatasetService datasetService;
+
+    @Autowired
+    private WorkflowService workflowService;
+
+    @GetMapping("/datasets")
+    public Flux<DatasetNode> getAllDatasets() {
+        return datasetService.getAllDatasets();
+    }
+
+    @Deprecated
+    @GetMapping("/datasets/{name}")
+    public Mono<DatasetNode> getDatasetByName(@PathVariable String name) {
+        return datasetService.getDatasetByName(name);
+    }
+
+    @Deprecated
+    @PostMapping("/datasets")
+    public Mono<DatasetNode> createDataset(@RequestBody DatasetNode dataset) {
+        return datasetService.save(dataset);
+    }
+
+    @Deprecated
+    @GetMapping("/datasets/create")
+    public Mono<DatasetNode> createDataset(
+            @RequestParam String name,
+            @RequestParam String type,
+            @RequestParam String source,
+            @RequestParam(required = false) String entityName,
+            @RequestParam(required = false) Long columns,
+            @RequestParam(required = false) Long rows,
+            @RequestParam(required = false) Double size,
+            @RequestParam(required = false) Long fds) {
+
+        DatasetNode dataset = new DatasetNode();
+        dataset.setName(name);
+        dataset.setType(DatasetNode.DatasetType.valueOf(type));
+        dataset.setSource(source);
+
+        if (entityName != null) {
+            dataset.setKindName(entityName);
+        }
+
+        if (columns != null) {
+            dataset.setColumns(columns);
+        }
+
+        if (rows != null) {
+            dataset.setRows(rows);
+        }
+
+        if (size != null) {
+            dataset.setSize(size);
+        }
+
+        if (fds != null) {
+            dataset.setFds(fds);
+        }
+        return datasetService.save(dataset);
+    }
+
+    @GetMapping("/datasets/workflows/{workflowId}/data")
+    public Mono<DatasetData> getDataForWorkflow(@PathVariable String workflowId, @RequestParam(required = false, defaultValue = "10") String limit) {
+        int numberLimit = tryParseLimit(limit);
+
+        return workflowService.getDatasetName(workflowId)
+            .flatMap(name -> datasetService.getLoadedDatasetByName(name))
+            .map(dataset -> new DatasetData(dataset.getHeader(), dataset.getRows().stream().limit(numberLimit).toList()));
+    }
+
+    // @GetMapping("/datasets/assignments/{assignmentId}/data")
+    // public Mono<DatasetData> getDataForAssignment(@PathVariable String assignmentId, @RequestParam(required = false, defaultValue = "10") String limit) {
+    //     int numberLimit = tryParseLimit(limit);
+
+    //     return assignmentService.getDatasetName(assignmentId)
+    //         .flatMap(name -> datasetService.getLoadedDatasetByName(name))
+    //         .map(dataset -> new DatasetData(dataset.getHeader(), dataset.getRows().stream().limit(numberLimit).toList()));
+    // }
+
+    private static final int defaultLimit = 10;
+
+    public static int tryParseLimit(String limit) {
+        try {
+            return Integer.parseInt(limit);
+        }
+        catch (NumberFormatException e) {
+            return defaultLimit;
+        }
+    }
+
+}

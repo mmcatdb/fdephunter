@@ -1,0 +1,237 @@
+@import './base.scss';
+
+// Table
+
+.fd-negative-example-row {
+    & td {
+        @extend .py-2;
+        color: $primary !important;
+    }
+}
+
+// List
+
+.fd-column-name-badge {
+    @extend .clickable;
+
+    &:active {
+        background-color: $primary-accent !important;
+    }
+
+    & + .fd-column-name-badge {
+        @extend .ms-2;
+    }
+}
+
+// Graph
+
+.react-flow__attribution {
+    //display: none;
+    background: rgba(white, 0.06);
+    & a {
+        color: $primary !important;
+    }
+}
+
+.react-flow__handle.target {
+    visibility: hidden;
+}
+
+// Workflow progress
+
+$transition-long: 1.2s;
+$transition-short: 0.4s;
+
+.fd-workflow-display {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.fd-workflow-step {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+
+    &:last-of-type {
+        flex-grow: 0;
+    }
+}
+
+.fd-workflow-step-body {
+    margin: 0 auto;
+
+    & > div {
+        flex-grow: 0;
+        width: 40px;
+        height: 40px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 30px;
+        font-weight: bolder;
+
+        background-color: $body-color-dark;
+        color: $gray-700;
+        .finished > & {
+            transition: background-color $transition-long;
+            transition: color $transition-short;
+            background-color: $success;
+            color: white;
+        }
+        .active > & {
+            transition: background-color $transition-long;
+            transition: color $transition-short;
+            background-color: $primary;
+            color: white;
+        }
+    }
+}
+
+.fd-workflow-step-label {
+    flex-grow: 0;
+    text-align: center;
+
+    .finished > & {
+        transition: color $transition-long;
+        color: $success;
+    }
+    .active > & {
+        transition: color $transition-long;
+        color: $primary;
+    }
+}
+
+.fd-workflow-step-between {
+    flex-grow: 1;
+    @extend .py-2;
+
+    .fd-workflow-step:last-of-type > & {
+        display: none;
+    }
+}
+
+.fd-workflow-step-bar {
+    height: 100%;
+    margin: 0 auto;
+    width: 0.75rem;
+    @extend .rounded-2;
+
+    background-color: $body-color-dark;
+    .finished & {
+        transition: background-color $transition-long;
+        background-color: $success;
+    }
+}
+
+// Decisions
+
+.fd-column {
+    padding: 0 !important;
+
+    &.negative {
+        .fd-column-value {
+            @extend .text-danger;
+        }
+    }
+
+    &.positive {
+        .fd-column-value {
+            @extend .text-success;
+        }
+    }
+}
+
+.fd-column-inner {
+    height: 100%;
+    min-width: 140px;
+    @extend .px-2;
+
+    &.evaluated {
+        @extend .py-2;
+        @extend .clickable;
+        @extend .rounded;
+
+        &:hover {
+            background-color: $highlight-bg-color-dark;
+        }
+
+        .selected &, &:active {
+            background-color: $highlight-bg-color-accent-dark;
+        }
+    }
+}
+
+.fd-edit-reason-row {
+    min-height: 38px;
+    display: flex;
+    align-items: center;
+}
+
+.fd-column-reasons {
+    display: inline-block;
+    min-width: 140px;
+}
+
+// react-select
+
+.react-select-control, .react-select-control--focused {
+    border-radius: $input-border-radius !important;
+    border-width: $input-border-width !important;
+    background-color: $input-focus-bg !important;
+    color: $input-color !important;
+}
+
+.react-select-control {
+    border-color: $input-border-color !important;
+
+    &:hover {
+        border-color: $input-border-color !important;
+    }
+
+    .indicator-separator {
+        background-color: $body-color-dark !important;
+    }
+
+    .dropdown-indicator {
+        color: $body-color-dark !important;
+    }
+}
+
+.react-select-control--focused {
+    border-color: $input-focus-border-color !important;
+    box-shadow: $input-focus-box-shadow !important;
+
+    &:hover {
+        border-color: $input-focus-border-color !important;
+    }
+}
+
+.react-select-option {
+    color: $body-color !important;
+
+    &.focused {
+        background-color: $highlight-bg-color !important;
+    }
+
+    &:active, &.selected {
+        background-color: $highlight-bg-color-accent !important;
+    }
+
+    &.disabled {
+        background-color: $input-disabled-bg !important;
+    }
+}
+
+.react-select-menu {
+    z-index: 2 !important;
+}
+
+.react-select-value {
+    color: $body-color-dark !important;
+
+    input, .single-value {
+        color: $body-color-dark !important;
+    }
+}

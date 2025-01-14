@@ -1,0 +1,347 @@
+import useDecisionContext, { DecisionPhase } from '@/context/DecisionProvider';
+import { DecisionStatus } from '@/types/decision';
+import { type ReactNode, useCallback, useMemo, useState } from 'react';
+import { Button, Card, Col, Form, Row } from 'react-bootstrap';
+import { useNavigate } from 'react-router';
+import { CreatableSelect } from '@/components/common/FormSelect';
+import { type SingleValue } from 'react-select';
+import { TiPlus } from 'react-icons/ti';
+import { IoClose } from 'react-icons/io5';
+import { routes } from '@/router';
+import AssignmentVerdictLabel from './AssignmentVerdictLabel';
+import { type Assignment } from '@/types/assignment';
+import API from '@/utils/api';
+import { TbPointFilled } from 'react-icons/tb';
+import SpinnerButton from './common/SpinnerButton';
+
+type AssignmentEvaluationProps = {
+    assignment: Assignment;
+    onEvaluated: (assignment: Assignment) => void;
+};
+
+export default function AssignmentEvaluation({ assignment, onEvaluated }: AssignmentEvaluationProps) {
+    return (
+        <Row>
+            <Col xxl={6} xl={10} xs={12}>
+                <ControlCard
+                    assignment={assignment}
+                    onEvaluated={onEvaluated}
+                />
+            </Col>
+            <Col xxl={6} xl={10} xs={12}>
+                <DecisionReasonsCard />
+            </Col>
+        </Row>
+    );
+}
+
+type ControlCardProps = {
+    assignment: Assignment;
+    onEvaluated: (assignment: Assignment) => void;
+};
+
+function ControlCard({ assignment, onEvaluated }: ControlCardProps) {
+    const { decision, setDecision } = useDecisionContext();
+    const [ fetching, setFetching ] = useState(false);
+    const navigate = useNavigate();
+
+    async function evaluate(status: DecisionStatus) {
+        const filteredColumns = decision.rows[0].columns.filter(column => column.reasons.length > 0);
+        // If the user select Rejected but then he don't provide any reasons, we evaluate as Accepted.
+        if (status === DecisionStatus.Rejected && filteredColumns.length === 0)
+            status = DecisionStatus.Accepted;
+            
+        const columns = status === DecisionStatus.Rejected
+            ? filteredColumns.map(column => ({ name: column.name, reasons: column.reasons }))
+            : [];
+
+        setFetching(true);
+        const response = await API.assignments.evaluate({ assignmentId: assignment.id }, {
+            status,
+            columns,
+        });
+        setFetching(false);
+        if (!response.status)
+            return;
+
+        setDecision({ ...decision, phase: DecisionPhase.JustFinished, selectedColumn: undefined });
+        onEvaluated(assignment);
+    }
+
+    function continueAccepted() {
+        navigate(routes.worker.detail.resolve({ workerId: assignment.workerId }));
+    }
+
+    return (<>
+        <Card>
+            <Card.Header>
+                <Card.Title>{titles[decision.phase]}</Card.Title>
+            </Card.Header>
+            <Card.Body>
+                {bodies[decision.phase]}
+                {decision.phase === DecisionPhase.Finished && (<>
+                    This example was evaluated as <AssignmentVerdictLabel verdict={assignment.verdict} />
+                </>)}
+            </Card.Body>
+            {decision.phase !== DecisionPhase.Finished && (
+                <Card.Footer>
+                    {decision.phase === DecisionPhase.AnswerYesNo && (<>
+                        <SpinnerButton
+                            variant='success'
+                            onClick={() => evaluate(DecisionStatus.Accepted)}
+                            fetching={fetching}
+                        >
+                            Yes, the row is possible
+                        </SpinnerButton>
+                        <Button className='ms-3' variant='danger' onClick={() => setDecision({ ...decision, phase: DecisionPhase.ProvideReason })}>
+                            No, the row is invalid
+                        </Button>
+                        <SpinnerButton
+                            className='ms-3'
+                            variant='warning'
+                            onClick={() => evaluate(DecisionStatus.Unanswered)}
+                            fetching={fetching}
+                        >
+                            {`I don't know ...`}
+                        </SpinnerButton>
+                    </>)}
+                    {decision.phase === DecisionPhase.ProvideReason && (<>
+                        <SpinnerButton
+                            onClick={() => evaluate(DecisionStatus.Rejected)}
+                            fetching={fetching}
+                        >
+                            Submit
+                        </SpinnerButton>
+                        <SpinnerButton
+                            className='ms-3'
+                            variant='warning'
+                            onClick={() => evaluate(DecisionStatus.Unanswered)}
+                            fetching={fetching}
+                        >
+                            {`I don't know ...`}
+                        </SpinnerButton>
+                    </>)}
+                    {decision.phase === DecisionPhase.JustFinished && (<>
+                        <Button onClick={continueAccepted}>
+                            Go back and continue
+                        </Button>
+                    </>)}
+                </Card.Footer>
+            )}
+        </Card>
+    </>);
+}
+
+const titles: { [key in DecisionPhase]: string } = {
+    [DecisionPhase.AnswerYesNo]: 'Can the dataset include the last row?',
+    [DecisionPhase.ProvideReason]: 'Evaluate each column individually',
+    [DecisionPhase.JustFinished]: 'Thank you!',
+    [DecisionPhase.Finished]: 'Assignment finished',
+};
+
+const bodies: { [key in DecisionPhase]: ReactNode } = {
+    [DecisionPhase.AnswerYesNo]: (<>
+        <p>
+            It was generated as a negative example. But is it really a negative example? Please help us decide if the row would be a valid part of the dataset.
+        </p>
+        The row should be marked as possible only if all its values are valid as well as all their combinations (with regards to all other values in the dataset). If any of these conditions {`isn't`} met, the row is invalid. If you are not sure, the {`"I don't know"`} is also a helpful answer.
+    </>),
+    [DecisionPhase.ProvideReason]: (<>
+        <p>
+            Start by clicking on the example value you want to evaluate. Then you can provide reasons why it should be a negative example. If the {`column's`} value is possible in the given context, leave it as-is. If two or more columns are invalid because of how they interact with each other, please provide the reasons for all of them.
+        </p>
+        When you are finished with the evaluation, please submit the results.
+    </>),
+    [DecisionPhase.JustFinished]: (<>
+        Your answer was recorded. Please go back and continue with a next example.
+    </>),
+    [DecisionPhase.Finished]: null,
+};
+
+function DecisionReasonsCard() {
+    const { decision, setDecision } = useDecisionContext();
+    const selectedColumn = decision.selectedColumn && decision.rows[decision.selectedColumn.rowIndex].columns[decision.selectedColumn.colIndex];
+    const isEditable = decision.phase === DecisionPhase.ProvideReason;
+    
+    function setData(reasons: string[]) {
+        if (!selectedColumn)
+            return;
+        
+        selectedColumn.reasons = reasons;
+        setDecision({ ...decision });
+    }
+
+    if (!selectedColumn)
+        return null;
+
+    const isNegative = selectedColumn.reasons.length !== 0;
+
+    if (!isEditable && !isNegative)
+        return null;
+
+    return (
+        <Card>
+            <Card.Header>
+                <Card.Title>
+                    {isEditable ? (<>
+                        Why is this column a negative example?
+                    </>) : (<>
+                        This column is {isNegative ? 'negative' : 'positive'}
+                    </>)}
+                </Card.Title>
+            </Card.Header>
+            <Card.Body>
+                {isEditable ? (<>
+                    <p>
+                        Please provide us with one or multiple reasons why the value <span className='fw-bold text-primary'>{selectedColumn.value}</span> {`isn't`} valid. You can select from the predefined reasons or you can type your own.
+                    </p>
+                    <DecisionReasonsForm key={selectedColumn.id} data={selectedColumn.reasons} setData={setData} />
+                </>) : (<>
+                    <p>
+                        You can se the reasons here:
+                    </p>
+                    <DecisionReasonsOverview key={selectedColumn.id} data={selectedColumn.reasons} />
+                </>)}
+            </Card.Body>
+        </Card>
+    );
+}
+
+type DecisionReasonsFormProps = {
+    data: string[];
+    setData: (data: string[]) => void;
+}
+
+function DecisionReasonsForm({ data, setData }: DecisionReasonsFormProps) {
+    const [ editingIndex, setEditingIndex ] = useState<number | undefined>(data.length === 0 ? 0 : undefined);
+    const [ isAdding, setIsAdding ] = useState(data.length === 0);
+    const innerData = isAdding ? [ ...data, '' ] : [ ...data ];
+
+    function finishEditingReason(newValue: string) {
+        if (editingIndex === undefined)
+            return;
+
+        if (!newValue && data.length === 0)
+            return;
+
+        setEditingIndex(undefined);
+        setIsAdding(false);
+            
+        if (!newValue) 
+            return;
+        
+        innerData[editingIndex] = newValue;
+        setData(innerData.filter(reason => !!reason));
+    }
+
+    function startEditingReason(index: number) {
+        setEditingIndex(index);
+        setIsAdding(false);
+    }
+
+    function addReason() {
+        setIsAdding(true);
+        setEditingIndex(data.length);
+    }
+
+    function deleteReason(index: number) {
+        setEditingIndex(undefined);
+        setIsAdding(false);
+        setData(data.filter((_, i) => i !== index));
+    }
+    
+    return (<>
+        {innerData.map((reason, index) => (
+            <Form.Group key={index}>
+                {index === editingIndex ? (
+                    <ReasonSelect value={innerData[editingIndex]} onChange={finishEditingReason}/>
+                ) : (
+                    <div className='fd-edit-reason-row'>
+                        <span className='d-flex align-items-center fw-bold'>
+                            <IoClose
+                                size={24}
+                                className='clickable text-danger me-2'
+                                onClick={() => deleteReason(index)}
+                            />
+                            <span className='clickable' onClick={() => startEditingReason(index)}>{reason}</span>
+                        </span>
+                    </div>
+                )}
+            </Form.Group>
+        ))}
+        {!isAdding && (
+            <div className='mt-2'>
+                <span className='d-flex align-items-center clickable text-primary' onClick={addReason}>
+                    <TiPlus size={20} className='me-2' /><span>Add reason</span>
+                </span>
+            </div>
+        )}
+    </>);
+}
+
+type ReasonSelectProps = {
+    value: string;
+    onChange: (value: string) => void;
+}
+
+function ReasonSelect({ value, onChange }: ReasonSelectProps) {
+    const options = useMemo(() => (!value || predefinedReasons.includes(value)) ? predefinedOptions : [ ...predefinedOptions, valueToOption(value) ], [ value ]);
+
+    const handleChange = useCallback((option: SingleValue<Option>) => {
+        onChange(option ? option.value : '');
+    }, [ onChange ]);
+
+    return (
+        <CreatableSelect
+            openMenuOnFocus
+            options={options}
+            value={value ? valueToOption(value) : undefined}
+            onChange={handleChange}
+            onBlur={e => onChange(e.target.value)}
+            isValidNewOption={inputValue => !!inputValue}
+            placeholder='Select an option or provide a custom one ...'
+        />
+    );
+}
+
+type Option = {
+    value: string;
+    label: string;
+}
+
+function valueToOption(value: string): Option {
+    return {
+        value,
+        label: value,
+    };
+}
+
+const predefinedReasons = [
+    'VALUE_MUST_BE_UNIQUE_IN_COLUMNS',
+    'VALUE_MUST_BE_UNIQUE_IN_ROW',
+    'VALUES_INDETIFY_EACH_OTHER',
+    'VALUES_DO_NOT_MATCH',
+    'VALUE_MUST_BE_IN_RANGE',
+    'VALUE_DOES_NOT_MAKE_SENSE_AT_ALL',
+];
+
+const predefinedOptions = predefinedReasons.map(valueToOption);
+
+type DecisionReasonsOverviewProps = {
+    data: string[];
+}
+
+function DecisionReasonsOverview({ data }: DecisionReasonsOverviewProps) {
+    return (<>
+        {data.map((reason, index) => (
+            <Form.Group key={index}>
+                <div className='fd-edit-reason-row'>
+                    <span className='d-flex align-items-center fw-bold'>
+                        <TbPointFilled size={16} />
+                        <span>{reason}</span>
+                    </span>
+                </div>
+            </Form.Group>
+        ))}
+    </>);
+}

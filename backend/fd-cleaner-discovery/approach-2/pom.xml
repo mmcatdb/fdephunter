@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <parent>
+        <groupId>de.uni.passau</groupId>
+        <artifactId>fd-cleaner-discovery</artifactId>
+        <version>BETA</version>
+    </parent>
+    
+    <artifactId>approach-2</artifactId>
+    <name>FD Discovery Approach 2</name>
+
+    <dependencies>
+        <!--        <dependency>
+            <groupId>de.metanome</groupId>
+            <artifactId>algorithm_integration</artifactId>
+            <version>1.2-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>de.metanome</groupId>
+            <artifactId>backend</artifactId>
+            <version>1.2-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>de.metanome.algorithms.hyfd</groupId>
+            <artifactId>HyFD</artifactId>
+            <version>1.2-SNAPSHOT</version>
+        </dependency>-->
+        <dependency>
+            <groupId>de.uni.passau</groupId>
+            <artifactId>algorithm_integration</artifactId>
+            <version>BETA</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>de.uni.passau</groupId>
+            <artifactId>utils</artifactId>
+            <version>BETA</version>
+            <type>jar</type>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot</artifactId>
+            <version>${spring.version}</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+            <version>${spring.version}</version>
+            <!--<type>jar</type>-->
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <version>6.0.8</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.1.0</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>de.uni.passau</groupId>
+            <artifactId>fd-cleaner-core</artifactId>
+            <version>BETA</version>
+            <type>jar</type>
+        </dependency>
+    </dependencies>
+</project>

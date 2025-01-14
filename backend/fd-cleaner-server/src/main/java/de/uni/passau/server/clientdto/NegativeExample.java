@@ -1,0 +1,22 @@
+package de.uni.passau.server.clientdto;
+
+import de.uni.passau.server.workflow.model.NegativeExampleNode;
+import de.uni.passau.server.workflow.model.NegativeExampleNode.NegativeExampleState;
+
+import java.io.Serializable;
+
+public record NegativeExample(
+    String id,
+    String payload,
+    NegativeExampleState state
+) implements Serializable {
+
+    public static NegativeExample fromNodes(NegativeExampleNode exampleNode) {
+        return new NegativeExample(
+            exampleNode.getId(),
+            exampleNode.getPayload(),
+            exampleNode.getState()
+        );
+    }
+
+}
