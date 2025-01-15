@@ -7,7 +7,7 @@ type PortalProps = {
 };
 
 export function Portal({ children, to }: PortalProps) {
-    const [ target, setTarget ] = useState(document.getElementById(to));
+    const [ target, setTarget ] = useState(() => document.getElementById(to));
 
     useEffect(() => {
         setTarget(document.getElementById(to));
@@ -16,6 +16,7 @@ export function Portal({ children, to }: PortalProps) {
     return target ? createPortal(children, target) : null;
 }
 
-export const portals = {
+Portal.targets = {
     topbar: 'top-bar-content',
+    sidebar: 'sidebar-content',
 };

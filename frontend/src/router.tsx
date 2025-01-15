@@ -5,7 +5,6 @@ import WorkerPage from './pages/WorkerPage';
 import AssignmentPage from './pages/AssignmentPage';
 import ExamplePage from './pages/ExamplePage';
 
-
 export class NamedRoute<T extends string = never> {
     constructor(
         public readonly path: string,
@@ -56,7 +55,7 @@ export function RouterView() {
 
             <Route path={routes.assignment.example}     element={<ExamplePage type='assignment' />} />
             <Route path={routes.assignment.detail.path} element={<AssignmentPage />} />
-            
+
             <Route path='*' element={<Navigate replace to={from} />} />
         </Routes>
     );

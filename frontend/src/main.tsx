@@ -6,9 +6,9 @@ import { NextUIProvider } from '@nextui-org/react';
 import '@/assets/index.css';
 import App from './App.js';
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+ReactDOM.createRoot(document.getElementById('react-root')!).render(
     <StrictMode>
-        <NextUIProvider>
+        <NextUIProvider className='h-full'>
             <App />
         </NextUIProvider>
     </StrictMode>,

@@ -8,7 +8,7 @@ import { routes, type NamedParams } from '@/router';
 import { type Assignment } from '@/types/assignment';
 import { createDataWithExamples, type DatasetDataWithExamples } from '@/types/dataset';
 import { useMemo } from 'react';
-import { Portal, portals } from '@/components/common/Portal';
+import { Portal } from '@/components/common/Portal';
 import { Link, useParams } from 'react-router-dom';
 import { Button, Tab, Tabs } from '@nextui-org/react';
 
@@ -21,10 +21,10 @@ export default function AssignmentPage() {
         return null;
 
     return (<>
-        <Portal to={portals.topbar}>
-            <Link to={routes.worker.detail.resolve({ workerId: assignment.workerId })}>
-                <Button>Back to domain expert</Button>
-            </Link>
+        <Portal to={Portal.targets.topbar}>
+            <Button as={Link} to={routes.worker.detail.resolve({ workerId: assignment.workerId })}>
+                Back to domain expert
+            </Button>
         </Portal>
         <DecisionProvider data={data} isFinished={assignment.isFinished}>
             <AssignmentReady assignment={assignment} setAssignment={setAssignment} data={data} />

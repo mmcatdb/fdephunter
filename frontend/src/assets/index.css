@@ -29,6 +29,25 @@
 }
 
 @layer base {
+    :root {
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        -webkit-text-size-adjust: 100%;
+
+        @apply bg-content2;
+    }
+
+    :root, body, #react-root {
+        @apply h-full;
+    }
+
+
+    /* Fix for NextUI provider to enable themed scrollbar on :root. */
+    :root:has(.fd-global-dark) {
+        color-scheme: dark;
+    }
+
     body {
         @apply text-base;
     }

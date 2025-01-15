@@ -1,7 +1,6 @@
 import { WorkflowProgressDisplay } from '@/components/worklow/WorkflowProgressDisplay';
 import { type Job } from '@/types/job';
 import { type Workflow, WorkflowState } from '@/types/workflow';
-import { createPortal } from 'react-dom';
 import InitialSettings from '@/pages/InitialSettings';
 import WaitingForInitialFD from './WaitingForInitialFD';
 import { useWorkflow } from '@/hooks';
@@ -10,6 +9,7 @@ import { type NamedParams, type routes } from '@/router';
 import DisplayFDs from './DisplayFDs';
 import WaitingForFD from './WaitingForFD';
 import DisplayFinalFDs from './DisplayFinalFDs';
+import { Portal } from '@/components/common/Portal';
 
 export default function WorkflowPage() {
     const { workflowId } = useParams() as NamedParams<typeof routes.workflow.detail>;
@@ -22,13 +22,11 @@ export default function WorkflowPage() {
     if (!workflow)
         return null;
 
-    const leftBar = document.getElementById('left-bar');
-
     return (<>
-        {leftBar && createPortal(
-            <WorkflowProgressDisplay currentStep={workflow.state} />,
-            leftBar,
-        )}
+        <Portal to={Portal.targets.sidebar}>
+            <WorkflowProgressDisplay currentStep={workflow.state} />
+        </Portal>
+
         {workflow.state === WorkflowState.InitialSettings && (
             <InitialSettings workflow={workflow} onNextStep={runFDJob} />
         )}

@@ -3,8 +3,9 @@ import { routes } from '@/router';
 import { Workflow } from '@/types/workflow';
 import { Link, useNavigate } from 'react-router-dom';
 import { rawAPI } from '@/utils/api/rawAPI';
-import { Portal, portals } from '@/components/common/Portal';
+import { Portal } from '@/components/common/Portal';
 import { Button } from '@nextui-org/react';
+import { Page } from '@/components/layout';
 
 export default function DashboardPage() {
     const navigate = useNavigate();
@@ -17,11 +18,12 @@ export default function DashboardPage() {
         navigate(routes.workflow.detail.resolve({ workflowId: Workflow.fromServer(response.data).id }));
     }
 
-    return (<>
-        <Portal to={portals.topbar} >
-            <TopbarToolbar />
-        </Portal>
-        <div className='container'>
+    return (
+        <Page>
+            <Portal to={Portal.targets.topbar} >
+                <TopbarToolbar />
+            </Portal>
+
             <h1>A catching title!</h1>
             <p className='mt-12'>
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
@@ -40,8 +42,8 @@ export default function DashboardPage() {
                     </Button>
                 </div>
             </div>
-        </div>
-    </>);
+        </Page>
+    );
 }
 
 function TopbarToolbar() {
@@ -50,20 +52,20 @@ function TopbarToolbar() {
     }
 
     return (
-        <div>
-            <Link to={routes.root}>
+        <div className='space-x-4'>
+            <Link to={routes.root} className='hover:underline'>
                 Home
             </Link>
-            <Link to={routes.workflow.example} className='ml-4'>
+            <Link to={routes.workflow.example} className='hover:underline'>
                 Workflow
             </Link>
-            <Link to={routes.worker.example} className='ml-4'>
+            <Link to={routes.worker.example} className='hover:underline'>
                 Worker
             </Link>
-            <Link to={routes.assignment.example} className='ml-4'>
+            <Link to={routes.assignment.example} className='hover:underline'>
                 Assignment
             </Link>
-            <Button onPress={resetDatabase} className='ml-4' color='primary' variant='bordered'>
+            <Button onPress={resetDatabase} color='secondary'>
                 Reset DB
             </Button>
         </div>

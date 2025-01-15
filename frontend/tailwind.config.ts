@@ -22,10 +22,11 @@ export default {
             '5xl': '2.25rem',   // 36px
             '6xl': '2.5rem',    // 40px
         },
-        extend: {},
-        menuDimension: '4rem',
-        contextWidth: '20rem',
-        layoutBorderWidth: '1px',
+        extend: {
+            transitionProperty: {
+                margin: 'margin',
+            },
+        },
     },
     plugins: [ nextui() ],
 } satisfies Config;
