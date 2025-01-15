@@ -58,8 +58,8 @@ export function WorkersDistribution({ workflow, classes, onNextStep }: WorkersDi
                 <ClassStatsCard classes={classes} />
             </div>
 
-            <div className='mt-12 col-span-2 flex justify-end'>
-                <Button onPress={() => setShowModal(true)} isDisabled={!canGoNext}>
+            <div className='mt-10 col-span-2 flex justify-end'>
+                <Button color='primary' onPress={() => setShowModal(true)} isDisabled={!canGoNext}>
                     Go next
                 </Button>
             </div>

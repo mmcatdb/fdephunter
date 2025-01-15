@@ -47,6 +47,6 @@ type ColumnNameBadgeProps = {
 
 function ColumnNameBadge({ name }: ColumnNameBadgeProps) {
     return (
-        <div className='px-2 bg-primary rounded-full'>{name}</div>
+        <div className='px-2 rounded-full bg-primary text-white'>{name}</div>
     );
 }

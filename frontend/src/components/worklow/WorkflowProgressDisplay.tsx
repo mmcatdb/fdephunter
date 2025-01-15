@@ -47,7 +47,7 @@ function WorkflowStepDisplay({ step, isFinished, isActive, isLast }: WorkflowSte
         </div>
 
         {!isLast && (
-            <div className={clsx('grow my-2 w-3 rounded-full bg-default-400 transition-colors duration-1000', isFinished && 'bg-success')} />
+            <div className={clsx('grow my-3 w-2 rounded-full bg-default-400 transition-colors duration-1000', isFinished && 'bg-success')} />
         )}
     </>);
 }

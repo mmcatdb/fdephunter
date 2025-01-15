@@ -37,7 +37,7 @@ export function InitialSettings({ workflow, onNextStep }: InitialSettingsProps) 
         <Page className='flex flex-col justify-center max-w-xl'>
             <h1 className='text-lg'>Initial settings</h1>
 
-            <Card className='mt-12 w-full'>
+            <Card className='mt-10 w-full'>
                 <CardBody>
                     <InitialSettingsForm onSubmit={runInitialDiscovery} fetching={fetching} />
                 </CardBody>
@@ -119,7 +119,7 @@ export function InitialSettingsForm({ onSubmit, fetching }: InitialSettingsFormP
         </div>
 
         <Button
-            className='mt-12 w-full'
+            className='mt-10 w-full'
             color='primary'
             onPress={submit}
             isLoading={fetching}

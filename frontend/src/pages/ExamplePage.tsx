@@ -1,3 +1,4 @@
+import { Page } from '@/components/layout';
 import { routes } from '@/router';
 import { Workflow } from '@/types/workflow';
 import { API } from '@/utils/api';
@@ -74,6 +75,8 @@ export function ExamplePage({ type }: ExamplePageProps) {
         return null;
 
     return (
-        <h1 className='text-lg'>No example of {type} was found :/</h1>
+        <Page>
+            <h1 className='text-lg'>No example of {type} was found :/</h1>
+        </Page>
     );
 }

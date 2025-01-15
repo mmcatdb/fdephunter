@@ -17,7 +17,7 @@ export function WaitingForInitialFD({ workflowId, cachedJob, onNextStep }: Waiti
         return null;
 
     return (
-        <Page className='max-w-xl space-y-12'>
+        <Page className='max-w-xl space-y-10'>
             <h1 className='text-lg'>Wait for initial FD discovery ...</h1>
 
             <JobDisplay job={job} />

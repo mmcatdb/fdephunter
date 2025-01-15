@@ -1,4 +1,5 @@
 import { AssignmentVerdictLabel } from '@/components/AssignmentVerdictLabel';
+import { Page } from '@/components/layout';
 import { useAnsweredAssignments, useWorker } from '@/hooks';
 import { routes, type NamedParams } from '@/router';
 import { WorkerState, type Worker, type WorkerFromServer } from '@/types/worker';
@@ -65,15 +66,16 @@ function WorkerReady({ worker, reload }: WorkerReadyProps) {
     }
 
     return (
-        <div className='text-center'>
+        <Page className='space-y-10 text-center'>
             <h1 className='text-lg'>Hello {worker.user.name}!</h1>
 
             {worker.state === WorkerState.Pending && (<>
-                <p className='mt-12'>
+                <p>
                     You, as a major expert in this domain, have been asked to help us with the evaluation of some negative examples.<br />
                     Will you answer the call?
                 </p>
-                <div className='mt-12'>
+
+                <div>
                     <Button
                         onPress={workerAccepted}
                         color='primary'
@@ -95,9 +97,10 @@ function WorkerReady({ worker, reload }: WorkerReadyProps) {
             </>)}
 
             {worker.state === WorkerState.Unsubscribed && (<>
-                <p className='mt-12'>
+                <p>
                     Unfortunatelly, you chose not to help us with the evaluation of the negative examples. However, you can always change your mind!
                 </p>
+
                 <Button
                     onPress={workerAccepted}
                     color='primary'
@@ -109,23 +112,25 @@ function WorkerReady({ worker, reload }: WorkerReadyProps) {
             </>)}
 
             {worker.state === WorkerState.Idle && (<>
-                <p className='mt-12'>
+                <p>
                     Thank you for choosing to help us! Please wait a few moments until we generate the next negative example.
                 </p>
+
                 <Spinner color='primary'/>
             </>)}
 
             {worker.state === WorkerState.Assigned && worker.assignment && (<>
-                <p className='mt-12'>
+                <p>
                     Thank you for choosing to help us! Your next assignment is ready:
                 </p>
-                <Button onPress={goToAssignment}>
+
+                <Button color='primary' onPress={goToAssignment}>
                     Go to assignment
                 </Button>
             </>)}
 
             {answeredAssignments && answeredAssignments.length > 0 && (<>
-                <h2 className='mt-12'>Previous assignments</h2>
+                <h2>Previous assignments</h2>
 
                 <div className='flex justify-center'>
                     <div className='text-start'>
@@ -140,6 +145,6 @@ function WorkerReady({ worker, reload }: WorkerReadyProps) {
                     </div>
                 </div>
             </>)}
-        </div>
+        </Page>
     );
 }

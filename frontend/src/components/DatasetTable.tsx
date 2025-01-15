@@ -17,7 +17,7 @@ export function DatasetTable({ data }: DatasetTableProps) {
     const decision = useTryDecisionContext()?.decision;
 
     return (
-        <Table isStriped>
+        <Table isStriped aria-label='Table of functional dependencies with negative examples'>
             <TableHeader>
                 {data.header.map((column, index) => (
                     <TableColumn key={index}>{column}</TableColumn>
@@ -45,15 +45,15 @@ function datasetTableRow(row: DatasetRow, rowIndex: number) {
 }
 
 function negativeExampleRow(row: DatasetRow, rowIndex: number, decision: DecisionState | undefined) {
-    if (!decision) 
+    if (!decision)
         throw new Error('Decision context is not available.');
-    
+
     if (decision.phase === DecisionPhase.AnswerYesNo) {
         return (
-            <TableRow key={-rowIndex} className='fd-negative-example-row'>
+            <TableRow key={`${rowIndex}-ne`} className='text-primary'>
                 {row.map((column, colIndex) => (
-                    <TableCell key={colIndex} className='fd-column'>
-                        <div className='fd-column-inner'>
+                    <TableCell key={colIndex} className='p-0'>
+                        <div className='min-w-32 h-full px-3 py-2'>
                             {column}
                         </div>
                     </TableCell>
@@ -62,11 +62,21 @@ function negativeExampleRow(row: DatasetRow, rowIndex: number, decision: Decisio
         );
     }
 
+    const selectedColumn = decision.selectedColumn;
+
     return (
-        <TableRow key={-rowIndex}>
-            {row.map((column, colIndex) => (
-                <NegativeExampleColumn key={colIndex} rowIndex={rowIndex} colIndex={colIndex} value={column} />
-            ))}
+        <TableRow key={`${rowIndex}-ne`}>
+            {row.map((column, colIndex) => {
+                const decisionColumn = decision.rows[rowIndex].columns[colIndex];
+                const isNegative = decisionColumn.reasons.length !== 0;
+                const isSelected = selectedColumn && selectedColumn.rowIndex === rowIndex && selectedColumn.colIndex === colIndex;
+
+                return (
+                    <TableCell key={colIndex} className={clsx('p-0', isNegative ? 'negative' : 'positive', isSelected && 'selected')}>
+                        <NegativeExampleColumn rowIndex={rowIndex} colIndex={colIndex} value={column} />
+                    </TableCell>
+                );
+            })}
         </TableRow>
     );
 }
@@ -88,25 +98,22 @@ function NegativeExampleColumn({ rowIndex, colIndex, value }: NegativeExampleCol
             ...decision,
             selectedColumn: isSelected
                 ? undefined
-                : {
-                    colIndex: colIndex,
-                    rowIndex,
-                },
+                : { colIndex, rowIndex },
         });
     }
 
     return (
-        <td className={clsx('fd-column', isNegative ? 'negative' : 'positive', isSelected && 'selected')}>
-            {/* TODO Replace by button. */}
-            <div className='fd-column-inner evaluated' onClick={columnClicked}>
-                <span className='fd-column-value'>{value}</span>
-                <div>
-                    <span className='fd-column-reasons'>
-                        <span>{isNegative ? 'Negative' : 'Positive'}</span>{' '}
-                        {isNegative && <span>(<span className='font-bold'>{column.reasons.length}</span> {column.reasons.length === 1 ? 'reason' : 'reasons'})</span>}
-                    </span>
-                </div>
+        // TODO Replace by button.
+        <div className={clsx('min-w-32 h-full px-3 py-2 cursor-pointer rounded fd-column-inner hover:bg-primary-200 active:bg-primary-100', isSelected && 'bg-primary-200')} onClick={columnClicked}>
+            <span className={isNegative ? 'text-danger' : 'text-success'}>{value}</span>
+
+            <div className='min-w-32'>
+                <span>{isNegative ? 'Negative' : 'Positive'}</span>{' '}
+                {isNegative && (<>
+                    <span className='font-bold'>{column.reasons.length}</span>
+                    {column.reasons.length === 1 ? 'reason' : 'reasons'}
+                </>)}
             </div>
-        </td>
+        </div>
     );
 }

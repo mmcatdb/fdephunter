@@ -11,6 +11,7 @@ import { useMemo } from 'react';
 import { Portal } from '@/components/common/Portal';
 import { Link, useParams } from 'react-router-dom';
 import { Button, Tab, Tabs } from '@nextui-org/react';
+import { Page } from '@/components/layout';
 
 export function AssignmentPage() {
     const { assignmentId } = useParams() as NamedParams<typeof routes.assignment.detail>;
@@ -26,8 +27,11 @@ export function AssignmentPage() {
                 Back to domain expert
             </Button>
         </Portal>
+
         <DecisionProvider data={data} isFinished={assignment.isFinished}>
-            <AssignmentReady assignment={assignment} setAssignment={setAssignment} data={data} />
+            <Page>
+                <AssignmentReady assignment={assignment} setAssignment={setAssignment} data={data} />
+            </Page>
         </DecisionProvider>
     </>);
 }
@@ -41,19 +45,22 @@ type AssignmentReadyProps = {
 function AssignmentReady({ assignment, setAssignment, data }: AssignmentReadyProps) {
     return (
         <Tabs defaultSelectedKey='evaluation'>
-            <Tab key='evaluation' title='Evaluation' className='pt-6'>
-                <DatasetTable
-                    data={data}
-                />
-                <AssignmentEvaluation
-                    assignment={assignment}
-                    onEvaluated={setAssignment}
-                />
+            <Tab key='evaluation' title='Evaluation'>
+                <div className='space-y-4'>
+                    <DatasetTable
+                        data={data}
+                    />
+
+                    <AssignmentEvaluation
+                        assignment={assignment}
+                        onEvaluated={setAssignment}
+                    />
+                </div>
             </Tab>
-            <Tab key='list' title='Functional dependencies' className='pt-4'>
+            <Tab key='list' title='Functional dependencies'>
                 <FDListView graph={assignment.discoveryResult.fdGraph} />
             </Tab>
-            <Tab key='graph' title='Graph view' className='pt-4'>
+            <Tab key='graph' title='Graph view'>
                 <FDGraphView graph={assignment.discoveryResult.fdGraph} />
             </Tab>
         </Tabs>

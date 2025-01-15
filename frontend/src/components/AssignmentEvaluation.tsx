@@ -18,14 +18,15 @@ type AssignmentEvaluationProps = {
 
 export function AssignmentEvaluation({ assignment, onEvaluated }: AssignmentEvaluationProps) {
     return (
-        <div className='grid grid-cols-12 gap-4'>
-            <div className='col-span-12 lg:col-span-10 xl:col-span-6'>
+        <div className='grid grid-cols-10 gap-4'>
+            <div className='col-span-10 lg:col-span-10 xl:col-span-6'>
                 <ControlCard
                     assignment={assignment}
                     onEvaluated={onEvaluated}
                 />
             </div>
-            <div className='col-span-12 lg:col-span-10 xl:col-span-6'>
+
+            <div className='col-span-10 lg:col-span-10 xl:col-span-6'>
                 <DecisionReasonsCard />
             </div>
         </div>
@@ -106,6 +107,7 @@ function ControlCard({ assignment, onEvaluated }: ControlCardProps) {
                     </>)}
                     {decision.phase === DecisionPhase.ProvideReason && (<>
                         <Button
+                            color='primary'
                             onPress={() => evaluate(DecisionStatus.Rejected)}
                             isLoading={fetching}
                         >
@@ -121,7 +123,7 @@ function ControlCard({ assignment, onEvaluated }: ControlCardProps) {
                         </Button>
                     </>)}
                     {decision.phase === DecisionPhase.JustFinished && (<>
-                        <Button onPress={continueAccepted}>
+                        <Button color='primary' onPress={continueAccepted}>
                             Go back and continue
                         </Button>
                     </>)}
@@ -255,7 +257,7 @@ function DecisionReasonsForm({ data, setData }: DecisionReasonsFormProps) {
                 {index === editingIndex ? (
                     <ReasonSelect value={innerData[editingIndex]} onChange={finishEditingReason}/>
                 ) : (
-                    <div className='fd-edit-reason-row'>
+                    <div className='min-h-10 flex items-center'>
                         <span className='flex items-center font-bold'>
                             {/* TODO Replace by button. */}
                             <IoClose
@@ -339,7 +341,7 @@ type DecisionReasonsOverviewProps = {
 function DecisionReasonsOverview({ data }: DecisionReasonsOverviewProps) {
     return (<>
         {data.map((reason, index) => (
-            <div key={index} className='fd-edit-reason-row'>
+            <div key={index} className='min-h-10 flex items-center'>
                 <span className='flex items-center font-bold'>
                     <TbPointFilled size={16} />
                     <span>{reason}</span>
