@@ -5,14 +5,15 @@ import { type Approach } from '@/types/approach';
 import { Workflow } from '@/types/workflow';
 import { API } from '@/utils/api';
 import { Job } from '@/types/job';
-import { Button, Select, SelectItem, type SharedSelection } from '@nextui-org/react';
+import { Button, Card, CardBody, Select, SelectItem, type SharedSelection } from '@nextui-org/react';
+import { Page } from '@/components/layout';
 
 type InitialSettingsProps = {
     workflow: Workflow;
     onNextStep: (workflow: Workflow, job: Job) => void;
 };
 
-export default function InitialSettings({ workflow, onNextStep }: InitialSettingsProps) {
+export function InitialSettings({ workflow, onNextStep }: InitialSettingsProps) {
     const [ fetching, setFetching ] = useState(false);
 
     async function runInitialDiscovery(settings: DiscoverySettings) {
@@ -33,12 +34,15 @@ export default function InitialSettings({ workflow, onNextStep }: InitialSetting
     }
 
     return (
-        <div className='container flex justify-center'>
-            <div className='md:w-1/2 lg:w-1/3'>
-                <h1>Initial settings</h1>
-                <InitialSettingsForm onSubmit={runInitialDiscovery} fetching={fetching} />
-            </div>
-        </div>
+        <Page className='flex flex-col justify-center max-w-xl'>
+            <h1 className='text-lg'>Initial settings</h1>
+
+            <Card className='mt-12 w-full'>
+                <CardBody>
+                    <InitialSettingsForm onSubmit={runInitialDiscovery} fetching={fetching} />
+                </CardBody>
+            </Card>
+        </Page>
     );
 }
 
@@ -86,7 +90,7 @@ export function InitialSettingsForm({ onSubmit, fetching }: InitialSettingsFormP
         return null;
 
     return (<>
-        <div className='mt-4'>
+        <div>
             <Select
                 label='Datasets'
                 selectionMode='multiple'
@@ -116,9 +120,10 @@ export function InitialSettingsForm({ onSubmit, fetching }: InitialSettingsFormP
 
         <Button
             className='mt-12 w-full'
+            color='primary'
             onPress={submit}
             isLoading={fetching}
-            disabled={selectedApproach.size === 0 || selectedDatasets.size === 0}
+            isDisabled={selectedApproach.size === 0 || selectedDatasets.size === 0}
         >
             Run!
         </Button>

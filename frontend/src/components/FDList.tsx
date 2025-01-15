@@ -1,5 +1,4 @@
 import type { FDEdge, FDGraph } from '@/types/FD';
-import { Badge } from '@nextui-org/react';
 import { FaArrowRight } from 'react-icons/fa';
 
 type FDListProps = {
@@ -24,12 +23,19 @@ function FDRow({ edge }: FDRowProps) {
     return (
         <div className='py-1 grid grid-cols-12 gap-4'>
             <div className='col-span-1'>{edge.id}</div>
-            <div className='col-span-6'>
-                {edge.source.columns.map(name => <ColumnNameBadge key={name} name={name} />)}
+
+            <div className='col-span-6 flex gap-x-2'>
+                {edge.source.columns.map(name => (
+                    <ColumnNameBadge key={name} name={name} />
+                ))}
             </div>
+
             <div className='col-span-2'><FaArrowRight size={20} /></div>
-            <div className='col-span-3'>
-                {edge.target.columns.map(name => <ColumnNameBadge key={name} name={name} />)}
+
+            <div className='col-span-3 flex gap-x-2'>
+                {edge.target.columns.map(name => (
+                    <ColumnNameBadge key={name} name={name} />
+                ))}
             </div>
         </div>
     );
@@ -41,6 +47,6 @@ type ColumnNameBadgeProps = {
 
 function ColumnNameBadge({ name }: ColumnNameBadgeProps) {
     return (
-        <Badge className='fd-column-name-badge'>{name}</Badge>
+        <div className='px-2 bg-primary rounded-full'>{name}</div>
     );
 }

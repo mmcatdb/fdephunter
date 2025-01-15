@@ -2,7 +2,7 @@ import { Layout } from './components/layout';
 import { RouterView } from './router';
 import { BrowserRouter } from 'react-router-dom';
 
-export default function App() {
+export function App() {
     return (
         <BrowserRouter future={future}>
             <Layout>

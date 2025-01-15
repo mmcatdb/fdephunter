@@ -8,7 +8,7 @@ type ExamplePageProps = {
     type: 'workflow' | 'worker' | 'assignment';
 };
 
-export default function ExamplePage({ type }: ExamplePageProps) {
+export function ExamplePage({ type }: ExamplePageProps) {
     const [ isError, setIsError ] = useState(false);
     const navigate = useNavigate();
 
@@ -74,6 +74,6 @@ export default function ExamplePage({ type }: ExamplePageProps) {
         return null;
 
     return (
-        <h1>No example of {type} was found :/</h1>
+        <h1 className='text-lg'>No example of {type} was found :/</h1>
     );
 }

@@ -9,21 +9,21 @@ type WaitingForFDProps = {
     onNextStep: () => void;
 };
 
-export default function WaitingForFD({ workflowId, cachedJob, onNextStep }: WaitingForFDProps) {
+export function WaitingForFD({ workflowId, cachedJob, onNextStep }: WaitingForFDProps) {
     const job = useJob(workflowId, cachedJob);
 
     if (!job)
         return null;
 
     return (<>
-        <h1>Wait for FD discovery ...</h1>
+        <h1 className='text-lg'>Wait for FD discovery ...</h1>
 
         <div className='mt-12 lg:w-2/3 xl:w-1/2'>
             <JobDisplay job={job} />
         </div>
 
         <div className='mt-12'>
-            <Button onPress={onNextStep} disabled={!job || job.state !== JobState.Finished}>
+            <Button onPress={onNextStep} isDisabled={!job || job.state !== JobState.Finished}>
                 Go next
             </Button>
         </div>

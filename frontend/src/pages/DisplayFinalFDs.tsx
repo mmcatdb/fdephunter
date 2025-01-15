@@ -9,7 +9,7 @@ export type DisplayFinalFDsProps = {
     workflow: Workflow;
 }
 
-export default function DisplayFinalFDs({ workflow }: DisplayFinalFDsProps) {
+export function DisplayFinalFDs({ workflow }: DisplayFinalFDsProps) {
     const jobResult = useJobResult(workflow.id);
 
     return (

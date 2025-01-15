@@ -1,17 +1,17 @@
 import { WorkflowProgressDisplay } from '@/components/worklow/WorkflowProgressDisplay';
 import { type Job } from '@/types/job';
 import { type Workflow, WorkflowState } from '@/types/workflow';
-import InitialSettings from '@/pages/InitialSettings';
-import WaitingForInitialFD from './WaitingForInitialFD';
+import { InitialSettings } from '@/pages/InitialSettings';
+import { WaitingForInitialFD } from '@/pages/WaitingForInitialFD';
 import { useWorkflow } from '@/hooks';
 import { useParams } from 'react-router-dom';
 import { type NamedParams, type routes } from '@/router';
-import DisplayFDs from './DisplayFDs';
-import WaitingForFD from './WaitingForFD';
-import DisplayFinalFDs from './DisplayFinalFDs';
+import { DisplayFDs } from '@/pages/DisplayFDs';
+import { WaitingForFD } from '@/pages/WaitingForFD';
+import { DisplayFinalFDs } from '@/pages/DisplayFinalFDs';
 import { Portal } from '@/components/common/Portal';
 
-export default function WorkflowPage() {
+export function WorkflowPage() {
     const { workflowId } = useParams() as NamedParams<typeof routes.workflow.detail>;
     const { workflow, cache, setWorkflow, reload } = useWorkflow(workflowId);
 

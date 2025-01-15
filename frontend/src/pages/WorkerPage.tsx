@@ -7,7 +7,7 @@ import { Button, Spinner } from '@nextui-org/react';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
-export default function WorkerPage() {
+export function WorkerPage() {
     const { workerId } = useParams() as NamedParams<typeof routes.worker.detail>;
     const { worker, reload } = useWorker(workerId);
 
@@ -66,7 +66,7 @@ function WorkerReady({ worker, reload }: WorkerReadyProps) {
 
     return (
         <div className='text-center'>
-            <h1>Hello {worker.user.name}!</h1>
+            <h1 className='text-lg'>Hello {worker.user.name}!</h1>
 
             {worker.state === WorkerState.Pending && (<>
                 <p className='mt-12'>
@@ -78,7 +78,7 @@ function WorkerReady({ worker, reload }: WorkerReadyProps) {
                         onPress={workerAccepted}
                         color='primary'
                         isLoading={fetchingAccept}
-                        disabled={fetchingReject}
+                        isDisabled={fetchingReject}
                     >
                         Yes! Of course!
                     </Button>
@@ -87,7 +87,7 @@ function WorkerReady({ worker, reload }: WorkerReadyProps) {
                         color='danger'
                         className='ml-4'
                         isLoading={fetchingReject}
-                        disabled={fetchingAccept}
+                        isDisabled={fetchingAccept}
                     >
                         {`No, I can't ...`}
                     </Button>
@@ -102,7 +102,7 @@ function WorkerReady({ worker, reload }: WorkerReadyProps) {
                     onPress={workerAccepted}
                     color='primary'
                     isLoading={fetchingAccept}
-                    disabled={fetchingReject}
+                    isDisabled={fetchingReject}
                 >
                     Change my mind
                 </Button>

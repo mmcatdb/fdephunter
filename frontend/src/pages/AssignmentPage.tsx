@@ -12,7 +12,7 @@ import { Portal } from '@/components/common/Portal';
 import { Link, useParams } from 'react-router-dom';
 import { Button, Tab, Tabs } from '@nextui-org/react';
 
-export default function AssignmentPage() {
+export function AssignmentPage() {
     const { assignmentId } = useParams() as NamedParams<typeof routes.assignment.detail>;
     const { assignment, setAssignment } = useAssignment(assignmentId);
     const data = useMemo(() => createDataWithExamples(assignment), [ assignment ]);

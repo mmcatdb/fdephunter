@@ -35,10 +35,10 @@ function createNodes(payload: FDPayloadFromServer): Map<string, FDNode> {
     Object.entries(payload.vertices).forEach(([ labelList, nodeFromServer ], index) => {
         const node: FDNode = {
             id: '' + index,
-            label: labelList,
+            label: labelList.replace(/,/g, '\n'),
             columns: nodeFromServer.label,
         };
-        nodeMap.set(node.label, node);
+        nodeMap.set(labelList, node);
     });
 
     return nodeMap;
@@ -136,6 +136,7 @@ export function createRFGraph(fdGraph: FDGraph): RFGraph {
 const NODE_OPTIONS: Omit<RFNode, 'id' | 'position' | 'data'> = {
     draggable: false,
     connectable: false,
+    className: 'whitespace-pre-line',
 };
 
 const EDGE_OPTIONS: Omit<RFEdge, 'id' | 'source' | 'target'> = {

@@ -9,20 +9,6 @@
     }
 }
 
-// List
-
-.fd-column-name-badge {
-    @extend .clickable;
-
-    &:active {
-        background-color: $primary-accent !important;
-    }
-
-    & + .fd-column-name-badge {
-        @extend .ml-2;
-    }
-}
-
 // Graph
 
 .react-flow__attribution {
@@ -35,94 +21,6 @@
 
 .react-flow__handle.target {
     visibility: hidden;
-}
-
-// Workflow progress
-
-$transition-long: 1.2s;
-$transition-short: 0.4s;
-
-.fd-workflow-display {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
-
-.fd-workflow-step {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-
-    &:last-of-type {
-        flex-grow: 0;
-    }
-}
-
-.fd-workflow-step-body {
-    margin: 0 auto;
-
-    & > div {
-        flex-grow: 0;
-        width: 40px;
-        height: 40px;
-        border-radius: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 30px;
-        font-weight: bolder;
-
-        background-color: $body-color-dark;
-        color: $gray-700;
-        .finished > & {
-            transition: background-color $transition-long;
-            transition: color $transition-short;
-            background-color: $success;
-            color: white;
-        }
-        .active > & {
-            transition: background-color $transition-long;
-            transition: color $transition-short;
-            background-color: $primary;
-            color: white;
-        }
-    }
-}
-
-.fd-workflow-step-label {
-    flex-grow: 0;
-    text-align: center;
-
-    .finished > & {
-        transition: color $transition-long;
-        color: $success;
-    }
-    .active > & {
-        transition: color $transition-long;
-        color: $primary;
-    }
-}
-
-.fd-workflow-step-between {
-    flex-grow: 1;
-    @extend .py-2;
-
-    .fd-workflow-step:last-of-type > & {
-        display: none;
-    }
-}
-
-.fd-workflow-step-bar {
-    height: 100%;
-    margin: 0 auto;
-    width: 0.75rem;
-    @extend .rounded-2;
-
-    background-color: $body-color-dark;
-    .finished & {
-        transition: background-color $transition-long;
-        background-color: $success;
-    }
 }
 
 // Decisions

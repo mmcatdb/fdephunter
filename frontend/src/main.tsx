@@ -4,7 +4,7 @@ import { NextUIProvider } from '@nextui-org/react';
 //import '@/assets/base.scss';
 // import '@/assets/components.scss';
 import '@/assets/index.css';
-import App from './App.js';
+import { App } from './App.js';
 
 ReactDOM.createRoot(document.getElementById('react-root')!).render(
     <StrictMode>

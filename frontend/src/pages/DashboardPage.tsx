@@ -7,7 +7,7 @@ import { Portal } from '@/components/common/Portal';
 import { Button } from '@nextui-org/react';
 import { Page } from '@/components/layout';
 
-export default function DashboardPage() {
+export function DashboardPage() {
     const navigate = useNavigate();
 
     async function continueToWorkflow() {
@@ -24,7 +24,7 @@ export default function DashboardPage() {
                 <TopbarToolbar />
             </Portal>
 
-            <h1>A catching title!</h1>
+            <h1 className='text-lg'>A catching title!</h1>
             <p className='mt-12'>
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
             </p>
@@ -65,7 +65,7 @@ function TopbarToolbar() {
             <Link to={routes.assignment.example} className='hover:underline'>
                 Assignment
             </Link>
-            <Button onPress={resetDatabase} color='secondary'>
+            <Button color='secondary' size='sm' onPress={resetDatabase}>
                 Reset DB
             </Button>
         </div>

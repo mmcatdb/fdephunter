@@ -2,22 +2,49 @@ import { useMemo, useState } from 'react';
 import { routes, type NamedParams } from '@/router';
 import { type User } from '@/types/user';
 import { Worker } from '@/types/worker';
-import { type WorkflowStats, type Workflow, type Class } from '@/types/workflow';
+import { Workflow, type WorkflowStats, type Class } from '@/types/workflow';
 import { API } from '@/utils/api';
 import { IoIosCheckmarkCircleOutline, IoIosCloseCircleOutline } from 'react-icons/io';
-import { useUsers, useWorkers } from '@/hooks';
+import { useApproaches, useUsers, useWorkers } from '@/hooks';
 import { Link, useParams } from 'react-router-dom';
 import { NegativeExampleState } from '@/types/negativeExample';
 import { type IconType } from 'react-icons/lib';
 import { IoReloadCircleOutline, IoStopCircleOutline } from 'react-icons/io5';
-import { Button, Card, CardBody, CardFooter, CardHeader, Select, SelectItem, type SharedSelection } from '@nextui-org/react';
+import { Button, Card, CardBody, CardFooter, CardHeader, Divider, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem, type SharedSelection } from '@nextui-org/react';
+import { nameToOption } from '@/pages/InitialSettings';
+import { type Approach } from '@/types/approach';
+import { Job } from '@/types/job';
 
 type WorkersDistributionProps = {
     workflow: Workflow;
     classes: Class[];
+    onNextStep: (workflow: Workflow, job: Job) => void;
 };
 
-export function WorkersDistribution({ workflow, classes }: WorkersDistributionProps) {
+export function WorkersDistribution({ workflow, classes, onNextStep }: WorkersDistributionProps) {
+    const canGoNext = useMemo(() => {
+        const acceptedClasses = classes.filter(c => c.example && c.example.state === NegativeExampleState.Accepted);
+        return classes.length === acceptedClasses.length;
+    }, [ classes ]);
+
+    const [ showModal, setShowModal ] = useState(false);
+    const [ fetching, setFetching ] = useState(false);
+
+    async function runRediscovery(approach: Approach) {
+        setFetching(true);
+        const response = await API.workflows.executeRediscovery({ workflowId: workflow.id }, {
+            approach: approach.name,
+        });
+        setFetching(false);
+        if (!response.status)
+            return;
+
+        onNextStep(
+            Workflow.fromServer(response.data.workflow),
+            Job.fromServer(response.data.job),
+        );
+    }
+
     return (
         <div className='grid grid-cols-2 gap-4'>
             <div>
@@ -26,9 +53,20 @@ export function WorkersDistribution({ workflow, classes }: WorkersDistributionPr
                     <WorkersOverviewCard />
                 </div>
             </div>
+
             <div>
                 <ClassStatsCard classes={classes} />
             </div>
+
+            <div className='mt-12 col-span-2 flex justify-end'>
+                <Button onPress={() => setShowModal(true)} isDisabled={!canGoNext}>
+                    Go next
+                </Button>
+            </div>
+
+            <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
+                <RediscoveryFormModal onSubmit={runRediscovery} fetching={fetching} />
+            </Modal>
         </div>
     );
 }
@@ -52,12 +90,18 @@ function WorkersOverviewCard() {
     return (
         <Card>
             <CardHeader>
-                Workers
+                <h3 className='font-semibold'>Workers</h3>
             </CardHeader>
+
+            <Divider />
+
             <CardBody>
                 <WorkersTable workers={workers} />
             </CardBody>
-            <CardFooter>
+
+            <Divider />
+
+            <CardFooter className='gap-6'>
                 <AddWorker onCreated={workerCreated} />
             </CardFooter>
         </Card>
@@ -79,7 +123,7 @@ function WorkersTable({ workers }: WorkersTableProps) {
             <div key={worker.id} className='grid grid-cols-2 gap-4'>
                 <div>{worker.user.name}</div>
                 <div className='text-center'>
-                    <Link to={routes.worker.detail.resolve({ workerId: worker.id })} target='_blank' rel='noreferrer'>
+                    <Link to={routes.worker.detail.resolve({ workerId: worker.id })} target='_blank' rel='noreferrer' className='text-primary hover:underline'>
                         {routes.worker.detail.resolve({ workerId: worker.id })}
                     </Link>
                 </div>
@@ -121,33 +165,28 @@ function AddWorker({ onCreated }: AddWorkerProps) {
     if (!userOptions)
         return null;
 
-    return (
-        <div className='pb-1 grid grid-cols-3 gap-4'>
-            <div className='col-span-2'>
-                <Select
-                    label='Add another user'
-                    selectionMode='single'
-                    items={userOptions}
-                    selectedKeys={selectedUser}
-                    onSelectionChange={setSelectedUser as (keys: SharedSelection) => void}
-                >
-                    {option => (
-                        <SelectItem key={option.key}>{option.label}</SelectItem>
-                    )}
-                </Select>
-            </div>
+    return (<>
+        <Select
+            size='sm'
+            label='Add another user'
+            selectionMode='single'
+            items={userOptions}
+            selectedKeys={selectedUser}
+            onSelectionChange={setSelectedUser as (keys: SharedSelection) => void}
+        >
+            {option => (
+                <SelectItem key={option.key}>{option.label}</SelectItem>
+            )}
+        </Select>
 
-            <div className='flex items-end'>
-                <Button
-                    className='w-full'
-                    onPress={submit}
-                    isLoading={fetching}
-                >
+        <Button
+            className='shrink-0 w-1/3'
+            onPress={submit}
+            isLoading={fetching}
+        >
                     Add
-                </Button>
-            </div>
-        </div>
-    );
+        </Button>
+    </>);
 }
 
 type Option = {
@@ -170,20 +209,23 @@ function WorkflowStatsCard({ stats }: WorkflowStatsCardProps) {
     return (
         <Card>
             <CardHeader>
-                Workflow statistics
+                <h3 className='font-semibold'>Workflow statistics</h3>
             </CardHeader>
+
+            <Divider />
+
             <CardBody>
                 <div className='grid grid-cols-2 gap-4 font-bold'>
-                    <div className='w-1/2'>Functional dependencies</div>
-                    <div className='w-1/2'>Evaluated examples</div>
+                    <div>Functional dependencies</div>
+                    <div>Evaluated examples</div>
                 </div>
                 <div className='grid grid-cols-2 gap-4'>
-                    <div className='w-1/2'>Initial: {stats.FDsInitial}</div>
-                    <div className='w-1/2'>Positive: {stats.examplesPositive}</div>
+                    <div>Initial: {stats.FDsInitial}</div>
+                    <div>Positive: {stats.examplesPositive}</div>
                 </div>
                 <div className='grid grid-cols-2 gap-4'>
-                    <div className='w-1/2'>Remaining: {stats.FDsRemaining}</div>
-                    <div className='w-1/2'>Negative: {stats.examplesNegative}</div>
+                    <div>Remaining: {stats.FDsRemaining}</div>
+                    <div>Negative: {stats.examplesNegative}</div>
                 </div>
             </CardBody>
         </Card>
@@ -200,8 +242,11 @@ function ClassStatsCard({ classes }: ClassStatsCardProps) {
     return (
         <Card>
             <CardHeader>
-                Class statistics
+                <h3 className='font-semibold'>Class statistics</h3>
             </CardHeader>
+
+            <Divider />
+
             <CardBody>
                 <div className='font-bold grid grid-cols-6 gap-4'>
                     <div className='col-span-3'>Name</div>
@@ -215,7 +260,7 @@ function ClassStatsCard({ classes }: ClassStatsCardProps) {
                         <div className='col-span-3'>{c.label}</div>
                         <div className='text-center'>{c.weight}</div>
                         <div className='text-center'>{c.iteration}</div>
-                        <div className='text-center'>{c.example && <ExampleStateIcon state={c.example.state} />}</div>
+                        <div className='flex justify-center'>{c.example && <ExampleStateIcon state={c.example.state} />}</div>
                     </div>
                 ))}
             </CardBody>
@@ -231,9 +276,7 @@ export function ExampleStateIcon({ state }: ExampleStateIconProps) {
     const data = exampleStateData[state];
 
     return (
-        <span className={`text-${data.color}`}>
-            {data.icon({ size: 24 })}
-        </span>
+        <data.icon size={24} className={data.color} />
     );
 }
 
@@ -243,9 +286,67 @@ const exampleStateData: {
         icon: IconType;
     }
 } = {
-    [NegativeExampleState.New]: { icon: IoReloadCircleOutline, color: 'text-info' },
+    [NegativeExampleState.New]: { icon: IoReloadCircleOutline, color: 'text-primary' },
     [NegativeExampleState.Rejected]: { icon: IoIosCloseCircleOutline, color: 'text-danger' },
     [NegativeExampleState.Accepted]: { icon: IoIosCheckmarkCircleOutline, color: 'text-success' },
-    [NegativeExampleState.Answered]: { icon: IoReloadCircleOutline, color: 'text-info' },
+    [NegativeExampleState.Answered]: { icon: IoReloadCircleOutline, color: 'text-primary' },
     [NegativeExampleState.Conflict]: { icon: IoStopCircleOutline, color: 'text-warning' },
 };
+
+type RediscoveryFormModalProps = {
+    onSubmit: (approach: Approach) => void;
+    fetching?: boolean;
+};
+
+function RediscoveryFormModal({ onSubmit, fetching }: RediscoveryFormModalProps) {
+    const availableApproaches = useApproaches();
+    const [ selectedApproach, setSelectedApproach ] = useState(new Set<string>());
+    const approachOptions = useMemo(() => availableApproaches?.map(a => nameToOption(a.name)), [ availableApproaches ]);
+
+    function submit() {
+        if (!availableApproaches)
+            return;
+
+        const selectedApproachName = selectedApproach.values().next().value;
+        const approach = availableApproaches.find(a => a.name === selectedApproachName);
+        if (!approach)
+            return;
+
+        onSubmit(approach);
+    }
+
+    if (!approachOptions)
+        return null;
+
+    return (
+        <ModalContent>
+            <ModalHeader>
+                Execute rediscovery
+            </ModalHeader>
+
+            <ModalBody>
+                <Select
+                    label='Approach'
+                    selectionMode='single'
+                    items={approachOptions}
+                    selectedKeys={selectedApproach}
+                    onSelectionChange={setSelectedApproach as (keys: SharedSelection) => void}
+                >
+                    {option => (
+                        <SelectItem key={option.key}>{option.label}</SelectItem>
+                    )}
+                </Select>
+            </ModalBody>
+
+            <ModalFooter className='justify-start'>
+                <Button
+                    onPress={submit}
+                    isLoading={fetching}
+                    isDisabled={!selectedApproach}
+                >
+                    Execute
+                </Button>
+            </ModalFooter>
+        </ModalContent>
+    );
+}

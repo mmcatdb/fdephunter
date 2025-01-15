@@ -10,16 +10,16 @@ export function WorkflowProgressDisplay({ currentStep }: WorkflowProgressDisplay
     const currentStepIndex = STEPS.findIndex(step => step === currentStep);
 
     return (
-        <div className='fd-workflow-display'>
+        <div className='h-full py-8 flex flex-col items-center'>
             {STEPS.map((step, index) => (
                 <WorkflowStepDisplay
                     key={index}
                     step={step}
                     isActive={index === currentStepIndex}
                     isFinished={index < currentStepIndex}
+                    isLast={index === STEPS.length - 1}
                 />
             ))}
-
         </div>
     );
 }
@@ -30,24 +30,26 @@ type WorkflowStepDisplayProps = {
     step: WorkflowState;
     isFinished: boolean;
     isActive: boolean;
+    isLast: boolean;
 };
 
-function WorkflowStepDisplay({ step, isFinished, isActive }: WorkflowStepDisplayProps) {
-    return (
-        <div className={clsx('fd-workflow-step', isFinished && 'finished', isActive && 'active')}>
-            <div className='fd-workflow-step-body'>
-                <div>
-                    {STEP_LABELS[step].shortLabel}
-                </div>
-            </div>
-            <div className='fd-workflow-step-label'>
-                {STEP_LABELS[step].longLabel}
-            </div>
-            <div className='fd-workflow-step-between'>
-                <div className='fd-workflow-step-bar' />
-            </div>
+function WorkflowStepDisplay({ step, isFinished, isActive, isLast }: WorkflowStepDisplayProps) {
+    return (<>
+        <div className={clsx('size-10 rounded-full flex items-center justify-center text-3xl font-semibold text-white bg-default-400 transition-colors duration-1000',
+            isActive && 'bg-primary',
+            isFinished && 'bg-success',
+        )}>
+            {STEP_LABELS[step].shortLabel}
         </div>
-    );
+
+        <div className={clsx('transition-colors duration-1000', isActive && 'text-primary', isFinished && 'text-success')}>
+            {STEP_LABELS[step].longLabel}
+        </div>
+
+        {!isLast && (
+            <div className={clsx('grow my-2 w-3 rounded-full bg-default-400 transition-colors duration-1000', isFinished && 'bg-success')} />
+        )}
+    </>);
 }
 
 type StepLabel = {

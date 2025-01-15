@@ -52,3 +52,15 @@
         @apply text-base;
     }
 }
+
+.react-flow__attribution {
+    @apply !bg-white/5;
+
+    & a {
+        @apply !text-primary;
+    }
+}
+
+.react-flow__handle.target {
+    @apply invisible;
+}

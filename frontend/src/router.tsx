@@ -1,9 +1,9 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import DashboardPage from './pages/DashboardPage';
-import WorkflowPage from './pages/WorkflowPage';
-import WorkerPage from './pages/WorkerPage';
-import AssignmentPage from './pages/AssignmentPage';
-import ExamplePage from './pages/ExamplePage';
+import { DashboardPage } from './pages/DashboardPage';
+import { WorkflowPage } from './pages/WorkflowPage';
+import { WorkerPage } from './pages/WorkerPage';
+import { AssignmentPage } from './pages/AssignmentPage';
+import { ExamplePage } from './pages/ExamplePage';
 
 export class NamedRoute<T extends string = never> {
     constructor(

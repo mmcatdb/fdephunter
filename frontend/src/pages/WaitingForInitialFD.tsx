@@ -1,4 +1,5 @@
 import { JobDisplay } from '@/components/job/JobDisplay';
+import { Page } from '@/components/layout';
 import { useJob } from '@/hooks';
 import { type Job, JobState } from '@/types/job';
 import { Button } from '@nextui-org/react';
@@ -9,23 +10,23 @@ type WaitingForInitialFDProps = {
     onNextStep: () => void;
 };
 
-export default function WaitingForInitialFD({ workflowId, cachedJob, onNextStep }: WaitingForInitialFDProps) {
+export function WaitingForInitialFD({ workflowId, cachedJob, onNextStep }: WaitingForInitialFDProps) {
     const job = useJob(workflowId, cachedJob);
 
     if (!job)
         return null;
 
-    return (<>
-        <h1>Wait for initial FD discovery ...</h1>
+    return (
+        <Page className='max-w-xl space-y-12'>
+            <h1 className='text-lg'>Wait for initial FD discovery ...</h1>
 
-        <div className='mt-12 lg:w-2/3 xl:w-1/2'>
             <JobDisplay job={job} />
-        </div>
 
-        <div className='mt-12'>
-            <Button onPress={onNextStep} disabled={job.state !== JobState.Finished}>
-                Go next
-            </Button>
-        </div>
-    </>);
+            <div className='flex justify-end'>
+                <Button color='primary' onPress={onNextStep} isDisabled={job.state !== JobState.Finished}>
+                    Go next
+                </Button>
+            </div>
+        </Page>
+    );
 }

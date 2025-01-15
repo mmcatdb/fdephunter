@@ -72,7 +72,9 @@ function ControlCard({ assignment, onEvaluated }: ControlCardProps) {
     return (
         <Card>
             <CardHeader>
-                {titles[decision.phase]}
+                <h3 className='font-semibold'>
+                    {titles[decision.phase]}
+                </h3>
             </CardHeader>
             <CardBody>
                 {bodies[decision.phase]}
@@ -179,11 +181,13 @@ function DecisionReasonsCard() {
     return (
         <Card>
             <CardHeader>
-                {isEditable ? (<>
-                    Why is this column a negative example?
-                </>) : (<>
-                    This column is {isNegative ? 'negative' : 'positive'}
-                </>)}
+                <h3 className='font-semibold'>
+                    {isEditable ? (<>
+                        Why is this column a negative example?
+                    </>) : (<>
+                        This column is {isNegative ? 'negative' : 'positive'}
+                    </>)}
+                </h3>
             </CardHeader>
             <CardBody>
                 {isEditable ? (<>

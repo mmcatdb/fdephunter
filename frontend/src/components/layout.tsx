@@ -68,7 +68,7 @@ export function Layout({ children }: LayoutProps) {
             <div
                 className={clsx(`
                     min-w-[600px] min-h-full pt-14 flex flex-col transition-margin !ease-in-out
-                    text-foreground-800 bg-content2 font-medium
+                    text-foreground-800 bg-content1 font-medium
                     `,
                 isDark && 'fd-global-dark dark',
                 state.isCollapsed ? 'ms-0' : 'ms-80',
@@ -90,7 +90,7 @@ function TopBar() {
     const { state: { isCollapsed, isLocalThemeDark }, setState } = useLayout();
 
     return (
-        <nav className={clsx('fixed top-0 left-0 right-0 z-10')}>
+        <nav className={clsx('fixed top-0 right-0 left-0 z-10')}>
             <ScrollShadow orientation='horizontal' hideScrollBar>
                 <div className='min-w-[600px] w-full h-14 flex justify-center bg-primary-100'>
 
@@ -139,7 +139,7 @@ function Sidebar({ children }: SidebarProps) {
         <aside
             id={Portal.targets.sidebar}
             className={clsx(
-                'fixed left-0 top-14 h-full overflow-hidden transition-width !ease-in-out bg-content1',
+                'fixed top-14 bottom-0 left-0 overflow-hidden transition-width !ease-in-out bg-content2',
                 isCollapsed ? 'w-0' : 'w-80',
             )}
         >
@@ -155,7 +155,7 @@ type ContentProps = {
 function Content({ children }: ContentProps) {
     return (
         // Id for uniqueness and accessibility.
-        <main id='main-content' className='grow'>
+        <main id='main-content' className='grow flex'>
             {children}
         </main>
     );
