@@ -6,7 +6,7 @@ import { WaitingForInitialFD } from '@/pages/WaitingForInitialFD';
 import { useWorkflow } from '@/hooks';
 import { useParams } from 'react-router-dom';
 import { type NamedParams, type routes } from '@/router';
-import { DisplayFDs } from '@/pages/DisplayFDs';
+import { WorkflowDashboard } from '@/pages/WorkflowDashboard';
 import { WaitingForFD } from '@/pages/WaitingForFD';
 import { DisplayFinalFDs } from '@/pages/DisplayFinalFDs';
 import { Sidebar } from '@/components/layout';
@@ -38,9 +38,9 @@ export function WorkflowPage() {
             />
         )}
         {workflow.state === WorkflowState.DisplayFD && (
-            <DisplayFDs
+            <WorkflowDashboard
                 workflow={workflow}
-                chachedClasses={cache.classes}
+                cachedClasses={cache.classes}
                 onNextStep={runFDJob}
             />
         )}

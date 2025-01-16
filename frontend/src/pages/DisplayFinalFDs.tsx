@@ -5,9 +5,9 @@ import { useJobResult } from '@/hooks';
 import { type Workflow } from '@/types/workflow';
 import { Tab, Tabs } from '@nextui-org/react';
 
-export type DisplayFinalFDsProps = {
+type DisplayFinalFDsProps = {
     workflow: Workflow;
-}
+};
 
 export function DisplayFinalFDs({ workflow }: DisplayFinalFDsProps) {
     const jobResult = useJobResult(workflow.id);

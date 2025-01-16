@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { DashboardPage } from './pages/DashboardPage';
+import { LandingPage } from './pages/LandingPage';
 import { WorkflowPage } from './pages/WorkflowPage';
 import { WorkerPage } from './pages/WorkerPage';
 import { AssignmentPage } from './pages/AssignmentPage';
@@ -23,7 +23,7 @@ export type NamedParams<TRoute> = TRoute extends NamedRoute<infer TParams> ? Rec
 
 export const routes = {
     root: '/',
-    dashboard: '/',
+    landing: '/',
     workflow: {
         example: '/workflows/example',
         detail: new NamedRoute<'workflowId'>('/workflows/:workflowId'),
@@ -44,8 +44,7 @@ export function RouterView() {
 
     return (
         <Routes>
-            <Route path={routes.root} element={<DashboardPage />} />
-            <Route path={routes.dashboard} element={<DashboardPage />} />
+            <Route path={routes.landing} element={<LandingPage />} />
 
             <Route path={routes.workflow.example}       element={<ExamplePage type='workflow' />} />
             <Route path={routes.workflow.detail.path}   element={<WorkflowPage />} />

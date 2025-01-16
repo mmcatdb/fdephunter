@@ -6,7 +6,7 @@ import { rawAPI } from '@/utils/api/rawAPI';
 import { Button } from '@nextui-org/react';
 import { Page, TopbarContent } from '@/components/layout';
 
-export function DashboardPage() {
+export function LandingPage() {
     const navigate = useNavigate();
 
     async function continueToWorkflow() {

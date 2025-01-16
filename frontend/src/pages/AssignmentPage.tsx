@@ -1,4 +1,3 @@
-import { DatasetTable } from '@/components/DatasetTable';
 import { AssignmentEvaluation } from '@/components/AssignmentEvaluation';
 import { FDGraphView } from '@/components/dataset/FDGraphView';
 import { FDListView } from '@/components/dataset/FDListView';
@@ -11,6 +10,7 @@ import { useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Button, Tab, Tabs } from '@nextui-org/react';
 import { Page, TopbarContent } from '@/components/layout';
+import { DatasetTable } from '@/components/dataset/DatasetTableView';
 
 export function AssignmentPage() {
     const { assignmentId } = useParams() as NamedParams<typeof routes.assignment.detail>;
@@ -46,9 +46,7 @@ function AssignmentReady({ assignment, setAssignment, data }: AssignmentReadyPro
         <Tabs defaultSelectedKey='evaluation'>
             <Tab key='evaluation' title='Evaluation'>
                 <div className='space-y-4'>
-                    <DatasetTable
-                        data={data}
-                    />
+                    <DatasetTable data={data} />
 
                     <AssignmentEvaluation
                         assignment={assignment}

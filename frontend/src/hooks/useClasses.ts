@@ -4,7 +4,7 @@ import { Class } from '@/types/workflow';
 
 const REFRESH_TIMEOUT = 2000; // in ms
 
-export function useClasses(workflowId: string, initialClasses?: Class[]): Class[] {
+export function useClasses(workflowId: string, initialClasses?: Class[], refreshTimeout: number | null = REFRESH_TIMEOUT): Class[] {
     const [ classes, setClasses ] = useState(initialClasses ?? []);
 
     const refreshClasses = useCallback(async (signal?: AbortSignal) => {
@@ -18,12 +18,15 @@ export function useClasses(workflowId: string, initialClasses?: Class[]): Class[
 
     useEffect(() => {
         const [ signal, abort ] = API.prepareAbort();
-        const interval = setInterval(() => {
-            void refreshClasses(signal);
-        }, REFRESH_TIMEOUT);
-
         if (!initialClasses)
             void refreshClasses(signal);
+
+        if (!refreshTimeout)
+            return () => abort();
+
+        const interval = setInterval(() => {
+            void refreshClasses(signal);
+        }, refreshTimeout);
 
         return () => {
             clearInterval(interval);

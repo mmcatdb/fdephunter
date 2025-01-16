@@ -5,18 +5,18 @@ import { useClasses, useJobResult } from '@/hooks';
 import { WorkersDistribution } from '@/components/WorkersDistribution';
 import { type Workflow, type Class } from '@/types/workflow';
 import { type Job } from '@/types/job';
-import { type Approach } from '@/types/approach';
 import { Tab, Tabs } from '@nextui-org/react';
 import { Page } from '@/components/layout';
+import { ArmstrongRelationView } from '@/components/dataset/ArmstrongRelationView';
 
-export type DisplayFDsProps = {
+type WorkflowDashboardProps = {
     workflow: Workflow;
-    chachedClasses?: Class[];
+    cachedClasses?: Class[];
     onNextStep: (workflow: Workflow, job: Job) => void;
 }
 
-export function DisplayFDs({ workflow, chachedClasses, onNextStep }: DisplayFDsProps) {
-    const classes = useClasses(workflow.id, chachedClasses);
+export function WorkflowDashboard({ workflow, cachedClasses, onNextStep }: WorkflowDashboardProps) {
+    const classes = useClasses(workflow.id, cachedClasses, null);
 
     const jobResult = useJobResult(workflow.id);
 
@@ -27,6 +27,9 @@ export function DisplayFDs({ workflow, chachedClasses, onNextStep }: DisplayFDsP
             <Tabs defaultSelectedKey='overview'>
                 <Tab key='overview' title='Overview'>
                     <WorkersDistribution workflow={workflow} classes={classes} onNextStep={onNextStep} />
+                </Tab>
+                <Tab key='armstrong-relation' title='Armstrong relation'>
+                    <ArmstrongRelationView />
                 </Tab>
                 <Tab key='table' title='Dataset'>
                     <DatasetTableView workflowId={workflow.id} />
@@ -40,7 +43,3 @@ export function DisplayFDs({ workflow, chachedClasses, onNextStep }: DisplayFDsP
             </Tabs>
         </Page>);
 }
-
-export type RediscoverySettings = {
-    approach: Approach;
-};
