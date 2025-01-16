@@ -15,8 +15,3 @@ export function Portal({ children, to }: PortalProps) {
 
     return target ? createPortal(children, target) : null;
 }
-
-Portal.targets = {
-    topbar: 'top-bar-content',
-    sidebar: 'sidebar-content',
-};

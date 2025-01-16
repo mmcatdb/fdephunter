@@ -9,7 +9,7 @@ import { type NamedParams, type routes } from '@/router';
 import { DisplayFDs } from '@/pages/DisplayFDs';
 import { WaitingForFD } from '@/pages/WaitingForFD';
 import { DisplayFinalFDs } from '@/pages/DisplayFinalFDs';
-import { Portal } from '@/components/common/Portal';
+import { Sidebar } from '@/components/layout';
 
 export function WorkflowPage() {
     const { workflowId } = useParams() as NamedParams<typeof routes.workflow.detail>;
@@ -23,9 +23,9 @@ export function WorkflowPage() {
         return null;
 
     return (<>
-        <Portal to={Portal.targets.sidebar}>
+        <Sidebar>
             <WorkflowProgressDisplay currentStep={workflow.state} />
-        </Portal>
+        </Sidebar>
 
         {workflow.state === WorkflowState.InitialSettings && (
             <InitialSettings workflow={workflow} onNextStep={runFDJob} />

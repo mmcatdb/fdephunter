@@ -34,7 +34,7 @@ export function InitialSettings({ workflow, onNextStep }: InitialSettingsProps) 
     }
 
     return (
-        <Page className='flex flex-col justify-center max-w-xl'>
+        <Page className='max-w-xl'>
             <h1 className='text-lg'>Initial settings</h1>
 
             <Card className='mt-10 w-full'>

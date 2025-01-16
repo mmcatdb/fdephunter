@@ -113,7 +113,8 @@ function WorkerReady({ worker, reload }: WorkerReadyProps) {
 
             {worker.state === WorkerState.Idle && (<>
                 <p>
-                    Thank you for choosing to help us! Please wait a few moments until we generate the next negative example.
+                    Thank you for choosing to help us!<br />
+                    Please wait a few moments until we generate the next negative example.
                 </p>
 
                 <Spinner color='primary'/>
@@ -121,7 +122,8 @@ function WorkerReady({ worker, reload }: WorkerReadyProps) {
 
             {worker.state === WorkerState.Assigned && worker.assignment && (<>
                 <p>
-                    Thank you for choosing to help us! Your next assignment is ready:
+                    Thank you for choosing to help us!<br />
+                    Your next assignment is ready:
                 </p>
 
                 <Button color='primary' onPress={goToAssignment}>

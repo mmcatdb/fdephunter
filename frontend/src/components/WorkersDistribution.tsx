@@ -102,7 +102,7 @@ function WorkersOverviewCard() {
             <Divider />
 
             <CardFooter className='gap-6'>
-                <AddWorker onCreated={workerCreated} />
+                <AddWorker workers={workers} onCreated={workerCreated} />
             </CardFooter>
         </Card>
     );
@@ -133,13 +133,14 @@ function WorkersTable({ workers }: WorkersTableProps) {
 }
 
 type AddWorkerProps = {
+    workers: Worker[];
     onCreated: (worker: Worker) => void;
 };
 
-function AddWorker({ onCreated }: AddWorkerProps) {
+function AddWorker({ workers, onCreated }: AddWorkerProps) {
     const users = useUsers();
     const [ selectedUser, setSelectedUser ] = useState(new Set<string>());
-    const userOptions = useMemo(() => users?.map(userToOption), [ users ]);
+    const userOptions = useMemo(() => users?.filter(user => !workers.some(worker => worker.user.id === user.id)).map(userToOption), [ users, workers ]);
     const [ fetching, setFetching ] = useState(false);
 
     const { workflowId } = useParams() as NamedParams<typeof routes.workflow.detail>;
@@ -169,6 +170,7 @@ function AddWorker({ onCreated }: AddWorkerProps) {
         <Select
             size='sm'
             label='Add another user'
+
             selectionMode='single'
             items={userOptions}
             selectedKeys={selectedUser}
@@ -184,7 +186,7 @@ function AddWorker({ onCreated }: AddWorkerProps) {
             onPress={submit}
             isLoading={fetching}
         >
-                    Add
+            Add
         </Button>
     </>);
 }

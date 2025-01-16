@@ -62,16 +62,6 @@ export class Workflow {
             input.iteration,
         );
     }
-
-    // TODO remove later when this is done on backend
-    nextStep(state: WorkflowState): Workflow {
-        return new Workflow(
-            this.id,
-            state,
-            this.iteration,
-            // this.classes,
-        );
-    }
 }
 
 export type WorkflowStats = {

@@ -42,7 +42,7 @@ function WorkflowStepDisplay({ step, isFinished, isActive, isLast }: WorkflowSte
             {STEP_LABELS[step].shortLabel}
         </div>
 
-        <div className={clsx('transition-colors duration-1000', isActive && 'text-primary', isFinished && 'text-success')}>
+        <div className={clsx('w-40 text-center transition-colors duration-1000', isActive && 'text-primary', isFinished && 'text-success')}>
             {STEP_LABELS[step].longLabel}
         </div>
 

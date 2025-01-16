@@ -3,9 +3,8 @@ import { routes } from '@/router';
 import { Workflow } from '@/types/workflow';
 import { Link, useNavigate } from 'react-router-dom';
 import { rawAPI } from '@/utils/api/rawAPI';
-import { Portal } from '@/components/common/Portal';
 import { Button } from '@nextui-org/react';
-import { Page } from '@/components/layout';
+import { Page, TopbarContent } from '@/components/layout';
 
 export function DashboardPage() {
     const navigate = useNavigate();
@@ -20,9 +19,9 @@ export function DashboardPage() {
 
     return (
         <Page>
-            <Portal to={Portal.targets.topbar} >
+            <TopbarContent>
                 <TopbarToolbar />
-            </Portal>
+            </TopbarContent>
 
             <h1 className='text-lg'>A catching title!</h1>
             <p className='mt-10'>
