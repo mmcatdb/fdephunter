@@ -1,6 +1,6 @@
 import { type DatasetData, type DatasetHeader, type DatasetRow } from './dataset';
 
-export enum NegativeExampleState {
+export enum ExampleState {
     New = 'NEW',
     Rejected = 'REJECTED',
     Accepted = 'ACCEPTED',
@@ -8,17 +8,19 @@ export enum NegativeExampleState {
     Conflict = 'CONFLICT',
 }
 
+/** @deprecated */
 export type NegativeExampleFromServer = {
     id: string;
     payload: string;
-    state: NegativeExampleState;
+    state: ExampleState;
     dataset: DatasetData;
 };
 
+/** @deprecated */
 export class NegativeExample {
     private constructor(
         readonly id: string,
-        readonly state: NegativeExampleState,
+        readonly state: ExampleState,
         readonly data: Record<string, string>,
     ) {}
 
@@ -42,7 +44,8 @@ type PayloadFromServer = {
     // TODO some other stuff
 };
 
+/** @deprecated */
 export type NegativeExampleInfo = {
     id: string;
-    state: NegativeExampleState;
+    state: ExampleState;
 }

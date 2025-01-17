@@ -7,7 +7,7 @@ import { API } from '@/utils/api';
 import { IoIosCheckmarkCircleOutline, IoIosCloseCircleOutline } from 'react-icons/io';
 import { useApproaches, useUsers, useWorkers } from '@/hooks';
 import { Link, useParams } from 'react-router-dom';
-import { NegativeExampleState } from '@/types/negativeExample';
+import { ExampleState } from '@/types/negativeExample';
 import { type IconType } from 'react-icons/lib';
 import { IoReloadCircleOutline, IoStopCircleOutline } from 'react-icons/io5';
 import { Button, Card, CardBody, CardFooter, CardHeader, Divider, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem, type SharedSelection } from '@nextui-org/react';
@@ -23,7 +23,7 @@ type WorkersDistributionProps = {
 
 export function WorkersDistribution({ workflow, classes, onNextStep }: WorkersDistributionProps) {
     const canGoNext = useMemo(() => {
-        const acceptedClasses = classes.filter(c => c.example && c.example.state === NegativeExampleState.Accepted);
+        const acceptedClasses = classes.filter(c => c.example && c.example.state === ExampleState.Accepted);
         return classes.length === acceptedClasses.length;
     }, [ classes ]);
 
@@ -271,28 +271,29 @@ function ClassStatsCard({ classes }: ClassStatsCardProps) {
 }
 
 type ExampleStateIconProps = {
-    state: NegativeExampleState;
+    state: ExampleState;
+    size?: number;
 };
 
-export function ExampleStateIcon({ state }: ExampleStateIconProps) {
+export function ExampleStateIcon({ state, size = 24 }: ExampleStateIconProps) {
     const data = exampleStateData[state];
 
     return (
-        <data.icon size={24} className={data.color} />
+        <data.icon size={size} className={data.color} />
     );
 }
 
 const exampleStateData: {
-    [key in NegativeExampleState]: {
+    [key in ExampleState]: {
         color: string;
         icon: IconType;
     }
 } = {
-    [NegativeExampleState.New]: { icon: IoReloadCircleOutline, color: 'text-primary' },
-    [NegativeExampleState.Rejected]: { icon: IoIosCloseCircleOutline, color: 'text-danger' },
-    [NegativeExampleState.Accepted]: { icon: IoIosCheckmarkCircleOutline, color: 'text-success' },
-    [NegativeExampleState.Answered]: { icon: IoReloadCircleOutline, color: 'text-primary' },
-    [NegativeExampleState.Conflict]: { icon: IoStopCircleOutline, color: 'text-warning' },
+    [ExampleState.New]: { icon: IoReloadCircleOutline, color: 'text-primary' },
+    [ExampleState.Rejected]: { icon: IoIosCloseCircleOutline, color: 'text-danger' },
+    [ExampleState.Accepted]: { icon: IoIosCheckmarkCircleOutline, color: 'text-success' },
+    [ExampleState.Answered]: { icon: IoReloadCircleOutline, color: 'text-primary' },
+    [ExampleState.Conflict]: { icon: IoStopCircleOutline, color: 'text-warning' },
 };
 
 type RediscoveryFormModalProps = {

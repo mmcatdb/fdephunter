@@ -1,3 +1,4 @@
+import { MOCK_ARMSTRONG_RELATION, type ReferenceRow, type ExampleRow, type ExampleRelation } from './armstrongRelation';
 import { type DatasetData } from './dataset';
 import { JobResult, type JobResultFromServer } from './jobResult';
 import { NegativeExample, type NegativeExampleFromServer } from './negativeExample';
@@ -12,6 +13,8 @@ export enum AssignmentVerdict {
 export type AssignmentInfo = {
     id: string;
     verdict: AssignmentVerdict;
+    referenceRow: ReferenceRow;
+    exampleRow: ExampleRow;
 };
 
 export type AssignmentFromServer = AssignmentInfo & {
@@ -21,19 +24,21 @@ export type AssignmentFromServer = AssignmentInfo & {
     dataset: DatasetData;
 };
 
+// TODO Replace by a simple type (if possible).
 export class Assignment {
     private constructor(
         readonly id: string,
         readonly workerId: string,
         readonly verdict: AssignmentVerdict,
         readonly isFinished: boolean,
+        /** @deprecated Use exampleRelation. */
         readonly example: NegativeExample,
         readonly discoveryResult: JobResult,
         readonly dataset: DatasetData,
+        readonly exampleRelation: ExampleRelation,
     ) {}
 
     static fromServer(input: AssignmentFromServer): Assignment {
-        console.log(input);
         return new Assignment(
             input.id,
             input.expertId,
@@ -42,6 +47,11 @@ export class Assignment {
             NegativeExample.fromServer(input.example),
             JobResult.fromServer(input.discoveryResult),
             input.dataset,
+            {
+                columns: MOCK_ARMSTRONG_RELATION.columns,
+                referenceRow: MOCK_ARMSTRONG_RELATION.referenceRow,
+                exampleRow: MOCK_ARMSTRONG_RELATION.exampleRows[0],
+            },
         );
     }
 }

@@ -10,6 +10,7 @@ import { type Assignment } from '@/types/assignment';
 import { API } from '@/utils/api';
 import { TbPointFilled } from 'react-icons/tb';
 import { Button, Card, CardBody, CardFooter, CardHeader } from '@nextui-org/react';
+import { ExampleRelationDisplay } from './dataset/ArmstrongRelationView';
 
 type AssignmentEvaluationProps = {
     assignment: Assignment;
@@ -19,15 +20,23 @@ type AssignmentEvaluationProps = {
 export function AssignmentEvaluation({ assignment, onEvaluated }: AssignmentEvaluationProps) {
     return (
         <div className='grid grid-cols-10 gap-4'>
-            <div className='col-span-10 lg:col-span-10 xl:col-span-6'>
+            <div className='col-span-10 lg:col-span-8 xl:col-span-6'>
                 <ControlCard
                     assignment={assignment}
                     onEvaluated={onEvaluated}
                 />
             </div>
 
-            <div className='col-span-10 lg:col-span-10 xl:col-span-6'>
+            <div className='col-span-10 lg:col-span-8 xl:col-span-6'>
                 <DecisionReasonsCard />
+            </div>
+
+            <div className='col-span-10'>
+                <div className='flex flex-col items-start'>
+                    <Card className='p-4 max-w-full'>
+                        <ExampleRelationDisplay relation={assignment.exampleRelation} />
+                    </Card>
+                </div>
             </div>
         </div>
     );

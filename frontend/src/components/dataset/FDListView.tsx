@@ -1,5 +1,5 @@
 import type { FDEdge, FDGraph } from '@/types/FD';
-import clsx from 'clsx';
+import { cn } from '@nextui-org/react';
 import { FaArrowRight } from 'react-icons/fa';
 
 type FDListViewProps = {
@@ -63,6 +63,6 @@ type ColumnNameBadgeProps = {
 
 export function ColumnNameBadge({ name, className }: ColumnNameBadgeProps) {
     return (
-        <div className={clsx('inline-block w-fit h-4 px-2 rounded-full text-sm/4 bg-primary text-white truncate', className)}>{name}</div>
+        <div className={cn('inline-block w-fit h-4 px-2 rounded-full text-sm/4 font-semibold bg-primary text-white truncate', className)}>{name}</div>
     );
 }

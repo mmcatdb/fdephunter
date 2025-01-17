@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { type Dispatch, type SetStateAction, useCallback, useEffect, useState } from 'react';
 import { API } from '@/utils/api';
 import { Worker, type WorkerFromServer } from '@/types/worker';
 
@@ -38,7 +38,7 @@ export function useWorker(workerId: string): UseWorkerReturn {
 
 type UseWorkersReturn = {
     workers: Worker[];
-    setWorkers: (workers: Worker[]) => void;
+    setWorkers: Dispatch<SetStateAction<Worker[]>>;
 };
 
 export function useWorkers(workflowId: string): UseWorkersReturn {
