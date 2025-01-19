@@ -1,14 +1,9 @@
-import { Layout } from './components/layout';
-import { RouterView } from './router';
-import { BrowserRouter } from 'react-router-dom';
+import { router } from './router';
+import { RouterProvider } from 'react-router-dom';
 
 export function App() {
     return (
-        <BrowserRouter future={future}>
-            <Layout>
-                <RouterView />
-            </Layout>
-        </BrowserRouter>
+        <RouterProvider router={router} future={future}/>
     );
 }
 

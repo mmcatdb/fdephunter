@@ -1,9 +1,10 @@
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { createBrowserRouter } from 'react-router-dom';
 import { LandingPage } from './pages/LandingPage';
 import { WorkflowPage } from './pages/WorkflowPage';
 import { WorkerPage } from './pages/WorkerPage';
-import { AssignmentPage } from './pages/AssignmentPage';
+import { AssignmentEvaluationPage, AssignmentGraphPage, AssignmentListPage, AssignmentPage } from './pages/AssignmentPage';
 import { ExamplePage } from './pages/ExamplePage';
+import { Layout } from './components/layout';
 
 export class NamedRoute<T extends string = never> {
     constructor(
@@ -33,29 +34,52 @@ export const routes = {
         detail: new NamedRoute<'workerId'>('/workers/:workerId'),
     },
     assignment: {
+        $id: 'assignment',
         example: '/assignments/example',
-        detail: new NamedRoute<'assignmentId'>('/assignments/:assignmentId'),
+        root: new NamedRoute<'assignmentId'>('/assignments/:assignmentId'),
+        tabs: new NamedRoute<'assignmentId'>('/assignments/:assignmentId/:tab'),
+        evaluation: new NamedRoute<'assignmentId'>('/assignments/:assignmentId/evaluation'),
+        list: new NamedRoute<'assignmentId'>('/assignments/:assignmentId/list'),
+        graph: new NamedRoute<'assignmentId'>('/assignments/:assignmentId/graph'),
     },
 };
 
-export function RouterView() {
-    const location = useLocation();
-    const from = (location.state as { from: string | undefined })?.from ?? routes.root;
-
-    return (
-        <Routes>
-            <Route path={routes.landing} element={<LandingPage />} />
-
-            <Route path={routes.workflow.example}       element={<ExamplePage type='workflow' />} />
-            <Route path={routes.workflow.detail.path}   element={<WorkflowPage />} />
-
-            <Route path={routes.worker.example}         element={<ExamplePage type='worker' />} />
-            <Route path={routes.worker.detail.path}     element={<WorkerPage />} />
-
-            <Route path={routes.assignment.example}     element={<ExamplePage type='assignment' />} />
-            <Route path={routes.assignment.detail.path} element={<AssignmentPage />} />
-
-            <Route path='*' element={<Navigate replace to={from} />} />
-        </Routes>
-    );
-}
+export const router = createBrowserRouter([ {
+    path: routes.root,
+    element: <Layout />,
+    children: [ {
+        index: true,
+        element: <LandingPage />,
+    }, {
+        path: routes.workflow.example,
+        element: <ExamplePage type='workflow' />,
+    }, {
+        path: routes.workflow.detail.path,
+        element: <WorkflowPage />,
+    }, {
+        path: routes.worker.example,
+        element: <ExamplePage type='worker' />,
+    }, {
+        path: routes.worker.detail.path,
+        element: <WorkerPage />,
+    }, {
+        path: routes.assignment.example,
+        element: <ExamplePage type='assignment' />,
+    }, {
+        id: routes.assignment.$id,
+        path: routes.assignment.root.path,
+        element: <AssignmentPage />,
+        loader: AssignmentPage.loader,
+        shouldRevalidate: () => false,
+        children: [ {
+            path: routes.assignment.evaluation.path,
+            element: <AssignmentEvaluationPage />,
+        }, {
+            path: routes.assignment.list.path,
+            element: <AssignmentListPage />,
+        }, {
+            path: routes.assignment.graph.path,
+            element: <AssignmentGraphPage />,
+        } ],
+    } ],
+} ]);

@@ -52,12 +52,9 @@ export type DatasetDataWithExamples = DatasetData & {
     examples: DatasetRow[]; // TODO remove
 }
 
-export function createDataWithExamples(assignment?: Assignment): DatasetDataWithExamples | undefined {
-    if (!assignment)
-        return undefined;
-
+export function createDataWithExamples(assignment: Assignment): DatasetDataWithExamples {
     const dataset = assignment.dataset;
-    
+
     return {
         ...dataset,
         examples: [ assignment.example.toRow(dataset.header) ],

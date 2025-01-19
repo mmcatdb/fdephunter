@@ -62,7 +62,7 @@ function WorkerReady({ worker, reload }: WorkerReadyProps) {
 
     function goToAssignment() {
         if (worker.assignment)
-            navigate(routes.assignment.detail.resolve({ assignmentId: worker.assignment.id }));
+            navigate(routes.assignment.evaluation.resolve({ assignmentId: worker.assignment.id }));
     }
 
     return (
@@ -138,8 +138,8 @@ function WorkerReady({ worker, reload }: WorkerReadyProps) {
                     <div className='text-start'>
                         {answeredAssignments.map(assignment => (
                             <div key={assignment.id} className='flex justify-between'>
-                                <Link to={routes.assignment.detail.resolve({ assignmentId: assignment.id })} className='mr-4'>
-                                    {routes.assignment.detail.resolve({ assignmentId: assignment.id })}
+                                <Link to={routes.assignment.evaluation.resolve({ assignmentId: assignment.id })} className='mr-4'>
+                                    {routes.assignment.evaluation.resolve({ assignmentId: assignment.id })}
                                 </Link>
                                 <span>(<AssignmentVerdictLabel verdict={assignment.verdict} />)</span>
                             </div>

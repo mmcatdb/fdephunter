@@ -51,7 +51,7 @@ export function ExamplePage({ type }: ExamplePageProps) {
         // const assignments = response.data.map(Assignment.fromServer);
         // navigate(routes.assignment.detail.resolve({ assignmentId: assignments[0].id }));
         console.log(signal);
-        navigate(routes.assignment.detail.resolve({ assignmentId: '789' }));
+        navigate(routes.assignment.evaluation.resolve({ assignmentId: '789' }));
     }
 
     useEffect(() => {

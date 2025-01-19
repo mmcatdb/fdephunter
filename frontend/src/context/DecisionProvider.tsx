@@ -22,6 +22,7 @@ export enum DecisionPhase {
 }
 
 export type DecisionState = {
+    data: DatasetDataWithExamples;
     phase: DecisionPhase;
     selectedColumn?: {
         rowIndex: number;
@@ -82,6 +83,7 @@ function createDefaultDecision(data: DatasetDataWithExamples, isFinished: boolea
     });
 
     return {
+        data,
         phase: isFinished ? DecisionPhase.Finished : DecisionPhase.AnswerYesNo,
         rows,
     };

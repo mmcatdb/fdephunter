@@ -2,7 +2,7 @@ import clsx from 'clsx';
 import { useState, type ReactNode, type SetStateAction, type Dispatch, createContext, useContext, useMemo, useEffect } from 'react';
 import { TbHome, TbLayoutSidebarLeftCollapse, TbLayoutSidebarRightCollapse } from 'react-icons/tb';
 import { Button, ScrollShadow } from '@nextui-org/react';
-import { Link } from 'react-router-dom';
+import { Link, Outlet } from 'react-router-dom';
 import { routes } from '@/router';
 import { MdOutlineDarkMode, MdOutlineLightMode } from 'react-icons/md';
 import { BiCog } from 'react-icons/bi';
@@ -42,11 +42,7 @@ function useLayout(): LayoutContext {
     return context;
 }
 
-type LayoutProps = {
-    children?: ReactNode;
-};
-
-export function Layout({ children }: LayoutProps) {
+export function Layout() {
     const [ state, setState ] = useState(defaultLayoutState);
     const context = useMemo(() => ({ state, setState }), [ state, setState ]);
 
@@ -76,7 +72,7 @@ export function Layout({ children }: LayoutProps) {
                 <div id='sidebar-portal' />
 
                 <Content>
-                    {children}
+                    <Outlet />
                 </Content>
             </div>
         </layoutContext.Provider>
