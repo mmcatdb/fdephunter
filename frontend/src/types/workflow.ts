@@ -1,4 +1,3 @@
-import { type JobFromServer } from './job';
 import { type NegativeExampleInfo } from './negativeExample';
 
 export enum WorkflowState {
@@ -42,11 +41,6 @@ export type WorkflowFromServer = {
     state: WorkflowState;
     iteration: number;
 }
-
-export type WorkflowDetailFromServer = WorkflowFromServer & {
-    job?: JobFromServer;
-    classes?: ClassFromServer[];
-};
 
 export class Workflow {
     private constructor(

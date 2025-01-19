@@ -1,10 +1,14 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter } from 'react-router';
 import { LandingPage } from './pages/LandingPage';
-import { WorkflowPage } from './pages/WorkflowPage';
+import { WorkflowPage } from './pages/workflow/WorkflowPage';
 import { WorkerPage } from './pages/WorkerPage';
 import { AssignmentEvaluationPage, AssignmentGraphPage, AssignmentListPage, AssignmentPage } from './pages/AssignmentPage';
 import { ExamplePage } from './pages/ExamplePage';
 import { Layout } from './components/layout';
+import { WorkflowSettingsPage } from './pages/workflow/WorkflowSettingsPage';
+import { WorkflowJobPage } from './pages/workflow/WorkflowJobPage';
+import { ArmstrongRelationPage, WorkersDistributionPage, WorkflowDashboardPage, WorkflowDatasetPage, WorkflowGraphPage, WorkflowListPage } from './pages/workflow/WorkflowDashboardPage';
+import { WorkflowResultsPage } from './pages/workflow/WorkflowResultsPage';
 
 export class NamedRoute<T extends string = never> {
     constructor(
@@ -12,9 +16,13 @@ export class NamedRoute<T extends string = never> {
     ) {}
 
     resolve(params: Record<T, string>): string {
+        return this.resolvePartial(params as Partial<Record<T, string>>);
+    }
+
+    resolvePartial(params: Partial<Record<T, string>>): string {
         let value = this.path;
         for (const key of Object.keys(params))
-            value = value.replace(':' + key, params[key as keyof typeof params]);
+            value = value.replace(':' + key, params[key as keyof typeof params]!);
 
         return value;
     }
@@ -26,8 +34,20 @@ export const routes = {
     root: '/',
     landing: '/',
     workflow: {
+        $id: 'workflow',
         example: '/workflows/example',
-        detail: new NamedRoute<'workflowId'>('/workflows/:workflowId'),
+        root: new NamedRoute<'workflowId'>('/workflows/:workflowId'),
+        settings: new NamedRoute<'workflowId'>('/workflows/:workflowId/settings'),
+        job: new NamedRoute<'workflowId'>('/workflows/:workflowId/job'),
+        dashboard: {
+            $id: 'dashboard',
+            root: new NamedRoute<'workflowId'>('/workflows/:workflowId/dashboard'),
+            tabs: new NamedRoute<'workflowId' | 'tab'>('/workflows/:workflowId/dashboard/:tab'),
+        },
+        results: {
+            root: new NamedRoute<'workflowId'>('/workflows/:workflowId/results'),
+            tabs: new NamedRoute<'workflowId' | 'tab'>('/workflows/:workflowId/results/:tab'),
+        },
     },
     worker: {
         example: '/workers/example',
@@ -37,10 +57,7 @@ export const routes = {
         $id: 'assignment',
         example: '/assignments/example',
         root: new NamedRoute<'assignmentId'>('/assignments/:assignmentId'),
-        tabs: new NamedRoute<'assignmentId'>('/assignments/:assignmentId/:tab'),
-        evaluation: new NamedRoute<'assignmentId'>('/assignments/:assignmentId/evaluation'),
-        list: new NamedRoute<'assignmentId'>('/assignments/:assignmentId/list'),
-        graph: new NamedRoute<'assignmentId'>('/assignments/:assignmentId/graph'),
+        tabs: new NamedRoute<'assignmentId' | 'tab'>('/assignments/:assignmentId/:tab'),
     },
 };
 
@@ -54,31 +71,79 @@ export const router = createBrowserRouter([ {
         path: routes.workflow.example,
         element: <ExamplePage type='workflow' />,
     }, {
-        path: routes.workflow.detail.path,
+        path: routes.workflow.root.path,
         element: <WorkflowPage />,
+        loader: WorkflowPage.loader,
+        id: routes.workflow.$id,
+        shouldRevalidate: ({ defaultShouldRevalidate }) => defaultShouldRevalidate,
+        children: [ {
+            path: routes.workflow.settings.path,
+            element: <WorkflowSettingsPage />,
+            loader: WorkflowSettingsPage.loader,
+        }, {
+            path: routes.workflow.job.path,
+            element: <WorkflowJobPage />,
+            loader: WorkflowJobPage.loader,
+        }, {
+            path: routes.workflow.dashboard.root.path,
+            element: <WorkflowDashboardPage />,
+            loader: WorkflowDashboardPage.loader,
+            id: routes.workflow.dashboard.$id,
+            shouldRevalidate: ({ defaultShouldRevalidate }) => defaultShouldRevalidate,
+            children: [ {
+                index: true,
+                element: <WorkersDistributionPage />,
+            }, {
+                path: routes.workflow.dashboard.tabs.resolvePartial({ tab: 'armstrong-relation' }),
+                element: <ArmstrongRelationPage />,
+            }, {
+                path: routes.workflow.dashboard.tabs.resolvePartial({ tab: 'dataset' }),
+                element: <WorkflowDatasetPage />,
+            }, {
+                path: routes.workflow.dashboard.tabs.resolvePartial({ tab: 'list' }),
+                element: <WorkflowListPage />,
+            }, {
+                path: routes.workflow.dashboard.tabs.resolvePartial({ tab: 'graph' }),
+                element: <WorkflowGraphPage />,
+            } ],
+        }, {
+            path: routes.workflow.results.root.path,
+            element: <WorkflowResultsPage />,
+            children: [ {
+                path: routes.workflow.results.tabs.resolvePartial({ tab: 'dataset' }),
+                element: <WorkflowDatasetPage />,
+            }, {
+                path: routes.workflow.results.tabs.resolvePartial({ tab: 'list' }),
+                element: <WorkflowListPage />,
+            }, {
+                path: routes.workflow.results.tabs.resolvePartial({ tab: 'graph' }),
+                element: <WorkflowGraphPage />,
+            } ],
+        } ],
     }, {
         path: routes.worker.example,
         element: <ExamplePage type='worker' />,
     }, {
         path: routes.worker.detail.path,
         element: <WorkerPage />,
+        loader: WorkerPage.loader,
     }, {
         path: routes.assignment.example,
         element: <ExamplePage type='assignment' />,
     }, {
-        id: routes.assignment.$id,
         path: routes.assignment.root.path,
         element: <AssignmentPage />,
         loader: AssignmentPage.loader,
+        id: routes.assignment.$id,
         shouldRevalidate: () => false,
         children: [ {
-            path: routes.assignment.evaluation.path,
+            index: true,
             element: <AssignmentEvaluationPage />,
         }, {
-            path: routes.assignment.list.path,
+            path: routes.assignment.tabs.resolvePartial({ tab: 'list' }),
             element: <AssignmentListPage />,
         }, {
-            path: routes.assignment.graph.path,
+            path: routes.assignment.tabs.resolvePartial({ tab: 'graph' }),
             element: <AssignmentGraphPage />,
         } ],
     } ],

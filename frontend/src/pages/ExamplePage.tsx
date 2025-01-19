@@ -3,7 +3,7 @@ import { routes } from '@/router';
 import { Workflow } from '@/types/workflow';
 import { API } from '@/utils/api';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 type ExamplePageProps = {
     type: 'workflow' | 'worker' | 'assignment';
@@ -25,7 +25,7 @@ export function ExamplePage({ type }: ExamplePageProps) {
         }
 
         const workflows = response.data.map(Workflow.fromServer);
-        navigate(routes.workflow.detail.resolve({ workflowId: workflows[0].id }));
+        navigate(routes.workflow.root.resolve({ workflowId: workflows[0].id }));
     }
 
     async function findRandomWorker(signal?: AbortSignal) {
@@ -51,7 +51,7 @@ export function ExamplePage({ type }: ExamplePageProps) {
         // const assignments = response.data.map(Assignment.fromServer);
         // navigate(routes.assignment.detail.resolve({ assignmentId: assignments[0].id }));
         console.log(signal);
-        navigate(routes.assignment.evaluation.resolve({ assignmentId: '789' }));
+        navigate(routes.assignment.root.resolve({ assignmentId: '789' }));
     }
 
     useEffect(() => {

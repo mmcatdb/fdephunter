@@ -1,7 +1,7 @@
 import { API } from '@/utils/api';
 import { routes } from '@/router';
 import { Workflow } from '@/types/workflow';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router';
 import { rawAPI } from '@/utils/api/rawAPI';
 import { Button } from '@nextui-org/react';
 import { Page, TopbarContent } from '@/components/layout';
@@ -14,7 +14,7 @@ export function LandingPage() {
         if (!response.status)
             return;
 
-        navigate(routes.workflow.detail.resolve({ workflowId: Workflow.fromServer(response.data).id }));
+        navigate(routes.workflow.root.resolve({ workflowId: Workflow.fromServer(response.data).id }));
     }
 
     return (

@@ -8,7 +8,6 @@ package de.uni.passau.server.controller;
 import de.uni.passau.server.clientdto.DiscoveryJob;
 import de.uni.passau.server.clientdto.Expert;
 import de.uni.passau.server.clientdto.Workflow;
-import de.uni.passau.server.clientdto.WorkflowDetail;
 import de.uni.passau.server.controller.request.DiscoveryJobRequest;
 import de.uni.passau.server.controller.request.RediscoveryJobRequest;
 import de.uni.passau.server.workflow.model.DiscoveryJobNode;
@@ -18,8 +17,6 @@ import de.uni.passau.server.workflow.service.DiscoveryJobService;
 import de.uni.passau.server.workflow.service.ExpertService;
 import de.uni.passau.server.workflow.service.UserService;
 import de.uni.passau.server.workflow.service.WorkflowService;
-
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,15 +61,8 @@ public class WorkflowController {
     }
 
     @GetMapping("/workflows/{workflowId}")
-    public Mono<WorkflowDetail> getWorkflowDetailById(@PathVariable String workflowId) {
-        return workflowService.getWorkflowById(workflowId).flatMap(workflowNode ->
-            discoveryJobService.getLastDiscoveryByWorkflowId(workflowId).map(Optional::of).switchIfEmpty(Mono.just(Optional.empty()))
-                .flatMap(optionalJobNode ->
-                    workflowService.getClassesForWorkflow(workflowId).collectList().map(classGroups ->
-                        WorkflowDetail.fromNodes(workflowNode, classGroups, optionalJobNode.orElse(null))
-                    )
-                )
-        );
+    public Mono<Workflow> getWorkflowById(@PathVariable String workflowId) {
+        return workflowService.getWorkflowById(workflowId).map(Workflow::fromNodes);
     }
 
     @PostMapping("/workflows/create")

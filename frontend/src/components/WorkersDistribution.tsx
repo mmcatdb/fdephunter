@@ -5,24 +5,26 @@ import { Worker } from '@/types/worker';
 import { Workflow, type WorkflowStats, type Class } from '@/types/workflow';
 import { API } from '@/utils/api';
 import { IoIosCheckmarkCircleOutline, IoIosCloseCircleOutline } from 'react-icons/io';
-import { useApproaches, useUsers, useWorkers } from '@/hooks';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router';
 import { ExampleState } from '@/types/negativeExample';
 import { type IconType } from 'react-icons/lib';
 import { IoReloadCircleOutline, IoStopCircleOutline } from 'react-icons/io5';
 import { Button, Card, CardBody, CardFooter, CardHeader, Divider, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem, type SharedSelection } from '@nextui-org/react';
-import { nameToOption } from '@/pages/InitialSettings';
 import { type Approach } from '@/types/approach';
 import { Job } from '@/types/job';
 
 type WorkersDistributionProps = {
     workflow: Workflow;
+    users: User[];
+    workers: Worker[];
+    onWorkerCreated: (worker: Worker) => void;
+    approaches: Approach[];
     classes: Class[];
     onNextStep: (workflow: Workflow, job: Job) => void;
 };
 
-export function WorkersDistribution({ workflow, classes, onNextStep }: WorkersDistributionProps) {
-    const canGoNext = useMemo(() => {
+export function WorkersDistribution({ workflow, users, workers, onWorkerCreated, approaches, classes, onNextStep }: WorkersDistributionProps) {
+    const canContinue = useMemo(() => {
         const acceptedClasses = classes.filter(c => c.example && c.example.state === ExampleState.Accepted);
         return classes.length === acceptedClasses.length;
     }, [ classes ]);
@@ -50,7 +52,7 @@ export function WorkersDistribution({ workflow, classes, onNextStep }: WorkersDi
             <div>
                 <WorkflowStatsCard stats={MOCK_WORKFLOW_STATS} />
                 <div className='mt-3'>
-                    <WorkersOverviewCard />
+                    <WorkersOverviewCard users={users} workers={workers} onWorkerCreated={onWorkerCreated} />
                 </div>
             </div>
 
@@ -59,13 +61,17 @@ export function WorkersDistribution({ workflow, classes, onNextStep }: WorkersDi
             </div>
 
             <div className='mt-10 col-span-2 flex justify-end'>
-                <Button color='primary' onPress={() => setShowModal(true)} isDisabled={!canGoNext}>
-                    Go next
+                <Button color='primary' onPress={() => setShowModal(true)} isDisabled={!canContinue}>
+                    Continue
                 </Button>
             </div>
 
             <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
-                <RediscoveryFormModal onSubmit={runRediscovery} fetching={fetching} />
+                <RediscoveryFormModal
+                    approaches={approaches}
+                    onSubmit={runRediscovery}
+                    fetching={fetching}
+                />
             </Modal>
         </div>
     );
@@ -78,15 +84,13 @@ const MOCK_WORKFLOW_STATS: WorkflowStats = {
     examplesNegative: 256,
 };
 
-function WorkersOverviewCard() {
-    const { workflowId } = useParams() as NamedParams<typeof routes.workflow.detail>;
+type WorkersOverviewCardProps = {
+    users: User[];
+    workers: Worker[];
+    onWorkerCreated: (worker: Worker) => void;
+};
 
-    const { workers, setWorkers } = useWorkers(workflowId);
-
-    function workerCreated(worker: Worker) {
-        setWorkers([ ...workers, worker ]);
-    }
-
+function WorkersOverviewCard({ users, workers, onWorkerCreated }: WorkersOverviewCardProps) {
     return (
         <Card>
             <CardHeader>
@@ -102,7 +106,7 @@ function WorkersOverviewCard() {
             <Divider />
 
             <CardFooter className='gap-6'>
-                <AddWorker workers={workers} onCreated={workerCreated} />
+                <AddWorker users={users} workers={workers} onCreated={onWorkerCreated} />
             </CardFooter>
         </Card>
     );
@@ -133,17 +137,17 @@ function WorkersTable({ workers }: WorkersTableProps) {
 }
 
 type AddWorkerProps = {
+    users: User[];
     workers: Worker[];
     onCreated: (worker: Worker) => void;
 };
 
-function AddWorker({ workers, onCreated }: AddWorkerProps) {
-    const users = useUsers();
+function AddWorker({ users, workers, onCreated }: AddWorkerProps) {
     const [ selectedUser, setSelectedUser ] = useState(new Set<string>());
-    const userOptions = useMemo(() => users?.filter(user => !workers.some(worker => worker.user.id === user.id)).map(userToOption), [ users, workers ]);
+    const userOptions = useMemo(() => users.filter(user => !workers.some(worker => worker.user.id === user.id)).map(userToOption), [ users, workers ]);
     const [ fetching, setFetching ] = useState(false);
 
-    const { workflowId } = useParams() as NamedParams<typeof routes.workflow.detail>;
+    const { workflowId } = useParams() as NamedParams<typeof routes.workflow.root>;
 
     async function submit() {
         const selectedUserId = selectedUser.values().next().value;
@@ -162,9 +166,6 @@ function AddWorker({ workers, onCreated }: AddWorkerProps) {
         onCreated(Worker.fromServer(response.data));
         setSelectedUser(new Set());
     }
-
-    if (!userOptions)
-        return null;
 
     return (<>
         <Select
@@ -239,8 +240,6 @@ type ClassStatsCardProps = {
 };
 
 function ClassStatsCard({ classes }: ClassStatsCardProps) {
-    console.log(classes);
-
     return (
         <Card>
             <CardHeader>
@@ -297,29 +296,23 @@ const exampleStateData: {
 };
 
 type RediscoveryFormModalProps = {
+    approaches: Approach[];
     onSubmit: (approach: Approach) => void;
     fetching?: boolean;
 };
 
-function RediscoveryFormModal({ onSubmit, fetching }: RediscoveryFormModalProps) {
-    const availableApproaches = useApproaches();
+function RediscoveryFormModal({ approaches, onSubmit, fetching }: RediscoveryFormModalProps) {
     const [ selectedApproach, setSelectedApproach ] = useState(new Set<string>());
-    const approachOptions = useMemo(() => availableApproaches?.map(a => nameToOption(a.name)), [ availableApproaches ]);
+    const approachOptions = useMemo(() => approaches.map(a => nameToOption(a.name)), [ approaches ]);
 
     function submit() {
-        if (!availableApproaches)
-            return;
-
         const selectedApproachName = selectedApproach.values().next().value;
-        const approach = availableApproaches.find(a => a.name === selectedApproachName);
+        const approach = approaches.find(a => a.name === selectedApproachName);
         if (!approach)
             return;
 
         onSubmit(approach);
     }
-
-    if (!approachOptions)
-        return null;
 
     return (
         <ModalContent>
@@ -352,4 +345,11 @@ function RediscoveryFormModal({ onSubmit, fetching }: RediscoveryFormModalProps)
             </ModalFooter>
         </ModalContent>
     );
+}
+
+function nameToOption(name: string): Option {
+    return {
+        key: name,
+        label: name,
+    };
 }

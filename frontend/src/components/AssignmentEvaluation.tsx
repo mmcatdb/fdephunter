@@ -1,7 +1,7 @@
 import { DecisionPhase, useDecisionContext } from '@/context/DecisionProvider';
 import { DecisionStatus } from '@/types/decision';
 import { type ReactNode, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { TiPlus } from 'react-icons/ti';
 import { IoClose } from 'react-icons/io5';
 import { routes } from '@/router';
@@ -10,7 +10,7 @@ import { type Assignment } from '@/types/assignment';
 import { API } from '@/utils/api';
 import { TbPointFilled } from 'react-icons/tb';
 import { Button, Card, CardBody, CardFooter, CardHeader } from '@nextui-org/react';
-import { ExampleRelationDisplay } from './dataset/ArmstrongRelationView';
+import { ExampleRelationDisplay } from './dataset/ArmstrongRelationDisplay';
 
 type AssignmentEvaluationProps = {
     assignment: Assignment;

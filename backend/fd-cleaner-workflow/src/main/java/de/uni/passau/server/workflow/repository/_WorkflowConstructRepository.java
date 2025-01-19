@@ -17,7 +17,7 @@ import reactor.core.publisher.Mono;
  * @author pavel.koupil
  */
 public interface _WorkflowConstructRepository extends ReactiveNeo4jRepository<_WorkflowConstruct, Long> {
-    
+
     @Query("""
         MATCH (workflow:Workflow {id: $workflowId})
         with workflow
@@ -57,7 +57,7 @@ public interface _WorkflowConstructRepository extends ReactiveNeo4jRepository<_W
                 content: nex.content
             }) AS decisions
         """)
-    public Mono<_WorkflowConstruct> getWorkflowDetail(@Param("workflowId") String workflowId);
+    public Mono<_WorkflowConstruct> getWorkflow(@Param("workflowId") String workflowId);
 
 //    MATCH (workflow:Workflow {id: $workflowId})
 //OPTIONAL MATCH (workflow)-[:HAS_ASSIGNED_DATASET]->(dataset:Dataset)
@@ -94,5 +94,5 @@ public interface _WorkflowConstructRepository extends ReactiveNeo4jRepository<_W
 //        ]
 //    }) AS decisions
 
-    
+
 }

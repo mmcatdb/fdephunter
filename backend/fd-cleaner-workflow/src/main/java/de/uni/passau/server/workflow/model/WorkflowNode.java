@@ -1,8 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
 package de.uni.passau.server.workflow.model;
 
 import org.springframework.data.neo4j.core.schema.GeneratedValue;
@@ -19,12 +14,16 @@ import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
 public class WorkflowNode {
 
     public static enum WorkflowState {
-        // TODO,
-        INITIAL, /* vytvoreno workflow a ceka se na zadani info o datasetu a approach */
-        INITIAL_JOB_WAITING, /* bezi proces, prvni discovery job */
-        WORKER_ASSIGNMENT, /* mame vysledek discovery procesu a prirazujeme workery -- je totez jako PENDING_ASSIGNMENT */
-        JOB_WAITING, /* bezi proces, dalsi faze discovery */
-        FINAL /* mame vysledek */;
+        /** Workflow is created, now we wait for the user to select dataset(s) and approach. */
+        INITIAL,
+        /** Wait for the initial discovery job. */
+        INITIAL_JOB_WAITING,
+        /** The initial discovery job is finished, now we wait for the user to distribute the negative examples and for the workers to finish their evaluation. */
+        WORKER_ASSIGNMENT,
+        /** Wait for the rediscovery job. */
+        JOB_WAITING,
+        /** We have the results. */
+        FINAL;
     }
 
     @Id @GeneratedValue(UUIDStringGenerator.class)

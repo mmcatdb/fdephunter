@@ -1,42 +1,10 @@
-import { type ExampleRelation, MOCK_ARMSTRONG_RELATION, type ArmstrongRelation, type ExampleRow } from '@/types/armstrongRelation';
-import { Button, Card, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from '@nextui-org/react';
-import { ColumnNameBadge } from './FDListView';
+import { type ExampleRelation, type ArmstrongRelation, type ExampleRow } from '@/types/armstrongRelation';
+import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from '@nextui-org/react';
+import { ColumnNameBadge } from './FDListDisplay';
 import clsx from 'clsx';
-import { type Key, useCallback, useMemo, useState } from 'react';
+import { type Key, useState } from 'react';
 import { BiCollapseHorizontal, BiExpandHorizontal } from 'react-icons/bi';
 import { ExampleStateIcon } from '../WorkersDistribution';
-import { useWorkers } from '@/hooks';
-import { type Worker } from '@/types/worker';
-import { useParams } from 'react-router-dom';
-import { type NamedParams, type routes } from '@/router';
-
-export function ArmstrongRelationView() {
-    const { workflowId } = useParams() as NamedParams<typeof routes.workflow.detail>;
-    const { workers, setWorkers } = useWorkers(workflowId);
-
-    // FIXME Use real relation.
-    const [ relation, setRelation ] = useState<ArmstrongRelation>(MOCK_ARMSTRONG_RELATION);
-
-    // FIXME Synchronize with backend.
-    const assignWorker = useCallback((rowIndex: number, workerId: string) => {
-        setRelation(prev => ({
-            ...prev,
-            exampleRows: prev.exampleRows.map((row, i) => i === rowIndex ? { ...row, workerId } : row),
-        }));
-    }, []);
-
-    const workerOptions = useMemo(() => workers.map(workerToOption), [ workers ]);
-    if (!workerOptions)
-        return null;
-
-    return (
-        <div className='flex flex-col items-start'>
-            <Card className='p-4 max-w-full'>
-                <ArmstrongRelationDisplay relation={relation} workerOptions={workerOptions} assignWorker={assignWorker} />
-            </Card>
-        </div>
-    );
-}
 
 type GridState = {
     isProgressCollapsed?: boolean;
@@ -242,17 +210,10 @@ function WorkerDropdown({ workerOptions, selectWorker }: WorkerDropdownProps) {
     );
 }
 
-type WorkerOption = {
+export type WorkerOption = {
     key: string;
     label: string;
 };
-
-function workerToOption(worker: Worker): WorkerOption {
-    return {
-        key: worker.id,
-        label: worker.user.name,
-    };
-}
 
 type ExampleRelationDisplayProps = {
     relation: ExampleRelation;

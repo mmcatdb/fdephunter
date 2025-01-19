@@ -1,7 +1,7 @@
 import type { Empty, StringLike } from '@/types/api/routes';
 import { GET, POST } from '../routeFunctions';
 import type { ExecuteDiscoveryParams, ExecuteRediscoveryParams, JobFromServer } from '@/types/job';
-import { type WorkflowFromServer, type WorkflowDetailFromServer, type ClassFromServer } from '@/types/workflow';
+import { type WorkflowFromServer, type ClassFromServer } from '@/types/workflow';
 import { type JobResultFromServer } from '@/types/jobResult';
 import { type WorkerFromServer } from '@/types/worker';
 
@@ -18,7 +18,7 @@ export const workflows = {
     create: POST<Empty, WorkflowFromServer, Empty>(
         () => `/workflows/create`,
     ),
-    get: GET<{ workflowId: StringLike }, WorkflowDetailFromServer>(
+    get: GET<{ workflowId: StringLike }, WorkflowFromServer>(
         u => `/workflows/${u.workflowId}`,
     ),
     getAll: GET<Empty, WorkflowFromServer[]>(

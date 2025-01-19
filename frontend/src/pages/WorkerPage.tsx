@@ -1,44 +1,33 @@
 import { AssignmentVerdictLabel } from '@/components/AssignmentVerdictLabel';
 import { Page } from '@/components/layout';
-import { useAnsweredAssignments, useWorker } from '@/hooks';
-import { routes, type NamedParams } from '@/router';
-import { WorkerState, type Worker, type WorkerFromServer } from '@/types/worker';
+import { routes } from '@/router';
+import { type AssignmentInfo } from '@/types/assignment';
+import { Worker, WorkerState } from '@/types/worker';
 import { API } from '@/utils/api';
 import { Button, Spinner } from '@nextui-org/react';
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, type Params, useLoaderData, useNavigate, useRevalidator } from 'react-router';
+
+const REFRESH_TIMEOUT = 2000; // in ms
 
 export function WorkerPage() {
-    const { workerId } = useParams() as NamedParams<typeof routes.worker.detail>;
-    const { worker, reload } = useWorker(workerId);
+    const { worker, answeredAssignments } = useLoaderData<WorkerLoaded>();
+    const revalidator = useRevalidator();
 
-    if (!worker)
-        return null;
-
-    return (
-        <WorkerReady worker={worker} reload={reload} />
-    );
-}
-
-type WorkerReadyProps = {
-    worker: Worker;
-    reload: (nextValue?: WorkerFromServer) => void;
-};
-
-function WorkerReady({ worker, reload }: WorkerReadyProps) {
     const navigate = useNavigate();
     const [ fetchingAccept, setFetchingAccept ] = useState(false);
     const [ fetchingReject, setFetchingReject ] = useState(false);
-    const answeredAssignments = useAnsweredAssignments(worker.id);
 
     useEffect(() => {
         if (worker.state !== WorkerState.Idle)
             return;
 
-        const interval = setInterval(() => reload(), 2000);
+        const interval = setInterval(() => {
+            void revalidator.revalidate();
+        }, REFRESH_TIMEOUT);
 
         return () => clearInterval(interval);
-    }, [ worker.state, reload ]);
+    }, [ worker.state, revalidator ]);
 
     async function workerAccepted() {
         setFetchingAccept(true);
@@ -47,7 +36,7 @@ function WorkerReady({ worker, reload }: WorkerReadyProps) {
         if (!response.status)
             return;
 
-        reload(response.data);
+        await revalidator.revalidate();
     }
 
     async function workerRejected() {
@@ -57,12 +46,12 @@ function WorkerReady({ worker, reload }: WorkerReadyProps) {
         if (!response.status)
             return;
 
-        reload(response.data);
+        await revalidator.revalidate();
     }
 
     function goToAssignment() {
         if (worker.assignment)
-            navigate(routes.assignment.evaluation.resolve({ assignmentId: worker.assignment.id }));
+            void navigate(routes.assignment.root.resolve({ assignmentId: worker.assignment.id }));
     }
 
     return (
@@ -138,8 +127,8 @@ function WorkerReady({ worker, reload }: WorkerReadyProps) {
                     <div className='text-start'>
                         {answeredAssignments.map(assignment => (
                             <div key={assignment.id} className='flex justify-between'>
-                                <Link to={routes.assignment.evaluation.resolve({ assignmentId: assignment.id })} className='mr-4'>
-                                    {routes.assignment.evaluation.resolve({ assignmentId: assignment.id })}
+                                <Link to={routes.assignment.root.resolve({ assignmentId: assignment.id })} className='mr-4'>
+                                    {routes.assignment.root.resolve({ assignmentId: assignment.id })}
                                 </Link>
                                 <span>(<AssignmentVerdictLabel verdict={assignment.verdict} />)</span>
                             </div>
@@ -150,3 +139,27 @@ function WorkerReady({ worker, reload }: WorkerReadyProps) {
         </Page>
     );
 }
+
+type WorkerLoaded = {
+    worker: Worker;
+    answeredAssignments: AssignmentInfo[];
+};
+
+WorkerPage.loader = async ({ params: { workerId } }: { params: Params<'workerId'> }): Promise<WorkerLoaded> => {
+    if (!workerId)
+        throw new Error('Missing worker ID');
+
+    const [ workerResponse, assignmentsResponse ] = await Promise.all([
+        API.workers.get(undefined, { workerId }),
+        API.assignments.getAllAnswered(undefined, { workerId }),
+    ]);
+    if (!workerResponse.status)
+        throw new Error('Failed to load worker');
+    if (!assignmentsResponse.status)
+        throw new Error('Failed to load answered assignments');
+
+    return {
+        worker: Worker.fromServer(workerResponse.data),
+        answeredAssignments: assignmentsResponse.data,
+    };
+};

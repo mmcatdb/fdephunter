@@ -3,23 +3,6 @@ import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from 
 import { DecisionPhase, type DecisionState, useDecisionContext, useTryDecisionContext } from '@/context/DecisionProvider';
 import type { DatasetRow, DatasetDataWithExamples, DatasetData } from '@/types/dataset';
 import clsx from 'clsx';
-import { useWorkflowData } from '@/hooks';
-
-type DatasetTableViewProps = {
-    workflowId: string;
-};
-
-export function DatasetTableView({ workflowId }: DatasetTableViewProps) {
-    const data = useWorkflowData(workflowId);
-
-    if (!data)
-        return null;
-
-    return (
-        <DatasetTable data={data} />
-    );
-}
-
 
 type DatasetTableProps = {
     data: DatasetData | DatasetDataWithExamples;

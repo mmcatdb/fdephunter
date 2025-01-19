@@ -2,20 +2,6 @@ import type { FDEdge, FDGraph } from '@/types/FD';
 import { cn } from '@nextui-org/react';
 import { FaArrowRight } from 'react-icons/fa';
 
-type FDListViewProps = {
-    graph?: FDGraph;
-};
-
-export function FDListView({ graph }: FDListViewProps) {
-    if (!graph)
-        return null;
-
-    return (
-        <FDListDisplay graph={graph} />
-    );
-}
-
-
 type FDListDisplayProps = {
     graph: FDGraph;
 };

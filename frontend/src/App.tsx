@@ -1,13 +1,8 @@
 import { router } from './router';
-import { RouterProvider } from 'react-router-dom';
+import { RouterProvider } from 'react-router';
 
 export function App() {
     return (
-        <RouterProvider router={router} future={future}/>
+        <RouterProvider router={router} />
     );
 }
-
-const future = {
-    v7_relativeSplatPath: true,
-    v7_startTransition: true,
-} as const;
