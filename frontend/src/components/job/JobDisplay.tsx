@@ -1,7 +1,6 @@
 import { JobState, type Job } from '@/types/job';
 import { type IconType } from 'react-icons/lib';
-import { IoReloadCircleOutline, IoStopCircleOutline } from 'react-icons/io5';
-import { IoIosCloseCircleOutline, IoIosCheckmarkCircleOutline } from 'react-icons/io';
+import { IoCloseCircleOutline, IoCheckmarkCircleOutline, IoReloadCircleOutline, IoStopCircleOutline } from 'react-icons/io5';
 import { displayPercent } from '@/utils/common';
 import { Card, CardBody, CardHeader } from '@nextui-org/react';
 
@@ -48,6 +47,6 @@ const jobStateData: {
 } = {
     [JobState.Waiting]: { color: 'text-warning', icon: IoStopCircleOutline, label: 'Waiting' },
     [JobState.Running]: { color: 'text-primary', icon: IoReloadCircleOutline, label: 'Running' },
-    [JobState.Pending]: { color: 'text-danger', icon: IoIosCloseCircleOutline, label: 'Pending' },
-    [JobState.Finished]: { color: 'text-success', icon: IoIosCheckmarkCircleOutline, label: 'Finished' },
+    [JobState.Pending]: { color: 'text-danger', icon: IoCloseCircleOutline, label: 'Pending' },
+    [JobState.Finished]: { color: 'text-success', icon: IoCheckmarkCircleOutline, label: 'Finished' },
 };

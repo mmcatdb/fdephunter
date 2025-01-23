@@ -4,11 +4,10 @@ import { type User } from '@/types/user';
 import { Worker } from '@/types/worker';
 import { Workflow, type WorkflowStats, type Class } from '@/types/workflow';
 import { API } from '@/utils/api';
-import { IoIosCheckmarkCircleOutline, IoIosCloseCircleOutline } from 'react-icons/io';
 import { Link, useParams } from 'react-router';
 import { ExampleState } from '@/types/negativeExample';
 import { type IconType } from 'react-icons/lib';
-import { IoReloadCircleOutline, IoStopCircleOutline } from 'react-icons/io5';
+import { IoCheckmarkCircleOutline, IoCloseCircleOutline, IoReloadCircleOutline, IoStopCircleOutline } from 'react-icons/io5';
 import { Button, Card, CardBody, CardFooter, CardHeader, Divider, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem, type SharedSelection } from '@nextui-org/react';
 import { type Approach } from '@/types/approach';
 import { Job } from '@/types/job';
@@ -147,7 +146,7 @@ function AddWorker({ users, workers, onCreated }: AddWorkerProps) {
     const userOptions = useMemo(() => users.filter(user => !workers.some(worker => worker.user.id === user.id)).map(userToOption), [ users, workers ]);
     const [ fetching, setFetching ] = useState(false);
 
-    const { workflowId } = useParams() as NamedParams<typeof routes.workflow.root>;
+    const { workflowId } = useParams() as NamedParams<typeof routes.workflow.dashboard.root>;
 
     async function submit() {
         const selectedUserId = selectedUser.values().next().value;
@@ -282,17 +281,15 @@ export function ExampleStateIcon({ state, size = 24 }: ExampleStateIconProps) {
     );
 }
 
-const exampleStateData: {
-    [key in ExampleState]: {
-        color: string;
-        icon: IconType;
-    }
-} = {
-    [ExampleState.New]: { icon: IoReloadCircleOutline, color: 'text-primary' },
-    [ExampleState.Rejected]: { icon: IoIosCloseCircleOutline, color: 'text-danger' },
-    [ExampleState.Accepted]: { icon: IoIosCheckmarkCircleOutline, color: 'text-success' },
-    [ExampleState.Answered]: { icon: IoReloadCircleOutline, color: 'text-primary' },
-    [ExampleState.Conflict]: { icon: IoStopCircleOutline, color: 'text-warning' },
+const exampleStateData: Record<ExampleState, {
+    color: string;
+    icon: IconType;
+}> = {
+    [ExampleState.New]: { color: 'text-primary', icon: IoReloadCircleOutline },
+    [ExampleState.Rejected]: { color: 'text-danger', icon: IoCloseCircleOutline },
+    [ExampleState.Accepted]: { color: 'text-success', icon: IoCheckmarkCircleOutline },
+    [ExampleState.Answered]: { color: 'text-primary', icon: IoReloadCircleOutline },
+    [ExampleState.Conflict]: { color: 'text-warning', icon: IoStopCircleOutline },
 };
 
 type RediscoveryFormModalProps = {

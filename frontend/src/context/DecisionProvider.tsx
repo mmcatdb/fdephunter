@@ -1,17 +1,17 @@
 import { createContext, type Dispatch, type ReactNode, type SetStateAction, useContext, useState } from 'react';
-import { type DatasetDataWithExamples } from '@/types/dataset';
+import { type ExampleRelation } from '@/types/armstrongRelation';
+
+export enum ColumnState {
+    Undecided = 'undecided',
+    Valid = 'valid',
+    Invalid = 'invalid',
+}
 
 export type DecisionColumn = {
-    id: string;
-    index: number;
+    colIndex: number;
     name: string;
-    value: string;
+    state?: ColumnState;
     reasons: string[];
-};
-
-export type DecisionRow = {
-    index: number;
-    columns: DecisionColumn[];
 };
 
 export enum DecisionPhase {
@@ -21,17 +21,12 @@ export enum DecisionPhase {
     Finished = 'finished',
 }
 
-export type DecisionState = {
-    data: DatasetDataWithExamples;
+type DecisionState = {
     phase: DecisionPhase;
-    selectedColumn?: {
-        rowIndex: number;
-        colIndex: number;
-    };
-    rows: DecisionRow[];
+    columns: DecisionColumn[];
 };
 
-export type DecisionContext = {
+type DecisionContext = {
     decision: DecisionState;
     setDecision: Dispatch<SetStateAction<DecisionState>>;
 };
@@ -40,12 +35,12 @@ const decisionContext = createContext<DecisionContext | undefined>(undefined);
 
 type DecisionProviderProps = {
     children: ReactNode;
-    data: DatasetDataWithExamples;
+    relation: ExampleRelation;
     isFinished: boolean;
 };
 
-export function DecisionProvider({ children, data, isFinished }: DecisionProviderProps) {
-    const [ decision, setDecision ] = useState<DecisionState>(createDefaultDecision(data, isFinished));
+export function DecisionProvider({ children, relation, isFinished }: DecisionProviderProps) {
+    const [ decision, setDecision ] = useState<DecisionState>(createDefaultDecision(relation, isFinished));
 
     return (
         <decisionContext.Provider value={{ decision, setDecision }}>
@@ -62,29 +57,17 @@ export function useDecisionContext(): DecisionContext {
     return context;
 }
 
-export function useTryDecisionContext(): DecisionContext | undefined {
-    return useContext(decisionContext);
-}
-
-function createDefaultDecision(data: DatasetDataWithExamples, isFinished: boolean): DecisionState {
-    const rows = (data.examples ?? []).map((row, rowIndex) => {
-        const columns = row.map((column, colIndex) => ({
-            id: `${rowIndex}_${colIndex}`,
-            index: colIndex,
-            name: data.header[colIndex],
-            value: column,
-            reasons: [] as string[],
-        }));
-
-        return {
-            index: rowIndex,
-            columns,
-        };
-    });
+function createDefaultDecision(relation: ExampleRelation, isFinished: boolean): DecisionState {
+    console.log({ relation });
+    const columns = relation.columns.map((name, colIndex) => ({
+        colIndex,
+        name,
+        state: relation.exampleRow.maximalSet.includes(colIndex) ? undefined : ColumnState.Undecided,
+        reasons: [],
+    }));
 
     return {
-        data,
         phase: isFinished ? DecisionPhase.Finished : DecisionPhase.AnswerYesNo,
-        rows,
+        columns,
     };
 }

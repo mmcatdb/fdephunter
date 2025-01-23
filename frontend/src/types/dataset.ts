@@ -1,5 +1,3 @@
-import { type Assignment } from './assignment';
-
 enum DatasetType {
     Csv = 'CSV',
     Json = 'JSON',
@@ -47,16 +45,3 @@ export type DatasetData = {
     header: DatasetHeader;
     rows: DatasetRow[];
 };
-
-export type DatasetDataWithExamples = DatasetData & {
-    examples: DatasetRow[]; // TODO remove
-}
-
-export function createDataWithExamples(assignment: Assignment): DatasetDataWithExamples {
-    const dataset = assignment.dataset;
-
-    return {
-        ...dataset,
-        examples: [ assignment.example.toRow(dataset.header) ],
-    };
-}

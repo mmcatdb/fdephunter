@@ -25,7 +25,7 @@ export function ExamplePage({ type }: ExamplePageProps) {
         }
 
         const workflows = response.data.map(Workflow.fromServer);
-        navigate(routes.workflow.root.resolve({ workflowId: workflows[0].id }));
+        navigate(routes.workflow.settings.resolve({ workflowId: workflows[0].id }));
     }
 
     async function findRandomWorker(signal?: AbortSignal) {

@@ -1,10 +1,14 @@
 import { type ExampleRelation, type ArmstrongRelation, type ExampleRow } from '@/types/armstrongRelation';
 import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from '@nextui-org/react';
 import { ColumnNameBadge } from './FDListDisplay';
-import clsx from 'clsx';
-import { type Key, useState } from 'react';
+import clsx, { type ClassValue } from 'clsx';
+import { type Dispatch, type Key, useState } from 'react';
 import { BiCollapseHorizontal, BiExpandHorizontal } from 'react-icons/bi';
 import { ExampleStateIcon } from '../WorkersDistribution';
+import { ExampleState } from '@/types/negativeExample';
+import { IoCheckmark, IoClose, IoHelp } from 'react-icons/io5';
+import { ColumnState, useDecisionContext } from '@/context/DecisionProvider';
+import { type IconType } from 'react-icons';
 
 type GridState = {
     isProgressCollapsed?: boolean;
@@ -83,7 +87,7 @@ export function ArmstrongRelationDisplay({ relation, workerOptions, assignWorker
             {relation.exampleRows.map((row, rowIndex) => (
                 <ExampleRowDisplay
                     key={rowIndex}
-                    columns={relation.columns}
+                    relation={relation}
                     row={row}
                     rowIndex={rowIndex}
                     workerOptions={workerOptions}
@@ -94,13 +98,15 @@ export function ArmstrongRelationDisplay({ relation, workerOptions, assignWorker
         </div>
     );
 }
-function getCellClass(rowIndex: number, colIndex: number, isHighlighted?: boolean) {
+
+function getCellClass(rowIndex: number, colIndex: number, isHighlighted?: boolean, ...rest: ClassValue[]) {
     const bgClass = rowIndex % 2 === 0 ? 'bg-content1' : 'bg-content2';
     return clsx(
         'p-2 leading-5 align-top max-w-xl break-words',
         bgClass,
         colIndex !== 0 && 'border-l border-foreground-500',
         isHighlighted && 'text-primary font-semibold',
+        ...rest,
     );
 }
 
@@ -134,7 +140,7 @@ function ReferenceRowDisplay({ row }: ReferenceRowDisplayProps) {
 }
 
 type ExampleRowDisplayProps = {
-    columns: string[];
+    relation: ArmstrongRelation;
     row: ExampleRow;
     rowIndex: number;
     workerOptions: WorkerOption[];
@@ -142,24 +148,36 @@ type ExampleRowDisplayProps = {
     gridState: GridState;
 };
 
-function ExampleRowDisplay({ columns, row, rowIndex, workerOptions, assignWorker, gridState }: ExampleRowDisplayProps) {
-    const maximalSetCols = row.maximalSet.map(index => columns[index]);
+function ExampleRowDisplay({ relation, row, rowIndex, workerOptions, assignWorker, gridState }: ExampleRowDisplayProps) {
+    const maximalSetCols = row.maximalSet.map(index => relation.columns[index]);
     const exampleBgClass = row.isNegative ? 'bg-warning-400' : 'bg-danger-400';
     const { leftClass, rightClass } = getSpecialCellClasses(rowIndex);
 
     const worker = workerOptions.find(w => w.key === row.workerId);
+    const isEvaluationAllowed = row.isNegative || relation.isPositivesAllowed;
+
+    function evaluateExample() {
+        // FIXME
+        console.warn('TODO Evaluate example');
+    }
 
     return (<>
         <div className={leftClass}>
             <ExampleStateIcon state={row.state} size={20} />
 
-            {!gridState.isProgressCollapsed && (
-                worker ? (
+            {isEvaluationAllowed && !gridState.isProgressCollapsed && (<>
+                {worker ? (
                     <span className='font-semibold'>{worker.label}</span>
                 ) : (
                     <WorkerDropdown workerOptions={workerOptions} selectWorker={key => assignWorker(rowIndex, key as string)} />
-                )
-            )}
+                )}
+
+                {row.state === ExampleState.New && (
+                    <Button size='sm' className='h-6' disableAnimation onPress={evaluateExample}>
+                        Evaluate
+                    </Button>
+                )}
+            </>)}
         </div>
 
         {row.values.map((value, colIndex) => (
@@ -217,11 +235,12 @@ export type WorkerOption = {
 
 type ExampleRelationDisplayProps = {
     relation: ExampleRelation;
+    selectedColIndex: number | undefined;
+    setSelectedColIndex?: Dispatch<number | undefined>;
 };
 
-export function ExampleRelationDisplay({ relation: { columns, referenceRow, exampleRow } }: ExampleRelationDisplayProps) {
-    const maximalSetCols = exampleRow.maximalSet.map(index => columns[index]);
-    const exampleBgClass = exampleRow.isNegative ? 'bg-warning-400' : 'bg-danger-400';
+export function ExampleRelationDisplay({ relation: { columns, referenceRow, exampleRow }, selectedColIndex, setSelectedColIndex }: ExampleRelationDisplayProps) {
+    const { decision } = useDecisionContext();
 
     return (
         <div
@@ -240,19 +259,41 @@ export function ExampleRelationDisplay({ relation: { columns, referenceRow, exam
                 </div>
             ))}
 
-            {exampleRow.values.map((value, colIndex) => (
-                <div key={colIndex} className={getCellClass(0, colIndex, exampleRow.maximalSet.includes(colIndex))}>
-                    {value}
-                </div>
-            ))}
+            {exampleRow.values.map((value, colIndex) => {
+                const state = decision.columns[colIndex].state;
 
-            <div className='col-span-full'>
-                <div title={maximalSetCols.join(', ')} className='max-w-80 px-2 py-[10px] flex flex-wrap gap-x-2 gap-y-1'>
-                    {maximalSetCols.map(col => (
-                        <ColumnNameBadge key={col} name={col} className={exampleBgClass} />
-                    ))}
-                </div>
-            </div>
+                // If the selection function isn't provided, the cells aren't interactive. Also, if the state isn't defined, the cell is in the maximal set.
+                if (!setSelectedColIndex || !state) {
+                    return (
+                        <div key={colIndex} className={getCellClass(0, colIndex, !state)}>
+                            {value}
+                        </div>
+                    );
+                }
+
+                const { color, icon } = columnStateData[state];
+                const isSelected = colIndex === selectedColIndex;
+
+                return (
+                    <button
+                        key={colIndex}
+                        className={getCellClass(0, colIndex, false, 'flex justify-between gap-2 hover:bg-primary-200 active:bg-primary-300', isSelected && 'text-secondary')}
+                        onClick={() => setSelectedColIndex(isSelected ? undefined : colIndex)}
+                    >
+                        {value}
+                        {icon({ size: 20, className: color })}
+                    </button>
+                );
+            })}
         </div>
     );
 }
+
+const columnStateData: Record<ColumnState, {
+    color: string;
+    icon: IconType;
+}> = {
+    [ColumnState.Undecided]: { color: 'text-warning', icon: IoHelp },
+    [ColumnState.Valid]: { color: 'text-success', icon: IoCheckmark },
+    [ColumnState.Invalid]: { color: 'text-danger', icon: IoClose },
+};

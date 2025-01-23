@@ -1,20 +1,16 @@
 import { AssignmentEvaluation } from '@/components/AssignmentEvaluation';
 import { FDGraphDisplay } from '@/components/dataset/FDGraphDisplay';
 import { FDListDisplay } from '@/components/dataset/FDListDisplay';
-import { DecisionProvider, useDecisionContext } from '@/context/DecisionProvider';
+import { DecisionProvider } from '@/context/DecisionProvider';
 import { routes } from '@/router';
 import { Assignment } from '@/types/assignment';
-import { createDataWithExamples } from '@/types/dataset';
-import { useMemo } from 'react';
 import { Link, matchPath, Outlet, type Params, useLoaderData, useLocation, useRevalidator, useRouteLoaderData } from 'react-router';
 import { Button, Tab, Tabs } from '@nextui-org/react';
 import { Page, TopbarContent } from '@/components/layout';
-import { DatasetTable } from '@/components/dataset/DatasetTableDisplay';
 import { API } from '@/utils/api';
 
 export function AssignmentPage() {
     const { assignment } = useLoaderData<AssignmentLoaded>();
-    const data = useMemo(() => createDataWithExamples(assignment), [ assignment ]);
 
     return (<>
         <TopbarContent>
@@ -27,7 +23,7 @@ export function AssignmentPage() {
             </div>
         </TopbarContent>
 
-        <DecisionProvider data={data} isFinished={assignment.isFinished}>
+        <DecisionProvider relation={assignment.exampleRelation} isFinished={assignment.isFinished}>
             <Page>
                 <Outlet />
             </Page>
@@ -67,15 +63,10 @@ function AssignmentTabs({ assignmentId }: { assignmentId: string }) {
 
 export function AssignmentEvaluationPage() {
     const { assignment } = useRouteLoaderData<AssignmentLoaded>(routes.assignment.$id)!;
-    const { decision: { data } } = useDecisionContext();
     const revalidator = useRevalidator();
 
     return (
-        <div className='space-y-4'>
-            <DatasetTable data={data} />
-
-            <AssignmentEvaluation assignment={assignment} onEvaluated={() => revalidator.revalidate()} />
-        </div>
+        <AssignmentEvaluation assignment={assignment} onEvaluated={() => revalidator.revalidate()} />
     );
 }
 
