@@ -12,7 +12,7 @@
             <properties>
                 <exec.vmArgs></exec.vmArgs>
                 <exec.args>${exec.vmArgs} -classpath %classpath ${exec.mainClass} ${exec.appArgs}</exec.args>
-                <exec.appArgs>--server.port=8083</exec.appArgs>
+                <exec.appArgs>--server.port=5601</exec.appArgs>
                 <exec.appArgs>--server.origin=http://localhost:5600</exec.appArgs>
                 <exec.mainClass>${packageClassName}</exec.mainClass>
                 <exec.executable>java</exec.executable>
@@ -30,7 +30,7 @@
             <properties>
                 <exec.vmArgs>-agentlib:jdwp=transport=dt_socket,server=n,address=${jpda.address}</exec.vmArgs>
                 <exec.args>${exec.vmArgs} -classpath %classpath ${exec.mainClass} ${exec.appArgs}</exec.args>
-                <exec.appArgs>--server.port=8083</exec.appArgs>
+                <exec.appArgs>--server.port=5601</exec.appArgs>
                 <exec.appArgs>--server.origin=http://localhost:5600</exec.appArgs>
                 <exec.mainClass>${packageClassName}</exec.mainClass>
                 <exec.executable>java</exec.executable>
@@ -51,7 +51,7 @@
                 <exec.args>${exec.vmArgs} -classpath %classpath ${exec.mainClass} ${exec.appArgs}</exec.args>
                 <exec.mainClass>${packageClassName}</exec.mainClass>
                 <exec.executable>java</exec.executable>
-                <exec.appArgs>--server.port=8083</exec.appArgs>
+                <exec.appArgs>--server.port=5601</exec.appArgs>
                 <exec.appArgs>--server.origin=http://localhost:5600</exec.appArgs>
             </properties>
         </action>

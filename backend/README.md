@@ -2,6 +2,8 @@
 
 ## Installation
 
+- Copy the `fd-cleaner-server/src/main/resources/default.properties` file to `fd-cleaner-server/src/main/resources/application.properties` file and adjust the settings.
+
 - Create Neo4j container:
 ```bash
 docker run -d -e NEO4J_AUTH=neo4j/password -p 7474:7474 -p 7687:7687 --name=neo4j neo4j
