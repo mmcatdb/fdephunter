@@ -1,17 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    
     <parent>
         <groupId>de.uni.passau</groupId>
-        <artifactId>fd-cleaner-weight-functions</artifactId>
+        <artifactId>fd-cleaner</artifactId>
         <version>BETA</version>
     </parent>
     
-    <artifactId>function-2</artifactId>
-    <name>Function 2</name>
+    <artifactId>discovery</artifactId>
+    <packaging>pom</packaging>
     
-    <dependencies>
-        
-    </dependencies>
+    <name>FD Cleaner Discovery</name>
+    <modules>
+        <module>approach-1</module>
+        <module>approach-2</module>
+        <module>algorithm_integration</module>
+        <module>utils</module>
+    </modules>
 </project>

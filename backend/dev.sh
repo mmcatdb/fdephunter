@@ -17,6 +17,6 @@ if [ "$onlyRun" != true ] ; then
     mvn clean install -DskipTests
 fi
 
-cd fd-cleaner-server
+cd server
 mvn spring-boot:run
 #mvn spring-boot:run -Dspring-boot.run.arguments=--logging.level.de.uni.passau.server=OFF

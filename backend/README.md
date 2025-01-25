@@ -2,7 +2,7 @@
 
 ## Installation
 
-- Copy the `fd-cleaner-server/src/main/resources/default.properties` file to `fd-cleaner-server/src/main/resources/application.properties` file and adjust the settings.
+- Copy the `server/src/main/resources/default.properties` file to `server/src/main/resources/application.properties` file and adjust the settings.
 
 - Create Neo4j container:
 ```bash

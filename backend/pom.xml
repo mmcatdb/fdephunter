@@ -40,10 +40,10 @@
     </dependencies>
     
     <modules>
-        <module>fd-cleaner-core</module>
-        <module>fd-cleaner-server</module>
-        <module>fd-cleaner-crowdsourcing</module>
-        <module>fd-cleaner-discovery</module>
-        <module>fd-cleaner-weight-functions</module>
+        <module>core</module>
+        <module>server</module>
+        <module>crowdsourcing</module>
+        <module>discovery</module>
+        <module>weightfunctions</module>
     </modules>
 </project>

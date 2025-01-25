@@ -23,7 +23,7 @@ limitations under the License.
 
     <parent>
         <groupId>de.uni.passau</groupId>
-        <artifactId>fd-cleaner-discovery</artifactId>
+        <artifactId>discovery</artifactId>
         <version>BETA</version>
     </parent>
 

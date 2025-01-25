@@ -4,12 +4,12 @@
     
     <parent>
         <groupId>de.uni.passau</groupId>
-        <artifactId>fd-cleaner-weight-functions</artifactId>
+        <artifactId>weight-functions</artifactId>
         <version>BETA</version>
     </parent>
     
-    <artifactId>function-api</artifactId>
-    <name>Function API</name>
+    <artifactId>function-2</artifactId>
+    <name>Function 2</name>
     
     <dependencies>
         
