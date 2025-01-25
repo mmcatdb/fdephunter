@@ -1,0 +1,35 @@
+services:
+    neo4j:
+        container_name: "fdephunter-neo4j"
+        restart: always
+        image: neo4j
+        environment:
+            NEO4J_AUTH: neo4j/password
+        expose:
+            - 7474
+            - 7687
+
+    backend:
+        container_name: "fdephunter-backend"
+        restart: always
+        build:
+            context: backend
+            dockerfile: docker/Dockerfile
+        expose:
+            - 5601
+
+    frontend:
+        container_name: "fdephunter-frontend"
+        restart: always
+        build:
+            # Sets source directory for all COPY, ADD, etc. commands in the Dockerfile
+            context: frontend
+            # Path to the dockerfile
+            dockerfile: docker/Dockerfile
+        ports:
+            # Map localhost port to 80 in docker
+            - 5600:80
+
+networks:
+    default:
+        name: fdephunter-network
