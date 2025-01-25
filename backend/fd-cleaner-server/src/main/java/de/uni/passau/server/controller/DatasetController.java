@@ -1,14 +1,9 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
 package de.uni.passau.server.controller;
 
 import de.uni.passau.server.clientdto.DatasetData;
-import de.uni.passau.server.workflow.model.DatasetNode;
-import de.uni.passau.server.workflow.service.DatasetService;
-import de.uni.passau.server.workflow.service.WorkflowService;
+import de.uni.passau.server.model.DatasetNode;
+import de.uni.passau.server.service.DatasetService;
+import de.uni.passau.server.service.WorkflowService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,14 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-/**
- *
- * @author pavel.koupil
- */
 @RestController
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 public class DatasetController {
-    
+
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(DatasetController.class);
 

@@ -1,7 +1,7 @@
 package de.uni.passau.server.clientdto;
 
-import de.uni.passau.server.workflow.model.AssignmentNode;
-import de.uni.passau.server.workflow.model.AssignmentNode.ExpertVerdict;
+import de.uni.passau.server.model.AssignmentNode;
+import de.uni.passau.server.model.AssignmentNode.ExpertVerdict;
 
 import java.io.Serializable;
 

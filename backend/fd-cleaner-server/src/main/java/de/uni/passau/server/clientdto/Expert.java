@@ -1,10 +1,10 @@
 package de.uni.passau.server.clientdto;
 
-import de.uni.passau.server.workflow.model.AssignmentNode;
-import de.uni.passau.server.workflow.model.ExpertNode;
-import de.uni.passau.server.workflow.model.ExpertNode.ExpertState;
-import de.uni.passau.server.workflow.model.UserNode;
-import de.uni.passau.server.workflow.repository.ExpertRepository.ExpertNodeGroup;
+import de.uni.passau.server.model.AssignmentNode;
+import de.uni.passau.server.model.ExpertNode;
+import de.uni.passau.server.model.ExpertNode.ExpertState;
+import de.uni.passau.server.model.UserNode;
+import de.uni.passau.server.repository.ExpertRepository.ExpertNodeGroup;
 
 import java.io.Serializable;
 

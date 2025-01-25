@@ -1,8 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
 package de.uni.passau.server.controller;
 
 import de.uni.passau.server.clientdto.DiscoveryJob;
@@ -10,13 +5,13 @@ import de.uni.passau.server.clientdto.Expert;
 import de.uni.passau.server.clientdto.Workflow;
 import de.uni.passau.server.controller.request.DiscoveryJobRequest;
 import de.uni.passau.server.controller.request.RediscoveryJobRequest;
-import de.uni.passau.server.workflow.model.DiscoveryJobNode;
-import de.uni.passau.server.workflow.model.DiscoveryResultNode;
-import de.uni.passau.server.workflow.model.WorkflowNode;
-import de.uni.passau.server.workflow.service.DiscoveryJobService;
-import de.uni.passau.server.workflow.service.ExpertService;
-import de.uni.passau.server.workflow.service.UserService;
-import de.uni.passau.server.workflow.service.WorkflowService;
+import de.uni.passau.server.model.DiscoveryJobNode;
+import de.uni.passau.server.model.DiscoveryResultNode;
+import de.uni.passau.server.model.WorkflowNode;
+import de.uni.passau.server.service.DiscoveryJobService;
+import de.uni.passau.server.service.ExpertService;
+import de.uni.passau.server.service.UserService;
+import de.uni.passau.server.service.WorkflowService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,10 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-/**
- *
- * @author pavel.koupil
- */
 @RestController
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 public class WorkflowController {

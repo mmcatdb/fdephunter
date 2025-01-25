@@ -1,7 +1,7 @@
 package de.uni.passau.server.clientdto;
 
-import de.uni.passau.server.workflow.model.DiscoveryJobNode;
-import de.uni.passau.server.workflow.model.DiscoveryJobNode.DiscoveryJobState;
+import de.uni.passau.server.model.DiscoveryJobNode;
+import de.uni.passau.server.model.DiscoveryJobNode.DiscoveryJobState;
 
 import java.io.Serializable;
 
@@ -11,7 +11,7 @@ public record DiscoveryJob(
     String description,
     int iteration
 ) implements Serializable {
-    
+
     public static DiscoveryJob fromNodes(DiscoveryJobNode jobNode) {
         return new DiscoveryJob(
             jobNode.getId(),

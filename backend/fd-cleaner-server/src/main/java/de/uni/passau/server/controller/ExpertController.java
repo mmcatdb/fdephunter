@@ -2,8 +2,8 @@ package de.uni.passau.server.controller;
 
 import de.uni.passau.server.clientdto.Expert;
 import de.uni.passau.server.clientdto.User;
-import de.uni.passau.server.workflow.service.ExpertService;
-import de.uni.passau.server.workflow.service.UserService;
+import de.uni.passau.server.service.ExpertService;
+import de.uni.passau.server.service.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -29,7 +29,7 @@ public class ExpertController {
     public Mono<Expert> getExpert(@PathVariable String expertId) {
         return expertService.findById(expertId).map(Expert::fromNodes);
     }
-    
+
     @PostMapping("/domain-experts/{expertId}/accept")
     // dostaneme payload s duvody
     public Mono<Expert> acceptAssignment(@PathVariable String expertId) {

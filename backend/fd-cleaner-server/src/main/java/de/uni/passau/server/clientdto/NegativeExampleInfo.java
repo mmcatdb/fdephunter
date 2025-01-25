@@ -1,7 +1,7 @@
 package de.uni.passau.server.clientdto;
 
-import de.uni.passau.server.workflow.model.NegativeExampleNode;
-import de.uni.passau.server.workflow.model.NegativeExampleNode.NegativeExampleState;
+import de.uni.passau.server.model.NegativeExampleNode;
+import de.uni.passau.server.model.NegativeExampleNode.NegativeExampleState;
 
 import java.io.Serializable;
 

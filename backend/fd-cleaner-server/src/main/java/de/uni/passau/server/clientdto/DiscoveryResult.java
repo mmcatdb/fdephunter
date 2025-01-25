@@ -1,6 +1,6 @@
 package de.uni.passau.server.clientdto;
 
-import de.uni.passau.server.workflow.model.DiscoveryResultNode;
+import de.uni.passau.server.model.DiscoveryResultNode;
 
 import java.io.Serializable;
 

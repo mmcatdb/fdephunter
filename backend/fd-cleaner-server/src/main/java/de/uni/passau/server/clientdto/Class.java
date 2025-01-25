@@ -1,8 +1,8 @@
 package de.uni.passau.server.clientdto;
 
-import de.uni.passau.server.workflow.model.ClassNode;
-import de.uni.passau.server.workflow.model.NegativeExampleNode;
-import de.uni.passau.server.workflow.repository.ClassRepository.ClassNodeGroup;
+import de.uni.passau.server.model.ClassNode;
+import de.uni.passau.server.model.NegativeExampleNode;
+import de.uni.passau.server.repository.ClassRepository.ClassNodeGroup;
 
 import java.io.Serializable;
 
@@ -15,7 +15,7 @@ public record Class(
     int iteration,
     @Nullable NegativeExampleInfo example
 ) implements Serializable {
-    
+
     public static Class fromNodes(ClassNode classNode, int iteration, @Nullable NegativeExampleNode exampleNode) {
         return new Class(
             classNode.getId(),

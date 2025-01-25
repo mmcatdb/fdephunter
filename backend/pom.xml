@@ -43,7 +43,6 @@
         <module>fd-cleaner-core</module>
         <module>fd-cleaner-server</module>
         <module>fd-cleaner-crowdsourcing</module>
-        <module>fd-cleaner-workflow</module>
         <module>fd-cleaner-discovery</module>
         <module>fd-cleaner-weight-functions</module>
     </modules>

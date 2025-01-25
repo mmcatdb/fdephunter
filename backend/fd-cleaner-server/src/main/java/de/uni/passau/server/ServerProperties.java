@@ -3,9 +3,6 @@ package de.uni.passau.server;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-/**
- * @author jachym.bartik
- */
 @Component
 @ConfigurationProperties("server")
 public class ServerProperties {

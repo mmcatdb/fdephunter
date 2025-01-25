@@ -1,13 +1,8 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
 package de.uni.passau.server.controller;
 
 import de.uni.passau.core.approach.AbstractApproach.ApproachName;
-import de.uni.passau.server.workflow.model.ApproachNode;
-import de.uni.passau.server.workflow.service.ApproachService;
+import de.uni.passau.server.model.ApproachNode;
+import de.uni.passau.server.service.ApproachService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,10 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-/**
- *
- * @author pavel.koupil
- */
 @RestController
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 public class ApproachController {

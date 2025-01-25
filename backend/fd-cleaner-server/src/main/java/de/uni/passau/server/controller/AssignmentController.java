@@ -1,16 +1,11 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
 package de.uni.passau.server.controller;
 
 import de.uni.passau.core.nex.Decision;
 import de.uni.passau.server.clientdto.Assignment;
 import de.uni.passau.server.clientdto.AssignmentInfo;
 import de.uni.passau.server.clientdto.DatasetData;
-import de.uni.passau.server.workflow.service.AssignmentService;
-import de.uni.passau.server.workflow.service.DatasetService;
+import de.uni.passau.server.service.AssignmentService;
+import de.uni.passau.server.service.DatasetService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,10 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-/**
- *
- * @author pavel.koupil
- */
 @RestController
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 public class AssignmentController {
@@ -96,7 +87,7 @@ public class AssignmentController {
     ) {
         final var columns = init.columns.stream().map(ColumnInit::toColumn).toList();
         final var decision = new Decision(init.status, columns);
-        
+
         return assignmentService.evaluateAssignment(assignmentId, decision)
             .then(getAssignment(assignmentId, limit));
     }

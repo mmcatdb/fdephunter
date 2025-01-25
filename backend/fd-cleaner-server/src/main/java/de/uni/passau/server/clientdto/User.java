@@ -1,6 +1,6 @@
 package de.uni.passau.server.clientdto;
 
-import de.uni.passau.server.workflow.model.UserNode;
+import de.uni.passau.server.model.UserNode;
 
 import java.io.Serializable;
 
@@ -8,7 +8,7 @@ public record User(
     String id,
     String firstName,
     String lastName,
-    String email    
+    String email
 ) implements Serializable {
 
     public static User fromNodes(UserNode userNode) {
@@ -19,5 +19,5 @@ public record User(
             userNode.getEmail()
         );
     }
-    
+
 }

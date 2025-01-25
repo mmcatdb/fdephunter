@@ -1,8 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
 package de.uni.passau.core.dataset.csv;
 
 import de.uni.passau.core.dataset.Dataset;
@@ -18,10 +13,6 @@ import com.opencsv.exceptions.CsvException;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.Nullable;
 
-/**
- *
- * @author pavel.koupil
- */
 public class CSVDataset implements Dataset {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(CSVDataset.class);
@@ -63,7 +54,7 @@ public class CSVDataset implements Dataset {
             final var csvReader = new CSVReaderBuilder(filereader).build();
             if (hasHeader)
                 header = csvReader.readNext();
-                
+
             rows = csvReader.readAll();
             isLoaded = true;
         }
@@ -88,7 +79,7 @@ public class CSVDataset implements Dataset {
 
         if (metadata == null)
             metadata = new CSVDatasetMetadata(inputFile.getAbsolutePath(), inputFile.getName(), hasHeader, inputFile.length(), rows.size(), rows.get(0).length);
-        
+
         return metadata;
     }
 

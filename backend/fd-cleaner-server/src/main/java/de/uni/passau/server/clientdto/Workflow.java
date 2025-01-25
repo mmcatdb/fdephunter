@@ -1,7 +1,7 @@
 package de.uni.passau.server.clientdto;
 
-import de.uni.passau.server.workflow.model.WorkflowNode;
-import de.uni.passau.server.workflow.model.WorkflowNode.WorkflowState;
+import de.uni.passau.server.model.WorkflowNode;
+import de.uni.passau.server.model.WorkflowNode.WorkflowState;
 
 import java.io.Serializable;
 

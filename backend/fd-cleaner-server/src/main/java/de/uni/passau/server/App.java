@@ -1,8 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
 package de.uni.passau.server;
 
 import org.slf4j.Logger;
@@ -16,13 +11,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-/**
- *
- * @author pavel.koupil
- */
 @Configuration
 @EnableAutoConfiguration
-@ComponentScan(basePackages = {"de.uni.passau.server"})
+@ComponentScan({ "de.uni.passau.server" })
 public class App {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);

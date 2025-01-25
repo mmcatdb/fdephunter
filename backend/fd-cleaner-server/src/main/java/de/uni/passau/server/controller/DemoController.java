@@ -1,22 +1,17 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
 package de.uni.passau.server.controller;
 
 import de.uni.passau.server.approach.Approach1Metadata;
 import de.uni.passau.server.approach.HyFDMetadata;
-import de.uni.passau.server.workflow.model.ApproachNode;
-import de.uni.passau.server.workflow.model.DatasetNode;
-import de.uni.passau.server.workflow.model.RoleNode;
-import de.uni.passau.server.workflow.model.RoleNode.RoleType;
-import de.uni.passau.server.workflow.model.UserNode;
-import de.uni.passau.server.workflow.model.WorkflowNode;
-import de.uni.passau.server.workflow.service.ApproachService;
-import de.uni.passau.server.workflow.service.DatasetService;
-import de.uni.passau.server.workflow.service.UserService;
-import de.uni.passau.server.workflow.service.WorkflowService;
+import de.uni.passau.server.model.ApproachNode;
+import de.uni.passau.server.model.DatasetNode;
+import de.uni.passau.server.model.RoleNode;
+import de.uni.passau.server.model.RoleNode.RoleType;
+import de.uni.passau.server.model.UserNode;
+import de.uni.passau.server.model.WorkflowNode;
+import de.uni.passau.server.service.ApproachService;
+import de.uni.passau.server.service.DatasetService;
+import de.uni.passau.server.service.UserService;
+import de.uni.passau.server.service.WorkflowService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,10 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-/**
- *
- * @author pavel.koupil
- */
 @RestController
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 public class DemoController {

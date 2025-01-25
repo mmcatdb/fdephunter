@@ -1,11 +1,11 @@
 package de.uni.passau.server.clientdto;
 
-import de.uni.passau.server.workflow.model.AssignmentNode;
-import de.uni.passau.server.workflow.model.AssignmentNode.ExpertVerdict;
-import de.uni.passau.server.workflow.model.DiscoveryResultNode;
-import de.uni.passau.server.workflow.model.ExpertNode;
-import de.uni.passau.server.workflow.model.NegativeExampleNode;
-import de.uni.passau.server.workflow.repository.AssignmentRepository.AssignmentNodeGroup;
+import de.uni.passau.server.model.AssignmentNode;
+import de.uni.passau.server.model.AssignmentNode.ExpertVerdict;
+import de.uni.passau.server.model.DiscoveryResultNode;
+import de.uni.passau.server.model.ExpertNode;
+import de.uni.passau.server.model.NegativeExampleNode;
+import de.uni.passau.server.repository.AssignmentRepository.AssignmentNodeGroup;
 
 import java.io.Serializable;
 

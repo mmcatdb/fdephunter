@@ -1,8 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
 package de.uni.passau.server.approach.service;
 
 import de.uni.passau.core.approach.ApproachMetadata;
@@ -20,13 +15,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-/**
- *
- * @author stefan.klessinger
- */
 @Service
 public class OurApproachService {
-    
+
     private static final String VIEW_NULL = "##VIEW_NULL"; // null value in negative examples TODO: define globally
     private static final String EMPTY = "";    // null value in positive examples (i.e. input data)
 
@@ -35,10 +26,10 @@ public class OurApproachService {
     public List<FDInit> execute(String[] header, List<String[]> data) {
         List<FDInit> fds = discoverFDs(header, data);
         boolean hasHeader = true;
-        
+
         // order fds by lhs size
         fds.sort((FDInit t1, FDInit t2) -> t1.lhs().size() - t2.lhs().size());
-        
+
         final List<FDInit> filteredFDs = new ArrayList<>();
         // do not add fds if left side is super set of another fd with same right side
         for (FDInit fd : fds) {
@@ -87,7 +78,7 @@ public class OurApproachService {
     private FDInit translateFD(FDInit fd, String[] header) {
         if (header == null)
             return fd;
-        
+
         final List<String> lhsTranslate = fd.lhs().stream().map(column -> header[Integer.parseInt(column)]).toList();
 
         return new FDInit(lhsTranslate, header[Integer.parseInt(fd.rhs())]);
@@ -128,7 +119,7 @@ public class OurApproachService {
 
         final List<Integer> lhsIndices = lhs.stream().map(Integer::parseInt).toList();
         final List<String> lhsValues = data.stream().flatMap(row -> lhsIndices.stream().map(lhsColumn -> row[lhsColumn])).toList();
-        
+
         for (final String[] row : data) {
             // Ignore empty fields (null values) on rhs
             String rhsValue = row[Integer.parseInt(rhs)];
@@ -158,7 +149,7 @@ public class OurApproachService {
                     skip = true;
                     break;
                 }
-                
+
                 if (lhsValue.equals(EMPTY)) {
                     if (mode == 1) { // null == null
                         // do nothing
@@ -223,7 +214,7 @@ public class OurApproachService {
                 .forEachOrdered(rhs -> fds.add(new FDInit(lhs, rhs))
             )
         );
-        
+
         return fds;
     }
 
