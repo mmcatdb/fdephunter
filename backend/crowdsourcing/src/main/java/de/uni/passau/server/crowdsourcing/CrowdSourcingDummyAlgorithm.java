@@ -1,4 +1,4 @@
-package de.uni.passau.server.crowdsourcing.service;
+package de.uni.passau.server.crowdsourcing;
 
 import de.uni.passau.core.approach.FDInit;
 import de.uni.passau.core.graph.Vertex;
@@ -11,12 +11,10 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
-@Service
-public class CrowdSourcingDummyService {
+public class CrowdSourcingDummyAlgorithm {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CrowdSourcingDummyService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CrowdSourcingDummyAlgorithm.class);
 
     public List<FDInit> getFDClassFromVertex(
             Vertex vertex, List<FDInit> fds) {
@@ -75,7 +73,7 @@ public class CrowdSourcingDummyService {
         for (NegativeExample nex : unassignedNegativeExamples) {
 
             // TODO here we need an information about the example's previous negative example. It's available as an edge HAS_PREVIOUS_ITERATION, but we don't have it here for some reason. So we should probably change the API of this method.
-            
+
             if (nex.previousIterationId != null) {
                 // try to find user which has processed this negative example
                 for (ExpertUser expu : idleExperts) {

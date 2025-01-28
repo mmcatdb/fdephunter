@@ -10,11 +10,11 @@ import de.uni.passau.core.nex.Decision.ColumnReason;
 import de.uni.passau.core.nex.Decision.PredefinedReason;
 import de.uni.passau.core.nex.NegativeExample;
 import de.uni.passau.core.nex.NegativeExampleBuilder;
-import de.uni.passau.server.approach.service.HyFDService;
-import de.uni.passau.server.approach.service.OurApproachService;
+import de.uni.passau.server.approach.HyFDAlgorithm;
+import de.uni.passau.server.approach.OurApproachAlgorithm;
+import de.uni.passau.server.crowdsourcing.CrowdSourcingDummyAlgorithm;
 import de.uni.passau.server.crowdsourcing.serverdto.Assignment;
 import de.uni.passau.server.crowdsourcing.serverdto.ExpertUser;
-import de.uni.passau.server.crowdsourcing.service.CrowdSourcingDummyService;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,11 +24,10 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class CrowdSourcingWorkflow {
 
     // CSV-Dataset
-    private static final String datasetPath = HyFDService.class.getClassLoader().getResource("WDC_satellites.csv").getPath();
+    private static final String datasetPath = HyFDAlgorithm.class.getClassLoader().getResource("WDC_satellites.csv").getPath();
     private static final Dataset dataset = new CSVDataset(
         datasetPath,
         false
@@ -41,11 +40,11 @@ public class CrowdSourcingWorkflow {
     private static List<NegativeExample> negativeExamplesList = new ArrayList<>();
 
     // FD-Discovering Service
-    private static OurApproachService fdDiscovering = new OurApproachService();
+    private static OurApproachAlgorithm fdDiscovering = new OurApproachAlgorithm();
     // Neg Builder
     private static NegativeExampleBuilder negativeExampleBuilder;
     // Crownsourcing Service
-    private static CrowdSourcingDummyService crowdSourcingDummyService = new CrowdSourcingDummyService();
+    private static CrowdSourcingDummyAlgorithm crowdSourcingDummyAlgorithm = new CrowdSourcingDummyAlgorithm();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CrowdSourcingWorkflow.class);
 
@@ -80,7 +79,7 @@ public class CrowdSourcingWorkflow {
         for (final Vertex vertex : orderedVertexList) {
             //System.out.println("# NextVertex: " + vertex.toString());
             // get list containing only FDs with "label" on rhs
-            var fdClass = crowdSourcingDummyService.getFDClassFromVertex(vertex, discoveredFDs);
+            var fdClass = crowdSourcingDummyAlgorithm.getFDClassFromVertex(vertex, discoveredFDs);
 
             negativeExamplesList.add(negativeExampleBuilder.createNew(fdClass, 8));
         }
@@ -102,7 +101,7 @@ public class CrowdSourcingWorkflow {
             //for (ExpertUser expertUser : expertUserList) {
             ExpertUser expertUser = iterator.next();
             System.out.println("## Try to assign user: " + expertUser.toString());
-            assignments = crowdSourcingDummyService.makeAssignment(expertUserList, negativeExamplesList);
+            assignments = crowdSourcingDummyAlgorithm.makeAssignment(expertUserList, negativeExamplesList);
             if (assignments.isEmpty()) {
                 LOGGER.info("could not assign negative example to expert user!");
             }
@@ -190,7 +189,7 @@ public class CrowdSourcingWorkflow {
 
                 System.out.println("try to assign IDLE user: " + expertUser.toString());
 
-                assignments = crowdSourcingDummyService.makeAssignment(expertUserList, negativeExamplesList);
+                assignments = crowdSourcingDummyAlgorithm.makeAssignment(expertUserList, negativeExamplesList);
                 if (assignments == null) {
                     LOGGER.info("could not assign negative example to expert user!");
                 } else {

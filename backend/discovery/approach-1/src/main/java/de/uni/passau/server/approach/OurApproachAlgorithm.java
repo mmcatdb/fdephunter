@@ -1,8 +1,7 @@
-package de.uni.passau.server.approach.service;
+package de.uni.passau.server.approach;
 
 import de.uni.passau.core.approach.ApproachMetadata;
 import de.uni.passau.core.approach.FDInit;
-import de.uni.passau.server.approach.Approach1Metadata;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,15 +12,13 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
-@Service
-public class OurApproachService {
+public class OurApproachAlgorithm {
 
     private static final String VIEW_NULL = "##VIEW_NULL"; // null value in negative examples TODO: define globally
     private static final String EMPTY = "";    // null value in positive examples (i.e. input data)
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(OurApproachService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(OurApproachAlgorithm.class);
 
     public List<FDInit> execute(String[] header, List<String[]> data) {
         List<FDInit> fds = discoverFDs(header, data);

@@ -1,6 +1,6 @@
 import { DatasetTable } from '@/components/dataset/DatasetTableDisplay';
 import { FDListDisplay } from '@/components/dataset/FDListDisplay';
-import { FDGraphDisplay } from '@/components/dataset/FDGraphDisplay';
+import { FDGraphDisplay, LatticeDisplay } from '@/components/dataset/FDGraphDisplay';
 import { WorkersDistribution } from '@/components/WorkersDistribution';
 import { Class } from '@/types/workflow';
 import { Card, Tab, Tabs } from '@nextui-org/react';
@@ -172,6 +172,7 @@ export function WorkflowGraphPage() {
     const { jobResult } = useRouteLoaderData<WorkflowDashboardLoaded>(routes.workflow.dashboard.$id)!;
 
     return (
-        <FDGraphDisplay graph={jobResult.fdGraph} />
+        // <FDGraphDisplay graph={jobResult.fdGraph} />
+        <LatticeDisplay />
     );
 }

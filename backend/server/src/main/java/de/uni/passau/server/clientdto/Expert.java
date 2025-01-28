@@ -8,7 +8,7 @@ import de.uni.passau.server.repository.ExpertRepository.ExpertNodeGroup;
 
 import java.io.Serializable;
 
-import org.springframework.lang.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public record Expert(
     String id,

@@ -28,7 +28,7 @@ export function JobDisplay({ job }: JobDisplayProps) {
                     State: <span className={data.color}>{data.label}</span>
                 </div>
                 <div>
-                    Started: {job.startDate.toJSDate().toLocaleString()}
+                    Started: {job.startedAt.toJSDate().toLocaleString()}
                 </div>
                 <div>
                     Progress: {displayPercent(job.progress)}

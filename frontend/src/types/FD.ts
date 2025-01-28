@@ -1,4 +1,4 @@
-import { type Edge, MarkerType, type Node } from 'reactflow';
+import { type Edge, MarkerType, type Node } from '@xyflow/react';
 import dagre from 'dagre';
 import { type FDPayloadFromServer } from './jobResult';
 
@@ -75,10 +75,10 @@ const DEFAULT_NODE_DIMENSIONS = {
     height: 50,
 };
 
-type RFNode = Node<{ label: string }>;
-type RFEdge = Edge;
+export type RFNode = Node<{ label: string }>;
+export type RFEdge = Edge;
 
-type RFGraph = {
+export type RFGraph = {
     nodes: RFNode[];
     edges: RFEdge[];
 };
@@ -133,13 +133,14 @@ export function createRFGraph(fdGraph: FDGraph): RFGraph {
     };
 }
 
-const NODE_OPTIONS: Omit<RFNode, 'id' | 'position' | 'data'> = {
+export const NODE_OPTIONS: Omit<RFNode, 'id' | 'position' | 'data'> = {
     draggable: false,
     connectable: false,
+    selectable: false,
     className: 'whitespace-pre-line',
 };
 
-const EDGE_OPTIONS: Omit<RFEdge, 'id' | 'source' | 'target'> = {
+export const EDGE_OPTIONS: Omit<RFEdge, 'id' | 'source' | 'target'> = {
     //animated: true,
     markerEnd: {
         width: 30,

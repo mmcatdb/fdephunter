@@ -1,6 +1,6 @@
 package de.uni.passau.server.crowdsourcing.serverdto;
 
-import org.springframework.lang.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class ExpertUser implements Comparable<ExpertUser> {
 

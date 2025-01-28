@@ -4,6 +4,8 @@ import de.uni.passau.core.approach.FDInit;
 import de.uni.passau.core.dataset.DatasetData;
 import de.uni.passau.core.graph.Vertex;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,8 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
-
-import org.springframework.lang.Nullable;
 
 public class NegativeExampleBuilder {
 
@@ -48,7 +48,7 @@ public class NegativeExampleBuilder {
         final boolean isMultipleRHS = fds.stream().anyMatch(fd -> !rhs.equals(fd.rhs()));
         if (isMultipleRHS)
             throw new IllegalArgumentException("Provided FDs have multiple different right sides.");
-        
+
         final var values = computeExampleValues(fds, row);
 
         validateExample(fds, values.innerValues);
@@ -89,9 +89,9 @@ public class NegativeExampleBuilder {
      * until it is unique.
      * This method is not suitable for large datasets.
      * TODO: Implement a better method for generating unique values.
-     * 
+     *
      * @param columnIndex the index of the column
-     * 
+     *
      * @return a random, unique value for a cell in the column
      */
     private String getUniqueCellValue(int columnIndex) {
@@ -105,7 +105,7 @@ public class NegativeExampleBuilder {
         String uniqueValue = randomString;
         while (isValueInColumn(uniqueValue, columnIndex))
             uniqueValue += randomString;
-            
+
         return uniqueValue;
     }
 
@@ -154,7 +154,7 @@ public class NegativeExampleBuilder {
             final var values = computeExampleValues(fds, row);
             newNegExs.add(new NegativeExample(generateExampleId(), negEx.id, values.innerValues, values.originalValues, newView, fds));
         }
-        
+
         return newNegExs;
     }
 

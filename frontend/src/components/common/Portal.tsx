@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useLayoutEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 type PortalProps = {
@@ -9,7 +9,7 @@ type PortalProps = {
 export function Portal({ children, to }: PortalProps) {
     const [ target, setTarget ] = useState(() => document.getElementById(to));
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         setTarget(document.getElementById(to));
     }, [ to ]);
 

@@ -196,7 +196,7 @@ function DecisionReasonsCard({ relation: { exampleRow, columns }, selectedFDInde
         ? selected.state === ColumnState.Valid
         : selected.reasons.length === 0;
 
-    const maximalSetCols = exampleRow.maximalSet.map(index => columns[index]);
+    const maxSetCols = exampleRow.maxSet.map(index => columns[index]);
 
     return (
         <Card>
@@ -213,7 +213,7 @@ function DecisionReasonsCard({ relation: { exampleRow, columns }, selectedFDInde
             <CardBody className='space-y-6'>
                 <div className='flex gap-4'>
                     <div className='py-[2px] flex flex-wrap gap-x-2 gap-y-1'>
-                        {maximalSetCols.map(col => (
+                        {maxSetCols.map(col => (
                             <ColumnNameBadge key={col} name={col} className={exampleRow.isNegative ? 'bg-warning-400' : 'bg-danger-400'} />
                         ))}
                     </div>
@@ -312,7 +312,7 @@ function DecisionReasonsForm({ data, setData }: DecisionReasonsFormProps) {
                             <IoClose size={24} />
                         </Button>
 
-                        <Input size='sm' value={reason} onValueChange={value => updateCustomReason(index, value)} />
+                        <Input autoFocus size='sm' value={reason} onValueChange={value => updateCustomReason(index, value)} />
                     </div>
                 ))}
 

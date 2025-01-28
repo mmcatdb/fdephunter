@@ -7,7 +7,7 @@ public class Approach1Metadata implements ApproachMetadata {
 
     @Override
     public final ApproachName getName() {
-        return ApproachName.Approach1;
+        return ApproachName.DepMiner;
     }
 
     @Override

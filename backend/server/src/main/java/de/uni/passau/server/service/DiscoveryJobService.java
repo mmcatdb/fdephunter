@@ -46,10 +46,6 @@ public class DiscoveryJobService {
     @Autowired
     private ObjectMapper objectMapperJSON;
 
-    public Flux<DiscoveryJobNode> getAllJobs() {
-        return discoveryJobRepository.findAll();
-    }
-
     public Mono<DiscoveryJobNode> getJobById(String jobId) {
         return discoveryJobRepository.getJobById(jobId);
     }

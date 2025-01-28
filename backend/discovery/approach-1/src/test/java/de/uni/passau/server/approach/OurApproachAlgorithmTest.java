@@ -1,4 +1,4 @@
-package de.uni.passau.server.approach.service;
+package de.uni.passau.server.approach;
 
 import de.uni.passau.core.dataset.csv.CSVDataset;
 
@@ -10,7 +10,7 @@ import java.nio.file.Path;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class OurApproachServiceTest {
+class OurApproachAlgorithmTest {
     private static final String TEST_FILE_NAME = "test.csv";
     private static final String[] TEST_HEADER = { "column_1", "column_2", "column_3" };
     private static final String[][] TEST_DATA = { { "1", "", "3" }, { "4", "", "6" }, { "", "", "6" } };
@@ -32,9 +32,9 @@ class OurApproachServiceTest {
 
     @Test
     void testNullSemantic() {
-        OurApproachService ourApproachService = new OurApproachService();
-        
-//        List<FDInit> fds = ourApproachService.execute(dataset);
+        OurApproachAlgorithm ourApproachAlgorithm = new OurApproachAlgorithm();
+
+//        List<FDInit> fds = ourApproachAlgorithm.execute(dataset);
 //        Assertions.assertEquals(2, fds.size());
 //        Assertions.assertEquals("[0]", fds.get(0).getFirst().toString());
 //        Assertions.assertEquals("2", fds.get(0).getSecond());

@@ -10,11 +10,11 @@ import de.uni.passau.core.nex.Decision;
 import de.uni.passau.core.nex.NegativeExample;
 import de.uni.passau.core.nex.NegativeExampleBuilder;
 import de.uni.passau.core.nex.NegativeExampleUpdater;
-import de.uni.passau.server.approach.service.HyFDService;
-import de.uni.passau.server.approach.service.OurApproachService;
+import de.uni.passau.server.approach.HyFDAlgorithm;
+import de.uni.passau.server.approach.OurApproachAlgorithm;
+import de.uni.passau.server.crowdsourcing.CrowdSourcingDummyAlgorithm;
 import de.uni.passau.server.crowdsourcing.serverdto.Assignment;
 import de.uni.passau.server.crowdsourcing.serverdto.ExpertUser;
-import de.uni.passau.server.crowdsourcing.service.CrowdSourcingDummyService;
 import de.uni.passau.server.model.AssignmentNode.ExpertVerdict;
 import de.uni.passau.server.model.DiscoveryJobNode;
 import de.uni.passau.server.model.DiscoveryJobNode.DiscoveryJobState;
@@ -45,12 +45,6 @@ public class ScheduledJobsService {
     private DiscoveryJobService discoveryJobService;
 
     @Autowired
-    private HyFDService hyFDService;
-
-    @Autowired
-    private OurApproachService ourApproachService;
-
-    @Autowired
     private DatasetService datasetService;
 
     @Autowired
@@ -61,9 +55,6 @@ public class ScheduledJobsService {
 
     @Autowired
     private WorkflowService workflowService;
-
-    @Autowired
-    private CrowdSourcingDummyService crowdSourcingDummyService;
 
     @Autowired
     private AssignmentService assignmentService;
@@ -142,7 +133,8 @@ public class ScheduledJobsService {
             final List<NegativeExample> unassignedNegativeExamples = tuple.getT1();
 
             //TODO: DISTRIBUTE WORK HERE!
-            final List<Assignment> assignments = crowdSourcingDummyService.makeAssignment(idleExperts, unassignedNegativeExamples);
+            final var algorithm = new CrowdSourcingDummyAlgorithm();
+            final List<Assignment> assignments = algorithm.makeAssignment(idleExperts, unassignedNegativeExamples);
 
             assignments.forEach(assignment -> {
                 LOGGER.info("ASSIGNMENT: {}", assignment);
@@ -214,10 +206,18 @@ public class ScheduledJobsService {
     }
 
     private List<FDInit> executeDiscoveryByApproach(Dataset dataset, ApproachName name) {
-        return switch (name) {
-            case HyFD -> hyFDService.execute(dataset.getHeader(), dataset.getRows());
-            case Approach1 -> ourApproachService.execute(dataset.getHeader(), dataset.getRows());
-        };
+        switch (name) {
+            case HyFD: {
+                final var algorithm = new HyFDAlgorithm();
+                return algorithm.execute(dataset.getHeader(), dataset.getRows());
+            }
+            case DepMiner: {
+                final var algorithm = new OurApproachAlgorithm();
+                return algorithm.execute(dataset.getHeader(), dataset.getRows());
+            }
+            default:
+                throw new UnsupportedOperationException("Not supported approach: " + name);
+        }
     }
 
 }

@@ -10,8 +10,8 @@ import java.util.List;
 
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvException;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.LoggerFactory;
-import org.springframework.lang.Nullable;
 
 public class CSVDataset implements Dataset {
 

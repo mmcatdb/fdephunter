@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.lang.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Represents a negative example, which is a row in a database or CSV file.
@@ -15,7 +15,7 @@ import org.springframework.lang.Nullable;
  */
 public class NegativeExample implements Comparable<NegativeExample> {
 
-    private static final String VIEW_NULL = "##VIEW_NULL"; //TODO: define globally -- also used in OurApproachService
+    private static final String VIEW_NULL = "##VIEW_NULL"; //TODO: define globally -- also used in OurApproachAlgorithm
 
     public final String id;
     public final String previousIterationId;
@@ -45,7 +45,7 @@ public class NegativeExample implements Comparable<NegativeExample> {
             final String value = this.view.contains(columnName) ? entry.getValue() : VIEW_NULL;
             values.put(columnName, value);
         }
-        
+
         return values;
     }
 
@@ -74,5 +74,5 @@ public class NegativeExample implements Comparable<NegativeExample> {
     public int hashCode() {
         return id.hashCode();
     }
-    
+
 }

@@ -109,12 +109,6 @@ public class WorkflowController {
             );
     }
 
-    @Deprecated
-    @GetMapping("/jobs")
-    public Flux<DiscoveryJobNode> getAllJobs() {
-        return discoveryJobService.getAllJobs();
-    }
-
     @GetMapping("/workflows/{workflowId}/last-discovery")
     public Mono<DiscoveryJob> getLastJobByWorkflowId(@PathVariable String workflowId) {
         // informace o jobu, nevracej vysledky (uzivatel musi potvrdit)

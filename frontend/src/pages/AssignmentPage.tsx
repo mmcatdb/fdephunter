@@ -1,5 +1,5 @@
 import { AssignmentEvaluation } from '@/components/AssignmentEvaluation';
-import { FDGraphDisplay } from '@/components/dataset/FDGraphDisplay';
+import { FDGraphDisplay, LatticeDisplay } from '@/components/dataset/FDGraphDisplay';
 import { FDListDisplay } from '@/components/dataset/FDListDisplay';
 import { DecisionProvider } from '@/context/DecisionProvider';
 import { routes } from '@/router';
@@ -82,6 +82,7 @@ export function AssignmentGraphPage() {
     const { assignment } = useRouteLoaderData<AssignmentLoaded>(routes.assignment.$id)!;
 
     return (
-        <FDGraphDisplay graph={assignment.discoveryResult.fdGraph} />
+        // <FDGraphDisplay graph={assignment.discoveryResult.fdGraph} />
+        <LatticeDisplay />
     );
 }

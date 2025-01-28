@@ -5,10 +5,10 @@ import de.uni.passau.server.model.ExpertNode;
 import de.uni.passau.server.model.ExpertNode.ExpertState;
 import de.uni.passau.server.model.UserNode;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.data.neo4j.repository.ReactiveNeo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.lang.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

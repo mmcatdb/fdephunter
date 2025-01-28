@@ -1,8 +1,7 @@
-package de.uni.passau.server.approach.service;
+package de.uni.passau.server.approach;
 
 import de.uni.passau.core.approach.ApproachMetadata;
 import de.uni.passau.core.approach.FDInit;
-import de.uni.passau.server.approach.HyFDMetadata;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -16,12 +15,10 @@ import de.metanome.algorithms.hyfd.HyFDModified;
 import de.metanome.algorithms.run.ResultCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
-@Service
-public class HyFDService {
+public class HyFDAlgorithm {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HyFDService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HyFDAlgorithm.class);
 
     private final HyFDModified algorithm = new HyFDModified();
 

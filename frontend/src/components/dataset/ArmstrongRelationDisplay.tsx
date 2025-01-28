@@ -12,7 +12,7 @@ import { type IconType } from 'react-icons';
 
 type GridState = {
     isProgressCollapsed?: boolean;
-    isMaximalSetCollapsed?: boolean;
+    isMaxSetCollapsed?: boolean;
 };
 
 type ArmstrongRelationDisplayProps = {
@@ -65,16 +65,16 @@ export function ArmstrongRelationDisplay({ relation, workerOptions, assignWorker
                     size='sm'
                     variant='light'
                     color='primary'
-                    onPress={() => setState(prev => ({ ...prev, isMaximalSetCollapsed: !prev.isMaximalSetCollapsed }))}
+                    onPress={() => setState(prev => ({ ...prev, isMaxSetCollapsed: !prev.isMaxSetCollapsed }))}
                 >
-                    {state.isMaximalSetCollapsed ? (
+                    {state.isMaxSetCollapsed ? (
                         <BiExpandHorizontal size={20} />
                     ) : (
                         <BiCollapseHorizontal size={20} />
                     )}
                 </Button>
 
-                {!state.isMaximalSetCollapsed && (
+                {!state.isMaxSetCollapsed && (
                     <span className='font-semibold text-primary'>
                         Maximal set
                     </span>
@@ -149,7 +149,7 @@ type ExampleRowDisplayProps = {
 };
 
 function ExampleRowDisplay({ relation, row, rowIndex, workerOptions, assignWorker, gridState }: ExampleRowDisplayProps) {
-    const maximalSetCols = row.maximalSet.map(index => relation.columns[index]);
+    const maxSetCols = row.maxSet.map(index => relation.columns[index]);
     const exampleBgClass = row.isNegative ? 'bg-warning-400' : 'bg-danger-400';
     const { leftClass, rightClass } = getSpecialCellClasses(rowIndex);
 
@@ -181,17 +181,17 @@ function ExampleRowDisplay({ relation, row, rowIndex, workerOptions, assignWorke
         </div>
 
         {row.values.map((value, colIndex) => (
-            <div key={colIndex} className={getCellClass(rowIndex, colIndex, row.maximalSet.includes(colIndex))}>
+            <div key={colIndex} className={getCellClass(rowIndex, colIndex, row.maxSet.includes(colIndex))}>
                 {value}
             </div>
         ))}
 
-        <div title={maximalSetCols.join(', ')} className={rightClass}>
-            {gridState.isMaximalSetCollapsed ? (
+        <div title={maxSetCols.join(', ')} className={rightClass}>
+            {gridState.isMaxSetCollapsed ? (
                 <div className={clsx('size-4 rounded-full', exampleBgClass)} />
             ) : (
                 <div className='max-w-80 flex flex-wrap gap-x-2 gap-y-1'>
-                    {maximalSetCols.map(col => (
+                    {maxSetCols.map(col => (
                         <ColumnNameBadge key={col} name={col} className={exampleBgClass} />
                     ))}
                 </div>

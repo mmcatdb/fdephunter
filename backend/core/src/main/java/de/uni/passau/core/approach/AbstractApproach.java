@@ -4,7 +4,9 @@ public abstract class AbstractApproach {
 
     public enum ApproachName {
         HyFD,
-        Approach1
+        // Formerly "Approach1".
+        // TODO We should probably rename this everywhere.
+        DepMiner;
     }
 
 }

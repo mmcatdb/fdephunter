@@ -4,12 +4,14 @@ import de.uni.passau.server.model.DiscoveryJobNode;
 import de.uni.passau.server.model.DiscoveryJobNode.DiscoveryJobState;
 
 import java.io.Serializable;
+import java.util.Date;
 
 public record DiscoveryJob(
     String id,
     DiscoveryJobState state,
     String description,
-    int iteration
+    int iteration,
+    Date startedAt
 ) implements Serializable {
 
     public static DiscoveryJob fromNodes(DiscoveryJobNode jobNode) {
@@ -17,7 +19,8 @@ public record DiscoveryJob(
             jobNode.getId(),
             jobNode.getState(),
             jobNode.getDescription(),
-            jobNode.getIteration()
+            jobNode.getIteration(),
+            jobNode.getStartedAt()
         );
     }
 

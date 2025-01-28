@@ -10,11 +10,11 @@ import de.uni.passau.server.repository.ClassRepository;
 import de.uni.passau.server.repository.DiscoveryResultRepository;
 import de.uni.passau.server.repository.NegativeExampleRepository;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

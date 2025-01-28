@@ -1,5 +1,7 @@
 package de.uni.passau.server.model;
 
+import java.util.Date;
+
 import org.springframework.data.neo4j.core.schema.GeneratedValue;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
@@ -28,11 +30,15 @@ public class DiscoveryJobNode {
     @Property
     private Integer iteration;
 
+    @Property
+    private Date startedAt;
+
     public static DiscoveryJobNode createNew(String description, int iteration) {
         final var job = new DiscoveryJobNode();
         job.setDescription(description);
         job.setState(DiscoveryJobState.WAITING);
         job.setIteration(iteration);
+        job.setStartedAt(new Date());
 
         return job;
     }
@@ -69,6 +75,14 @@ public class DiscoveryJobNode {
         this.iteration = iteration;
     }
 
+    public Date getStartedAt() {
+        return startedAt;
+    }
+
+    public void setStartedAt(Date startedAt) {
+        this.startedAt = startedAt;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -76,6 +90,8 @@ public class DiscoveryJobNode {
         sb.append("id=").append(id);
         sb.append(", description=").append(description);
         sb.append(", state=").append(state);
+        sb.append(", iteration=").append(iteration);
+        sb.append(", startedAt=").append(startedAt);
         sb.append('}');
         return sb.toString();
     }

@@ -58,11 +58,10 @@ export function useDecisionContext(): DecisionContext {
 }
 
 function createDefaultDecision(relation: ExampleRelation, isFinished: boolean): DecisionState {
-    console.log({ relation });
     const columns = relation.columns.map((name, colIndex) => ({
         colIndex,
         name,
-        state: relation.exampleRow.maximalSet.includes(colIndex) ? undefined : ColumnState.Undecided,
+        state: relation.exampleRow.maxSet.includes(colIndex) ? undefined : ColumnState.Undecided,
         reasons: [],
     }));
 

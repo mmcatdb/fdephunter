@@ -6,7 +6,7 @@ import de.uni.passau.server.repository.ClassRepository.ClassNodeGroup;
 
 import java.io.Serializable;
 
-import org.springframework.lang.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public record Class(
     String id,

@@ -20,24 +20,49 @@ export enum JobState {
 export type JobFromServer = {
     id: string;
     state: JobState;
-    startDate: DateTime;
-    progress: number;
+    description: string;
+    iteration: number;
+    /** In UTC. */
+    startedAt: string;
 };
 
 export class Job {
     private constructor(
         readonly id: string,
         readonly state: JobState,
-        readonly startDate: DateTime,
+        readonly iteration: number,
+        readonly startedAt: DateTime,
         readonly progress: number, // from 0 to 1
     ) {}
 
     static fromServer(input: JobFromServer): Job {
+        const prevProgress = progressCache.get(input.id) ?? 0;
+        const progress = computeNextProgress(prevProgress, input.state);
+        progressCache.set(input.id, progress);
+
         return new Job(
             input.id,
             input.state,
-            DateTime.now(), // TODO
-            Math.random(), // TODO
+            input.iteration,
+            DateTime.fromISO(input.startedAt),
+            progress,
         );
     }
+}
+
+const progressCache = new Map<string, number>();
+
+// FIXME Implement on the backend later.
+
+/** @returns A number from 0 to 1. */
+function computeNextProgress(prev: number, state: JobState): number {
+    if (state === JobState.Finished)
+        return 1;
+    if (state === JobState.Waiting || state === JobState.Pending)
+        return 0;
+
+    const range = (1 - prev) / 2;
+    const next = Math.random() * range + prev;
+
+    return next;
 }
