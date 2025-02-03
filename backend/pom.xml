@@ -8,6 +8,14 @@
     <packaging>pom</packaging>
     
     <name>FD Cleaner (Java 17)</name>
+
+    <modules>
+        <module>core</module>
+        <module>server</module>
+        <module>crowdsourcing</module>
+        <module>discovery</module>
+        <module>weightfunctions</module>
+    </modules>
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -35,12 +43,16 @@
             <type>jar</type>
         </dependency>
     </dependencies>
-    
-    <modules>
-        <module>core</module>
-        <module>server</module>
-        <module>crowdsourcing</module>
-        <module>discovery</module>
-        <module>weightfunctions</module>
-    </modules>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.10.1</version>
+                <configuration>
+                    <release>17</release>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
