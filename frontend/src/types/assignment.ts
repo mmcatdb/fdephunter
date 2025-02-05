@@ -50,7 +50,7 @@ export class Assignment {
             {
                 columns: MOCK_ARMSTRONG_RELATION.columns,
                 referenceRow: MOCK_ARMSTRONG_RELATION.referenceRow,
-                exampleRow: MOCK_ARMSTRONG_RELATION.exampleRows[0],
+                exampleRow: MOCK_ARMSTRONG_RELATION.exampleRows[3],
             },
         );
     }

@@ -10,7 +10,7 @@ export function WorkflowProgressDisplay({ currentStep }: WorkflowProgressDisplay
     const currentStepIndex = STEPS.findIndex(step => step === currentStep);
 
     return (
-        <div className='h-full py-8 flex flex-col items-center'>
+        <div className='h-full py-8 flex flex-col items-center gap-3'>
             {STEPS.map((step, index) => (
                 <WorkflowStepDisplay
                     key={index}
@@ -35,19 +35,21 @@ type WorkflowStepDisplayProps = {
 
 function WorkflowStepDisplay({ step, isFinished, isActive, isLast }: WorkflowStepDisplayProps) {
     return (<>
-        <div className={clsx('size-10 rounded-full flex items-center justify-center text-3xl font-semibold text-white bg-default-400 transition-colors duration-1000',
-            isActive && 'bg-primary',
-            isFinished && 'bg-success',
-        )}>
-            {STEP_LABELS[step].shortLabel}
-        </div>
+        <div className='flex flex-col items-center [@media_(max-height:500px)]:flex-row'>
+            <div className={clsx('size-10 rounded-full flex items-center justify-center text-3xl font-semibold text-white bg-default-400 transition-colors duration-1000',
+                isActive && 'bg-primary',
+                isFinished && 'bg-success',
+            )}>
+                {STEP_LABELS[step].shortLabel}
+            </div>
 
-        <div className={clsx('w-40 text-center transition-colors duration-1000', isActive && 'text-primary', isFinished && 'text-success')}>
-            {STEP_LABELS[step].longLabel}
+            <div className={clsx('w-40 text-center transition-colors duration-1000', isActive && 'text-primary', isFinished && 'text-success')}>
+                {STEP_LABELS[step].longLabel}
+            </div>
         </div>
 
         {!isLast && (
-            <div className={clsx('grow my-3 w-2 rounded-full bg-default-400 transition-colors duration-1000', isFinished && 'bg-success')} />
+            <div className={clsx('grow w-2 rounded-full bg-default-400 transition-colors duration-1000 [@media_(max-height:500px)]:hidden', isFinished && 'bg-success')} />
         )}
     </>);
 }

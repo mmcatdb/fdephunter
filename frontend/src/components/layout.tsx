@@ -168,7 +168,7 @@ export function Sidebar({ children }: SidebarProps) {
 
     return (
         <Portal to='sidebar-portal'>
-            <aside className={clsx('fixed top-14 left-0 z-20 min-h-[600px] h-[calc(100vh_-_56px)] overflow-hidden transition-width !ease-in-out bg-content2 lg:bg-content1', isCollapsed ? 'w-0' : 'w-80')}>
+            <aside className={clsx('fixed top-14 left-0 z-20 h-[calc(100vh_-_56px)] overflow-hidden transition-width !ease-in-out bg-content2 lg:bg-content1', isCollapsed ? 'w-0' : 'w-80')}>
                 {children}
             </aside>
 

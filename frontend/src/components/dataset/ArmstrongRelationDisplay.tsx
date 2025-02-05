@@ -163,7 +163,9 @@ function ExampleRowDisplay({ relation, row, rowIndex, workerOptions, assignWorke
 
     return (<>
         <div className={leftClass}>
-            <ExampleStateIcon state={row.state} size={20} />
+            {isEvaluationAllowed && (
+                <ExampleStateIcon state={row.state} size={20} />
+            )}
 
             {isEvaluationAllowed && !gridState.isProgressCollapsed && (<>
                 {worker ? (
