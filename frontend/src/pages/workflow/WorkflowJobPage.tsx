@@ -5,9 +5,9 @@ import { Job, JobState } from '@/types/job';
 import { Button } from '@nextui-org/react';
 import { type Params, useLoaderData, useNavigate, useRevalidator, useRouteLoaderData } from 'react-router';
 import { type WorkflowLoaded } from './WorkflowPage';
-import { WorkflowState } from '@/types/workflow';
-import { API } from '@/utils/api';
+// import { API } from '@/utils/api';
 import { useEffect } from 'react';
+import { mockAPI } from '@/utils/api/mockAPI';
 
 const REFRESH_TIMEOUT = 2000; // in ms
 
@@ -34,7 +34,7 @@ export function WorkflowJobPage() {
     return (
         <Page className='max-w-xl space-y-10'>
             <h1 className='text-lg'>
-                {workflow.state === WorkflowState.WaitingForFD ? 'Wait for FD discovery ...' : 'Wait for initial FD discovery ...'}
+                {job.description}
             </h1>
 
             <JobDisplay job={job} />
@@ -52,7 +52,8 @@ WorkflowJobPage.loader = async ({ params: { workflowId } }: { params: Params<'wo
     if (!workflowId)
         throw new Error('Missing workflow ID');
 
-    const response = await API.workflows.getLastJob(undefined, { workflowId });
+    // const response = await API.workflows.getLastJob(undefined, { workflowId });
+    const response = await mockAPI.workflows.getLastJob(workflowId);
     if (!response.status)
         throw new Error('Failed to load job');
 

@@ -1,4 +1,4 @@
-import { type NegativeExampleInfo } from './negativeExample';
+import { type NegativeExampleInfo } from './assignment';
 
 export enum WorkflowState {
     /**
@@ -12,7 +12,7 @@ export enum WorkflowState {
     /**
      * The user can see the FDs in multiple ways (list, graph).
      */
-    DisplayFD = 'WORKER_ASSIGNMENT',
+    NegativeExamples = 'WORKER_ASSIGNMENT',
     /**
      * The user requested new negative sample.
      * This step has two phases - first, the next vertex is selected (pickNext). Then the next negative sample is generated. However, we can probably merge them together.
@@ -24,12 +24,13 @@ export enum WorkflowState {
      * Otherwise, we continue with the next step.
      */
     //EvaluatingSample = 'evaluatingSample',
+    PositiveExamples = 'POSITIVE_EXAMPLES',
     /**
      * Very simillar to the step WaitingForInitialFD. However, there are two possible outcomes:
      * - New FDs are found and we move to the step DisplayFD.
      * - Nothing new to process so we continue.
      */
-    WaitingForFD = 'JOB_WAITING',
+    // WaitingForFD = 'JOB_WAITING',
     /**
      * Yes! We have finally made it. The algorithm drops the final set of genuine FDs and we level up.
      */
@@ -40,7 +41,7 @@ export type WorkflowFromServer = {
     id: string;
     state: WorkflowState;
     iteration: number;
-}
+};
 
 export class Workflow {
     private constructor(
@@ -64,7 +65,7 @@ export type WorkflowStats = {
     examplesPositive: number;
     examplesNegative: number;
     // examplesTotal = examplesPositive + examplesNegative
-}
+};
 
 export type ClassFromServer = {
     id: string;

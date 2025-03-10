@@ -7,7 +7,7 @@ import { ExamplePage } from './pages/ExamplePage';
 import { Layout } from './components/layout';
 import { WorkflowSettingsPage } from './pages/workflow/WorkflowSettingsPage';
 import { WorkflowJobPage } from './pages/workflow/WorkflowJobPage';
-import { ArmstrongRelationPage, WorkersDistributionPage, WorkflowDashboardPage, WorkflowDatasetPage, WorkflowGraphPage, WorkflowListPage } from './pages/workflow/WorkflowDashboardPage';
+import { ArmstrongRelationPage, WorkflowDashboardPage, WorkflowDatasetPage, WorkflowGraphPage, WorkflowListPage } from './pages/workflow/WorkflowDashboardPage';
 import { WorkflowResultsPage } from './pages/workflow/WorkflowResultsPage';
 
 export class NamedRoute<T extends string = never> {
@@ -92,10 +92,11 @@ export const router = createBrowserRouter([ {
             shouldRevalidate: ({ defaultShouldRevalidate }) => defaultShouldRevalidate,
             children: [ {
                 index: true,
-                element: <WorkersDistributionPage />,
-            }, {
-                path: routes.workflow.dashboard.tabs.resolvePartial({ tab: 'armstrong-relation' }),
+                // element: <WorkersDistributionPage />,
                 element: <ArmstrongRelationPage />,
+            // }, {
+            //     path: routes.workflow.dashboard.tabs.resolvePartial({ tab: 'armstrong-relation' }),
+            //     element: <ArmstrongRelationPage />,
             }, {
                 path: routes.workflow.dashboard.tabs.resolvePartial({ tab: 'dataset' }),
                 element: <WorkflowDatasetPage />,

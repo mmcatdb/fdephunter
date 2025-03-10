@@ -1,14 +1,16 @@
-import { type ExampleRelation, type ArmstrongRelation, type ExampleRow } from '@/types/armstrongRelation';
+import { type ExampleRelation, type ArmstrongRelation, type ExampleRow, ExampleState } from '@/types/armstrongRelation';
 import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from '@nextui-org/react';
 import { ColumnNameBadge } from './FDListDisplay';
 import clsx, { type ClassValue } from 'clsx';
-import { type Dispatch, type Key, useState } from 'react';
+import { type Dispatch, type Key, useMemo, useState } from 'react';
 import { BiCollapseHorizontal, BiExpandHorizontal } from 'react-icons/bi';
 import { ExampleStateIcon } from '../WorkersDistribution';
-import { ExampleState } from '@/types/negativeExample';
 import { IoCheckmark, IoClose, IoHelp } from 'react-icons/io5';
 import { ColumnState, useDecisionContext } from '@/context/DecisionProvider';
 import { type IconType } from 'react-icons';
+import { type AssignmentInfo } from '@/types/assignment';
+import { Link } from 'react-router';
+import { routes } from '@/router';
 
 type GridState = {
     isProgressCollapsed?: boolean;
@@ -18,10 +20,11 @@ type GridState = {
 type ArmstrongRelationDisplayProps = {
     relation: ArmstrongRelation;
     workerOptions: WorkerOption[];
-    assignWorker: (rowIndex: number, workerId: string) => void;
+    assignWorker: (rowIndex: number, workerId?: string) => void;
+    assignments?: AssignmentInfo[];
 };
 
-export function ArmstrongRelationDisplay({ relation, workerOptions, assignWorker }: ArmstrongRelationDisplayProps) {
+export function ArmstrongRelationDisplay({ relation, workerOptions, assignWorker, assignments }: ArmstrongRelationDisplayProps) {
     const [ state, setState ] = useState<GridState>({});
 
     return (
@@ -92,6 +95,7 @@ export function ArmstrongRelationDisplay({ relation, workerOptions, assignWorker
                     rowIndex={rowIndex}
                     workerOptions={workerOptions}
                     assignWorker={assignWorker}
+                    assignments={assignments}
                     gridState={state}
                 />
             ))}
@@ -144,11 +148,12 @@ type ExampleRowDisplayProps = {
     row: ExampleRow;
     rowIndex: number;
     workerOptions: WorkerOption[];
-    assignWorker: (rowIndex: number, workerId: string) => void;
+    assignWorker: (rowIndex: number, workerId?: string) => void;
+    assignments?: AssignmentInfo[];
     gridState: GridState;
 };
 
-function ExampleRowDisplay({ relation, row, rowIndex, workerOptions, assignWorker, gridState }: ExampleRowDisplayProps) {
+function ExampleRowDisplay({ relation, row, rowIndex, workerOptions, assignWorker, assignments, gridState }: ExampleRowDisplayProps) {
     const maxSetCols = row.maxSet.map(index => relation.columns[index]);
     const exampleBgClass = row.isNegative ? 'bg-warning-400' : 'bg-danger-400';
     const { leftClass, rightClass } = getSpecialCellClasses(rowIndex);
@@ -156,10 +161,7 @@ function ExampleRowDisplay({ relation, row, rowIndex, workerOptions, assignWorke
     const worker = workerOptions.find(w => w.key === row.workerId);
     const isEvaluationAllowed = row.isNegative || relation.isPositivesAllowed;
 
-    function evaluateExample() {
-        // FIXME
-        console.warn('TODO Evaluate example');
-    }
+    const assignment = useMemo(() => assignments?.find(a => a.rowIndex === rowIndex), [ assignments, rowIndex ]);
 
     return (<>
         <div className={leftClass}>
@@ -168,14 +170,20 @@ function ExampleRowDisplay({ relation, row, rowIndex, workerOptions, assignWorke
             )}
 
             {isEvaluationAllowed && !gridState.isProgressCollapsed && (<>
-                {worker ? (
+                {/* {worker ? (
                     <span className='font-semibold'>{worker.label}</span>
                 ) : (
                     <WorkerDropdown workerOptions={workerOptions} selectWorker={key => assignWorker(rowIndex, key as string)} />
-                )}
+                )} */}
 
-                {row.state === ExampleState.New && (
-                    <Button size='sm' className='h-6' disableAnimation onPress={evaluateExample}>
+                {assignment ? (
+                    <Link to={routes.assignment.root.resolve({ assignmentId: assignment.id })}>
+                        <Button size='sm' className='h-6' disableAnimation>
+                            {row.state === ExampleState.New ? 'Evaluate' : 'Re-evaluate'}
+                        </Button>
+                    </Link>
+                ) : (
+                    <Button size='sm' className='h-6' disableAnimation onPress={() => assignWorker(rowIndex)}>
                         Evaluate
                     </Button>
                 )}

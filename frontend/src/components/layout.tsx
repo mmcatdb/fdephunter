@@ -1,13 +1,13 @@
 import clsx from 'clsx';
 import { useState, type ReactNode, type SetStateAction, type Dispatch, createContext, useContext, useMemo, useEffect } from 'react';
 import { TbHome, TbLayoutSidebarLeftCollapse, TbLayoutSidebarRightCollapse } from 'react-icons/tb';
-import { Button, ScrollShadow } from '@nextui-org/react';
+import { Button, cn, ScrollShadow } from '@nextui-org/react';
 import { Link, Outlet } from 'react-router';
 import { routes } from '@/router';
 import { MdOutlineDarkMode, MdOutlineLightMode } from 'react-icons/md';
-import { BiCog } from 'react-icons/bi';
 import { Portal } from './common/Portal';
 import { FaGithub } from 'react-icons/fa';
+import { FaDisplay } from 'react-icons/fa6';
 
 type LayoutState = {
     /** Whether the sidebar is collapsed. */
@@ -47,26 +47,25 @@ export function Layout() {
     const context = useMemo(() => ({ state, setState }), [ state, setState ]);
 
     useEffect(() => {
-        const themeListener = (event: MediaQueryListEvent) => {
+        const c = new AbortController();
+
+        windowThemeMatcher.addEventListener('change', (event: MediaQueryListEvent) => {
             setState(prev => ({ ...prev, isOSThemeDark: event.matches }));
-        };
+        }, { signal: c.signal });
 
-        windowThemeMatcher.addEventListener('change', themeListener);
-
-        return () => {
-            windowThemeMatcher.removeEventListener('change', themeListener);
-        };
+        return () => c.abort();
     }, []);
 
     const isDark = state.isLocalThemeDark ?? state.isOSThemeDark;
 
+    useEffect(() => {
+        document.documentElement.classList.toggle('dark', isDark);
+        document.documentElement.classList.toggle('light', !isDark);
+    }, [ isDark ]);
+
     return (
         <layoutContext.Provider value={context}>
-            <div
-                className={clsx('group min-w-fit min-h-full pt-14 flex text-foreground-800 bg-content1 font-medium',
-                    isDark && 'fd-global-dark dark',
-                )}
-            >
+            <div className='group min-w-fit min-h-full pt-14 flex text-foreground-800 bg-content1 font-medium'>
                 <Topbar />
 
                 <div id='sidebar-portal' />
@@ -87,7 +86,7 @@ function Topbar() {
             <ScrollShadow orientation='horizontal' hideScrollBar>
                 <div className='min-w-[600px] w-full h-14 flex justify-center bg-content1'>
 
-                    <div className='max-w-xs px-2 flex items-center gap-2'>
+                    <div className='w-40 px-2 flex items-center gap-2'>
                         <Button
                             isIconOnly
                             size='sm'
@@ -111,7 +110,7 @@ function Topbar() {
                             onPress={() => setState(prev => ({ ...prev, isLocalThemeDark: prev.isLocalThemeDark === undefined ? false : prev.isLocalThemeDark ? undefined : true }))}
                         >
                             {isLocalThemeDark === undefined ? (
-                                <BiCog size={24} />
+                                <FaDisplay size={20} />
                             ) : isLocalThemeDark ? (
                                 <MdOutlineDarkMode size={24} />
                             ) : (
@@ -124,9 +123,11 @@ function Topbar() {
                         </Button>
                     </div>
 
+                    <div id='topbar-sidebar-spacer-portal' />
+
                     <div id='topbar-content-portal' className='grow flex items-center justify-center' />
 
-                    <div className='max-w-xs px-2 flex items-center gap-2'>
+                    <div className='w-40 px-2 flex items-center justify-end gap-2'>
                         <Button
                             isIconOnly
                             size='sm'
@@ -166,7 +167,7 @@ type SidebarProps = {
 export function Sidebar({ children }: SidebarProps) {
     const { state: { isCollapsed } } = useLayout();
 
-    return (
+    return (<>
         <Portal to='sidebar-portal'>
             <aside className={clsx('fixed top-14 left-0 z-20 h-[calc(100vh_-_56px)] overflow-hidden transition-width !ease-in-out bg-content2 lg:bg-content1', isCollapsed ? 'w-0' : 'w-80')}>
                 {children}
@@ -180,7 +181,12 @@ export function Sidebar({ children }: SidebarProps) {
                 )}
             />
         </Portal>
-    );
+
+        {/* This keeps the topbar content aligned with the page content. */}
+        <Portal to='topbar-sidebar-spacer-portal'>
+            <div className={clsx('shrink-0 max-lg:hidden transition-width !ease-in-out', isCollapsed ? 'w-0' : 'w-80')} />
+        </Portal>
+    </>);
 }
 
 type ContentProps = {
@@ -203,7 +209,7 @@ type PageProps = {
 
 export function Page({ children, className }: PageProps) {
     return (
-        <div className={clsx('w-full max-w-7xl mx-auto px-4 py-8', className)}>
+        <div className={cn('w-full max-w-7xl mx-auto px-4 py-8', className)}>
             {children}
         </div>
     );

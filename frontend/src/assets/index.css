@@ -42,12 +42,6 @@
         @apply h-full;
     }
 
-
-    /* Fix for NextUI provider to enable themed scrollbar on :root. */
-    :root:has(.fd-global-dark) {
-        color-scheme: dark;
-    }
-
     body {
         @apply text-base;
     }

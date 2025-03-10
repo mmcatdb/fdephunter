@@ -1,5 +1,4 @@
-import { Assignment, type AssignmentInfo } from './assignment';
-import { type NegativeExampleFromServer } from './negativeExample';
+import { type AssignmentInfo } from './assignment';
 import { User, type UserFromServer } from './user';
 
 export enum WorkerState {

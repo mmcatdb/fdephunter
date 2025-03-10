@@ -7,7 +7,6 @@ export type ExecuteRediscoveryParams = {
 export type ExecuteDiscoveryParams = ExecuteRediscoveryParams & {
     datasets: string[];
     approach: string;
-    description: string;
 };
 
 export enum JobState {
@@ -24,12 +23,14 @@ export type JobFromServer = {
     iteration: number;
     /** In UTC. */
     startedAt: string;
+    resultId?: string;
 };
 
 export class Job {
     private constructor(
         readonly id: string,
         readonly state: JobState,
+        readonly description: string,
         readonly iteration: number,
         readonly startedAt: DateTime,
         readonly progress: number, // from 0 to 1
@@ -43,6 +44,7 @@ export class Job {
         return new Job(
             input.id,
             input.state,
+            input.description,
             input.iteration,
             DateTime.fromISO(input.startedAt),
             progress,

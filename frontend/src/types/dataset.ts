@@ -1,4 +1,4 @@
-enum DatasetType {
+export enum DatasetType {
     Csv = 'CSV',
     Json = 'JSON',
     Xml = 'XML',

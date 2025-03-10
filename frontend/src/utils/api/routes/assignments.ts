@@ -1,12 +1,9 @@
-import type { Empty, StringLike } from '@/types/api/routes';
+import type { StringLike } from '@/types/api/routes';
 import { GET, POST } from '../routeFunctions';
-import { type AssignmentInit, type AssignmentFromServer, type AssignmentInfo } from '@/types/assignment';
+import { type AssignmentFromServer, type AssignmentInfo } from '@/types/assignment';
 import { type DecisionInit } from '@/types/decision';
 
 export const assignments = {
-    create: POST<Empty, AssignmentFromServer, AssignmentInit>(
-        () => `/dummy/assignments`,
-    ),
     get: GET<{ assignmentId: StringLike }, AssignmentFromServer, { limit?: number }>(
         u => `/assignments/${u.assignmentId}`,
     ),

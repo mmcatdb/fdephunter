@@ -18,7 +18,7 @@ export type PullRoute<U extends UrlParams, T, Q extends QueryParams> = (urlParam
 
 export type PullRouteWithAbort<U extends UrlParams, T, Q extends QueryParams> = (signal: AbortSignal | undefined, urlParams: U, queryParams?: Q) => PullResult<T>;
 
-export type PushData = Record<string, unknown> | Record<string, unknown>[] | void;
+export type PushData = Record<string, unknown> | Record<string, unknown>[] | FormData | void;
 
 export type PushRoute<U extends UrlParams, T, D extends PushData> = (urlParams: U, data: D) => PullResult<T>;
 

@@ -2,7 +2,7 @@ import { AssignmentVerdictLabel } from '@/components/AssignmentVerdictLabel';
 import { Page } from '@/components/layout';
 import { routes } from '@/router';
 import { type AssignmentInfo } from '@/types/assignment';
-import { Worker, WorkerState } from '@/types/worker';
+import { type Worker, WorkerState } from '@/types/worker';
 import { API } from '@/utils/api';
 import { Button, Spinner } from '@nextui-org/react';
 import { useEffect, useState } from 'react';
@@ -30,21 +30,25 @@ export function WorkerPage() {
     }, [ worker.state, revalidator ]);
 
     async function workerAccepted() {
-        setFetchingAccept(true);
-        const response = await API.workers.accept({ workerId: worker.id });
-        setFetchingAccept(false);
-        if (!response.status)
-            return;
+        // setFetchingAccept(true);
+        // const response = await API.workers.accept({ workerId: worker.id });
+        // setFetchingAccept(false);
+        // if (!response.status)
+        //     return;
+
+        throw new Error('Not implemented');
 
         await revalidator.revalidate();
     }
 
     async function workerRejected() {
-        setFetchingReject(true);
-        const response = await API.workers.reject({ workerId: worker.id });
-        setFetchingReject(false);
-        if (!response.status)
-            return;
+        // setFetchingReject(true);
+        // const response = await API.workers.reject({ workerId: worker.id });
+        // setFetchingReject(false);
+        // if (!response.status)
+        //     return;
+
+        throw new Error('Not implemented');
 
         await revalidator.revalidate();
     }
@@ -146,20 +150,22 @@ type WorkerLoaded = {
 };
 
 WorkerPage.loader = async ({ params: { workerId } }: { params: Params<'workerId'> }): Promise<WorkerLoaded> => {
-    if (!workerId)
-        throw new Error('Missing worker ID');
+    // if (!workerId)
+    //     throw new Error('Missing worker ID');
 
-    const [ workerResponse, assignmentsResponse ] = await Promise.all([
-        API.workers.get(undefined, { workerId }),
-        API.assignments.getAllAnswered(undefined, { workerId }),
-    ]);
-    if (!workerResponse.status)
-        throw new Error('Failed to load worker');
-    if (!assignmentsResponse.status)
-        throw new Error('Failed to load answered assignments');
+    // const [ workerResponse, assignmentsResponse ] = await Promise.all([
+    //     API.workers.get(undefined, { workerId }),
+    //     API.assignments.getAllAnswered(undefined, { workerId }),
+    // ]);
+    // if (!workerResponse.status)
+    //     throw new Error('Failed to load worker');
+    // if (!assignmentsResponse.status)
+    //     throw new Error('Failed to load answered assignments');
 
-    return {
-        worker: Worker.fromServer(workerResponse.data),
-        answeredAssignments: assignmentsResponse.data,
-    };
+    // return {
+    //     worker: Worker.fromServer(workerResponse.data),
+    //     answeredAssignments: assignmentsResponse.data,
+    // };
+
+    throw new Error('Not implemented');
 };

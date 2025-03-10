@@ -1,6 +1,10 @@
 import { type Edge, MarkerType, type Node } from '@xyflow/react';
-import dagre from 'dagre';
 import { type FDPayloadFromServer } from './jobResult';
+
+export type FDGraph = {
+    nodes: FDNode[];
+    edges: FDEdge[];
+};
 
 type FDNode = {
     id: string;
@@ -12,11 +16,6 @@ export type FDEdge = {
     readonly id: string;
     readonly source: FDNode;
     readonly target: FDNode;
-};
-
-export type FDGraph = {
-    nodes: FDNode[];
-    edges: FDEdge[];
 };
 
 export function createFDGraph(payload: FDPayloadFromServer): FDGraph {
@@ -70,11 +69,6 @@ function createEdges(payload: FDPayloadFromServer, nodes: Map<string, FDNode>): 
     return edges;
 }
 
-const DEFAULT_NODE_DIMENSIONS = {
-    width: 200,
-    height: 50,
-};
-
 export type RFNode = Node<{ label: string }>;
 export type RFEdge = Edge;
 
@@ -82,56 +76,6 @@ export type RFGraph = {
     nodes: RFNode[];
     edges: RFEdge[];
 };
-
-export function createRFGraph(fdGraph: FDGraph): RFGraph {
-    const graph = new dagre.graphlib.Graph();
-
-    /*
-    graph.setGraph({
-        width: 700,
-        height: 200,
-    });
-    */
-
-    graph.setGraph({});
-
-    graph.setDefaultEdgeLabel(function () {
-        return {};
-    });
-
-    fdGraph.nodes.forEach(fdNode => graph.setNode(fdNode.id, { label: fdNode.label, ...DEFAULT_NODE_DIMENSIONS }));
-    fdGraph.edges.forEach(fdEdge => graph.setEdge(fdEdge.source.id, fdEdge.target.id));
-
-    dagre.layout(graph);
-
-    const nodes: RFNode[] = graph.nodes().map(name => {
-        const node = graph.node(name);
-
-        return {
-            id: name,
-            position: {
-                x: node.x,
-                y: node.y,
-            },
-            data: {
-                label: node.label!,
-            },
-            ...NODE_OPTIONS,
-        };
-    });
-
-    const edges: RFEdge[] = graph.edges().map(edge => ({
-        id: `${edge.v}_${edge.w}`,
-        source: edge.v,
-        target: edge.w,
-        ...EDGE_OPTIONS,
-    }));
-
-    return {
-        nodes,
-        edges,
-    };
-}
 
 export const NODE_OPTIONS: Omit<RFNode, 'id' | 'position' | 'data'> = {
     draggable: false,

@@ -1,5 +1,5 @@
 import { AssignmentEvaluation } from '@/components/AssignmentEvaluation';
-import { FDGraphDisplay, LatticeDisplay } from '@/components/dataset/FDGraphDisplay';
+import { LatticeDisplay } from '@/components/dataset/FDGraphDisplay';
 import { FDListDisplay } from '@/components/dataset/FDListDisplay';
 import { DecisionProvider } from '@/context/DecisionProvider';
 import { routes } from '@/router';
@@ -7,7 +7,9 @@ import { Assignment } from '@/types/assignment';
 import { Link, matchPath, Outlet, type Params, useLoaderData, useLocation, useRevalidator, useRouteLoaderData } from 'react-router';
 import { Button, Tab, Tabs } from '@nextui-org/react';
 import { Page, TopbarContent } from '@/components/layout';
-import { API } from '@/utils/api';
+import { mockAPI } from '@/utils/api/mockAPI';
+import { MOCK_LATTICES } from '@/types/armstrongRelation';
+// import { API } from '@/utils/api';
 
 export function AssignmentPage() {
     const { assignment } = useLoaderData<AssignmentLoaded>();
@@ -17,13 +19,19 @@ export function AssignmentPage() {
             <div className='space-x-4'>
                 <AssignmentTabs assignmentId={assignment.id} />
 
-                <Button as={Link} to={routes.worker.detail.resolve({ workerId: assignment.workerId })}>
-                    Back to Domain Expert
-                </Button>
+                {assignment.owner === 'worker' ? (
+                    <Button as={Link} to={routes.worker.detail.resolve({ workerId: assignment.ownerId })}>
+                        Back to Domain Expert
+                    </Button>
+                ) : (
+                    <Button as={Link} to={routes.workflow.dashboard.root.resolve({ workflowId: assignment.ownerId })}>
+                        Back to Workflow
+                    </Button>
+                )}
             </div>
         </TopbarContent>
 
-        <DecisionProvider relation={assignment.exampleRelation} isFinished={assignment.isFinished}>
+        <DecisionProvider relation={assignment.relation} isFinished={assignment.isFinished}>
             <Page>
                 <Outlet />
             </Page>
@@ -39,7 +47,8 @@ AssignmentPage.loader = async ({ params: { assignmentId } }: { params: Params<'a
     if (!assignmentId)
         throw new Error('Missing assignment ID');
 
-    const response = await API.assignments.get(undefined, { assignmentId });
+    // const response = await API.assignments.get(undefined, { assignmentId });
+    const response = await mockAPI.assignments.get(assignmentId);
     if (!response.status)
         throw new Error('Failed to load assignment');
 
@@ -71,10 +80,14 @@ export function AssignmentEvaluationPage() {
 }
 
 export function AssignmentListPage() {
-    const { assignment } = useRouteLoaderData<AssignmentLoaded>(routes.assignment.$id)!;
+    // const { assignment } = useRouteLoaderData<AssignmentLoaded>(routes.assignment.$id)!;
+
+    // return (
+    //     <FDListDisplay graph={assignment.discoveryResult.fdGraph} />
+    // );
 
     return (
-        <FDListDisplay graph={assignment.discoveryResult.fdGraph} />
+        <div />
     );
 }
 
@@ -82,7 +95,6 @@ export function AssignmentGraphPage() {
     const { assignment } = useRouteLoaderData<AssignmentLoaded>(routes.assignment.$id)!;
 
     return (
-        // <FDGraphDisplay graph={assignment.discoveryResult.fdGraph} />
-        <LatticeDisplay />
+        <LatticeDisplay lattice={MOCK_LATTICES[0]} />
     );
 }

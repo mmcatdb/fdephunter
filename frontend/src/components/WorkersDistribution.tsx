@@ -1,16 +1,17 @@
 import { useMemo, useState } from 'react';
 import { routes, type NamedParams } from '@/router';
 import { type User } from '@/types/user';
-import { Worker } from '@/types/worker';
+import { type Worker } from '@/types/worker';
 import { Workflow, type WorkflowStats, type Class } from '@/types/workflow';
-import { API } from '@/utils/api';
+// import { API } from '@/utils/api';
 import { Link, useParams } from 'react-router';
-import { ExampleState } from '@/types/negativeExample';
 import { type IconType } from 'react-icons/lib';
 import { IoCheckmarkCircleOutline, IoCloseCircleOutline, IoReloadCircleOutline, IoStopCircleOutline } from 'react-icons/io5';
 import { Button, Card, CardBody, CardFooter, CardHeader, Divider, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem, type SharedSelection } from '@nextui-org/react';
 import { type Approach } from '@/types/approach';
 import { Job } from '@/types/job';
+import { ExampleState } from '@/types/armstrongRelation';
+import { mockAPI } from '@/utils/api/mockAPI';
 
 type WorkersDistributionProps = {
     workflow: Workflow;
@@ -29,14 +30,15 @@ export function WorkersDistribution({ workflow, users, workers, onWorkerCreated,
     }, [ classes ]);
 
     const [ showModal, setShowModal ] = useState(false);
-    const [ fetching, setFetching ] = useState(false);
+    const [ isFetching, setIsFetching ] = useState(false);
 
     async function runRediscovery(approach: Approach) {
-        setFetching(true);
-        const response = await API.workflows.executeRediscovery({ workflowId: workflow.id }, {
+        setIsFetching(true);
+        // const response = await API.workflows.executeRediscovery({ workflowId: workflow.id }, {
+        const response = await mockAPI.workflows.executeRediscovery(workflow.id, {
             approach: approach.name,
         });
-        setFetching(false);
+        setIsFetching(false);
         if (!response.status)
             return;
 
@@ -69,7 +71,7 @@ export function WorkersDistribution({ workflow, users, workers, onWorkerCreated,
                 <RediscoveryFormModal
                     approaches={approaches}
                     onSubmit={runRediscovery}
-                    fetching={fetching}
+                    fetching={isFetching}
                 />
             </Modal>
         </div>
@@ -149,21 +151,21 @@ function AddWorker({ users, workers, onCreated }: AddWorkerProps) {
     const { workflowId } = useParams() as NamedParams<typeof routes.workflow.dashboard.root>;
 
     async function submit() {
-        const selectedUserId = selectedUser.values().next().value;
-        const user = users?.find(u => u.id === selectedUserId);
-        if (!user)
-            return;
+        // const selectedUserId = selectedUser.values().next().value;
+        // const user = users?.find(u => u.id === selectedUserId);
+        // if (!user)
+        //     return;
 
-        setFetching(true);
-        const response = await API.workflows.addWorker({ workflowId }, {
-            userId: user.id,
-        });
-        setFetching(false);
-        if (!response.status)
-            return;
+        // setFetching(true);
+        // const response = await API.workflows.addWorker({ workflowId }, {
+        //     userId: user.id,
+        // });
+        // setFetching(false);
+        // if (!response.status)
+        //     return;
 
-        onCreated(Worker.fromServer(response.data));
-        setSelectedUser(new Set());
+        // onCreated(Worker.fromServer(response.data));
+        // setSelectedUser(new Set());
     }
 
     return (<>
@@ -288,8 +290,8 @@ const exampleStateData: Record<ExampleState, {
     [ExampleState.New]: { color: 'text-primary', icon: IoReloadCircleOutline },
     [ExampleState.Rejected]: { color: 'text-danger', icon: IoCloseCircleOutline },
     [ExampleState.Accepted]: { color: 'text-success', icon: IoCheckmarkCircleOutline },
-    [ExampleState.Answered]: { color: 'text-primary', icon: IoReloadCircleOutline },
-    [ExampleState.Conflict]: { color: 'text-warning', icon: IoStopCircleOutline },
+    [ExampleState.Answered]: { color: 'text-warning', icon: IoReloadCircleOutline },
+    [ExampleState.Conflict]: { color: 'text-danger', icon: IoStopCircleOutline },
 };
 
 type RediscoveryFormModalProps = {

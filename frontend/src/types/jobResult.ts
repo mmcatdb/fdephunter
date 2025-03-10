@@ -1,23 +1,27 @@
+import { type ArmstrongRelation } from './armstrongRelation';
 import { type FDGraph, createFDGraph } from './FD';
 
 export type JobResultFromServer = {
     id: string;
     payload: string;
+    relation: ArmstrongRelation;
 };
 
 export class JobResult {
     private constructor(
         readonly id: string,
-        readonly fdGraph: FDGraph,
+        // readonly fdGraph: FDGraph,
+        readonly relation: ArmstrongRelation,
     ) {}
 
     static fromServer(input: JobResultFromServer): JobResult {
-        const payload = JSON.parse(input.payload) as FDPayloadFromServer;
-        const fdGraph = createFDGraph(payload);
+        // const payload = JSON.parse(input.payload) as FDPayloadFromServer;
+        // const fdGraph = createFDGraph(payload);
 
         return new JobResult(
             input.id,
-            fdGraph,
+            // fdGraph,
+            input.relation,
         );
     }
 }

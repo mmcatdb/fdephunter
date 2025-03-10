@@ -6,13 +6,14 @@ import { IoAdd, IoClose } from 'react-icons/io5';
 import { routes } from '@/router';
 import { AssignmentVerdictLabel } from './AssignmentVerdictLabel';
 import { AssignmentVerdict, type Assignment } from '@/types/assignment';
-import { API } from '@/utils/api';
+// import { API } from '@/utils/api';
 import { TbPointFilled } from 'react-icons/tb';
 import { Button, Card, CardBody, CardFooter, CardHeader, Checkbox, Input, Switch } from '@nextui-org/react';
 import { ExampleRelationDisplay } from './dataset/ArmstrongRelationDisplay';
 import { type ExampleRelation } from '@/types/armstrongRelation';
 import { ColumnNameBadge } from './dataset/FDListDisplay';
 import { FaArrowRight } from 'react-icons/fa';
+import { mockAPI } from '@/utils/api/mockAPI';
 
 type AssignmentEvaluationProps = {
     assignment: Assignment;
@@ -30,14 +31,14 @@ export function AssignmentEvaluation({ assignment, onEvaluated }: AssignmentEval
 
             <Card className='p-4 max-w-full'>
                 <ExampleRelationDisplay
-                    relation={assignment.exampleRelation}
+                    relation={assignment.relation}
                     selectedColIndex={selectedFDIndex}
                     setSelectedColIndex={areColsClickable ? setSelectedFDIndex : undefined}
                 />
             </Card>
 
             {areColsClickable && (
-                <DecisionReasonsCard relation={assignment.exampleRelation} selectedFDIndex={selectedFDIndex} />
+                <DecisionReasonsCard relation={assignment.relation} selectedFDIndex={selectedFDIndex} />
             )}
         </div>
     );
@@ -50,10 +51,10 @@ type ControlCardProps = {
 
 function ControlCard({ assignment, onEvaluated }: ControlCardProps) {
     const { decision, setDecision } = useDecisionContext();
-    const [ fetching, setFetching ] = useState(false);
+    const [ fetching, setFetching ] = useState<string>();
     const navigate = useNavigate();
 
-    async function evaluate(status: DecisionStatus) {
+    async function evaluate(status: DecisionStatus, fid: string) {
         const columns = status === DecisionStatus.Rejected
             ? decision.columns.map(col => {
                 const trimmed = col.reasons.map(reason => reason.trim()).filter(reason => reason.length > 0);
@@ -66,12 +67,13 @@ function ControlCard({ assignment, onEvaluated }: ControlCardProps) {
             })
             : [];
 
-        setFetching(true);
-        const response = await API.assignments.evaluate({ assignmentId: assignment.id }, {
+        setFetching(fid);
+        // const response = await API.assignments.evaluate({ assignmentId: assignment.id }, {
+        const response = await mockAPI.assignments.evaluate(assignment.id, {
             status,
             columns,
         });
-        setFetching(false);
+        setFetching(undefined);
         if (!response.status)
             return;
 
@@ -79,8 +81,22 @@ function ControlCard({ assignment, onEvaluated }: ControlCardProps) {
         onEvaluated(assignment);
     }
 
+    async function reevaluate(fid: string) {
+        setFetching(fid);
+        const response = await mockAPI.assignments.reset(assignment.id);
+        if (!response.status) {
+            setFetching(undefined);
+            return;
+        }
+
+        await navigate(0);
+    }
+
     function continueAccepted() {
-        void navigate(routes.worker.detail.resolve({ workerId: assignment.workerId }));
+        const route = assignment.owner === 'worker'
+            ? routes.worker.detail.resolve({ workerId: assignment.ownerId })
+            : routes.workflow.dashboard.root.resolve({ workflowId: assignment.ownerId });
+        void navigate(route);
     }
 
     const isUndecided = decision.phase !== DecisionPhase.Finished && decision.columns.some(column => column.state === ColumnState.Undecided);
@@ -97,45 +113,54 @@ function ControlCard({ assignment, onEvaluated }: ControlCardProps) {
                 {bodies[decision.phase]}
 
                 {decision.phase === DecisionPhase.Finished && (
-                    <div>
-                        This example was evaluated as <AssignmentVerdictLabel verdict={assignment.verdict} />.
-                    </div>
+                    <p>
+                        This example was evaluated as <AssignmentVerdictLabel verdict={assignment.verdict} />. Do you want to re-evaluate it?
+                    </p>
                 )}
             </CardBody>
 
-            {decision.phase !== DecisionPhase.Finished && (
-                <CardFooter className='gap-3'>
-                    {decision.phase === DecisionPhase.AnswerYesNo && (<>
-                        <Button color='success' onPress={() => evaluate(DecisionStatus.Accepted)} isLoading={fetching}>
-                            Yes, the example is correct
-                        </Button>
-                        <Button color='danger' onPress={() => setDecision({ ...decision, phase: DecisionPhase.ProvideReason })}>
-                            No, the example is incorrect
-                        </Button>
-                        <Button color='warning' onPress={() => evaluate(DecisionStatus.Unanswered)} isLoading={fetching}>
-                            {`I don't know ...`}
-                        </Button>
-                    </>)}
+            <CardFooter className='gap-3'>
+                {decision.phase === DecisionPhase.AnswerYesNo && (<>
+                    <Button color='success' onPress={() => evaluate(DecisionStatus.Accepted, FID_ACCEPT)} isLoading={fetching === FID_ACCEPT} isDisabled={!!fetching}>
+                        Yes, the example is correct
+                    </Button>
+                    <Button color='danger' onPress={() => setDecision({ ...decision, phase: DecisionPhase.ProvideReason })}>
+                        No, the example is incorrect
+                    </Button>
+                    <Button color='warning' onPress={() => evaluate(DecisionStatus.Unanswered, FID_ANSWER)} isLoading={fetching === FID_ANSWER} isDisabled={!!fetching}>
+                        {`I don't know ...`}
+                    </Button>
+                </>)}
 
-                    {decision.phase === DecisionPhase.ProvideReason && (<>
-                        <Button color='primary' onPress={() => evaluate(DecisionStatus.Rejected)} isLoading={fetching} isDisabled={isUndecided}>
-                            Submit
-                        </Button>
-                        <Button color='warning' onPress={() => evaluate(DecisionStatus.Unanswered)} isLoading={fetching}>
-                            {`I don't know ...`}
-                        </Button>
-                    </>)}
+                {decision.phase === DecisionPhase.ProvideReason && (<>
+                    <Button color='primary' onPress={() => evaluate(DecisionStatus.Rejected, FID_REJECT)} isLoading={fetching === FID_REJECT} isDisabled={!!fetching || isUndecided}>
+                        Submit
+                    </Button>
+                    <Button color='warning' onPress={() => evaluate(DecisionStatus.Unanswered, FID_ANSWER)} isLoading={fetching === FID_ANSWER} isDisabled={!!fetching}>
+                        {`I don't know ...`}
+                    </Button>
+                </>)}
 
-                    {decision.phase === DecisionPhase.JustFinished && (<>
-                        <Button color='primary' onPress={continueAccepted}>
-                            Go back and continue
-                        </Button>
-                    </>)}
-                </CardFooter>
-            )}
+                {decision.phase === DecisionPhase.JustFinished && (<>
+                    <Button color='primary' onPress={continueAccepted}>
+                        Go back and continue
+                    </Button>
+                </>)}
+
+                {decision.phase === DecisionPhase.Finished && (
+                    <Button color='warning' onPress={() => reevaluate(FID_REEVALUATE)} isLoading={fetching === FID_REEVALUATE} isDisabled={!!fetching}>
+                        Re-evaluate
+                    </Button>
+                )}
+            </CardFooter>
         </Card>
     );
 }
+
+const FID_ACCEPT = 'accept';
+const FID_REJECT = 'reject';
+const FID_ANSWER = 'answer';
+const FID_REEVALUATE = 'reevaluate';
 
 const titles: { [key in DecisionPhase]: string } = {
     [DecisionPhase.AnswerYesNo]: 'Is this example correct?',

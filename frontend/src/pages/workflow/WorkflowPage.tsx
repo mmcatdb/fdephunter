@@ -2,7 +2,8 @@ import { WorkflowProgressDisplay } from '@/components/worklow/WorkflowProgressDi
 import { Workflow } from '@/types/workflow';
 import { Outlet, type Params, useLoaderData } from 'react-router';
 import { Sidebar } from '@/components/layout';
-import { API } from '@/utils/api';
+// import { API } from '@/utils/api';
+import { mockAPI } from '@/utils/api/mockAPI';
 
 export function WorkflowPage() {
     const { workflow } = useLoaderData<WorkflowLoaded>();
@@ -24,7 +25,8 @@ WorkflowPage.loader = async ({ params: { workflowId } }: { params: Params<'workf
     if (!workflowId)
         throw new Error('Missing workflow ID');
 
-    const response = await API.workflows.get(undefined, { workflowId });
+    // const response = await API.workflows.get(undefined, { workflowId });
+    const response = await mockAPI.workflows.get(workflowId);
     if (!response.status)
         throw new Error('Failed to load workflow');
 

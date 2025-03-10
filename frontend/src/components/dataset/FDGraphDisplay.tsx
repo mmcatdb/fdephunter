@@ -1,36 +1,18 @@
 import { memo, useMemo, useState } from 'react';
-import { createRFGraph, NODE_OPTIONS, type RFGraph, type RFNode, type FDGraph as FDGraphType, type RFEdge } from '@/types/FD';
+import { NODE_OPTIONS, type RFGraph, type RFNode, type RFEdge } from '@/types/FD';
 import { Handle, type NodeProps, Position, ReactFlow } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { computeColumnIndexesForLatticeRow, computeEdgesForLatticeCell, type Lattice, McType, MOCK_LATTICE } from '@/types/armstrongRelation';
-import { Button, cn, Divider, select, Switch } from '@nextui-org/react';
+import { computeColumnIndexesForLatticeRow, computeEdgesForLatticeCell, type Lattice, McType } from '@/types/armstrongRelation';
+import { Button, cn, Divider, Switch } from '@nextui-org/react';
 
-type FDGraphDisplayProps = {
-    graph: FDGraphType;
-};
-
-export function FDGraphDisplay({ graph }: FDGraphDisplayProps) {
-    const rfGraph = useMemo(() => createRFGraph(graph), [ graph ]);
-
-    return (
-        <div className='w-full h-[700px]'>
-            <ReactFlow
-                fitView
-                nodes={rfGraph.nodes}
-                edges={rfGraph.edges}
-                onInit={console.log}
-            />
-        </div>
-    );
-}
-
-export function LatticeDisplay() {
+export function LatticeDisplay({ lattice }: { lattice: Lattice }) {
     const [ showAllRows, setShowAllRows ] = useState(false);
     const [ rowIndex, setRowIndex ] = useState(0);
-    const rfGraph = useMemo(() => createLatticeGraph(MOCK_LATTICE, showAllRows ? undefined : rowIndex), [ showAllRows, rowIndex ]);
+    const selectedIndex = showAllRows ? undefined : rowIndex;
+    const rfGraph = useMemo(() => createLatticeGraph(lattice, selectedIndex), [ lattice, selectedIndex ]);
 
     return (
-        <div className='w-full'>
+        <div className='w-full h-full flex flex-col'>
             <div className='h-10 flex items-center gap-8'>
                 <Switch isSelected={showAllRows} onValueChange={setShowAllRows} className='text-base'>
                     Show all rows?
@@ -51,13 +33,13 @@ export function LatticeDisplay() {
                             Previous
                         </Button>
 
-                        <Button onPress={() => setRowIndex(prev => Math.min(MOCK_LATTICE.rows.length - 1, prev + 1))} isDisabled={rowIndex === MOCK_LATTICE.rows.length - 1}>
+                        <Button onPress={() => setRowIndex(prev => Math.min(lattice.rows.length - 1, prev + 1))} isDisabled={rowIndex === lattice.rows.length - 1}>
                             Next
                         </Button>
                     </div>
                 </>)}
             </div>
-            <div className='w-full h-[700px]'>
+            <div className='w-full h-full'>
                 <ReactFlow
                     fitView
                     nodeTypes={nodeTypes}

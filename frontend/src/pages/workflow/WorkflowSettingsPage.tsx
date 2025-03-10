@@ -1,13 +1,16 @@
-import { useMemo, useState } from 'react';
-import { Dataset } from '@/types/dataset';
+import { useState } from 'react';
+import { Dataset, DatasetType } from '@/types/dataset';
 import { Approach } from '@/types/approach';
-import { API } from '@/utils/api';
-import { Button, Card, CardBody, Select, SelectItem, type SharedSelection } from '@nextui-org/react';
+// import { API } from '@/utils/api';
+import { Button, Card, CardBody } from '@nextui-org/react';
 import { Page } from '@/components/layout';
 import { Link, useLoaderData, useNavigate, useRouteLoaderData } from 'react-router';
 import { routes } from '@/router';
 import { type WorkflowLoaded } from './WorkflowPage';
 import { WorkflowState } from '@/types/workflow';
+import { FileInput } from '@/components/common/FileInput';
+import { type FileFromServer } from '@/types/file';
+import { mockAPI } from '@/utils/api/mockAPI';
 
 export function WorkflowSettingsPage() {
     const { workflow } = useRouteLoaderData<WorkflowLoaded>(routes.workflow.$id)!;
@@ -18,21 +21,22 @@ export function WorkflowSettingsPage() {
 
     async function runInitialDiscovery(settings: DiscoverySettings) {
         setFetching(true);
-        const response = await API.workflows.executeDiscovery({ workflowId: workflow.id }, {
+        // const response = await API.workflows.executeDiscovery({ workflowId: workflow.id }, {
+        const response = await mockAPI.workflows.executeDiscovery(workflow.id, {
             datasets: settings.datasets.map(d => d.name),
             approach: settings.approach.name,
-            description: settings.description,
         });
-        setFetching(false);
-        if (!response.status)
+        if (!response.status) {
+            setFetching(false);
             return;
+        }
 
         void navigate(routes.workflow.job.resolve({ workflowId: workflow.id }));
     }
 
     return (
         <Page className='max-w-xl'>
-            <h1 className='text-lg'>Initial settings</h1>
+            <h1 className='text-lg'>Select a dataset</h1>
 
             {workflow.state === WorkflowState.InitialSettings ? (
                 <Card className='mt-10 w-full'>
@@ -66,25 +70,31 @@ type WorkflowSettingsLoaded = {
 };
 
 WorkflowSettingsPage.loader = async (): Promise<WorkflowSettingsLoaded> => {
-    const [ datasetsResponse, approachesResponse ] = await Promise.all([
-        API.datasets.getAll(undefined, {}),
-        API.approaches.getAll(undefined, {}),
-    ]);
-    if (!datasetsResponse.status)
-        throw new Error('Failed to load datasets');
-    if (!approachesResponse.status)
-        throw new Error('Failed to load approaches');
+    // const [ datasetsResponse, approachesResponse ] = await Promise.all([
+    //     API.datasets.getAll(undefined, {}),
+    //     API.approaches.getAll(undefined, {}),
+    // ]);
+    // if (!datasetsResponse.status)
+    //     throw new Error('Failed to load datasets');
+    // if (!approachesResponse.status)
+    //     throw new Error('Failed to load approaches');
+
+    // return {
+    //     datasets: datasetsResponse.data.map(Dataset.fromServer),
+    //     approaches: approachesResponse.data.map(Approach.fromServer),
+    // };
+
+    await new Promise(resolve => setTimeout(resolve, (1 + Math.random()) * 200));
 
     return {
-        datasets: datasetsResponse.data.map(Dataset.fromServer),
-        approaches: approachesResponse.data.map(Approach.fromServer),
+        datasets: [ Dataset.fromServer({ name: 'temp', type: DatasetType.Csv }) ],
+        approaches: [ Approach.fromServer({ name: 'temp', author: 'temp' }) ],
     };
 };
 
 type DiscoverySettings = {
     datasets: Dataset[];
     approach: Approach;
-    description: '';
 };
 
 type InitialSettingsFormProps = {
@@ -95,31 +105,33 @@ type InitialSettingsFormProps = {
 };
 
 function InitialSettingsForm({ datasets, approaches, onSubmit, fetching }: InitialSettingsFormProps) {
-    const [ selectedDatasets, setSelectedDatasets ] = useState(new Set<string>());
-    const datasetOptions = useMemo(() => datasets.map(d => nameToOption(d.name)), [ datasets ]);
+    const [ file, setFile ] = useState<FileFromServer>();
+    // const [ selectedDatasets, setSelectedDatasets ] = useState(new Set<string>());
+    // const datasetOptions = useMemo(() => datasets.map(d => nameToOption(d.name)), [ datasets ]);
 
-    const [ selectedApproach, setSelectedApproach ] = useState(new Set<string>());
-    const approachOptions = useMemo(() => approaches.map(a => nameToOption(a.name)), [ approaches ]);
+    // const [ selectedApproach, setSelectedApproach ] = useState(new Set<string>());
+    // const approachOptions = useMemo(() => approaches.map(a => nameToOption(a.name)), [ approaches ]);
 
     function submit() {
-        const finalDatasets = [ ...selectedDatasets.values() ]
-            .map(dataset => datasets.find(d => d.name === dataset))
-            .filter((d): d is Dataset => !!d);
-        const selectedApproachName = selectedApproach.values().next().value;
-        const approach = approaches.find(a => a.name === selectedApproachName);
+        // const finalDatasets = [ ...selectedDatasets.values() ]
+        //     .map(dataset => datasets.find(d => d.name === dataset))
+        //     .filter((d): d is Dataset => !!d);
+        // const selectedApproachName = selectedApproach.values().next().value;
+        // const approach = approaches.find(a => a.name === selectedApproachName);
+        const approach = approaches[0];
 
-        if (finalDatasets.length === 0 || !approach)
-            return;
+        // if (finalDatasets.length === 0 || !approach)
+        //     return;
 
         onSubmit({
-            datasets: finalDatasets,
+            // datasets: finalDatasets,
+            datasets: [ datasets[0] ],
             approach,
-            description: '', // TODO description
         });
     }
 
     return (<>
-        <div>
+        {/* <div>
             <Select
                 label='Datasets'
                 selectionMode='multiple'
@@ -131,9 +143,11 @@ function InitialSettingsForm({ datasets, approaches, onSubmit, fetching }: Initi
                     <SelectItem key={option.key}>{option.label}</SelectItem>
                 )}
             </Select>
-        </div>
+        </div> */}
 
-        <div className='mt-4'>
+        <FileInput value={file} onChange={setFile} />
+
+        {/* <div className='mt-4'>
             <Select
                 label='Approach'
                 selectionMode='single'
@@ -145,14 +159,15 @@ function InitialSettingsForm({ datasets, approaches, onSubmit, fetching }: Initi
                     <SelectItem key={option.key}>{option.label}</SelectItem>
                 )}
             </Select>
-        </div>
+        </div> */}
 
         <Button
             className='mt-10 w-full'
             color='primary'
             onPress={submit}
             isLoading={fetching}
-            isDisabled={selectedApproach.size === 0 || selectedDatasets.size === 0}
+            // isDisabled={selectedApproach.size === 0 || selectedDatasets.size === 0}
+            isDisabled={!file}
         >
             Run!
         </Button>

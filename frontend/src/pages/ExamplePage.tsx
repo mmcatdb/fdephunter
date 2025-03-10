@@ -18,14 +18,14 @@ export function ExamplePage({ type }: ExamplePageProps) {
     }
 
     async function findRandomWorkflow(signal?: AbortSignal) {
-        const response = await API.workflows.getAll(signal, {});
-        if (!response.status || response.data.length === 0) {
-            setError();
-            return;
-        }
+        // const response = await API.workflows.getAll(signal, {});
+        // if (!response.status || response.data.length === 0) {
+        //     setError();
+        //     return;
+        // }
 
-        const workflows = response.data.map(Workflow.fromServer);
-        navigate(routes.workflow.settings.resolve({ workflowId: workflows[0].id }));
+        // const workflows = response.data.map(Workflow.fromServer);
+        // navigate(routes.workflow.settings.resolve({ workflowId: workflows[0].id }));
     }
 
     async function findRandomWorker(signal?: AbortSignal) {

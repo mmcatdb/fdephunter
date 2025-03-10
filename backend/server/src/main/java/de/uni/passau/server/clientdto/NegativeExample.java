@@ -5,6 +5,7 @@ import de.uni.passau.server.model.NegativeExampleNode.NegativeExampleState;
 
 import java.io.Serializable;
 
+/** @deprecated */
 public record NegativeExample(
     String id,
     String payload,
