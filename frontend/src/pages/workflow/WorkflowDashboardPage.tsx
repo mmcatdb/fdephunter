@@ -307,7 +307,7 @@ export function WorkflowListPage() {
     // const { jobResult } = useRouteLoaderData<WorkflowDashboardLoaded>(routes.workflow.dashboard.$id)!;
 
     // return (
-    //     <FDListDisplay graph={jobResult.fdGraph} />
+    //     <FDListDisplay graph={jobResult.fdGraph.edges} />
     // );
 
     return (

@@ -12,3 +12,8 @@ const percentFormatter = Intl.NumberFormat(undefined, {
 export function displayPercent(value: number) {
     return percentFormatter.format(value);
 }
+
+/** Comparison of only ascii-like strings. */
+export function compareStringsAscii(a: string, b: string): number {
+    return a < b ? -1 : (a > b ? 1 : 0);
+}

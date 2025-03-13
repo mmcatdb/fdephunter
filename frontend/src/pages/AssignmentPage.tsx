@@ -83,7 +83,7 @@ export function AssignmentListPage() {
     // const { assignment } = useRouteLoaderData<AssignmentLoaded>(routes.assignment.$id)!;
 
     // return (
-    //     <FDListDisplay graph={assignment.discoveryResult.fdGraph} />
+    //     <FDListDisplay graph={assignment.discoveryResult.fdGraph.edges} />
     // );
 
     return (
