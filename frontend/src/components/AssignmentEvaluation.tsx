@@ -239,7 +239,7 @@ function DecisionReasonsCard({ relation: { exampleRow, columns }, selectedFDInde
                 <div className='flex gap-4'>
                     <div className='py-[2px] flex flex-wrap gap-x-2 gap-y-1'>
                         {maxSetCols.map(col => (
-                            <ColumnNameBadge key={col} name={col} className={exampleRow.isNegative ? 'bg-warning-400' : 'bg-danger-400'} />
+                            <ColumnNameBadge key={col} name={col} className={exampleRow.isPositive ? 'bg-danger-400' : 'bg-warning-400'} />
                         ))}
                     </div>
 

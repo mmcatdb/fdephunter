@@ -4,40 +4,39 @@ import { Handle, type NodeProps, Position, ReactFlow } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { computeColumnIndexesForLatticeRow, computeEdgesForLatticeCell, type Lattice, McType } from '@/types/armstrongRelation';
 import { Button, cn, Divider, Switch } from '@nextui-org/react';
+import clsx from 'clsx';
 
 export function LatticeDisplay({ lattice }: { lattice: Lattice }) {
-    const [ showAllRows, setShowAllRows ] = useState(false);
+    const [ showAllRows, setShowAllRows ] = useState(true);
     const [ rowIndex, setRowIndex ] = useState(0);
     const selectedIndex = showAllRows ? undefined : rowIndex;
     const rfGraph = useMemo(() => createLatticeGraph(lattice, selectedIndex), [ lattice, selectedIndex ]);
 
     return (
         <div className='w-full h-full flex flex-col'>
-            <div className='h-10 flex items-center gap-8'>
-                <Switch isSelected={showAllRows} onValueChange={setShowAllRows} className='text-base'>
+            <div className={clsx('h-10 flex items-center justify-center gap-8', !showAllRows && 'invisible')}>
+                <Switch isSelected={showAllRows} onValueChange={setShowAllRows} className='text-base visible'>
                     Show all rows?
                 </Switch>
 
-                {!showAllRows && (<>
-                    <Divider orientation='vertical' />
+                <Divider orientation='vertical' />
 
-                    <div>
+                <div>
                         Row:{' '}
-                        <span className='tabular-nums text-lg font-bold'>
-                            {rowIndex + 1}
-                        </span>
-                    </div>
+                    <span className='tabular-nums text-lg font-bold'>
+                        {rowIndex + 1}
+                    </span>
+                </div>
 
-                    <div className='space-x-2'>
-                        <Button onPress={() => setRowIndex(prev => Math.max(0, prev - 1))} isDisabled={rowIndex === 0}>
+                <div className='space-x-2'>
+                    <Button onPress={() => setRowIndex(prev => Math.max(0, prev - 1))} isDisabled={!showAllRows || rowIndex === 0}>
                             Previous
-                        </Button>
+                    </Button>
 
-                        <Button onPress={() => setRowIndex(prev => Math.min(lattice.rows.length - 1, prev + 1))} isDisabled={rowIndex === lattice.rows.length - 1}>
+                    <Button onPress={() => setRowIndex(prev => Math.min(lattice.rows.length - 1, prev + 1))} isDisabled={!showAllRows || rowIndex === lattice.rows.length - 1}>
                             Next
-                        </Button>
-                    </div>
-                </>)}
+                    </Button>
+                </div>
             </div>
             <div className='w-full h-full'>
                 <ReactFlow

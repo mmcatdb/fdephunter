@@ -25,6 +25,7 @@ export function WorkflowSettingsPage() {
         const response = await mockAPI.workflows.executeDiscovery(workflow.id, {
             datasets: settings.datasets.map(d => d.name),
             approach: settings.approach.name,
+            datasetName: settings.datasetName,
         });
         if (!response.status) {
             setFetching(false);
@@ -95,6 +96,7 @@ WorkflowSettingsPage.loader = async (): Promise<WorkflowSettingsLoaded> => {
 type DiscoverySettings = {
     datasets: Dataset[];
     approach: Approach;
+    datasetName: string;
 };
 
 type InitialSettingsFormProps = {
@@ -113,6 +115,8 @@ function InitialSettingsForm({ datasets, approaches, onSubmit, fetching }: Initi
     // const approachOptions = useMemo(() => approaches.map(a => nameToOption(a.name)), [ approaches ]);
 
     function submit() {
+        if (!file)
+            return;
         // const finalDatasets = [ ...selectedDatasets.values() ]
         //     .map(dataset => datasets.find(d => d.name === dataset))
         //     .filter((d): d is Dataset => !!d);
@@ -127,6 +131,7 @@ function InitialSettingsForm({ datasets, approaches, onSubmit, fetching }: Initi
             // datasets: finalDatasets,
             datasets: [ datasets[0] ],
             approach,
+            datasetName: file.originalName,
         });
     }
 

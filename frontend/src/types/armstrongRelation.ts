@@ -4,10 +4,15 @@ export type ArmstrongRelation = {
     referenceRow: ReferenceRow;
     exampleRows: ExampleRow[];
     /**
-     * Whether the positive examples can be evaluated (otherwise only the negative ones).
-     * Should be true if and only if all negative examples are evaluated.
+     * Whether we are evaluating the positive examples or the negative ones.
+     * Should be true if and only if all negative examples are already evaluated.
      */
-    isPositivesAllowed: boolean;
+    isEvaluatingPositives: boolean;
+
+    /** This probably shouldn't be here, but we need it now for the stats. */
+    minimalFDs: number;
+    otherFDs: number;
+    lhsSize: number;
 };
 
 export type ReferenceRow = {
@@ -19,7 +24,7 @@ export type ExampleRow = {
     /** The indexes of the columns that form the maximal set. Undefined for the first row. */
     maxSet: number[];
     /** Whether it is a negative or positive example. Undefined for the first row. */
-    isNegative: boolean;
+    isPositive: boolean;
     state: ExampleState;
     workerId?: string;
 };
@@ -148,60 +153,80 @@ export const MOCK_ARMSTRONG_RELATIONS: ArmstrongRelation[] = [ {
     columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
     referenceRow: { values: [ 'tt0036443', 'Titanic', '1943', '85', 'Action+Drama+History' ] },
     exampleRows: [
-        { maxSet: [ 1, 2 ], isNegative: false, state: ExampleState.New, values: [ 'tt0079836', 'Titanic', '1943', '194', 'Drama+History' ] },
-        { maxSet: [ 1, 3 ], isNegative: false, state: ExampleState.New, values: [ 'tt0115392', 'Titanic', '1979', '85', 'Drama+Romance' ] },
-        { maxSet: [ 1, 4 ], isNegative: false, state: ExampleState.New, values: [ 'tt0120338', 'Titanic', '1996', '87', 'Action+Drama+History' ] },
-        { maxSet: [ 3 ], isNegative: false, state: ExampleState.New, values: [ 'tt0143942', 'S.O.S. Titanic', '1997', '85', 'History' ] },
+        { maxSet: [ 1, 2 ], isPositive: true, state: ExampleState.New, values: [ 'tt0079836', 'Titanic', '1943', '194', 'Drama+History' ] },
+        { maxSet: [ 1, 3 ], isPositive: true, state: ExampleState.New, values: [ 'tt0115392', 'Titanic', '1979', '85', 'Drama+Romance' ] },
+        { maxSet: [ 1, 4 ], isPositive: true, state: ExampleState.New, values: [ 'tt0120338', 'Titanic', '1996', '87', 'Action+Drama+History' ] },
+        { maxSet: [ 3 ], isPositive: true, state: ExampleState.New, values: [ 'tt0143942', 'S.O.S. Titanic', '1997', '85', 'History' ] },
     ],
-    isPositivesAllowed: false,
+    isEvaluatingPositives: false,
+
+    minimalFDs: 12,
+    otherFDs: 40,
+    lhsSize: 0,
 }, {
     columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
     referenceRow: { values: [ 'tt0036443', 'Titanic', '1943', '85', 'Action+Drama+History' ] },
     exampleRows: [
-        { maxSet: [ 0 ], isNegative: true, state: ExampleState.New, values: [ 'tt0036443', 'S.O.S. Titanic', '1979', '194', 'Drama+History' ] },
-        { maxSet: [ 1, 2 ], isNegative: false, state: ExampleState.New, values: [ 'tt0079836', 'Titanic', '1943', '87', 'Drama+Romance' ] },
-        { maxSet: [ 1, 3 ], isNegative: false, state: ExampleState.New, values: [ 'tt0115392', 'Titanic', '1996', '85', 'History' ] },
-        { maxSet: [ 1, 4 ], isNegative: false, state: ExampleState.New, values: [ 'tt0120338', 'Titanic', '1997', 'null', 'Action+Drama+History' ] },
-        { maxSet: [ 2 ], isNegative: true, state: ExampleState.New, values: [ 'tt0155274', 'The Titanic', '1943', '51', 'Documentary+Short' ] },
-        { maxSet: [ 3 ], isNegative: false, state: ExampleState.New, values: [ 'tt0594950', 'Titanic Tech', '1915', '85', 'Documentary' ] },
-        { maxSet: [ 4 ], isNegative: true, state: ExampleState.New, values: [ 'tt0771984', 'Titanic\'s Ghosts', '2006', '46', 'Action+Drama+History' ] },
+        { maxSet: [ 0 ], isPositive: false, state: ExampleState.New, values: [ 'tt0036443', 'S.O.S. Titanic', '1979', '194', 'Drama+History' ] },
+        { maxSet: [ 1, 2 ], isPositive: true, state: ExampleState.New, values: [ 'tt0079836', 'Titanic', '1943', '87', 'Drama+Romance' ] },
+        { maxSet: [ 1, 3 ], isPositive: true, state: ExampleState.New, values: [ 'tt0115392', 'Titanic', '1996', '85', 'History' ] },
+        { maxSet: [ 1, 4 ], isPositive: true, state: ExampleState.New, values: [ 'tt0120338', 'Titanic', '1997', 'null', 'Action+Drama+History' ] },
+        { maxSet: [ 2 ], isPositive: false, state: ExampleState.New, values: [ 'tt0155274', 'The Titanic', '1943', '51', 'Documentary+Short' ] },
+        { maxSet: [ 3 ], isPositive: true, state: ExampleState.New, values: [ 'tt0594950', 'Titanic Tech', '1915', '85', 'Documentary' ] },
+        { maxSet: [ 4 ], isPositive: false, state: ExampleState.New, values: [ 'tt0771984', 'Titanic\'s Ghosts', '2006', '46', 'Action+Drama+History' ] },
     ],
-    isPositivesAllowed: false,
+    isEvaluatingPositives: false,
+
+    minimalFDs: 9,
+    otherFDs: 37,
+    lhsSize: 1,
 }, {
     columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
     referenceRow: { values: [ 'tt0036443', 'Titanic', '1943', '85', 'Action+Drama+History' ] },
     exampleRows: [
-        { maxSet: [ 1, 2 ], isNegative: false, state: ExampleState.New, values: [ 'tt0079836', 'Titanic', '1943', '194', 'Drama+History' ] },
-        { maxSet: [ 1, 3 ], isNegative: false, state: ExampleState.New, values: [ 'tt0115392', 'Titanic', '1979', '85', 'Drama+Romance' ] },
-        { maxSet: [ 1, 4 ], isNegative: false, state: ExampleState.New, values: [ 'tt0120338', 'Titanic', '1996', '87', 'Action+Drama+History' ] },
-        { maxSet: [ 2, 3 ], isNegative: true, state: ExampleState.New, values: [ 'tt0155274', 'S.O.S. Titanic', '1943', '85', 'History' ] },
-        { maxSet: [ 2, 4 ], isNegative: true, state: ExampleState.New, values: [ 'tt0594950', 'Titanic Tech', '1943', 'null', 'Action+Drama+History' ] },
-        { maxSet: [ 3, 4 ], isNegative: true, state: ExampleState.New, values: [ 'tt0650185', 'The Titanic', '1997', '85', 'Action+Drama+History' ] },
+        { maxSet: [ 1, 2 ], isPositive: true, state: ExampleState.New, values: [ 'tt0079836', 'Titanic', '1943', '194', 'Drama+History' ] },
+        { maxSet: [ 1, 3 ], isPositive: true, state: ExampleState.New, values: [ 'tt0115392', 'Titanic', '1979', '85', 'Drama+Romance' ] },
+        { maxSet: [ 1, 4 ], isPositive: true, state: ExampleState.New, values: [ 'tt0120338', 'Titanic', '1996', '87', 'Action+Drama+History' ] },
+        { maxSet: [ 2, 3 ], isPositive: false, state: ExampleState.New, values: [ 'tt0155274', 'S.O.S. Titanic', '1943', '85', 'History' ] },
+        { maxSet: [ 2, 4 ], isPositive: false, state: ExampleState.New, values: [ 'tt0594950', 'Titanic Tech', '1943', 'null', 'Action+Drama+History' ] },
+        { maxSet: [ 3, 4 ], isPositive: false, state: ExampleState.New, values: [ 'tt0650185', 'The Titanic', '1997', '85', 'Action+Drama+History' ] },
     ],
-    isPositivesAllowed: false,
+    isEvaluatingPositives: false,
+
+    minimalFDs: 12,
+    otherFDs: 29,
+    lhsSize: 2,
 }, {
     columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
     referenceRow: { values: [ 'tt0036443', 'Titanic', '1943', '85', 'Action+Drama+History' ] },
     exampleRows: [
-        { maxSet: [ 1, 2, 3 ], isNegative: true, state: ExampleState.New, values: [ 'tt0079836', 'Titanic', '1943', '85', 'Drama+History' ] },
-        { maxSet: [ 1, 2, 4 ], isNegative: true, state: ExampleState.New, values: [ 'tt0115392', 'Titanic', '1943', '194', 'Action+Drama+History' ] },
-        { maxSet: [ 1, 3, 4 ], isNegative: true, state: ExampleState.New, values: [ 'tt0120338', 'Titanic', '1979', '85', 'Action+Drama+History' ] },
-        { maxSet: [ 2, 3, 4 ], isNegative: true, state: ExampleState.New, values: [ 'tt0155274', 'S.O.S. Titanic', '1943', '85', 'Action+Drama+History' ] },
+        { maxSet: [ 1, 2, 3 ], isPositive: false, state: ExampleState.New, values: [ 'tt0079836', 'Titanic', '1943', '85', 'Drama+History' ] },
+        { maxSet: [ 1, 2, 4 ], isPositive: false, state: ExampleState.New, values: [ 'tt0115392', 'Titanic', '1943', '194', 'Action+Drama+History' ] },
+        { maxSet: [ 1, 3, 4 ], isPositive: false, state: ExampleState.New, values: [ 'tt0120338', 'Titanic', '1979', '85', 'Action+Drama+History' ] },
+        { maxSet: [ 2, 3, 4 ], isPositive: false, state: ExampleState.New, values: [ 'tt0155274', 'S.O.S. Titanic', '1943', '85', 'Action+Drama+History' ] },
     ],
-    isPositivesAllowed: false,
+    isEvaluatingPositives: false,
+
+    minimalFDs: 4,
+    otherFDs: 29,
+    lhsSize: 3,
 }, {
     columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
     referenceRow: { values: [ 'tt0036443', 'Titanic', '1943', '85', 'Action+Drama+History' ] },
     exampleRows: [
-        { maxSet: [ 1, 2, 3, 4 ], isNegative: true, state: ExampleState.New, values: [ 'tt0079836', 'Titanic', '1943', '85', 'Action+Drama+History' ] },
-        { maxSet: [ 1, 2, 4 ], isNegative: true, state: ExampleState.New, values: [ 'tt0115392', 'Titanic', '1943', '194', 'Action+Drama+History' ] },
-        { maxSet: [ 1, 2 ], isNegative: false, state: ExampleState.New, values: [ 'tt0120338', 'Titanic', '1943', '87', 'Drama+History' ] },
-        { maxSet: [ 1, 3, 4 ], isNegative: true, state: ExampleState.New, values: [ 'tt0155274', 'Titanic', '1979', '85', 'Action+Drama+History' ] },
-        { maxSet: [ 1, 3 ], isNegative: false, state: ExampleState.New, values: [ 'tt0594950', 'Titanic', '1996', '85', 'Drama+Romance' ] },
-        { maxSet: [ 2, 3, 4 ], isNegative: true, state: ExampleState.New, values: [ 'tt0650185', 'S.O.S. Titanic', '1943', '85', 'Action+Drama+History' ] },
-        { maxSet: [ 2, 3 ], isNegative: true, state: ExampleState.New, values: [ 'tt0771984', 'The Titanic', '1943', '85', 'History' ] },
+        { maxSet: [ 1, 2, 3, 4 ], isPositive: false, state: ExampleState.New, values: [ 'tt0079836', 'Titanic', '1943', '85', 'Action+Drama+History' ] },
+        { maxSet: [ 1, 2, 4 ], isPositive: false, state: ExampleState.New, values: [ 'tt0115392', 'Titanic', '1943', '194', 'Action+Drama+History' ] },
+        { maxSet: [ 1, 2 ], isPositive: true, state: ExampleState.New, values: [ 'tt0120338', 'Titanic', '1943', '87', 'Drama+History' ] },
+        { maxSet: [ 1, 3, 4 ], isPositive: false, state: ExampleState.New, values: [ 'tt0155274', 'Titanic', '1979', '85', 'Action+Drama+History' ] },
+        { maxSet: [ 1, 3 ], isPositive: true, state: ExampleState.New, values: [ 'tt0594950', 'Titanic', '1996', '85', 'Drama+Romance' ] },
+        { maxSet: [ 2, 3, 4 ], isPositive: false, state: ExampleState.New, values: [ 'tt0650185', 'S.O.S. Titanic', '1943', '85', 'Action+Drama+History' ] },
+        { maxSet: [ 2, 3 ], isPositive: false, state: ExampleState.New, values: [ 'tt0771984', 'The Titanic', '1943', '85', 'History' ] },
     ],
-    isPositivesAllowed: true,
+    isEvaluatingPositives: true,
+
+    minimalFDs: 5,
+    otherFDs: 28,
+    lhsSize: 4,
 } ];
 
 export const MOCK_LATTICES: Lattice[] = [ {

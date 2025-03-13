@@ -3,7 +3,7 @@ import { FDListDisplay } from '@/components/dataset/FDListDisplay';
 import { LatticeDisplay } from '@/components/dataset/FDGraphDisplay';
 import { WorkersDistribution } from '@/components/WorkersDistribution';
 import { Class } from '@/types/workflow';
-import { Button, Card, CardBody, Tab, Tabs } from '@nextui-org/react';
+import { Button, Card, CardBody, CardFooter, CardHeader, Divider, Tab, Tabs } from '@nextui-org/react';
 import { Page, TopbarContent } from '@/components/layout';
 import { ArmstrongRelationDisplay, type WorkerOption } from '@/components/dataset/ArmstrongRelationDisplay';
 import { Link, matchPath, Outlet, type Params, useLocation, useNavigate, useRevalidator, useRouteLoaderData } from 'react-router';
@@ -31,7 +31,7 @@ export function WorkflowDashboardPage() {
             <WorkflowDashboardTabs workflowId={workflow.id} selectedKey={selectedKey} />
         </TopbarContent>
 
-        <Page className={clsx(selectedKey === 'graph' && 'max-w-[unset] min-w-[800px] min-h-[600px] h-full pr-0 pb-0')}>
+        <Page className={clsx(selectedKey === 'graph' && 'max-w-[unset] min-w-[800px] min-h-[600px] h-full pb-0')}>
             <Outlet />
         </Page>
     </>);
@@ -147,7 +147,7 @@ export function ArmstrongRelationPage() {
     const relation = jobResult.relation;
 
     const navigate = useNavigate();
-    const [ isFetching, setIsFetching ] = useState(false);
+    const [ fetching, setFetching ] = useState<string>();
 
     // FIXME Synchronize with backend.
     const assignWorker = useCallback(async (rowIndex: number, workerId?: string) => {
@@ -174,14 +174,14 @@ export function ArmstrongRelationPage() {
     const workerOptions = useMemo(() => [], []);
 
     async function runRediscovery() {
-        setIsFetching(true);
+        setFetching(FID_CONTINUE);
         // const response = await API.workflows.executeRediscovery({ workflowId: workflow.id }, {
         const response = await mockAPI.workflows.executeRediscovery(workflow.id, {
             // approach: approach.name,
             approach: 'HyFD',
         });
         if (!response.status) {
-            setIsFetching(false);
+            setFetching(undefined);
             return;
         }
 
@@ -193,11 +193,26 @@ export function ArmstrongRelationPage() {
         void navigate(routes.workflow.job.resolve({ workflowId: workflow.id }));
     }
 
-    const isContinueEnabled = useMemo(() => relation.exampleRows.filter(row => row.isNegative || relation.isPositivesAllowed).every(row => row.state !== ExampleState.New), [ relation ]);
+    const revalidator = useRevalidator();
+
+    async function acceptAll() {
+        setFetching(FID_ACCEPT_ALL);
+        const response = await mockAPI.workflows.acceptAllExamples(workflow.id);
+        if (!response.status) {
+            setFetching(undefined);
+            return;
+        }
+
+        await revalidator.revalidate();
+        setFetching(undefined);
+    }
+
+    const isContinueEnabled = useMemo(() => relation.exampleRows.filter(row => row.isPositive === relation.isEvaluatingPositives).every(row => row.state !== ExampleState.New), [ relation ]);
+    const isAcceptAllEnabled = !isContinueEnabled;
 
     const stats = useMemo(() => {
-        const positive = relation.exampleRows.filter(row => !row.isNegative).length;
-        const negative = relation.exampleRows.filter(row => row.isNegative).length;
+        const positive = relation.exampleRows.filter(row => row.isPositive).length;
+        const negative = relation.exampleRows.filter(row => !row.isPositive).length;
         const evaluated = relation.exampleRows.filter(row => row.state !== ExampleState.New).length;
 
         return {
@@ -208,33 +223,49 @@ export function ArmstrongRelationPage() {
     }, [ relation ]);
 
     return (
-        <div className='mx-auto w-fit flex flex-col items-end gap-8'>
+        <div className='mx-auto w-fit flex flex-col gap-8'>
             <Card className='w-full'>
-                <CardBody className='grid grid-flow-col gap-8'>
-                    <div>
-                        Positive FDs: <span className='px-1 text-primary font-semibold'>{stats.positive}</span>
-                    </div>
+                <CardHeader>
+                    <h1 className='text-lg'>Workflow overview</h1>
+                </CardHeader>
 
-                    <div>
-                        Negative FDs: <span className='px-1 text-primary font-semibold'>{stats.negative}</span>
-                    </div>
+                <CardBody className='grid grid-cols-3 gap-x-8 gap-y-2'>
+                    <div>Iteration:<span className='px-2 text-primary font-semibold'>{workflow.iteration}</span></div>
 
-                    <div>
-                        Evaluated FDs: <span className='px-1 text-primary font-semibold'>{stats.evaluated}</span>
-                    </div>
+                    <div className='col-span-2 flex items-center'>Dataset:<div className='truncate px-2 text-primary font-semibold'>{workflow.datasetName}</div></div>
+
+                    <div>Minimal FDs:<span className='px-2 text-primary font-semibold'>{relation.minimalFDs}</span></div>
+
+                    <div>Total FDs:<span className='px-2 text-primary font-semibold'>{relation.minimalFDs + relation.otherFDs}</span></div>
+
+                    <div>LHS size:<span className='px-2 text-primary font-semibold'>{relation.lhsSize}</span></div>
+
+                    <div>Positive examples:<span className='px-2 text-primary font-semibold'>{stats.positive}</span></div>
+
+                    <div>Negative examples:<span className='px-2 text-primary font-semibold'>{stats.negative}</span></div>
+
+                    <div>Evaluated examples:<span className='px-2 text-primary font-semibold'>{stats.evaluated}</span></div>
                 </CardBody>
+
+                <CardFooter className='flex justify-end gap-4'>
+                    <Button color='primary' onPress={runRediscovery} isDisabled={!isContinueEnabled || !!fetching} isLoading={fetching === FID_CONTINUE}>
+                        Continue
+                    </Button>
+                    <Button color='secondary' onPress={acceptAll} isDisabled={!isAcceptAllEnabled || !!fetching} isLoading={fetching === FID_ACCEPT_ALL}>
+                        Accept all
+                    </Button>
+                </CardFooter>
             </Card>
 
-            <Card className='max-w-full p-4'>
+            <Card className='max-w-full p-4 items-center'>
                 <ArmstrongRelationDisplay relation={relation} workerOptions={workerOptions} assignWorker={assignWorker} assignments={assignments} />
             </Card>
-
-            <Button color='primary' onPress={runRediscovery} isDisabled={!isContinueEnabled} isLoading={isFetching}>
-                Continue
-            </Button>
         </div>
     );
 }
+
+const FID_CONTINUE = 'continue';
+const FID_ACCEPT_ALL = 'accept-all';
 
 function workerToOption(worker: Worker): WorkerOption {
     return {

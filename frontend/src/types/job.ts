@@ -7,6 +7,7 @@ export type ExecuteRediscoveryParams = {
 export type ExecuteDiscoveryParams = ExecuteRediscoveryParams & {
     datasets: string[];
     approach: string;
+    datasetName: string;
 };
 
 export enum JobState {

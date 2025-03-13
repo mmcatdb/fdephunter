@@ -23,9 +23,6 @@ export function FileInput({ id, value, onChange }: FileInputProps) {
             return;
         }
 
-        if (isFetching)
-            return;
-
         const formData = new FormData();
         formData.append('file', file);
 

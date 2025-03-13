@@ -22,6 +22,7 @@ export const mockAPI = {
         get: getWorkflow,
         executeDiscovery,
         executeRediscovery,
+        acceptAllExamples,
         getLastJob,
         getLastJobResult,
     },
@@ -46,6 +47,16 @@ async function createAssignment(init: AssignmentInit): Promise<Result<Assignment
     if (!job?.resultId)
         return error();
 
+    const assignment = createAssignmentForWorkflow(init, workflow, job.resultId);
+
+    const relation = createExampleRelation(assignment);
+    if (!relation)
+        return error();
+
+    return success({ ...assignment, relation });
+}
+
+function createAssignmentForWorkflow(init: AssignmentInit, workflow: WorkflowDB, jobResultId: string): AssignmentDB {
     const assignment: AssignmentDB = {
         id: v4(),
         workflowId: init.workflowId,
@@ -54,18 +65,15 @@ async function createAssignment(init: AssignmentInit): Promise<Result<Assignment
         owner: 'workflow',
         ownerId: init.workflowId,
         verdict: AssignmentVerdict.New,
-        jobResultId: job.resultId,
+        jobResultId,
     };
 
     workflow.assignmentIds.push(assignment.id);
-    const relation = createExampleRelation(assignment);
-    if (!relation)
-        return error();
 
     set(assignment);
     set(workflow);
 
-    return success({ ...assignment, relation });
+    return assignment;
 }
 
 function createExampleRelation({ workflowId, rowIndex }: { workflowId: string, rowIndex: number }): ExampleRelation | undefined {
@@ -189,6 +197,7 @@ async function createWorkflow(): Promise<Result<WorkflowFromServer>> {
         id: v4(),
         state: WorkflowState.InitialSettings,
         iteration: 0,
+        datasetName: undefined,
         assignmentIds: [],
     };
 
@@ -225,6 +234,7 @@ async function executeDiscovery(workflowId: string, params: ExecuteDiscoveryPara
     };
 
     workflow.state = WorkflowState.WaitingForInitialFD;
+    workflow.datasetName = params.datasetName;
     workflow.jobId = job.id;
 
     set(workflow);
@@ -268,6 +278,61 @@ async function executeRediscovery(workflowId: string, params: ExecuteRediscovery
         workflow,
         job,
     });
+}
+
+async function acceptAllExamples(workflowId: string): Promise<Result<WorkflowFromServer>> {
+    await wait();
+
+    const workflow = get<WorkflowDB>(workflowId);
+    if (!workflow?.jobId)
+        return error();
+    const job = get<JobFromServer>(workflow.jobId);
+    if (!job?.resultId)
+        return error();
+    const result = get<JobResultFromServer>(job.resultId);
+    if (!result)
+        return error();
+
+    const availableIndexes: number[] = [];
+    for (let i = 0; i < result.relation.exampleRows.length; i++) {
+        const row = result.relation.exampleRows[i];
+        const isRowAvailable = row.state === ExampleState.New && (row.isPositive === result.relation.isEvaluatingPositives);
+        if (isRowAvailable)
+            availableIndexes.push(i);
+    }
+
+    const assignments = workflow.assignmentIds
+        .map(id => get<AssignmentDB>(id))
+        .filter(a => !!a && a.iteration === workflow.iteration) as AssignmentDB[];
+    const openAssignments = assignments.filter(a => a.verdict === AssignmentVerdict.New);
+
+    for (const rowIndex of availableIndexes) {
+        const assignment = openAssignments.find(a => a.rowIndex === rowIndex);
+        if (!assignment) {
+            const init = {
+                workerId: undefined,
+                workflowId,
+                rowIndex,
+            };
+
+            const assignment = createAssignmentForWorkflow(init, workflow, job.resultId);
+            openAssignments.push(assignment);
+        }
+    }
+
+    for (const assignment of openAssignments) {
+        const init = { status: DecisionStatus.Accepted, columns: [] };
+
+        assignment.verdict = decisionToAssignment[init.status];
+        assignment.decision = init;
+        result.relation.exampleRows[assignment.rowIndex].state = decisionToExample[init.status];
+
+        set(assignment);
+    }
+
+    set(result);
+
+    return success(workflow);
 }
 
 async function getLastJob(workflowId: string): Promise<Result<JobFromServer>> {

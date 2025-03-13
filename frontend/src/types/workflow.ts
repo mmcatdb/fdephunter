@@ -41,6 +41,8 @@ export type WorkflowFromServer = {
     id: string;
     state: WorkflowState;
     iteration: number;
+    /** Is set after the dataset is uploaded so it's not known from the start. */
+    datasetName: string | undefined;
 };
 
 export class Workflow {
@@ -48,6 +50,7 @@ export class Workflow {
         readonly id: string,
         readonly state: WorkflowState,
         readonly iteration: number,
+        readonly datasetName: string | undefined,
     ) {}
 
     static fromServer(input: WorkflowFromServer): Workflow {
@@ -55,6 +58,7 @@ export class Workflow {
             input.id,
             input.state,
             input.iteration,
+            input.datasetName,
         );
     }
 }

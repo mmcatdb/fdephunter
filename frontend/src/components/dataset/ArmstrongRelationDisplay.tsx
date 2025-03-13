@@ -155,11 +155,11 @@ type ExampleRowDisplayProps = {
 
 function ExampleRowDisplay({ relation, row, rowIndex, workerOptions, assignWorker, assignments, gridState }: ExampleRowDisplayProps) {
     const maxSetCols = row.maxSet.map(index => relation.columns[index]);
-    const exampleBgClass = row.isNegative ? 'bg-warning-400' : 'bg-danger-400';
+    const exampleBgClass = row.isPositive ? 'bg-danger-400' : 'bg-warning-400';
     const { leftClass, rightClass } = getSpecialCellClasses(rowIndex);
 
     const worker = workerOptions.find(w => w.key === row.workerId);
-    const isEvaluationAllowed = row.isNegative || relation.isPositivesAllowed;
+    const isEvaluationAllowed = row.isPositive === relation.isEvaluatingPositives;
 
     const assignment = useMemo(() => assignments?.find(a => a.rowIndex === rowIndex), [ assignments, rowIndex ]);
 
