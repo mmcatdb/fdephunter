@@ -31,7 +31,8 @@ export function LandingPage() {
             </TopbarContent>
 
             <h1 className='text-lg'>FDepHunter</h1>
-            <p className='mt-10'>
+
+            <p className='mt-12'>
                 Functional dependencies (FDs) are key to understanding your data, but standard discovery methods can miss important insights. FDepHunter goes beyond traditional approaches by eliminating false positives (coincidental FDs) and revealing hidden patterns (ghost FDs) that standard techniques overlook.
                 <br /><br />
 
@@ -41,7 +42,7 @@ export function LandingPage() {
                 Try FDepHunter today and uncover the true structure of your data!
             </p>
 
-            <div className='mt-10 flex flex-col items-center gap-4'>
+            <div className='mt-12 flex flex-col items-center gap-4'>
                 <Button color='primary' className='md:w-1/2 lg:w-1/3' onPress={continueToWorkflow} isLoading={isFetching}>
                     Sure thing!
                 </Button>

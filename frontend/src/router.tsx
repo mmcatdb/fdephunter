@@ -7,8 +7,8 @@ import { ExamplePage } from './pages/ExamplePage';
 import { Layout } from './components/layout';
 import { WorkflowSettingsPage } from './pages/workflow/WorkflowSettingsPage';
 import { WorkflowJobPage } from './pages/workflow/WorkflowJobPage';
-import { ArmstrongRelationPage, WorkflowDashboardPage, WorkflowDatasetPage, WorkflowGraphPage, WorkflowListPage } from './pages/workflow/WorkflowDashboardPage';
-import { WorkflowResultsPage } from './pages/workflow/WorkflowResultsPage';
+import { WorkflowOverviewPage, WorkflowDashboardPage, WorkflowDatasetPage, WorkflowGraphPage, WorkflowListPage } from './pages/workflow/WorkflowDashboardPage';
+import { WorkflowFinalPage, WorkflowResultsPage } from './pages/workflow/WorkflowResultsPage';
 
 export class NamedRoute<T extends string = never> {
     constructor(
@@ -45,6 +45,7 @@ export const routes = {
             tabs: new NamedRoute<'workflowId' | 'tab'>('/workflows/:workflowId/dashboard/:tab'),
         },
         results: {
+            $id: 'results',
             root: new NamedRoute<'workflowId'>('/workflows/:workflowId/results'),
             tabs: new NamedRoute<'workflowId' | 'tab'>('/workflows/:workflowId/results/:tab'),
         },
@@ -93,10 +94,7 @@ export const router = createBrowserRouter([ {
             children: [ {
                 index: true,
                 // element: <WorkersDistributionPage />,
-                element: <ArmstrongRelationPage />,
-            // }, {
-            //     path: routes.workflow.dashboard.tabs.resolvePartial({ tab: 'armstrong-relation' }),
-            //     element: <ArmstrongRelationPage />,
+                element: <WorkflowOverviewPage />,
             }, {
                 path: routes.workflow.dashboard.tabs.resolvePartial({ tab: 'dataset' }),
                 element: <WorkflowDatasetPage />,
@@ -110,7 +108,11 @@ export const router = createBrowserRouter([ {
         }, {
             path: routes.workflow.results.root.path,
             element: <WorkflowResultsPage />,
+            id: routes.workflow.results.$id,
             children: [ {
+                index: true,
+                element: <WorkflowFinalPage />,
+            }, {
                 path: routes.workflow.results.tabs.resolvePartial({ tab: 'dataset' }),
                 element: <WorkflowDatasetPage />,
             }, {

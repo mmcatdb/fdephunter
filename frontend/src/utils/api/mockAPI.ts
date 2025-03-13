@@ -233,7 +233,7 @@ async function executeDiscovery(workflowId: string, params: ExecuteDiscoveryPara
         startedAt: DateTime.now().toUTC().toISO(),
     };
 
-    workflow.state = WorkflowState.WaitingForInitialFD;
+    workflow.state = WorkflowState.WaitingForInitialFDs;
     workflow.datasetName = params.datasetName;
     workflow.jobId = job.id;
 
@@ -351,7 +351,8 @@ async function getLastJob(workflowId: string): Promise<Result<JobFromServer>> {
 
     switch (job.state) {
     case JobState.Waiting: {
-        const delay = (1 + Math.random()) * 2000;
+        // const delay = (1 + Math.random()) * 2000;
+        const delay = 0;
         if (+createdAt + delay < +now) {
             job.state = JobState.Running;
             set(job);
@@ -359,7 +360,8 @@ async function getLastJob(workflowId: string): Promise<Result<JobFromServer>> {
         break;
     }
     case JobState.Running: {
-        const delay = (1 + Math.random()) * 6000;
+        // const delay = (1 + Math.random()) * 6000;
+        const delay = 0;
         if (+createdAt + delay < +now) {
             finishJob(job, workflow);
 
@@ -380,7 +382,7 @@ function finishJob(job: JobFromServer, workflow: WorkflowDB) {
         ? WorkflowState.NegativeExamples
         : workflow.iteration < MOCK_ARMSTRONG_RELATIONS.length
             ? WorkflowState.PositiveExamples
-            : WorkflowState.DisplayFinalFD;
+            : WorkflowState.DisplayFinalFDs;
 }
 
 async function getLastJobResult(workflowId: string): Promise<Result<JobResultFromServer>> {

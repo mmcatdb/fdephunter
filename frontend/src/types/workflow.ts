@@ -8,7 +8,7 @@ export enum WorkflowState {
     /**
      * The user confirmed the settings. A job is created for the FD discovery algorithm. The user gets back id of the job so he can watch the job state in real time.
      */
-    WaitingForInitialFD = 'INITIAL_JOB_WAITING',
+    WaitingForInitialFDs = 'INITIAL_JOB_WAITING',
     /**
      * The user can see the FDs in multiple ways (list, graph).
      */
@@ -34,7 +34,7 @@ export enum WorkflowState {
     /**
      * Yes! We have finally made it. The algorithm drops the final set of genuine FDs and we level up.
      */
-    DisplayFinalFD = 'FINAL',
+    DisplayFinalFDs = 'FINAL',
 }
 
 export type WorkflowFromServer = {

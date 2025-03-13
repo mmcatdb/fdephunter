@@ -101,7 +101,6 @@ function WorkflowDashboardTabs({ workflowId, selectedKey }: { workflowId: string
     return (
         <Tabs selectedKey={selectedKey}>
             <Tab key='index' title='Overview' {...{ as: Link, to: routes.workflow.dashboard.root.resolve({ workflowId }) }} />
-            {/* <Tab key='armstrong-relation' title='Armstrong relation' {...{ as: Link, to: routes.workflow.dashboard.tabs.resolve({ workflowId, tab: 'armstrong-relation' }) }} /> */}
             <Tab key='dataset' title='Dataset' {...{ as: Link, to: routes.workflow.dashboard.tabs.resolve({ workflowId, tab: 'dataset' }) }} />
             <Tab key='list' title='Functional dependencies' {...{ as: Link, to: routes.workflow.dashboard.tabs.resolve({ workflowId, tab: 'list' }) }} />
             <Tab key='graph' title='Graph view' {...{ as: Link, to: routes.workflow.dashboard.tabs.resolve({ workflowId, tab: 'graph' }) }} />
@@ -138,7 +137,7 @@ function WorkflowDashboardTabs({ workflowId, selectedKey }: { workflowId: string
 //     );
 // }
 
-export function ArmstrongRelationPage() {
+export function WorkflowOverviewPage() {
     const { workflow } = useRouteLoaderData<WorkflowLoaded>(routes.workflow.$id)!;
     // const { workers } = useRouteLoaderData<WorkflowDashboardLoaded>(routes.workflow.dashboard.$id)!;
     const { jobResult, assignments } = useRouteLoaderData<WorkflowDashboardLoaded>(routes.workflow.dashboard.$id)!;
@@ -236,7 +235,7 @@ export function ArmstrongRelationPage() {
 
                     <div>Minimal FDs:<span className='px-2 text-primary font-semibold'>{relation.minimalFDs}</span></div>
 
-                    <div>Total FDs:<span className='px-2 text-primary font-semibold'>{relation.minimalFDs + relation.otherFDs}</span></div>
+                    <div>All FDs:<span className='px-2 text-primary font-semibold'>{relation.minimalFDs + relation.otherFDs}</span></div>
 
                     <div>LHS size:<span className='px-2 text-primary font-semibold'>{relation.lhsSize}</span></div>
 
@@ -244,7 +243,7 @@ export function ArmstrongRelationPage() {
 
                     <div>Negative examples:<span className='px-2 text-primary font-semibold'>{stats.negative}</span></div>
 
-                    <div>Evaluated examples:<span className='px-2 text-primary font-semibold'>{stats.evaluated}</span></div>
+                    <div>Unanswered examples:<span className='px-2 text-primary font-semibold'>{stats.evaluated}</span></div>
                 </CardBody>
 
                 <CardFooter className='flex justify-end gap-4'>
@@ -284,11 +283,14 @@ export function WorkflowDatasetPage() {
     const { workflow } = useRouteLoaderData<WorkflowLoaded>(routes.workflow.$id)!;
     const navigate = useNavigate();
 
+    const revalidate = useRevalidator();
+
     async function forceContinue() {
         const response = await mockAPI.workflows.executeRediscovery(workflow.id, { approach: 'HyFD' }, true);
         if (!response.status)
             return;
 
+        await revalidate.revalidate();
         void navigate(routes.workflow.job.resolve({ workflowId: workflow.id }));
     }
 
@@ -297,10 +299,6 @@ export function WorkflowDatasetPage() {
             <Button color='primary' onPress={forceContinue}>
                 Fast continue
             </Button>
-
-            <div className='mt-8'>
-                The left panel might display incorrect data after this operation. You can fix it by refreshing the page.
-            </div>
         </div>
     );
 }

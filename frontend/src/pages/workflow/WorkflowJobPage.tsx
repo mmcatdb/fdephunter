@@ -8,6 +8,7 @@ import { type WorkflowLoaded } from './WorkflowPage';
 // import { API } from '@/utils/api';
 import { useEffect } from 'react';
 import { mockAPI } from '@/utils/api/mockAPI';
+import { WorkflowState } from '@/types/workflow';
 
 const REFRESH_TIMEOUT = 2000; // in ms
 
@@ -28,7 +29,10 @@ export function WorkflowJobPage() {
     const navigate = useNavigate();
 
     function handleNextStep() {
-        void navigate(routes.workflow.dashboard.root.resolve({ workflowId: workflow.id }));
+        const route = workflow.state === WorkflowState.DisplayFinalFDs
+            ? routes.workflow.results.root
+            : routes.workflow.dashboard.root;
+        void navigate(route.resolve({ workflowId: workflow.id }));
     }
 
     return (
