@@ -64,7 +64,7 @@ export function WorkflowFinalPage() {
                 </CardHeader>
 
                 <CardBody className='grid grid-cols-3 gap-x-8 gap-y-2'>
-                    <div>Iteration:<span className='px-2 text-primary font-semibold'>{workflow.iteration}</span></div>
+                    <div>Total iterations:<span className='px-2 text-primary font-semibold'>{workflow.iteration}</span></div>
 
                     <div className='col-span-2 flex items-center'>Dataset:<div className='truncate px-2 text-primary font-semibold'>{workflow.datasetName}</div></div>
 
@@ -74,11 +74,11 @@ export function WorkflowFinalPage() {
 
                     <div />
 
-                    <div>Total positive examples:<span className='px-2 text-primary font-semibold'>{111}</span></div>
+                    <div>Total negative examples:<span className='px-2 text-primary font-semibold'>{10}</span></div>
 
-                    <div>Total negative examples:<span className='px-2 text-primary font-semibold'>{222}</span></div>
+                    <div>Total positive examples:<span className='px-2 text-primary font-semibold'>{10}</span></div>
 
-                    <div>Total unanswered examples:<span className='px-2 text-primary font-semibold'>{333}</span></div>
+                    <div>Total unanswered examples:<span className='px-2 text-primary font-semibold'>{2}</span></div>
                 </CardBody>
             </Card>
 

@@ -1,15 +1,14 @@
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Dataset, DatasetType } from '@/types/dataset';
 import { Approach } from '@/types/approach';
 // import { API } from '@/utils/api';
-import { Button, Card, CardBody } from '@nextui-org/react';
+import { Button, Card, CardBody, Select, SelectItem, type SharedSelection } from '@nextui-org/react';
 import { Page } from '@/components/layout';
 import { Link, useLoaderData, useNavigate, useRouteLoaderData } from 'react-router';
 import { routes } from '@/router';
 import { type WorkflowLoaded } from './WorkflowPage';
 import { WorkflowState } from '@/types/workflow';
-import { FileInput } from '@/components/common/FileInput';
-import { type FileFromServer } from '@/types/file';
+import { FileInput, type FileInputValue } from '@/components/common/FileInput';
 import { mockAPI } from '@/utils/api/mockAPI';
 
 export function WorkflowSettingsPage() {
@@ -107,15 +106,17 @@ type InitialSettingsFormProps = {
 };
 
 function InitialSettingsForm({ datasets, approaches, onSubmit, fetching }: InitialSettingsFormProps) {
-    const [ file, setFile ] = useState<FileFromServer>();
-    // const [ selectedDatasets, setSelectedDatasets ] = useState(new Set<string>());
-    // const datasetOptions = useMemo(() => datasets.map(d => nameToOption(d.name)), [ datasets ]);
+    const [ selected, setSelected ] = useState({
+        dataset: new Set<string>(),
+        file: undefined as FileInputValue,
+    });
+    const datasetOptions = useMemo(() => MOCK_DATASETS.map((label, key) => ({ key, label })), []);
 
     // const [ selectedApproach, setSelectedApproach ] = useState(new Set<string>());
     // const approachOptions = useMemo(() => approaches.map(a => nameToOption(a.name)), [ approaches ]);
 
     function submit() {
-        if (!file)
+        if (!selected.dataset.size && !selected.file)
             return;
         // const finalDatasets = [ ...selectedDatasets.values() ]
         //     .map(dataset => datasets.find(d => d.name === dataset))
@@ -131,26 +132,40 @@ function InitialSettingsForm({ datasets, approaches, onSubmit, fetching }: Initi
             // datasets: finalDatasets,
             datasets: [ datasets[0] ],
             approach,
-            datasetName: file.originalName,
+            datasetName: selected.file?.originalName ?? MOCK_DATASETS[Number(selected.dataset.values().next().value)],
         });
     }
 
+    const setSelectedValue = useCallback((value: FileInputValue | SharedSelection) => {
+        if (value === 'all')
+            return;
+
+        if (value instanceof Set)
+            setSelected(() => ({ dataset: value as Set<string>, file: undefined }));
+        else
+            setSelected(() => ({ dataset: new Set(), file: value }));
+
+    }, []);
+
     return (<>
-        {/* <div>
+        <p className='mb-4 text-center'>Pick from the predefined options ...</p>
+
+        <div>
             <Select
-                label='Datasets'
-                selectionMode='multiple'
+                label='Dataset'
                 items={datasetOptions}
-                selectedKeys={selectedDatasets}
-                onSelectionChange={setSelectedDatasets as (keys: SharedSelection) => void}
+                selectedKeys={selected.dataset}
+                onSelectionChange={setSelectedValue}
             >
                 {option => (
                     <SelectItem key={option.key}>{option.label}</SelectItem>
                 )}
             </Select>
-        </div> */}
+        </div>
 
-        <FileInput value={file} onChange={setFile} />
+        <p className='my-4 text-center'>... or upload your own!</p>
+
+        <FileInput value={selected.file} onChange={setSelectedValue} />
 
         {/* <div className='mt-4'>
             <Select
@@ -167,12 +182,12 @@ function InitialSettingsForm({ datasets, approaches, onSubmit, fetching }: Initi
         </div> */}
 
         <Button
-            className='mt-10 w-full'
+            className='mt-8 w-full'
             color='primary'
             onPress={submit}
             isLoading={fetching}
             // isDisabled={selectedApproach.size === 0 || selectedDatasets.size === 0}
-            isDisabled={!file}
+            isDisabled={!selected.dataset.size && !selected.file}
         >
             Run!
         </Button>
@@ -190,3 +205,43 @@ function nameToOption(name: string): Option {
         label: name,
     };
 }
+
+const MOCK_DATASETS = [
+    'iris',
+    'balance-scale',
+    'chess',
+    'abalone',
+    'nursery',
+    'breast-cancer-wisconsin',
+    'bridges',
+    'echocardiogram',
+    'adult',
+    'letter',
+    'ncvoter',
+    'ncvoter',
+    'hepatitis',
+    'horse',
+    'fd-reduced-30',
+    'plista',
+    'flight',
+    'flight',
+    'uniprot',
+    'TPC H lineitem',
+    'School results',
+    'Adult',
+    'Classification',
+    'Reflns',
+    'Atom sites',
+    'DB status',
+    'Entity source',
+    'Bio entry',
+    'Voter',
+    'FDR-15',
+    'FDR-30',
+    'Atom',
+    'Census',
+    'Wiki image',
+    'Spots',
+    'Struct sheet',
+    'Ditag feature',
+];

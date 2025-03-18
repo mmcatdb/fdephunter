@@ -3,26 +3,44 @@ import { NODE_OPTIONS, type RFGraph, type RFNode, type RFEdge } from '@/types/FD
 import { Handle, type NodeProps, Position, ReactFlow } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { computeColumnIndexesForLatticeRow, computeEdgesForLatticeCell, type Lattice, McType } from '@/types/armstrongRelation';
-import { Button, cn, Divider, Switch } from '@nextui-org/react';
+import { Button, cn, Divider, Select, SelectItem, type SharedSelection, Switch } from '@nextui-org/react';
 import clsx from 'clsx';
 
-export function LatticeDisplay({ lattice }: { lattice: Lattice }) {
+export function LatticeDisplay({ lattices }: { lattices: Lattice[] }) {
+    const [ classIndex, setClassIndex ] = useState(new Set([ '0' ]));
+    const classItems = useMemo(() => lattices.map((lattice, index) => ({ value: index, label: lattice.class })), [ lattices ]);
+    const lattice = lattices[Number(classIndex.values().next().value!)];
+
     const [ showAllRows, setShowAllRows ] = useState(true);
     const [ rowIndex, setRowIndex ] = useState(0);
+
     const selectedIndex = showAllRows ? undefined : rowIndex;
     const rfGraph = useMemo(() => createLatticeGraph(lattice, selectedIndex), [ lattice, selectedIndex ]);
 
     return (
         <div className='w-full h-full flex flex-col'>
             <div className={clsx('h-10 flex items-center justify-center gap-8', !showAllRows && 'invisible')}>
-                <Switch isSelected={showAllRows} onValueChange={setShowAllRows} className='text-base visible'>
+                <Select
+                    label='Class'
+                    items={classItems}
+                    selectedKeys={classIndex}
+                    disallowEmptySelection
+                    onSelectionChange={setClassIndex as (keys: SharedSelection) => void}
+                    className='visible max-w-sm'
+                >
+                    {item => (
+                        <SelectItem key={item.value}>{item.label}</SelectItem>
+                    )}
+                </Select>
+
+                <Switch isSelected={showAllRows} onValueChange={setShowAllRows} className='visible'>
                     Show all rows?
                 </Switch>
 
                 <Divider orientation='vertical' />
 
                 <div>
-                        Row:{' '}
+                    Row:{' '}
                     <span className='tabular-nums text-lg font-bold'>
                         {rowIndex + 1}
                     </span>
@@ -30,11 +48,11 @@ export function LatticeDisplay({ lattice }: { lattice: Lattice }) {
 
                 <div className='space-x-2'>
                     <Button onPress={() => setRowIndex(prev => Math.max(0, prev - 1))} isDisabled={!showAllRows || rowIndex === 0}>
-                            Previous
+                        Previous
                     </Button>
 
                     <Button onPress={() => setRowIndex(prev => Math.min(lattice.rows.length - 1, prev + 1))} isDisabled={!showAllRows || rowIndex === lattice.rows.length - 1}>
-                            Next
+                        Next
                     </Button>
                 </div>
             </div>

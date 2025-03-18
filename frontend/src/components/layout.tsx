@@ -65,7 +65,7 @@ export function Layout() {
 
     return (
         <layoutContext.Provider value={context}>
-            <div className='group min-w-fit min-h-full pt-14 flex text-foreground-800 bg-content1 font-medium'>
+            <div className='group/layout min-w-fit min-h-full pt-14 flex text-foreground-800 bg-content1 font-medium'>
                 <Topbar />
 
                 <div id='sidebar-portal' />
@@ -93,7 +93,7 @@ function Topbar() {
                             variant='light'
                             color='primary'
                             onPress={() => setState(prev => ({ ...prev, isCollapsed: !prev.isCollapsed }))}
-                            className='group-has-[#sidebar-portal:empty]:hidden'
+                            className='group-has-[#sidebar-portal:empty]/layout:hidden'
                         >
                             {isCollapsed ? (
                                 <TbLayoutSidebarRightCollapse size={24} />

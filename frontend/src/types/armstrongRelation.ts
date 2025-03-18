@@ -44,6 +44,7 @@ export type ExampleRelation = {
 };
 
 export type Lattice = {
+    class: string;
     /** Names of the columns. They are expected to be unique. */
     columns: string[];
     rows: LatticeRow[];
@@ -229,26 +230,79 @@ export const MOCK_ARMSTRONG_RELATIONS: ArmstrongRelation[] = [ {
     lhsSize: 4,
 } ];
 
-export const MOCK_LATTICES: Lattice[] = [ {
-    columns: [ 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
-    rows: [ {
-        cells: [ McType.Subset, McType.Subset, McType.Subset, McType.Subset ],
-    }, {
-        cells: [ McType.Initial, McType.Initial, McType.Initial, McType.Candidate, McType.Candidate, McType.Candidate ],
-    }, {
-        cells: [ McType.Derived, McType.Derived, McType.Derived, McType.Derived ],
-    }, {
-        cells: [ McType.Derived ],
+export const MOCK_LATTICES: Lattice[][] = [
+    [ {
+        class: 'tconst',
+        columns: [ 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
+        rows: [ {
+            cells: [ McType.Subset, McType.Subset, McType.Subset, McType.Subset ],
+        }, {
+            cells: [ McType.Initial, McType.Initial, McType.Initial, McType.Candidate, McType.Candidate, McType.Candidate ],
+        }, {
+            cells: [ McType.Derived, McType.Derived, McType.Derived, McType.Derived ],
+        }, {
+            cells: [ McType.Derived ],
+        } ],
     } ],
-}, {
-    columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes' ],
-    rows: [ {
-        cells: [ McType.Genuine, McType.Subset, McType.Subset, McType.Subset ],
+    [ {
+        class: 'tconst',
+        columns: [ 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
+        rows: [ {
+            cells: [ McType.Subset, McType.Subset, McType.Subset, McType.Subset ],
+        }, {
+            cells: [ McType.Subset, McType.Subset, McType.Subset, McType.Coincidental, McType.Coincidental, McType.Coincidental ],
+        }, {
+            cells: [ McType.Coincidental, McType.Coincidental, McType.Coincidental, McType.Coincidental ],
+        }, {
+            cells: [ McType.Eliminated ],
+        } ],
     }, {
-        cells: [ McType.Derived, McType.Derived, McType.Derived, McType.Final, McType.Final, McType.Eliminated ],
+        class: 'primaryTitle',
+        columns: [ 'tconst', 'startYear', 'runtimeMinutes', 'genres' ],
+        rows: [ {
+            cells: [ McType.Genuine, McType.Coincidental, McType.Subset, McType.Coincidental ],
+        }, {
+            cells: [ McType.Derived, McType.Derived, McType.Derived, McType.Coincidental, McType.Coincidental, McType.Coincidental ],
+        }, {
+            cells: [ McType.Derived, McType.Derived, McType.Derived, McType.Eliminated ],
+        }, {
+            cells: [ McType.Derived ],
+        } ],
     }, {
-        cells: [ McType.Derived, McType.Derived, McType.Derived, McType.Genuine ],
+        class: 'startYear',
+        columns: [ 'tconst', 'primaryTitle', 'runtimeMinutes', 'genres' ],
+        rows: [ {
+            cells: [ McType.Genuine, McType.Subset, McType.Subset, McType.Subset ],
+        }, {
+            cells: [ McType.Derived, McType.Derived, McType.Derived, McType.Subset, McType.Subset, McType.Coincidental ],
+        }, {
+            cells: [ McType.Derived, McType.Derived, McType.Derived, McType.Eliminated ],
+        }, {
+            cells: [ McType.Derived ],
+        } ],
     }, {
-        cells: [ McType.Derived ],
+        class: 'runtimeMinutes',
+        columns: [ 'tconst', 'primaryTitle', 'startYear', 'genres' ],
+        rows: [ {
+            cells: [ McType.Genuine, McType.Subset, McType.Subset, McType.Subset ],
+        }, {
+            cells: [ McType.Derived, McType.Derived, McType.Derived, McType.Subset, McType.Subset, McType.Coincidental ],
+        }, {
+            cells: [ McType.Derived, McType.Derived, McType.Derived, McType.Eliminated ],
+        }, {
+            cells: [ McType.Derived ],
+        } ],
+    }, {
+        class: 'genres',
+        columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes' ],
+        rows: [ {
+            cells: [ McType.Genuine, McType.Subset, McType.Subset, McType.Subset ],
+        }, {
+            cells: [ McType.Derived, McType.Derived, McType.Derived, McType.Final, McType.Final, McType.Eliminated ],
+        }, {
+            cells: [ McType.Derived, McType.Derived, McType.Derived, McType.Genuine ],
+        }, {
+            cells: [ McType.Derived ],
+        } ],
     } ],
-} ];
+];

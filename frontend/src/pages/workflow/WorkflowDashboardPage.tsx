@@ -239,9 +239,9 @@ export function WorkflowOverviewPage() {
 
                     <div>LHS size:<span className='px-2 text-primary font-semibold'>{relation.lhsSize}</span></div>
 
-                    <div>Positive examples:<span className='px-2 text-primary font-semibold'>{stats.positive}</span></div>
-
                     <div>Negative examples:<span className='px-2 text-primary font-semibold'>{stats.negative}</span></div>
+
+                    <div>Positive examples:<span className='px-2 text-primary font-semibold'>{stats.positive}</span></div>
 
                     <div>Unanswered examples:<span className='px-2 text-primary font-semibold'>{stats.evaluated}</span></div>
                 </CardBody>
@@ -321,6 +321,6 @@ export function WorkflowGraphPage() {
     const index = workflow.iteration === 0 ? 0 : 1;
 
     return (
-        <LatticeDisplay lattice={MOCK_LATTICES[index]} />
+        <LatticeDisplay lattices={MOCK_LATTICES[index]} />
     );
 }

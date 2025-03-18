@@ -95,6 +95,6 @@ export function AssignmentGraphPage() {
     const { assignment } = useRouteLoaderData<AssignmentLoaded>(routes.assignment.$id)!;
 
     return (
-        <LatticeDisplay lattice={MOCK_LATTICES[0]} />
+        <LatticeDisplay lattices={MOCK_LATTICES[0]} />
     );
 }
