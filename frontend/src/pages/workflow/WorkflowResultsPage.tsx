@@ -1,4 +1,4 @@
-import { Button, Card, CardBody, CardHeader, Tab, Tabs } from '@nextui-org/react';
+import { Button, Card, CardBody, CardHeader, Tab, Tabs } from '@heroui/react';
 import { type WorkflowLoaded } from './WorkflowPage';
 import { Link, matchPath, Outlet, useLocation, useRouteLoaderData } from 'react-router';
 import { routes } from '@/router';

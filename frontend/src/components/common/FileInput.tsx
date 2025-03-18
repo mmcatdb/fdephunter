@@ -4,7 +4,7 @@ import clsx from 'clsx';
 import { LuPaperclip } from 'react-icons/lu';
 import { MdModeEdit } from 'react-icons/md';
 import { TbTrashX } from 'react-icons/tb';
-import { Spinner } from '@nextui-org/react';
+import { Spinner } from '@heroui/react';
 
 export type FileInputValue = FileFromServer | undefined;
 

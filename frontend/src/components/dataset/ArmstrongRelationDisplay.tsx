@@ -1,5 +1,5 @@
 import { type ExampleRelation, type ArmstrongRelation, type ExampleRow, ExampleState } from '@/types/armstrongRelation';
-import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from '@nextui-org/react';
+import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from '@heroui/react';
 import { ColumnNameBadge } from './FDListDisplay';
 import clsx, { type ClassValue } from 'clsx';
 import { type Dispatch, type Key, useMemo, useState } from 'react';

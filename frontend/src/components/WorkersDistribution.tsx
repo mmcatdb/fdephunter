@@ -7,7 +7,7 @@ import { Workflow, type WorkflowStats, type Class } from '@/types/workflow';
 import { Link, useParams } from 'react-router';
 import { type IconType } from 'react-icons/lib';
 import { IoCheckmarkCircleOutline, IoCloseCircleOutline, IoReloadCircleOutline, IoStopCircleOutline } from 'react-icons/io5';
-import { Button, Card, CardBody, CardFooter, CardHeader, Divider, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem, type SharedSelection } from '@nextui-org/react';
+import { Button, Card, CardBody, CardFooter, CardHeader, Divider, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem, type SharedSelection } from '@heroui/react';
 import { type Approach } from '@/types/approach';
 import { Job } from '@/types/job';
 import { ExampleState } from '@/types/armstrongRelation';

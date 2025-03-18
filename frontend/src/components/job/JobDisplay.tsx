@@ -2,7 +2,7 @@ import { JobState, type Job } from '@/types/job';
 import { type IconType } from 'react-icons/lib';
 import { IoCloseCircleOutline, IoCheckmarkCircleOutline, IoReloadCircleOutline, IoStopCircleOutline } from 'react-icons/io5';
 import { displayPercent } from '@/utils/common';
-import { Card, CardBody, CardHeader } from '@nextui-org/react';
+import { Card, CardBody, CardHeader } from '@heroui/react';
 
 type JobDisplayProps = {
     job: Job;

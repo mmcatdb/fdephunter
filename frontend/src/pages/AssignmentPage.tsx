@@ -5,7 +5,7 @@ import { DecisionProvider } from '@/context/DecisionProvider';
 import { routes } from '@/router';
 import { Assignment } from '@/types/assignment';
 import { Link, matchPath, Outlet, type Params, useLoaderData, useLocation, useRevalidator, useRouteLoaderData } from 'react-router';
-import { Button, Tab, Tabs } from '@nextui-org/react';
+import { Button, Tab, Tabs } from '@heroui/react';
 import { Page, TopbarContent } from '@/components/layout';
 import { mockAPI } from '@/utils/api/mockAPI';
 import { MOCK_LATTICES } from '@/types/armstrongRelation';

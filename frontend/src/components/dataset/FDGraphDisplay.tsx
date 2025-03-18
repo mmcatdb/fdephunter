@@ -3,7 +3,7 @@ import { NODE_OPTIONS, type RFGraph, type RFNode, type RFEdge } from '@/types/FD
 import { Handle, type NodeProps, Position, ReactFlow } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { computeColumnIndexesForLatticeRow, computeEdgesForLatticeCell, type Lattice, McType } from '@/types/armstrongRelation';
-import { Button, cn, Divider, Select, SelectItem, type SharedSelection, Switch } from '@nextui-org/react';
+import { Button, cn, Divider, Select, SelectItem, type SharedSelection, Switch } from '@heroui/react';
 import clsx from 'clsx';
 
 export function LatticeDisplay({ lattices }: { lattices: Lattice[] }) {

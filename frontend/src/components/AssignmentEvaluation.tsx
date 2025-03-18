@@ -8,7 +8,7 @@ import { AssignmentVerdictLabel } from './AssignmentVerdictLabel';
 import { AssignmentVerdict, type Assignment } from '@/types/assignment';
 // import { API } from '@/utils/api';
 import { TbPointFilled } from 'react-icons/tb';
-import { Button, Card, CardBody, CardFooter, CardHeader, Checkbox, Input, Switch } from '@nextui-org/react';
+import { Button, Card, CardBody, CardFooter, CardHeader, Checkbox, Input, Switch } from '@heroui/react';
 import { ExampleRelationDisplay } from './dataset/ArmstrongRelationDisplay';
 import { type ExampleRelation } from '@/types/armstrongRelation';
 import { ColumnNameBadge } from './dataset/FDListDisplay';

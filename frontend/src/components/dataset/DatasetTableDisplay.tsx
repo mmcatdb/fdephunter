@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@nextui-org/react';
+import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@heroui/react';
 import type { DatasetData } from '@/types/dataset';
 
 type DatasetTableProps = {

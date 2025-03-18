@@ -2,7 +2,7 @@ import { JobDisplay } from '@/components/job/JobDisplay';
 import { Page } from '@/components/layout';
 import { routes } from '@/router';
 import { Job, JobState } from '@/types/job';
-import { Button } from '@nextui-org/react';
+import { Button } from '@heroui/react';
 import { type Params, useLoaderData, useNavigate, useRevalidator, useRouteLoaderData } from 'react-router';
 import { type WorkflowLoaded } from './WorkflowPage';
 // import { API } from '@/utils/api';

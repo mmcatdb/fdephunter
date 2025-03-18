@@ -3,7 +3,7 @@ import { FDListDisplay } from '@/components/dataset/FDListDisplay';
 import { LatticeDisplay } from '@/components/dataset/FDGraphDisplay';
 import { WorkersDistribution } from '@/components/WorkersDistribution';
 import { Class } from '@/types/workflow';
-import { Button, Card, CardBody, CardFooter, CardHeader, Divider, Tab, Tabs } from '@nextui-org/react';
+import { Button, Card, CardBody, CardFooter, CardHeader, Divider, Tab, Tabs } from '@heroui/react';
 import { Page, TopbarContent } from '@/components/layout';
 import { ArmstrongRelationDisplay, type WorkerOption } from '@/components/dataset/ArmstrongRelationDisplay';
 import { Link, matchPath, Outlet, type Params, useLocation, useNavigate, useRevalidator, useRouteLoaderData } from 'react-router';

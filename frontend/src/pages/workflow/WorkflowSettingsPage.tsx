@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { Dataset, DatasetType } from '@/types/dataset';
 import { Approach } from '@/types/approach';
 // import { API } from '@/utils/api';
-import { Button, Card, CardBody, Select, SelectItem, type SharedSelection } from '@nextui-org/react';
+import { Button, Card, CardBody, Select, SelectItem, type SharedSelection } from '@heroui/react';
 import { Page } from '@/components/layout';
 import { Link, useLoaderData, useNavigate, useRouteLoaderData } from 'react-router';
 import { routes } from '@/router';

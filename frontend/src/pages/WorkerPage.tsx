@@ -4,7 +4,7 @@ import { routes } from '@/router';
 import { type AssignmentInfo } from '@/types/assignment';
 import { type Worker, WorkerState } from '@/types/worker';
 import { API } from '@/utils/api';
-import { Button, Spinner } from '@nextui-org/react';
+import { Button, Spinner } from '@heroui/react';
 import { useEffect, useState } from 'react';
 import { Link, type Params, useLoaderData, useNavigate, useRevalidator } from 'react-router';
 

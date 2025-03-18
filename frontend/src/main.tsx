@@ -1,6 +1,6 @@
 import { StrictMode } from 'react';
 import ReactDOM from 'react-dom/client';
-import { NextUIProvider } from '@nextui-org/react';
+import { HeroUIProvider } from '@heroui/react';
 //import '@/assets/base.scss';
 // import '@/assets/components.scss';
 import '@/assets/index.css';
@@ -8,8 +8,8 @@ import { App } from './App.js';
 
 ReactDOM.createRoot(document.getElementById('react-root')!).render(
     <StrictMode>
-        <NextUIProvider className='h-full'>
+        <HeroUIProvider className='h-full'>
             <App />
-        </NextUIProvider>
+        </HeroUIProvider>
     </StrictMode>,
 );

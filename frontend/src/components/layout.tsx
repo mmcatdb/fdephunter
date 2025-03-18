@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 import { useState, type ReactNode, type SetStateAction, type Dispatch, createContext, useContext, useMemo, useEffect } from 'react';
 import { TbHome, TbLayoutSidebarLeftCollapse, TbLayoutSidebarRightCollapse } from 'react-icons/tb';
-import { Button, cn, ScrollShadow } from '@nextui-org/react';
+import { Button, cn, ScrollShadow } from '@heroui/react';
 import { Link, Outlet } from 'react-router';
 import { routes } from '@/router';
 import { MdOutlineDarkMode, MdOutlineLightMode } from 'react-icons/md';

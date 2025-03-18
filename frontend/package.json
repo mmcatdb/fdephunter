@@ -24,7 +24,7 @@
         ]
     },
     "dependencies": {
-        "@nextui-org/react": "^2.6.11",
+        "@heroui/react": "2.7.5",
         "@types/uuid": "^10.0.0",
         "@xyflow/react": "^12.4.2",
         "axios": "^1.4.0",

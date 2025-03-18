@@ -1,5 +1,5 @@
 import type { FDEdge } from '@/types/FD';
-import { cn } from '@nextui-org/react';
+import { cn } from '@heroui/react';
 import { FaArrowRight } from 'react-icons/fa';
 
 type FDListDisplayProps = {
