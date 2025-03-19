@@ -1,3 +1,5 @@
+import { type ColumnState } from '@/context/DecisionProvider';
+
 export enum DecisionStatus {
     Accepted = 'ACCEPTED',
     Rejected = 'REJECTED',
@@ -38,6 +40,7 @@ export type DecisionInit = {
     status: DecisionStatus;
     columns: {
         name: string;
+        state: ColumnState | undefined;
         reasons: string[];
     }[];
 };

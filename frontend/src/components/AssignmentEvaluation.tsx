@@ -55,17 +55,22 @@ function ControlCard({ assignment, onEvaluated }: ControlCardProps) {
     const navigate = useNavigate();
 
     async function evaluate(status: DecisionStatus, fid: string) {
-        const columns = status === DecisionStatus.Rejected
-            ? decision.columns.map(col => {
-                const trimmed = col.reasons.map(reason => reason.trim()).filter(reason => reason.length > 0);
-                const unique = [ ...new Set(trimmed) ];
+        const columns = status === DecisionStatus.Accepted
+            ? decision.columns.map(col => ({
+                name: col.name,
+                state: col.state === ColumnState.Undecided ? ColumnState.Valid : col.state,
+                reasons: [],
+            }))
+            : decision.columns.map(col => {
+                const trimmedReasons = col.reasons.map(reason => reason.trim()).filter(reason => reason.length > 0);
+                const uniqueReasons = [ ...new Set(trimmedReasons) ];
 
                 return {
                     name: col.name,
-                    reasons: unique,
+                    state: col.state,
+                    reasons: uniqueReasons,
                 };
-            })
-            : [];
+            });
 
         setFetching(fid);
         // const response = await API.assignments.evaluate({ assignmentId: assignment.id }, {
@@ -219,6 +224,7 @@ function DecisionReasonsCard({ relation: { exampleRow, columns }, selectedFDInde
 
     const isValid = isEditable
         ? selected.state === ColumnState.Valid
+        // FIXME This should come from the decision state. Also, we should allow the unanswered state.
         : selected.reasons.length === 0;
 
     const maxSetCols = exampleRow.maxSet.map(index => columns[index]);
@@ -365,14 +371,14 @@ type DecisionReasonsOverviewProps = {
 };
 
 function DecisionReasonsOverview({ data }: DecisionReasonsOverviewProps) {
-    return (<>
-        {data.values().map(reason => (
-            <div key={reason} className='min-h-10 flex items-center'>
-                <span className='flex items-center font-bold'>
+    return (
+        <div>
+            {data.map(reason => (
+                <div key={reason} className='flex items-center gap-2 font-bold'>
                     <TbPointFilled size={16} />
                     <span>{reason}</span>
-                </span>
-            </div>
-        ))}
-    </>);
+                </div>
+            ))}
+        </div>
+    );
 }

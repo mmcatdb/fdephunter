@@ -6,15 +6,22 @@ import { routes } from '@/router';
 import { Assignment } from '@/types/assignment';
 import { Link, matchPath, Outlet, type Params, useLoaderData, useLocation, useRevalidator, useRouteLoaderData } from 'react-router';
 import { Button, Tab, Tabs } from '@heroui/react';
-import { Page, TopbarContent } from '@/components/layout';
+import { Page, Sidebar, TopbarContent } from '@/components/layout';
 import { mockAPI } from '@/utils/api/mockAPI';
 import { MOCK_LATTICES } from '@/types/armstrongRelation';
+import { WorkflowProgressDisplay } from '@/components/worklow/WorkflowProgressDisplay';
+import { Workflow } from '@/types/workflow';
 // import { API } from '@/utils/api';
 
 export function AssignmentPage() {
-    const { assignment } = useLoaderData<AssignmentLoaded>();
+    const { assignment, workflow } = useLoaderData<AssignmentLoaded>();
 
     return (<>
+        {/* FIXME This shouldn't be here ... */}
+        <Sidebar>
+            <WorkflowProgressDisplay currentStep={workflow.state} />
+        </Sidebar>
+
         <TopbarContent>
             <div className='space-x-4'>
                 <AssignmentTabs assignmentId={assignment.id} />
@@ -31,7 +38,7 @@ export function AssignmentPage() {
             </div>
         </TopbarContent>
 
-        <DecisionProvider relation={assignment.relation} isFinished={assignment.isFinished}>
+        <DecisionProvider relation={assignment.relation} inputDecision={assignment.decision}>
             <Page>
                 <Outlet />
             </Page>
@@ -41,6 +48,8 @@ export function AssignmentPage() {
 
 type AssignmentLoaded = {
     assignment: Assignment;
+    /** @deprecated Workflow shouldn't be available from the assignment. */
+    workflow: Workflow;
 };
 
 AssignmentPage.loader = async ({ params: { assignmentId } }: { params: Params<'assignmentId'> }): Promise<AssignmentLoaded> => {
@@ -52,8 +61,13 @@ AssignmentPage.loader = async ({ params: { assignmentId } }: { params: Params<'a
     if (!response.status)
         throw new Error('Failed to load assignment');
 
+    const workflowResponse = await mockAPI.workflows.get(response.data.ownerId);
+    if (!workflowResponse.status)
+        throw new Error('Failed to load workflow');
+
     return {
         assignment: Assignment.fromServer(response.data),
+        workflow: Workflow.fromServer(workflowResponse.data),
     };
 };
 

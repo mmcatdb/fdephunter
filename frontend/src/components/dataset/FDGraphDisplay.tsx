@@ -19,42 +19,45 @@ export function LatticeDisplay({ lattices }: { lattices: Lattice[] }) {
 
     return (
         <div className='w-full h-full flex flex-col'>
-            <div className={clsx('h-10 flex items-center justify-center gap-8', !showAllRows && 'invisible')}>
+            <div className={clsx('h-10 flex items-center justify-center gap-8')}>
                 <Select
                     label='Class'
+                    labelPlacement='outside-left'
                     items={classItems}
                     selectedKeys={classIndex}
                     disallowEmptySelection
                     onSelectionChange={setClassIndex as (keys: SharedSelection) => void}
-                    className='visible max-w-sm'
+                    className='max-w-sm'
                 >
                     {item => (
                         <SelectItem key={item.value}>{item.label}</SelectItem>
                     )}
                 </Select>
 
-                <Switch isSelected={showAllRows} onValueChange={setShowAllRows} className='visible'>
+                <Switch isSelected={showAllRows} onValueChange={setShowAllRows}>
                     Show all rows?
                 </Switch>
 
-                <Divider orientation='vertical' />
+                {!showAllRows && (<>
+                    <Divider orientation='vertical' />
 
-                <div>
+                    <div>
                     Row:{' '}
-                    <span className='tabular-nums text-lg font-bold'>
-                        {rowIndex + 1}
-                    </span>
-                </div>
+                        <span className='tabular-nums text-lg font-bold'>
+                            {rowIndex + 1}
+                        </span>
+                    </div>
 
-                <div className='space-x-2'>
-                    <Button onPress={() => setRowIndex(prev => Math.max(0, prev - 1))} isDisabled={!showAllRows || rowIndex === 0}>
+                    <div className='space-x-2'>
+                        <Button onPress={() => setRowIndex(prev => Math.max(0, prev - 1))} isDisabled={showAllRows || rowIndex === 0}>
                         Previous
-                    </Button>
+                        </Button>
 
-                    <Button onPress={() => setRowIndex(prev => Math.min(lattice.rows.length - 1, prev + 1))} isDisabled={!showAllRows || rowIndex === lattice.rows.length - 1}>
+                        <Button onPress={() => setRowIndex(prev => Math.min(lattice.rows.length - 1, prev + 1))} isDisabled={showAllRows || rowIndex === lattice.rows.length - 1}>
                         Next
-                    </Button>
-                </div>
+                        </Button>
+                    </div>
+                </>)}
             </div>
             <div className='w-full h-full'>
                 <ReactFlow

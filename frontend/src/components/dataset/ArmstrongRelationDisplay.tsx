@@ -165,7 +165,7 @@ function ExampleRowDisplay({ relation, row, rowIndex, workerOptions, assignWorke
 
     return (<>
         <div className={leftClass}>
-            {isEvaluationAllowed && (
+            {(isEvaluationAllowed || row.state !== ExampleState.New) && (
                 <ExampleStateIcon state={row.state} size={20} />
             )}
 

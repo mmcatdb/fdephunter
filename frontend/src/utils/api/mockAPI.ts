@@ -7,7 +7,8 @@ import { JobState, type ExecuteDiscoveryParams, type ExecuteRediscoveryParams, t
 import { v4 } from 'uuid';
 import { DateTime } from 'luxon';
 import { type JobResultFromServer } from '@/types/jobResult';
-import { type ExampleRelation, ExampleState, MOCK_ARMSTRONG_RELATIONS } from '@/types/armstrongRelation';
+import { type ArmstrongRelation, type ExampleRelation, ExampleState, MOCK_ARMSTRONG_RELATIONS } from '@/types/armstrongRelation';
+import { ColumnState } from '@/context/DecisionProvider';
 
 export const mockAPI = {
     assignments: {
@@ -33,7 +34,6 @@ export const mockAPI = {
 type AssignmentDB = Omit<AssignmentFromServer, 'relation'> & {
     workflowId: string;
     iteration: number;
-    decision?: DecisionInit;
     jobResultId?: string;
 };
 
@@ -66,6 +66,7 @@ function createAssignmentForWorkflow(init: AssignmentInit, workflow: WorkflowDB,
         ownerId: init.workflowId,
         verdict: AssignmentVerdict.New,
         jobResultId,
+        decision: undefined,
     };
 
     workflow.assignmentIds.push(assignment.id);
@@ -87,8 +88,10 @@ function createExampleRelation({ workflowId, rowIndex }: { workflowId: string, r
     if (!result)
         return;
 
-    const relation = result.relation;
+    return armstrongRelationToExampleRelation(result.relation, rowIndex);
+}
 
+function armstrongRelationToExampleRelation(relation: ArmstrongRelation, rowIndex: number): ExampleRelation {
     return {
         columns: relation.columns,
         referenceRow: relation.referenceRow,
@@ -121,7 +124,7 @@ async function getAllAssignments(workflowId: string): Promise<Result<AssignmentI
     return success(assignments as AssignmentInfo[]);
 }
 
-async function evaluateAssignment(assignmentId: string, init: DecisionInit): Promise<Result<AssignmentFromServer>> {
+async function evaluateAssignment(assignmentId: string, decision: DecisionInit): Promise<Result<AssignmentFromServer>> {
     await wait();
 
     const assignment = get<AssignmentDB>(assignmentId);
@@ -137,16 +140,15 @@ async function evaluateAssignment(assignmentId: string, init: DecisionInit): Pro
     if (!result)
         return error();
 
-    assignment.decision = init;
-    assignment.verdict = decisionToAssignment[init.status];
+    assignment.decision = decision;
+    assignment.verdict = decisionToAssignment[decision.status];
 
-    result.relation.exampleRows[assignment.rowIndex].state = decisionToExample[init.status];
+    result.relation.exampleRows[assignment.rowIndex].state = decisionToExample[decision.status];
 
     set(assignment);
     set(result);
 
-    const relation = createExampleRelation(assignment);
-    return relation ? success({ ...assignment, relation }) : error();
+    return success({ ...assignment, relation: armstrongRelationToExampleRelation(result.relation, assignment.rowIndex) });
 }
 
 async function resetAssignment(assignmentId: string): Promise<Result<AssignmentFromServer>> {
@@ -262,7 +264,7 @@ async function executeRediscovery(workflowId: string, params: ExecuteRediscovery
     const job: JobFromServer = {
         id: v4(),
         state: JobState.Waiting,
-        description: workflow.iteration === 1 ? 'Wait for negative example generation ...' : 'Applying approved negative examples ...',
+        description: workflow.iteration === 1 ? 'Wait for negative example generation ...' : 'Applying approved examples ...',
         iteration: workflow.iteration,
         startedAt: DateTime.now().toUTC().toISO(),
     };
@@ -321,7 +323,14 @@ async function acceptAllExamples(workflowId: string): Promise<Result<WorkflowFro
     }
 
     for (const assignment of openAssignments) {
-        const init = { status: DecisionStatus.Accepted, columns: [] };
+        const relation = armstrongRelationToExampleRelation(result.relation, assignment.rowIndex);
+        const columns = relation.columns.map((name, colIndex) => ({
+            colIndex,
+            name,
+            state: relation.exampleRow.maxSet.includes(colIndex) ? undefined : ColumnState.Valid,
+            reasons: [],
+        }));
+        const init = { status: DecisionStatus.Accepted, columns };
 
         assignment.verdict = decisionToAssignment[init.status];
         assignment.decision = init;
@@ -376,13 +385,12 @@ async function getLastJob(workflowId: string): Promise<Result<JobFromServer>> {
 }
 
 function finishJob(job: JobFromServer, workflow: WorkflowDB) {
-    console.log('FINISH JOB', job, workflow);
     job.state = JobState.Finished;
-    workflow.state = workflow.iteration < 4
-        ? WorkflowState.NegativeExamples
-        : workflow.iteration < MOCK_ARMSTRONG_RELATIONS.length
+    workflow.state = workflow.iteration < MOCK_ARMSTRONG_RELATIONS.length
+        ? MOCK_ARMSTRONG_RELATIONS[workflow.iteration].isEvaluatingPositives
             ? WorkflowState.PositiveExamples
-            : WorkflowState.DisplayFinalFDs;
+            : WorkflowState.NegativeExamples
+        : WorkflowState.DisplayFinalFDs;
 }
 
 async function getLastJobResult(workflowId: string): Promise<Result<JobResultFromServer>> {

@@ -1,5 +1,6 @@
 import { type ReferenceRow, type ExampleRow, type ExampleRelation, type ExampleState } from './armstrongRelation';
 import { type DatasetData } from './dataset';
+import { type DecisionInit } from './decision';
 import { JobResult, type JobResultFromServer } from './jobResult';
 
 export enum AssignmentVerdict {
@@ -24,7 +25,7 @@ export type AssignmentFromServer = AssignmentInfo & {
     // discoveryResult: JobResultFromServer;
     // dataset: DatasetData;
     relation: ExampleRelation;
-
+    decision: DecisionInit | undefined;
 };
 // TODO Replace by a simple type (if possible).
 export class Assignment {
@@ -37,6 +38,7 @@ export class Assignment {
         // readonly discoveryResult: JobResult,
         // readonly dataset: DatasetData,
         readonly relation: ExampleRelation,
+        readonly decision: DecisionInit | undefined,
     ) {}
 
     static fromServer(input: AssignmentFromServer): Assignment {
@@ -49,6 +51,7 @@ export class Assignment {
             // JobResult.fromServer(input.discoveryResult),
             // input.dataset,
             input.relation,
+            input.decision,
         );
     }
 }
