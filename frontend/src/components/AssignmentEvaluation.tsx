@@ -27,18 +27,20 @@ export function AssignmentEvaluation({ assignment, onEvaluated }: AssignmentEval
 
     return (
         <div className='flex flex-col items-start gap-4'>
-            <ControlCard assignment={assignment} onEvaluated={onEvaluated} />
+            <ControlCard assignment={assignment} onEvaluated={onEvaluated} setSelectedFDIndex={setSelectedFDIndex} />
 
-            <Card className='p-4 max-w-full'>
-                <ExampleRelationDisplay
-                    relation={assignment.relation}
-                    selectedColIndex={selectedFDIndex}
-                    setSelectedColIndex={areColsClickable ? setSelectedFDIndex : undefined}
-                />
-            </Card>
+            {decision.phase !== DecisionPhase.JustFinished && (
+                <Card className='p-4 max-w-full'>
+                    <ExampleRelationDisplay
+                        relation={assignment.relation}
+                        selectedColIndex={selectedFDIndex}
+                        setSelectedColIndex={areColsClickable ? setSelectedFDIndex : undefined}
+                    />
+                </Card>
+            )}
 
-            {areColsClickable && (
-                <DecisionReasonsCard relation={assignment.relation} selectedFDIndex={selectedFDIndex} />
+            {areColsClickable && selectedFDIndex !== undefined && (
+                <DecisionCard relation={assignment.relation} selectedFDIndex={selectedFDIndex} />
             )}
         </div>
     );
@@ -47,9 +49,10 @@ export function AssignmentEvaluation({ assignment, onEvaluated }: AssignmentEval
 type ControlCardProps = {
     assignment: Assignment;
     onEvaluated: (assignment: Assignment) => void;
+    setSelectedFDIndex: (index: number | undefined) => void;
 };
 
-function ControlCard({ assignment, onEvaluated }: ControlCardProps) {
+function ControlCard({ assignment, onEvaluated, setSelectedFDIndex }: ControlCardProps) {
     const { decision, setDecision } = useDecisionContext();
     const [ fetching, setFetching ] = useState<string>();
     const navigate = useNavigate();
@@ -104,7 +107,18 @@ function ControlCard({ assignment, onEvaluated }: ControlCardProps) {
         void navigate(route);
     }
 
-    const isUndecided = decision.phase !== DecisionPhase.Finished && decision.columns.some(column => column.state === ColumnState.Undecided);
+    function decideRest(isValid: boolean) {
+        const newState = isValid ? ColumnState.Valid : ColumnState.Invalid;
+
+        setDecision(prev => ({
+            ...prev,
+            columns: prev.columns.map(col => ({ ...col, state: col.state === ColumnState.Undecided ? newState : col.state })),
+        }));
+
+        setSelectedFDIndex(undefined);
+    }
+
+    const isUndecided = decision.columns.some(column => column.state === ColumnState.Undecided);
 
     return (
         <Card className='self-stretch'>
@@ -127,13 +141,13 @@ function ControlCard({ assignment, onEvaluated }: ControlCardProps) {
             <CardFooter className='gap-3'>
                 {decision.phase === DecisionPhase.AnswerYesNo && (<>
                     <Button color='success' onPress={() => evaluate(DecisionStatus.Accepted, FID_ACCEPT)} isLoading={fetching === FID_ACCEPT} isDisabled={!!fetching}>
-                        Yes, the example is correct
+                        Yes, the example is possible
                     </Button>
                     <Button color='danger' onPress={() => setDecision({ ...decision, phase: DecisionPhase.ProvideReason })}>
-                        No, the example is incorrect
+                        No, the example is not possible
                     </Button>
                     <Button color='warning' onPress={() => evaluate(DecisionStatus.Unanswered, FID_ANSWER)} isLoading={fetching === FID_ANSWER} isDisabled={!!fetching}>
-                        {`I don't know ...`}
+                        I don't know ...
                     </Button>
                 </>)}
 
@@ -141,8 +155,14 @@ function ControlCard({ assignment, onEvaluated }: ControlCardProps) {
                     <Button color='primary' onPress={() => evaluate(DecisionStatus.Rejected, FID_REJECT)} isLoading={fetching === FID_REJECT} isDisabled={!!fetching || isUndecided}>
                         Submit
                     </Button>
-                    <Button color='warning' onPress={() => evaluate(DecisionStatus.Unanswered, FID_ANSWER)} isLoading={fetching === FID_ANSWER} isDisabled={!!fetching}>
-                        {`I don't know ...`}
+                    <Button color='success' onPress={() => decideRest(true)} isDisabled={!isUndecided}>
+                        Accept rest
+                    </Button>
+                    <Button color='danger' onPress={() => decideRest(false)} isDisabled={!isUndecided}>
+                        Reject rest
+                    </Button>
+                    <Button color='warning' onPress={() => evaluate(DecisionStatus.Unanswered, FID_ANSWER)} isLoading={fetching === FID_ANSWER} isDisabled={!!fetching || !isUndecided}>
+                        I don't know ...
                     </Button>
                 </>)}
 
@@ -177,10 +197,10 @@ const titles: { [key in DecisionPhase]: string } = {
 const bodies: { [key in DecisionPhase]: ReactNode } = {
     [DecisionPhase.AnswerYesNo]: (<>
         <p>
-            The first row is from the original dataset. The second one was generated. Please decide if the second row is a valid part of the dataset.
+            The first row is from the original dataset. The second one was generated. Please decide if the second row is a possible part of the dataset.
         </p>
         <p>
-            The row should be marked as possible only if all its values are valid as well as all their combinations (with regards to all other values in the first row). If any of these conditions {`isn't`} met, the row is invalid. If you are not sure, the {`"I don't know"`} option is also a helpful answer.
+            The row should be marked as possible only if all its values are valid as well as all their combinations (with regards to all other values in the first row). If any of these conditions isn't met, the row is not possible. If you are not sure, the "I don't know" option is also a helpful answer.
         </p>
     </>),
     [DecisionPhase.ProvideReason]: (<>
@@ -188,7 +208,13 @@ const bodies: { [key in DecisionPhase]: ReactNode } = {
             Please evaluate each value in the second row.
         </p>
         <p>
-            Start by clicking on the example value you want to evaluate. Then you can provide reasons why it should be a negative example. If the {`column's`} value is possible in the given context, leave it as-is. If two or more columns are invalid because of how they interact with each other, please provide the reasons for all of them.
+            Start by clicking on the example value you want to evaluate.
+            Then you can decide whether the value is possible or not.
+
+            {/*
+            TODO Backlogged.
+            Then you can provide reasons why it should not be possible. If the column's value is possible in the given context, leave it as-is. If two or more columns are invalid because of how they interact with each other, please provide the reasons for all of them.
+            */}
         </p>
         <p>
             When you are finished with the evaluation, please submit the results.
@@ -202,15 +228,24 @@ const bodies: { [key in DecisionPhase]: ReactNode } = {
     [DecisionPhase.Finished]: null,
 };
 
-type DecisionReasonsCardProps = {
+type DecisionCardProps = {
     relation: ExampleRelation;
-    selectedFDIndex: number | undefined;
+    selectedFDIndex: number;
 };
 
-function DecisionReasonsCard({ relation: { exampleRow, columns }, selectedFDIndex }: DecisionReasonsCardProps) {
+function DecisionCard({ relation, selectedFDIndex }: DecisionCardProps) {
+    const { decision } = useDecisionContext();
+
+    return decision.phase === DecisionPhase.ProvideReason
+        ? (<EditableDecisionCard relation={relation} selectedFDIndex={selectedFDIndex} />)
+        : (<FinalDecisionCard relation={relation} selectedFDIndex={selectedFDIndex} />);
+}
+
+function EditableDecisionCard({ relation, selectedFDIndex }: DecisionCardProps) {
+    const { exampleRow, columns } = relation;
     const { decision, setDecision } = useDecisionContext();
-    const selected = selectedFDIndex !== undefined && decision.columns[selectedFDIndex];
-    const isEditable = decision.phase === DecisionPhase.ProvideReason;
+    const selected = decision.columns[selectedFDIndex];
+    const isValid = selected.state === ColumnState.Valid;
 
     const updateColumn = useCallback((nextCol: Partial<DecisionColumn>) => {
         setDecision(prev => ({
@@ -219,79 +254,127 @@ function DecisionReasonsCard({ relation: { exampleRow, columns }, selectedFDInde
         }));
     }, [ selectedFDIndex, setDecision ]);
 
-    if (!selected)
-        return null;
+    return (
+        <Card>
+            <CardHeader>
+                <h3 className='font-semibold'>
+                    Is the value
+                    {' '}<span className='font-bold text-primary'>{exampleRow.values[selectedFDIndex]}</span>{' '}
+                    in the column
+                    {' '}<ColumnNameBadge name={columns[selectedFDIndex]} className='inline' />{' '}
+                    possible?
+                </h3>
+            </CardHeader>
 
-    const isValid = isEditable
-        ? selected.state === ColumnState.Valid
-        // FIXME This should come from the decision state. Also, we should allow the unanswered state.
-        : selected.reasons.length === 0;
+            <CardBody>
+                <p className='mb-3'>
+                    If the value is possible, the following functional dependency must be fake:
+                </p>
 
-    const maxSetCols = exampleRow.maxSet.map(index => columns[index]);
+                <FdDisplay relation={relation} selectedFDIndex={selectedFDIndex} />
+
+                {selected.state === ColumnState.Undecided ? (
+                    <div className='mt-6 flex gap-3'>
+                        <Button color='success' onPress={() => updateColumn({ state: ColumnState.Valid })}>
+                            Yes, it's possible!
+                        </Button>
+
+                        <Button color='danger' onPress={() => updateColumn({ state: ColumnState.Invalid })}>
+                            No ...
+                        </Button>
+                    </div>
+                ) : (
+                    <div className='mt-6'>
+                        <Switch
+                            isSelected={isValid}
+                            onValueChange={value => updateColumn({ state: value ? ColumnState.Valid : ColumnState.Invalid })}
+                            classNames={{ label: 'text-base' }}
+                        >
+                            {isValid ? (<>
+                                The example value is <span className='text-success'>possible</span>. The functional dependency is fake.
+                            </>) : (<>
+                                The example value is <span className='text-danger'>not possible</span>. The functional dependency is genuine.
+                            </>)}
+                        </Switch>
+
+                        {/*
+                        TODO Backlogged.
+                        {!isValid && (<>
+                            <p className='mt-6 mb-3'>
+                                Please provide us with one or more reasons why the value
+                                {' '}<span className='font-bold text-primary'>{exampleRow.values[selectedFDIndex]}</span>{' '}
+                                is not possible. You can select from the predefined reasons or you can type your own.
+                            </p>
+
+                            <DecisionReasonsForm key={selected.colIndex} data={selected.reasons} setData={data => updateColumn({ ...selected, reasons: data })} />
+                        </>)}
+                        */}
+                    </div>
+                )}
+            </CardBody>
+        </Card>
+    );
+}
+
+function FinalDecisionCard({ relation, selectedFDIndex }: DecisionCardProps) {
+    const { exampleRow, columns } = relation;
+    const { decision } = useDecisionContext();
+    const selected = decision.columns[selectedFDIndex];
+    const isValid = selected.state === ColumnState.Valid;
 
     return (
         <Card>
             <CardHeader>
                 <h3 className='font-semibold'>
-                    {isEditable ? (<>
-                        Is this functional dependency valid?
-                    </>) : (<>
-                        This functional dependency is <span className={isValid ? 'text-success' : 'text-danger'}>{isValid ? 'valid' : 'invalid'}</span>
-                    </>)}
+                    The value
+                    {' '}<span className='font-bold text-primary'>{exampleRow.values[selectedFDIndex]}</span>{' '}
+                    is
+                    {' '}{isValid ? (
+                        <span className='text-success'>possible</span>
+                    ) : (
+                        <span className='text-danger'>not possible</span>
+                    )}{' '}
+                    in the column
+                    {' '}<ColumnNameBadge name={columns[selectedFDIndex]} className='inline' />
+                    .
                 </h3>
             </CardHeader>
 
-            <CardBody className='space-y-6'>
-                <div className='flex gap-4'>
-                    <div className='py-[2px] flex flex-wrap gap-x-2 gap-y-1'>
-                        {maxSetCols.map(col => (
-                            <ColumnNameBadge key={col} name={col} className={exampleRow.isPositive ? 'bg-danger-400' : 'bg-warning-400'} />
-                        ))}
-                    </div>
+            <CardBody>
+                {/*
+                    TODO Backlogged.
+                    <DecisionReasonsOverview key={selected.colIndex} reasons={selected.reasons} />
+                    */}
 
-                    <FaArrowRight size={20} className='shrink-0' />
+                <p className='mb-3'>
+                    {isValid ? (<>
+                        Therefore, the following functional dependency is fake:
+                    </>) : (<>
+                            Therefore, the following functional dependency is genuine:
+                    </>)}
+                </p>
 
-                    <ColumnNameBadge name={columns[selectedFDIndex]} className='mt-[2px] shrink-0' />
-                </div>
-
-                {isEditable ? (<>
-                    {selected.state === ColumnState.Undecided ? (
-                        <div className='flex gap-3'>
-                            <Button color='success' onPress={() => updateColumn({ state: ColumnState.Valid })}>
-                                Yes!
-                            </Button>
-
-                            <Button color='danger' onPress={() => updateColumn({ state: ColumnState.Invalid })}>
-                                No ...
-                            </Button>
-                        </div>
-                    ) : (
-                        <div className='space-y-6'>
-                            <Switch
-                                isSelected={isValid}
-                                onValueChange={value => updateColumn({ state: value ? ColumnState.Valid : ColumnState.Invalid })}
-                                classNames={{ label: 'text-base' }}
-                            >
-                                it is <span className={isValid ? 'text-success' : 'text-danger'}>{isValid ? 'valid' : 'invalid'}</span>
-                            </Switch>
-
-                            {!isValid && (<>
-                                <p>
-                                    Please provide us with one or multiple reasons why the value <span className='font-bold text-primary'>{exampleRow.values[selectedFDIndex]}</span> {`isn't`} valid. You can select from the predefined reasons or you can type your own.
-                                </p>
-
-                                <DecisionReasonsForm key={selected.colIndex} data={selected.reasons} setData={data => updateColumn({ ...selected, reasons: data })} />
-                            </>)}
-                        </div>
-                    )}
-                </>) : !isValid ? (<>
-                    <p>
-                        You can see the reasons here:
-                    </p>
-                    <DecisionReasonsOverview key={selected.colIndex} data={selected.reasons} />
-                </>) : null}
+                <FdDisplay relation={relation} selectedFDIndex={selectedFDIndex} />
             </CardBody>
         </Card>
+    );
+}
+
+function FdDisplay({ relation: { exampleRow, columns }, selectedFDIndex }: DecisionCardProps) {
+    const maxSetCols = exampleRow.maxSet.map(index => columns[index]);
+
+    return (
+        <div className='flex gap-4'>
+            <div className='py-[2px] flex flex-wrap gap-x-2 gap-y-1'>
+                {maxSetCols.map(col => (
+                    <ColumnNameBadge key={col} name={col} className={exampleRow.isPositive ? 'bg-danger-400' : 'bg-warning-400'} />
+                ))}
+            </div>
+
+            <FaArrowRight size={20} className='shrink-0' />
+
+            <ColumnNameBadge name={columns[selectedFDIndex]} className='mt-[2px] shrink-0' />
+        </div>
     );
 }
 
@@ -358,22 +441,34 @@ function DecisionReasonsForm({ data, setData }: DecisionReasonsFormProps) {
 }
 
 const predefinedReasons = [
-    'VALUE_MUST_BE_UNIQUE_IN_COLUMNS',
-    'VALUE_MUST_BE_UNIQUE_IN_ROW',
-    'VALUES_INDETIFY_EACH_OTHER',
-    'VALUES_DO_NOT_MATCH',
-    'VALUE_MUST_BE_IN_RANGE',
-    'VALUE_DOES_NOT_MAKE_SENSE_AT_ALL',
+    'It would break the genuine functional dependency.',
+    'It doesn\'t make sense in this domain.',
 ];
 
 type DecisionReasonsOverviewProps = {
-    data: string[];
+    reasons: string[];
 };
 
-function DecisionReasonsOverview({ data }: DecisionReasonsOverviewProps) {
+function DecisionReasonsOverview({ reasons }: DecisionReasonsOverviewProps) {
+    if (reasons.length === 0) {
+        return (
+            <p>
+                There are no reasons provided.
+            </p>
+        );
+    }
+
     return (
         <div>
-            {data.map(reason => (
+            <p>
+                {reasons.length === 1 ? (<>
+                    The reason is:
+                </>) : (<>
+                    The reasons are:
+                </>)}
+            </p>
+
+            {reasons.map(reason => (
                 <div key={reason} className='flex items-center gap-2 font-bold'>
                     <TbPointFilled size={16} />
                     <span>{reason}</span>

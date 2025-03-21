@@ -215,6 +215,23 @@ export const MOCK_ARMSTRONG_RELATIONS: ArmstrongRelation[] = [ {
     columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
     referenceRow: { values: [ 'tt0036443', 'Titanic', '1943', '85', 'Action+Drama+History' ] },
     exampleRows: [
+        { maxSet: [ 1, 2, 3, 4 ], isPositive: false, state: ExampleState.New, values: [ 'tt0079836', 'Titanic', '1943', '85', 'Action+Drama+History' ] },
+        { maxSet: [ 1, 2, 4 ], isPositive: false, state: ExampleState.Accepted, values: [ 'tt0115392', 'Titanic', '1943', '194', 'Action+Drama+History' ] },
+        { maxSet: [ 1, 2 ], isPositive: true, state: ExampleState.New, values: [ 'tt0120338', 'Titanic', '1943', '87', 'Drama+History' ] },
+        { maxSet: [ 1, 3, 4 ], isPositive: false, state: ExampleState.Accepted, values: [ 'tt0155274', 'Titanic', '1979', '85', 'Action+Drama+History' ] },
+        { maxSet: [ 1, 3 ], isPositive: true, state: ExampleState.New, values: [ 'tt0594950', 'Titanic', '1996', '85', 'Drama+Romance' ] },
+        { maxSet: [ 2, 3, 4 ], isPositive: false, state: ExampleState.Accepted, values: [ 'tt0650185', 'S.O.S. Titanic', '1943', '85', 'Action+Drama+History' ] },
+        { maxSet: [ 2, 3 ], isPositive: false, state: ExampleState.Accepted, values: [ 'tt0771984', 'The Titanic', '1943', '85', 'History' ] },
+    ],
+    isEvaluatingPositives: false,
+
+    minimalFDs: 4,
+    otherFDs: 28,
+    lhsSize: 4,
+}, {
+    columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
+    referenceRow: { values: [ 'tt0036443', 'Titanic', '1943', '85', 'Action+Drama+History' ] },
+    exampleRows: [
         { maxSet: [ 1, 2, 3, 4 ], isPositive: false, state: ExampleState.Accepted, values: [ 'tt0079836', 'Titanic', '1943', '85', 'Action+Drama+History' ] },
         { maxSet: [ 1, 2, 4 ], isPositive: false, state: ExampleState.Accepted, values: [ 'tt0115392', 'Titanic', '1943', '194', 'Action+Drama+History' ] },
         { maxSet: [ 1, 2 ], isPositive: true, state: ExampleState.New, values: [ 'tt0120338', 'Titanic', '1943', '87', 'Drama+History' ] },
@@ -225,9 +242,9 @@ export const MOCK_ARMSTRONG_RELATIONS: ArmstrongRelation[] = [ {
     ],
     isEvaluatingPositives: true,
 
-    minimalFDs: 5,
+    minimalFDs: 4,
     otherFDs: 28,
-    lhsSize: 4,
+    lhsSize: 2,
 } ];
 
 export const MOCK_LATTICES: Lattice[][] = [

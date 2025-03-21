@@ -1,5 +1,5 @@
 import { DatasetTable } from '@/components/dataset/DatasetTableDisplay';
-import { FDListDisplay } from '@/components/dataset/FDListDisplay';
+import { FDListDisplayBalanced } from '@/components/dataset/FDListDisplay';
 import { LatticeDisplay } from '@/components/dataset/FDGraphDisplay';
 import { WorkersDistribution } from '@/components/WorkersDistribution';
 import { Class } from '@/types/workflow';
@@ -10,16 +10,17 @@ import { Link, matchPath, Outlet, type Params, useLocation, useNavigate, useReva
 import { type WorkflowLoaded } from './WorkflowPage';
 import { routes } from '@/router';
 import { useCallback, useMemo, useState } from 'react';
-import { ExampleState, MOCK_LATTICES, type ArmstrongRelation } from '@/types/armstrongRelation';
+import { ExampleState, MOCK_ARMSTRONG_RELATIONS, MOCK_LATTICES, type ArmstrongRelation } from '@/types/armstrongRelation';
 import { type Worker } from '@/types/worker';
 import { API } from '@/utils/api';
 import { JobResult } from '@/types/jobResult';
-import { type DatasetData } from '@/types/dataset';
+import { MOCK_DATASET, type DatasetData } from '@/types/dataset';
 import { Approach } from '@/types/approach';
 import { User } from '@/types/user';
 import clsx from 'clsx';
 import { mockAPI } from '@/utils/api/mockAPI';
 import { type AssignmentInfo } from '@/types/assignment';
+import { createFdEdges, MOCK_FDS } from './WorkflowResultsPage';
 
 export function WorkflowDashboardPage() {
     const { workflow } = useRouteLoaderData<WorkflowLoaded>(routes.workflow.$id)!;
@@ -243,7 +244,7 @@ export function WorkflowOverviewPage() {
 
                     <div>Positive examples:<span className='px-2 text-primary font-semibold'>{stats.positive}</span></div>
 
-                    <div>Unanswered examples:<span className='px-2 text-primary font-semibold'>{stats.evaluated}</span></div>
+                    <div>Unanswered examples:<span className='px-2 text-primary font-semibold'>{stats.evaluated - stats.negative - stats.positive}</span></div>
                 </CardBody>
 
                 <CardFooter className='flex justify-end gap-4'>
@@ -276,43 +277,49 @@ function workerToOption(worker: Worker): WorkerOption {
 export function WorkflowDatasetPage() {
     // const { data } = useRouteLoaderData<WorkflowDashboardLoaded>(routes.workflow.dashboard.$id)!;
 
-    // return (
-    //     <DatasetTable data={data} />
-    // );
-
-    const { workflow } = useRouteLoaderData<WorkflowLoaded>(routes.workflow.$id)!;
-    const navigate = useNavigate();
-
-    const revalidate = useRevalidator();
-
-    async function forceContinue() {
-        const response = await mockAPI.workflows.executeRediscovery(workflow.id, { approach: 'HyFD' }, true);
-        if (!response.status)
-            return;
-
-        await revalidate.revalidate();
-        void navigate(routes.workflow.job.resolve({ workflowId: workflow.id }));
-    }
-
     return (
-        <div>
-            <Button color='primary' onPress={forceContinue}>
-                Fast continue
-            </Button>
-        </div>
+        <DatasetTable data={MOCK_DATASET} />
     );
+
+    // const { workflow } = useRouteLoaderData<WorkflowLoaded>(routes.workflow.$id)!;
+    // const navigate = useNavigate();
+
+    // const revalidate = useRevalidator();
+
+    // async function forceContinue() {
+    //     const response = await mockAPI.workflows.executeRediscovery(workflow.id, { approach: 'HyFD' }, true);
+    //     if (!response.status)
+    //         return;
+
+    //     await revalidate.revalidate();
+    //     void navigate(routes.workflow.job.resolve({ workflowId: workflow.id }));
+    // }
+
+    // return (
+    //     <div>
+    //         <Button color='primary' onPress={forceContinue}>
+    //             Fast continue
+    //         </Button>
+    //     </div>
+    // );
 }
 
 export function WorkflowListPage() {
-    // const { jobResult } = useRouteLoaderData<WorkflowDashboardLoaded>(routes.workflow.dashboard.$id)!;
-
-    // return (
-    //     <FDListDisplay graph={jobResult.fdGraph.edges} />
-    // );
+    const { workflow } = useRouteLoaderData<WorkflowLoaded>(routes.workflow.$id)!;
+    const index = workflow.iteration === 0 ? 0 : 1;
+    const fds = useMemo(() => createFdEdges(MOCK_FDS[index], MOCK_ARMSTRONG_RELATIONS[0].columns), [ index ]);
 
     return (
-        <div />
+        <Card className='mx-auto w-fit'>
+            <CardBody>
+                <FDListDisplayBalanced edges={fds} />
+            </CardBody>
+        </Card>
     );
+
+    // return (
+    //     <div />
+    // );
 }
 
 export function WorkflowGraphPage() {

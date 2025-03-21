@@ -54,7 +54,7 @@ export function WorkflowFinalPage() {
         window.open(routes.workflow.settings.resolve({ workflowId: Workflow.fromServer(response.data).id }), '_blank');
     }
 
-    const fds = useMemo(() => createFdList(MOCK_FDS, MOCK_ARMSTRONG_RELATIONS[0].columns), []);
+    const fds = useMemo(() => createFdEdges(MOCK_FDS[1], MOCK_ARMSTRONG_RELATIONS[0].columns), []);
 
     return (
         <div className='mx-auto w-fit flex flex-col gap-8'>
@@ -68,17 +68,17 @@ export function WorkflowFinalPage() {
 
                     <div className='col-span-2 flex items-center'>Dataset:<div className='truncate px-2 text-primary font-semibold'>{workflow.datasetName}</div></div>
 
-                    <div>Minimal FDs:<span className='px-2 text-primary font-semibold'>{5}</span></div>
+                    <div>Minimal FDs:<span className='px-2 text-primary font-semibold'>{4}</span></div>
 
                     <div>All FDs:<span className='px-2 text-primary font-semibold'>{28}</span></div>
 
                     <div />
 
-                    <div>Total negative examples:<span className='px-2 text-primary font-semibold'>{10}</span></div>
+                    <div>Total negative examples:<span className='px-2 text-primary font-semibold'>{11}</span></div>
 
-                    <div>Total positive examples:<span className='px-2 text-primary font-semibold'>{10}</span></div>
+                    <div>Total positive examples:<span className='px-2 text-primary font-semibold'>{2}</span></div>
 
-                    <div>Total unanswered examples:<span className='px-2 text-primary font-semibold'>{2}</span></div>
+                    <div>Total unanswered examples:<span className='px-2 text-primary font-semibold'>{0}</span></div>
                 </CardBody>
             </Card>
 
@@ -121,29 +121,73 @@ type MockFDClass = {
     minimalFds: number[][];
 };
 
-const MOCK_FDS: MockFDClass[] = [ {
-    colIndex: 1,
-    minimalFds: [
-        [ 0 ],
-    ],
-}, {
-    colIndex: 2,
-    minimalFds: [
-        [ 0 ],
-    ],
-}, {
-    colIndex: 3,
-    minimalFds: [
-        [ 0 ],
-    ],
-}, {
-    colIndex: 4,
-    minimalFds: [
-        [ 1, 2, 3 ],
-    ],
-} ];
+export const MOCK_FDS: MockFDClass[][] = [
+    [ {
+        colIndex: 0,
+        minimalFds: [
+            [ 2, 3 ],
+            [ 2, 4 ],
+            [ 3, 4 ],
+        ],
+    }, {
+        colIndex: 1,
+        minimalFds: [
+            [ 0 ],
+            [ 2 ],
+            [ 4 ],
+        ],
+    }, {
+        colIndex: 2,
+        minimalFds: [
+            [ 0 ],
+            [ 3, 4 ],
+        ],
+    }, {
+        colIndex: 3,
+        minimalFds: [
+            [ 0 ],
+            [ 2, 4 ],
+        ],
+    }, {
+        colIndex: 4,
+        minimalFds: [
+            [ 0 ],
+            [ 2, 3 ],
+        ],
+    } ],
+    [ {
+        colIndex: 1,
+        minimalFds: [
+            [ 0 ],
+        ],
+    }, {
+        colIndex: 2,
+        minimalFds: [
+            [ 0 ],
+        ],
+    }, {
+        colIndex: 3,
+        minimalFds: [
+            [ 0 ],
+        ],
+    }, {
+        colIndex: 4,
+        minimalFds: [
+            [ 1, 2, 3 ],
+        ],
+    } ],
+];
 
-function createFdList(classes: MockFDClass[], columns: string[]) {
+export function createFdEdges(classes: MockFDClass[], columns: string[]): FDEdge[] {
+    return classes.flatMap(({ colIndex, minimalFds }) => minimalFds.map(minimalFd => ({
+        id: minimalFd.join(',') + '->' + colIndex,
+        source: { columns: minimalFd.map(i => columns[i]), label: minimalFd.join(','), id: minimalFd.join(',') },
+        target: { columns: [ columns[colIndex] ], label: columns[colIndex], id: colIndex.toString() },
+    })));
+}
+
+// Not used now - we don't want to group the FDs by LHS for displaying. Maybe we will use it if there are too many FDs.
+function groupFdsByLhs(classes: MockFDClass[], columns: string[]): FDEdge[] {
     const fdsByLhs = new Map<string, { lhs: number[], rhs: number[] }>();
 
     for (const { colIndex, minimalFds } of classes) {

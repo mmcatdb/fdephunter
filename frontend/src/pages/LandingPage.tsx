@@ -26,9 +26,9 @@ export function LandingPage() {
 
     return (
         <Page>
-            <TopbarContent>
+            {/* <TopbarContent>
                 <TopbarToolbar />
-            </TopbarContent>
+            </TopbarContent> */}
 
             <h1 className='text-lg'>FDepHunter</h1>
 

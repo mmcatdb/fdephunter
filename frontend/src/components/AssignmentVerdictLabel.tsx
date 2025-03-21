@@ -19,7 +19,7 @@ const verdictDescriptions: {
     };
 } = {
     [AssignmentVerdict.New]: { color: 'text-primary', label: 'not evaluated' },
-    [AssignmentVerdict.Accepted]: { color: 'text-success', label: 'valid' },
-    [AssignmentVerdict.Rejected]: { color: 'text-danger', label: 'invalid' },
+    [AssignmentVerdict.Accepted]: { color: 'text-success', label: 'possible' },
+    [AssignmentVerdict.Rejected]: { color: 'text-danger', label: 'not possible' },
     [AssignmentVerdict.DontKnow]: { color: 'text-warning', label: 'uncertain' },
 };
