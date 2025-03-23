@@ -213,12 +213,12 @@ export function WorkflowOverviewPage() {
     const stats = useMemo(() => {
         const positive = relation.exampleRows.filter(row => row.isPositive).length;
         const negative = relation.exampleRows.filter(row => !row.isPositive).length;
-        const evaluated = relation.exampleRows.filter(row => row.state !== ExampleState.New).length;
+        const unanswered = relation.exampleRows.filter(row => row.isPositive === relation.isEvaluatingPositives && [ ExampleState.New, ExampleState.Undecided ].includes(row.state)).length;
 
         return {
             positive,
             negative,
-            evaluated,
+            unanswered,
         };
     }, [ relation ]);
 
@@ -244,7 +244,7 @@ export function WorkflowOverviewPage() {
 
                     <div>Positive examples:<span className='px-2 text-primary font-semibold'>{stats.positive}</span></div>
 
-                    <div>Unanswered examples:<span className='px-2 text-primary font-semibold'>{stats.evaluated - stats.negative - stats.positive}</span></div>
+                    <div>Unanswered examples:<span className='px-2 text-primary font-semibold'>{stats.unanswered}</span></div>
                 </CardBody>
 
                 <CardFooter className='flex justify-end gap-4'>

@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router';
 import { IoAdd, IoClose } from 'react-icons/io5';
 import { routes } from '@/router';
 import { AssignmentVerdictLabel } from './AssignmentVerdictLabel';
-import { AssignmentVerdict, type Assignment } from '@/types/assignment';
+import { type Assignment } from '@/types/assignment';
 // import { API } from '@/utils/api';
 import { TbPointFilled } from 'react-icons/tb';
 import { Button, Card, CardBody, CardFooter, CardHeader, Checkbox, Input, Switch } from '@heroui/react';
@@ -23,25 +23,24 @@ type AssignmentEvaluationProps = {
 export function AssignmentEvaluation({ assignment, onEvaluated }: AssignmentEvaluationProps) {
     const { decision } = useDecisionContext();
     const [ selectedFDIndex, setSelectedFDIndex ] = useState<number>();
-    const areColsClickable = decision.phase !== DecisionPhase.AnswerYesNo || assignment.verdict === AssignmentVerdict.Accepted || assignment.verdict === AssignmentVerdict.DontKnow;
 
     return (
         <div className='flex flex-col items-start gap-4'>
-            <ControlCard assignment={assignment} onEvaluated={onEvaluated} setSelectedFDIndex={setSelectedFDIndex} />
+            <ControlCard assignment={assignment} onEvaluated={onEvaluated} />
 
-            {decision.phase !== DecisionPhase.JustFinished && (
+            {decision.phase !== DecisionPhase.JustFinished && (<>
                 <Card className='p-4 max-w-full'>
                     <ExampleRelationDisplay
                         relation={assignment.relation}
                         selectedColIndex={selectedFDIndex}
-                        setSelectedColIndex={areColsClickable ? setSelectedFDIndex : undefined}
+                        setSelectedColIndex={setSelectedFDIndex}
                     />
                 </Card>
-            )}
 
-            {areColsClickable && selectedFDIndex !== undefined && (
-                <DecisionCard relation={assignment.relation} selectedFDIndex={selectedFDIndex} />
-            )}
+                {selectedFDIndex !== undefined && (
+                    <DecisionCard relation={assignment.relation} selectedFDIndex={selectedFDIndex} />
+                )}
+            </>)}
         </div>
     );
 }
@@ -49,10 +48,9 @@ export function AssignmentEvaluation({ assignment, onEvaluated }: AssignmentEval
 type ControlCardProps = {
     assignment: Assignment;
     onEvaluated: (assignment: Assignment) => void;
-    setSelectedFDIndex: (index: number | undefined) => void;
 };
 
-function ControlCard({ assignment, onEvaluated, setSelectedFDIndex }: ControlCardProps) {
+function ControlCard({ assignment, onEvaluated }: ControlCardProps) {
     const { decision, setDecision } = useDecisionContext();
     const [ fetching, setFetching ] = useState<string>();
     const navigate = useNavigate();
@@ -107,17 +105,6 @@ function ControlCard({ assignment, onEvaluated, setSelectedFDIndex }: ControlCar
         void navigate(route);
     }
 
-    function decideRest(isValid: boolean) {
-        const newState = isValid ? ColumnState.Valid : ColumnState.Invalid;
-
-        setDecision(prev => ({
-            ...prev,
-            columns: prev.columns.map(col => ({ ...col, state: col.state === ColumnState.Undecided ? newState : col.state })),
-        }));
-
-        setSelectedFDIndex(undefined);
-    }
-
     const isUndecided = decision.columns.some(column => column.state === ColumnState.Undecided);
 
     return (
@@ -139,27 +126,15 @@ function ControlCard({ assignment, onEvaluated, setSelectedFDIndex }: ControlCar
             </CardBody>
 
             <CardFooter className='gap-3'>
-                {decision.phase === DecisionPhase.AnswerYesNo && (<>
+                {decision.phase === DecisionPhase.Evaluation && (<>
                     <Button color='success' onPress={() => evaluate(DecisionStatus.Accepted, FID_ACCEPT)} isLoading={fetching === FID_ACCEPT} isDisabled={!!fetching}>
-                        Yes, the example is possible
+                        Accept
                     </Button>
-                    <Button color='danger' onPress={() => setDecision({ ...decision, phase: DecisionPhase.ProvideReason })}>
-                        No, the example is not possible
+                    <Button color='danger' onPress={() => evaluate(DecisionStatus.Rejected, FID_REJECT)} isLoading={fetching === FID_REJECT} isDisabled={!!fetching}>
+                        Reject (LHS must be unique)
                     </Button>
-                    <Button color='warning' onPress={() => evaluate(DecisionStatus.Unanswered, FID_ANSWER)} isLoading={fetching === FID_ANSWER} isDisabled={!!fetching}>
-                        I don't know ...
-                    </Button>
-                </>)}
-
-                {decision.phase === DecisionPhase.ProvideReason && (<>
-                    <Button color='primary' onPress={() => evaluate(DecisionStatus.Rejected, FID_REJECT)} isLoading={fetching === FID_REJECT} isDisabled={!!fetching || isUndecided}>
-                        Submit
-                    </Button>
-                    <Button color='success' onPress={() => decideRest(true)} isDisabled={!isUndecided}>
-                        Accept rest
-                    </Button>
-                    <Button color='danger' onPress={() => decideRest(false)} isDisabled={!isUndecided}>
-                        Reject rest
+                    <Button color='danger' onPress={() => evaluate(DecisionStatus.Rejected, FID_PARTIALLY_REJECT)} isLoading={fetching === FID_PARTIALLY_REJECT} isDisabled={!!fetching || isUndecided}>
+                        Partially reject
                     </Button>
                     <Button color='warning' onPress={() => evaluate(DecisionStatus.Unanswered, FID_ANSWER)} isLoading={fetching === FID_ANSWER} isDisabled={!!fetching || !isUndecided}>
                         I don't know ...
@@ -184,40 +159,26 @@ function ControlCard({ assignment, onEvaluated, setSelectedFDIndex }: ControlCar
 
 const FID_ACCEPT = 'accept';
 const FID_REJECT = 'reject';
+const FID_PARTIALLY_REJECT = 'partially-reject';
 const FID_ANSWER = 'answer';
 const FID_REEVALUATE = 'reevaluate';
 
 const titles: { [key in DecisionPhase]: string } = {
-    [DecisionPhase.AnswerYesNo]: 'Is this example correct?',
-    [DecisionPhase.ProvideReason]: 'Why is this example incorrect?',
+    [DecisionPhase.Evaluation]: 'Is this example correct?',
     [DecisionPhase.JustFinished]: 'Thank you!',
     [DecisionPhase.Finished]: 'Assignment finished',
 };
 
 const bodies: { [key in DecisionPhase]: ReactNode } = {
-    [DecisionPhase.AnswerYesNo]: (<>
+    [DecisionPhase.Evaluation]: (<>
         <p>
             The first row is from the original dataset. The second one was generated. Please decide if the second row is a possible part of the dataset.
         </p>
         <p>
-            The row should be marked as possible only if all its values are valid as well as all their combinations (with regards to all other values in the first row). If any of these conditions isn't met, the row is not possible. If you are not sure, the "I don't know" option is also a helpful answer.
-        </p>
-    </>),
-    [DecisionPhase.ProvideReason]: (<>
-        <p>
-            Please evaluate each value in the second row.
+            The row should be accepted only if all its values are valid as well as all their combinations (with regards to all other values in the first row). If any of these conditions isn't met, the row should be rejected. You can reject only some of the values by clicking on them and evaluating them separately.
         </p>
         <p>
-            Start by clicking on the example value you want to evaluate.
-            Then you can decide whether the value is possible or not.
-
-            {/*
-            TODO Backlogged.
-            Then you can provide reasons why it should not be possible. If the column's value is possible in the given context, leave it as-is. If two or more columns are invalid because of how they interact with each other, please provide the reasons for all of them.
-            */}
-        </p>
-        <p>
-            When you are finished with the evaluation, please submit the results.
+            If you are not sure, the "I don't know" option is also a helpful answer.
         </p>
     </>),
     [DecisionPhase.JustFinished]: (<>
@@ -236,7 +197,7 @@ type DecisionCardProps = {
 function DecisionCard({ relation, selectedFDIndex }: DecisionCardProps) {
     const { decision } = useDecisionContext();
 
-    return decision.phase === DecisionPhase.ProvideReason
+    return decision.phase === DecisionPhase.Evaluation
         ? (<EditableDecisionCard relation={relation} selectedFDIndex={selectedFDIndex} />)
         : (<FinalDecisionCard relation={relation} selectedFDIndex={selectedFDIndex} />);
 }

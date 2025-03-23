@@ -33,7 +33,7 @@ export enum ExampleState {
     New = 'NEW',
     Rejected = 'REJECTED',
     Accepted = 'ACCEPTED',
-    Answered = 'ANSWERED',
+    Undecided = 'UNDECIDED',
     Conflict = 'CONFLICT',
 }
 

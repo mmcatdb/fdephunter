@@ -182,7 +182,7 @@ const decisionToAssignment = {
 const decisionToExample = {
     [DecisionStatus.Accepted]: ExampleState.Accepted,
     [DecisionStatus.Rejected]: ExampleState.Rejected,
-    [DecisionStatus.Unanswered]: ExampleState.Answered,
+    [DecisionStatus.Unanswered]: ExampleState.Undecided,
 };
 
 // Workflows

@@ -1,9 +1,9 @@
-import { memo, useMemo, useState } from 'react';
+import { memo, type ReactNode, useMemo, useState } from 'react';
 import { NODE_OPTIONS, type RFGraph, type RFNode, type RFEdge } from '@/types/FD';
 import { Handle, type NodeProps, Position, ReactFlow } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { computeColumnIndexesForLatticeRow, computeEdgesForLatticeCell, type Lattice, McType } from '@/types/armstrongRelation';
-import { Button, cn, Divider, Select, SelectItem, type SharedSelection, Switch } from '@heroui/react';
+import { Button, cn, Divider, Popover, PopoverContent, PopoverTrigger, Select, SelectItem, type SharedSelection, Switch } from '@heroui/react';
 import clsx from 'clsx';
 
 export function LatticeDisplay({ lattices }: { lattices: Lattice[] }) {
@@ -20,6 +20,15 @@ export function LatticeDisplay({ lattices }: { lattices: Lattice[] }) {
     return (
         <div className='w-full h-full flex flex-col'>
             <div className={clsx('h-10 flex items-center justify-center gap-8')}>
+                <Popover placement='bottom-start'>
+                    <PopoverTrigger>
+                        <Button>Legend</Button>
+                    </PopoverTrigger>
+                    <PopoverContent>
+                        <Legend />
+                    </PopoverContent>
+                </Popover>
+
                 <Select
                     label='Class'
                     labelPlacement='outside-left'
@@ -42,7 +51,7 @@ export function LatticeDisplay({ lattices }: { lattices: Lattice[] }) {
                     <Divider orientation='vertical' />
 
                     <div>
-                    Row:{' '}
+                        Row:{' '}
                         <span className='tabular-nums text-lg font-bold'>
                             {rowIndex + 1}
                         </span>
@@ -50,11 +59,11 @@ export function LatticeDisplay({ lattices }: { lattices: Lattice[] }) {
 
                     <div className='space-x-2'>
                         <Button onPress={() => setRowIndex(prev => Math.max(0, prev - 1))} isDisabled={showAllRows || rowIndex === 0}>
-                        Previous
+                            Previous
                         </Button>
 
                         <Button onPress={() => setRowIndex(prev => Math.min(lattice.rows.length - 1, prev + 1))} isDisabled={showAllRows || rowIndex === lattice.rows.length - 1}>
-                        Next
+                            Next
                         </Button>
                     </div>
                 </>)}
@@ -67,6 +76,41 @@ export function LatticeDisplay({ lattices }: { lattices: Lattice[] }) {
                     edges={rfGraph.edges}
                 />
             </div>
+        </div>
+    );
+}
+
+function Legend() {
+    return (
+        <div className='grid grid-cols-[repeat(3,auto)] gap-x-8 gap-y-2'>
+            <LegendItem type={McType.Final} text={<>Final <McCharacter /> element (initial)</>} />
+            <LegendItem type={McType.Genuine} text='Genuine FD' />
+            <LegendItem type={McType.Eliminated} text={<>Final <McCharacter /> element (eliminated FD)</>} />
+
+            <LegendItem type={McType.Initial} text={<>Initial <McCharacter /> element</>} />
+            <LegendItem type={McType.Candidate} text='Candidate for genuine FD' />
+            <LegendItem type={McType.Targeted} text='Targeted FD' />
+
+            <LegendItem type={McType.Subset} text={<>Subset of <McCharacter /> element</>} />
+            <LegendItem type={McType.Derived} text='Derived FD' />
+            <LegendItem type={McType.Coincidental} text={<>Subset of <McCharacter /> element (eliminated FD)</>} />
+        </div>
+    );
+}
+
+function McCharacter() {
+    return (
+        <span className='italic'>M<sub>C</sub></span>
+    );
+}
+
+function LegendItem({ type, text }: { type: McType, text: ReactNode }) {
+    return (
+        <div className='flex items-center gap-2'>
+            <div className={clsx('w-10 flex items-center justify-center border-2 text-black', getMcTypeClassName(type))}>
+                abc
+            </div>
+            <div>{text}</div>
         </div>
     );
 }
@@ -127,11 +171,7 @@ function createRowNodes(lattice: Lattice, rowIndex: number, columnIndexes: numbe
             className: cn(
                 NODE_OPTIONS.className,
                 '!w-[120px] !px-1 !py-0 !border-4 !text-black text-center rounded text-sm',
-                bold.includes(type) && 'font-bold',
-                red.includes(type) && '!border-red-600 !bg-red-300',
-                blue.includes(type) && '!border-blue-600 !bg-blue-300',
-                yellow.includes(type) && '!border-yellow-600 !bg-yellow-200',
-                white.includes(type) && '!bg-white',
+                getMcTypeClassName(type),
             ),
         } satisfies RFNode;
     });
@@ -169,6 +209,16 @@ const white = [ McType.Subset, McType.Derived, McType.Coincidental ];
 const red = [ McType.Final, McType.Initial, McType.Subset ];
 const blue = [ McType.Genuine, McType.Candidate, McType.Derived ];
 const yellow = [ McType.Eliminated, McType.Targeted, McType.Coincidental ];
+
+function getMcTypeClassName(type: McType): string {
+    return cn(
+        bold.includes(type) && 'font-bold',
+        red.includes(type) && '!border-red-600 !bg-red-300',
+        blue.includes(type) && '!border-blue-600 !bg-blue-300',
+        yellow.includes(type) && '!border-yellow-600 !bg-yellow-200',
+        white.includes(type) && '!bg-white',
+    );
+}
 
 /** In px. */
 const NODE_SIZE = 120;

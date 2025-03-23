@@ -16,8 +16,7 @@ export type DecisionColumn = {
 };
 
 export enum DecisionPhase {
-    AnswerYesNo = 'answerYesNo',
-    ProvideReason = 'provideReason',
+    Evaluation = 'evaluation',
     JustFinished = 'justFinished',
     Finished = 'finished',
 }
@@ -74,7 +73,7 @@ function createDefaultDecision(relation: ExampleRelation, inputDecision: Decisio
         }));
 
     return {
-        phase: inputDecision ? DecisionPhase.Finished : DecisionPhase.AnswerYesNo,
+        phase: inputDecision ? DecisionPhase.Finished : DecisionPhase.Evaluation,
         columns,
     };
 }

@@ -290,7 +290,7 @@ const exampleStateData: Record<ExampleState, {
     [ExampleState.New]: { color: 'text-primary', icon: IoReloadCircleOutline },
     [ExampleState.Rejected]: { color: 'text-danger', icon: IoCloseCircleOutline },
     [ExampleState.Accepted]: { color: 'text-success', icon: IoCheckmarkCircleOutline },
-    [ExampleState.Answered]: { color: 'text-warning', icon: IoReloadCircleOutline },
+    [ExampleState.Undecided]: { color: 'text-warning', icon: IoReloadCircleOutline },
     [ExampleState.Conflict]: { color: 'text-danger', icon: IoStopCircleOutline },
 };
 
