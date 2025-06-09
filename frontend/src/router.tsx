@@ -1,9 +1,7 @@
 import { createBrowserRouter } from 'react-router';
 import { LandingPage } from './pages/LandingPage';
 import { WorkflowPage } from './pages/workflow/WorkflowPage';
-import { WorkerPage } from './pages/WorkerPage';
 import { AssignmentEvaluationPage, AssignmentGraphPage, AssignmentListPage, AssignmentPage } from './pages/AssignmentPage';
-import { ExamplePage } from './pages/ExamplePage';
 import { Layout } from './components/layout';
 import { WorkflowSettingsPage } from './pages/workflow/WorkflowSettingsPage';
 import { WorkflowJobPage } from './pages/workflow/WorkflowJobPage';
@@ -35,7 +33,6 @@ export const routes = {
     landing: '/',
     workflow: {
         $id: 'workflow',
-        example: '/workflows/example',
         root: new NamedRoute<'workflowId'>('/workflows/:workflowId'),
         settings: new NamedRoute<'workflowId'>('/workflows/:workflowId/settings'),
         job: new NamedRoute<'workflowId'>('/workflows/:workflowId/job'),
@@ -49,10 +46,6 @@ export const routes = {
             root: new NamedRoute<'workflowId'>('/workflows/:workflowId/results'),
             tabs: new NamedRoute<'workflowId' | 'tab'>('/workflows/:workflowId/results/:tab'),
         },
-    },
-    worker: {
-        example: '/workers/example',
-        detail: new NamedRoute<'workerId'>('/workers/:workerId'),
     },
     assignment: {
         $id: 'assignment',
@@ -68,9 +61,6 @@ export const router = createBrowserRouter([ {
     children: [ {
         index: true,
         element: <LandingPage />,
-    }, {
-        path: routes.workflow.example,
-        element: <ExamplePage type='workflow' />,
     }, {
         path: routes.workflow.root.path,
         element: <WorkflowPage />,
@@ -93,7 +83,6 @@ export const router = createBrowserRouter([ {
             shouldRevalidate: ({ defaultShouldRevalidate }) => defaultShouldRevalidate,
             children: [ {
                 index: true,
-                // element: <WorkersDistributionPage />,
                 element: <WorkflowOverviewPage />,
             }, {
                 path: routes.workflow.dashboard.tabs.resolvePartial({ tab: 'dataset' }),
@@ -123,16 +112,6 @@ export const router = createBrowserRouter([ {
                 element: <WorkflowGraphPage />,
             } ],
         } ],
-    }, {
-        path: routes.worker.example,
-        element: <ExamplePage type='worker' />,
-    }, {
-        path: routes.worker.detail.path,
-        element: <WorkerPage />,
-        loader: WorkerPage.loader,
-    }, {
-        path: routes.assignment.example,
-        element: <ExamplePage type='assignment' />,
     }, {
         path: routes.assignment.root.path,
         element: <AssignmentPage />,

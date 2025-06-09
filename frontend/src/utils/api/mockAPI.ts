@@ -62,8 +62,6 @@ function createAssignmentForWorkflow(init: AssignmentInit, workflow: WorkflowDB,
         workflowId: init.workflowId,
         iteration: workflow.iteration,
         rowIndex: init.rowIndex,
-        owner: 'workflow',
-        ownerId: init.workflowId,
         verdict: AssignmentVerdict.New,
         jobResultId,
         decision: undefined,
@@ -235,7 +233,7 @@ async function executeDiscovery(workflowId: string, params: ExecuteDiscoveryPara
         startedAt: DateTime.now().toUTC().toISO(),
     };
 
-    workflow.state = WorkflowState.WaitingForInitialFDs;
+    workflow.state = WorkflowState.InitialFdDiscovery;
     workflow.datasetName = params.datasetName;
     workflow.jobId = job.id;
 
@@ -312,7 +310,6 @@ async function acceptAllExamples(workflowId: string): Promise<Result<WorkflowFro
         const assignment = openAssignments.find(a => a.rowIndex === rowIndex);
         if (!assignment) {
             const init = {
-                workerId: undefined,
                 workflowId,
                 rowIndex,
             };

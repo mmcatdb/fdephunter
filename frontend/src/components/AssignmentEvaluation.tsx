@@ -99,10 +99,7 @@ function ControlCard({ assignment, onEvaluated }: ControlCardProps) {
     }
 
     function continueAccepted() {
-        const route = assignment.owner === 'worker'
-            ? routes.worker.detail.resolve({ workerId: assignment.ownerId })
-            : routes.workflow.dashboard.root.resolve({ workflowId: assignment.ownerId });
-        void navigate(route);
+        void navigate(routes.workflow.dashboard.root.resolve({ workflowId: assignment.workflowId }));
     }
 
     const isUndecided = decision.columns.some(column => column.state === ColumnState.Undecided);

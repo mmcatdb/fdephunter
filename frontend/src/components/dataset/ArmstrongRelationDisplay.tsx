@@ -1,11 +1,10 @@
+import { type Dispatch, useMemo, useState } from 'react';
 import { type ExampleRelation, type ArmstrongRelation, type ExampleRow, ExampleState } from '@/types/armstrongRelation';
-import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from '@heroui/react';
+import { Button } from '@heroui/react';
 import { ColumnNameBadge } from './FDListDisplay';
 import clsx, { type ClassValue } from 'clsx';
-import { type Dispatch, type Key, useMemo, useState } from 'react';
 import { BiCollapseHorizontal, BiExpandHorizontal } from 'react-icons/bi';
-import { ExampleStateIcon } from '../WorkersDistribution';
-import { IoCheckmark, IoClose, IoHelp } from 'react-icons/io5';
+import { IoCheckmark, IoClose, IoHelp, IoCheckmarkCircleOutline, IoCloseCircleOutline, IoReloadCircleOutline, IoStopCircleOutline } from 'react-icons/io5';
 import { ColumnState, useDecisionContext } from '@/context/DecisionProvider';
 import { type IconType } from 'react-icons';
 import { type AssignmentInfo } from '@/types/assignment';
@@ -19,12 +18,11 @@ type GridState = {
 
 type ArmstrongRelationDisplayProps = {
     relation: ArmstrongRelation;
-    workerOptions: WorkerOption[];
-    assignWorker: (rowIndex: number, workerId?: string) => void;
+    assignRow: (rowIndex: number) => void;
     assignments?: AssignmentInfo[];
 };
 
-export function ArmstrongRelationDisplay({ relation, workerOptions, assignWorker, assignments }: ArmstrongRelationDisplayProps) {
+export function ArmstrongRelationDisplay({ relation, assignRow, assignments }: ArmstrongRelationDisplayProps) {
     const [ state, setState ] = useState<GridState>({});
 
     return (
@@ -93,8 +91,7 @@ export function ArmstrongRelationDisplay({ relation, workerOptions, assignWorker
                     relation={relation}
                     row={row}
                     rowIndex={rowIndex}
-                    workerOptions={workerOptions}
-                    assignWorker={assignWorker}
+                    assignRow={assignRow}
                     assignments={assignments}
                     gridState={state}
                 />
@@ -147,18 +144,16 @@ type ExampleRowDisplayProps = {
     relation: ArmstrongRelation;
     row: ExampleRow;
     rowIndex: number;
-    workerOptions: WorkerOption[];
-    assignWorker: (rowIndex: number, workerId?: string) => void;
+    assignRow: (rowIndex: number) => void;
     assignments?: AssignmentInfo[];
     gridState: GridState;
 };
 
-function ExampleRowDisplay({ relation, row, rowIndex, workerOptions, assignWorker, assignments, gridState }: ExampleRowDisplayProps) {
+function ExampleRowDisplay({ relation, row, rowIndex, assignRow, assignments, gridState }: ExampleRowDisplayProps) {
     const maxSetCols = row.maxSet.map(index => relation.columns[index]);
     const exampleBgClass = row.isPositive ? 'bg-danger-400' : 'bg-warning-400';
     const { leftClass, rightClass } = getSpecialCellClasses(rowIndex);
 
-    const worker = workerOptions.find(w => w.key === row.workerId);
     const isEvaluationAllowed = row.isPositive === relation.isEvaluatingPositives;
 
     const assignment = useMemo(() => assignments?.find(a => a.rowIndex === rowIndex), [ assignments, rowIndex ]);
@@ -170,12 +165,6 @@ function ExampleRowDisplay({ relation, row, rowIndex, workerOptions, assignWorke
             )}
 
             {isEvaluationAllowed && !gridState.isProgressCollapsed && (<>
-                {/* {worker ? (
-                    <span className='font-semibold'>{worker.label}</span>
-                ) : (
-                    <WorkerDropdown workerOptions={workerOptions} selectWorker={key => assignWorker(rowIndex, key as string)} />
-                )} */}
-
                 {assignment ? (
                     <Link to={routes.assignment.root.resolve({ assignmentId: assignment.id })}>
                         <Button size='sm' className='h-6' disableAnimation>
@@ -183,7 +172,7 @@ function ExampleRowDisplay({ relation, row, rowIndex, workerOptions, assignWorke
                         </Button>
                     </Link>
                 ) : (
-                    <Button size='sm' className='h-6' disableAnimation onPress={() => assignWorker(rowIndex)}>
+                    <Button size='sm' className='h-6' disableAnimation onPress={() => assignRow(rowIndex)}>
                         Evaluate
                     </Button>
                 )}
@@ -210,37 +199,28 @@ function ExampleRowDisplay({ relation, row, rowIndex, workerOptions, assignWorke
     </>);
 }
 
-type WorkerDropdownProps = {
-    workerOptions: WorkerOption[];
-    selectWorker: (key: Key) => void;
+type ExampleStateIconProps = {
+    state: ExampleState;
+    size?: number;
 };
 
-function WorkerDropdown({ workerOptions, selectWorker }: WorkerDropdownProps) {
+export function ExampleStateIcon({ state, size = 24 }: ExampleStateIconProps) {
+    const data = exampleStateData[state];
+
     return (
-        <Dropdown>
-            <DropdownTrigger>
-                <Button size='sm' className='h-6' disableAnimation>
-                    Assign
-                </Button>
-            </DropdownTrigger>
-            <DropdownMenu aria-label='Assign domain expert' items={workerOptions} onAction={selectWorker}>
-                {item => (
-                    <DropdownItem
-                        key={item.key}
-                        className={item.key === 'delete' ? 'text-danger' : ''}
-                        color={item.key === 'delete' ? 'danger' : 'default'}
-                    >
-                        {item.label}
-                    </DropdownItem>
-                )}
-            </DropdownMenu>
-        </Dropdown>
+        <data.icon size={size} className={data.color} />
     );
 }
 
-export type WorkerOption = {
-    key: string;
-    label: string;
+const exampleStateData: Record<ExampleState, {
+    color: string;
+    icon: IconType;
+}> = {
+    [ExampleState.New]: { color: 'text-primary', icon: IoReloadCircleOutline },
+    [ExampleState.Rejected]: { color: 'text-danger', icon: IoCloseCircleOutline },
+    [ExampleState.Accepted]: { color: 'text-success', icon: IoCheckmarkCircleOutline },
+    [ExampleState.Undecided]: { color: 'text-warning', icon: IoReloadCircleOutline },
+    [ExampleState.Conflict]: { color: 'text-danger', icon: IoStopCircleOutline },
 };
 
 type ExampleRelationDisplayProps = {

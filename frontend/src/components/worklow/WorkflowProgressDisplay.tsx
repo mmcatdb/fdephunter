@@ -61,7 +61,7 @@ type StepLabel = {
 
 const STEP_LABELS: { [key in WorkflowState]: StepLabel } = {
     [WorkflowState.InitialSettings]:        { shortLabel: '1', longLabel: 'Input dataset' },
-    [WorkflowState.WaitingForInitialFDs]:    { shortLabel: '2', longLabel: 'FD discovery' },
+    [WorkflowState.InitialFdDiscovery]:    { shortLabel: '2', longLabel: 'FD discovery' },
     [WorkflowState.NegativeExamples]:       { shortLabel: '3', longLabel: 'Negative examples' },
     //[WorkflowState.WaitingForNextSample]:    { shortLabel: '4', longLabel: 'Generating next sample' },
     //[WorkflowState.EvaluatingSample]:        { shortLabel: '5', longLabel: 'Sample evaluation' },

@@ -11,7 +11,7 @@ export enum DatasetType {
 export type DatasetFromServer = {
     name: string;
     type: DatasetType;
-    // TODO not important now
+    // NICE_TO_HAVE not important now
     // source: string;
     // kindName: string;
     // columns: number;
@@ -23,7 +23,7 @@ export type DatasetFromServer = {
 export class Dataset {
     private constructor(
         readonly name: string,
-        // TODO not important now
+        // NICE_TO_HAVE not important now
         // readonly source: string,
         // readonly columns: number,
         // readonly rows: number,

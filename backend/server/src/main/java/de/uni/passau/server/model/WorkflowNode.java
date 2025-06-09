@@ -11,11 +11,11 @@ public class WorkflowNode {
 
     public static enum WorkflowState {
         /** Workflow is created, now we wait for the user to select dataset(s) and approach. */
-        INITIAL,
+        INITIAL_SETTINGS,
         /** Wait for the initial discovery job. */
-        INITIAL_JOB_WAITING,
+        INITIAL_FD_DISCOVERY,
         /** The initial discovery job is finished, now we wait for the user to distribute the negative examples and for the workers to finish their evaluation. */
-        WORKER_ASSIGNMENT,
+        NEGATIVE_EXAMPLES,
         /** Wait for the rediscovery job. */
         JOB_WAITING,
         /** We have the results. */
@@ -33,7 +33,7 @@ public class WorkflowNode {
 
     public static WorkflowNode createNew() {
         final var workflow = new WorkflowNode();
-        workflow.setState(WorkflowState.INITIAL);
+        workflow.setState(WorkflowState.INITIAL_SETTINGS);
         workflow.setIteration(0);
 
         return workflow;

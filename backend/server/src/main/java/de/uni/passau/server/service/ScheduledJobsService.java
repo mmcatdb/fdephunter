@@ -194,7 +194,7 @@ public class ScheduledJobsService {
             Mono<DiscoveryJobNode> updatedJob = discoveryJobService.setState(group.job(), DiscoveryJobState.FINISHED)
                 .doOnNext(value -> LOGGER.info("Job {} has finished.", value.getId()));
 
-            Mono<WorkflowNode> updatedWorkflow = workflowService.setState(group.workflow().getId(), WorkflowState.WORKER_ASSIGNMENT)
+            Mono<WorkflowNode> updatedWorkflow = workflowService.setState(group.workflow().getId(), WorkflowState.NEGATIVE_EXAMPLES)
                 .doOnNext(value -> LOGGER.info("Workflow uuid={} state was updated to {}", value.getId(), value.getState()));
 
             Mono<WorkflowNode> updatedWorkflow2 = workflowService.setIteration(group.workflow().getId(), group.job().getIteration())

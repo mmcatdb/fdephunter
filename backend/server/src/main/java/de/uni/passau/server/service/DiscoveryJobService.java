@@ -109,7 +109,7 @@ public class DiscoveryJobService {
     }
 
     public Mono<DiscoveryJobNode> createDiscoveryJob(String workflowId, ApproachName approachName, String description, List<String> datasets) {
-        return createJob(workflowId, approachName, description, datasets, WorkflowState.INITIAL_JOB_WAITING);
+        return createJob(workflowId, approachName, description, datasets, WorkflowState.INITIAL_FD_DISCOVERY);
     }
 
     public Mono<DiscoveryJobNode> createRediscoveryJob(String workflowId, ApproachName approachName, String description) {
@@ -119,7 +119,7 @@ public class DiscoveryJobService {
     public Mono<Boolean> canCreateRediscoveryJob(String workflowId) {
         return workflowRepository.findById(workflowId)
             // If the workflow isn't in the correct state ...
-            .flatMap(workflow -> workflow.getState() == WorkflowState.WORKER_ASSIGNMENT
+            .flatMap(workflow -> workflow.getState() == WorkflowState.NEGATIVE_EXAMPLES
                 ? classRepository.findAllGroupsByWorkflowId(workflowId).collectList().map(classes ->
                     // If there still are unresolved classes ...
                     classes.stream().allMatch(c -> c.lastExample() != null && c.lastExample().getState() == NegativeExampleState.ACCEPTED)

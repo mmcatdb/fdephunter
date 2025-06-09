@@ -1,7 +1,5 @@
-import { type ReferenceRow, type ExampleRow, type ExampleRelation, type ExampleState } from './armstrongRelation';
-import { type DatasetData } from './dataset';
+import { type ExampleRelation, type ExampleState } from './armstrongRelation';
 import { type DecisionInit } from './decision';
-import { JobResult, type JobResultFromServer } from './jobResult';
 
 export enum AssignmentVerdict {
     New = 'NEW',
@@ -14,29 +12,21 @@ export type AssignmentInfo = {
     id: string;
     verdict: AssignmentVerdict;
     rowIndex: number;
-    // referenceRow: ReferenceRow;
-    // exampleRow: ExampleRow;
 };
 
 export type AssignmentFromServer = AssignmentInfo & {
-    owner: 'workflow' | 'worker';
-    /** Either worfklowId or workerId. */
-    ownerId: string;
-    // discoveryResult: JobResultFromServer;
-    // dataset: DatasetData;
+    workflowId: string;
     relation: ExampleRelation;
     decision: DecisionInit | undefined;
 };
+
 // TODO Replace by a simple type (if possible).
 export class Assignment {
     private constructor(
         readonly id: string,
-        readonly owner: 'workflow' | 'worker',
-        readonly ownerId: string,
+        readonly workflowId: string,
         readonly verdict: AssignmentVerdict,
         readonly isFinished: boolean,
-        // readonly discoveryResult: JobResult,
-        // readonly dataset: DatasetData,
         readonly relation: ExampleRelation,
         readonly decision: DecisionInit | undefined,
     ) {}
@@ -44,12 +34,9 @@ export class Assignment {
     static fromServer(input: AssignmentFromServer): Assignment {
         return new Assignment(
             input.id,
-            input.owner,
-            input.ownerId,
+            input.workflowId,
             input.verdict,
             input.verdict !== AssignmentVerdict.New,
-            // JobResult.fromServer(input.discoveryResult),
-            // input.dataset,
             input.relation,
             input.decision,
         );
@@ -57,8 +44,6 @@ export class Assignment {
 }
 
 export type AssignmentInit = {
-    /** If undefined, the workflow owner is assigning himself. */
-    workerId: string | undefined;
     workflowId: string;
     rowIndex: number;
 };

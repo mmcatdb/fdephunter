@@ -26,7 +26,6 @@ export type ExampleRow = {
     /** Whether it is a negative or positive example. Undefined for the first row. */
     isPositive: boolean;
     state: ExampleState;
-    workerId?: string;
 };
 
 export enum ExampleState {

@@ -186,7 +186,7 @@ export function createFdEdges(classes: MockFDClass[], columns: string[]): FDEdge
     })));
 }
 
-// Not used now - we don't want to group the FDs by LHS for displaying. Maybe we will use it if there are too many FDs.
+// NICE_TO_HAVE Not used now - we don't want to group the FDs by LHS for displaying. Maybe we will use it if there are too many FDs.
 function groupFdsByLhs(classes: MockFDClass[], columns: string[]): FDEdge[] {
     const fdsByLhs = new Map<string, { lhs: number[], rhs: number[] }>();
 

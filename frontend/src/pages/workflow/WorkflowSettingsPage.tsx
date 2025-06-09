@@ -110,7 +110,7 @@ function InitialSettingsForm({ datasets, approaches, onSubmit, fetching }: Initi
         dataset: new Set<string>(),
         file: undefined as FileInputValue,
     });
-    const datasetOptions = useMemo(() => MOCK_DATASETS.map((label, key) => ({ key, label })), []);
+    const datasetOptions = useMemo(() => MOCK_DATASETS.map(nameToOption), []);
 
     // const [ selectedApproach, setSelectedApproach ] = useState(new Set<string>());
     // const approachOptions = useMemo(() => approaches.map(a => nameToOption(a.name)), [ approaches ]);
@@ -167,26 +167,11 @@ function InitialSettingsForm({ datasets, approaches, onSubmit, fetching }: Initi
 
         <FileInput value={selected.file} onChange={setSelectedValue} />
 
-        {/* <div className='mt-4'>
-            <Select
-                label='Approach'
-                selectionMode='single'
-                items={approachOptions}
-                selectedKeys={selectedApproach}
-                onSelectionChange={setSelectedApproach as (keys: SharedSelection) => void}
-            >
-                {option => (
-                    <SelectItem key={option.key}>{option.label}</SelectItem>
-                )}
-            </Select>
-        </div> */}
-
         <Button
             className='mt-8 w-full'
             color='primary'
             onPress={submit}
             isLoading={fetching}
-            // isDisabled={selectedApproach.size === 0 || selectedDatasets.size === 0}
             isDisabled={!selected.dataset.size && !selected.file}
         >
             Run!

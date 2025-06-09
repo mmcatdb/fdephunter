@@ -26,15 +26,9 @@ export function AssignmentPage() {
             <div className='space-x-4'>
                 <AssignmentTabs assignmentId={assignment.id} />
 
-                {assignment.owner === 'worker' ? (
-                    <Button as={Link} to={routes.worker.detail.resolve({ workerId: assignment.ownerId })}>
-                        Back to Domain Expert
-                    </Button>
-                ) : (
-                    <Button as={Link} to={routes.workflow.dashboard.root.resolve({ workflowId: assignment.ownerId })}>
-                        Back to Workflow
-                    </Button>
-                )}
+                <Button as={Link} to={routes.workflow.dashboard.root.resolve({ workflowId: assignment.workflowId })}>
+                    Back to Workflow
+                </Button>
             </div>
         </TopbarContent>
 
@@ -61,7 +55,7 @@ AssignmentPage.loader = async ({ params: { assignmentId } }: { params: Params<'a
     if (!response.status)
         throw new Error('Failed to load assignment');
 
-    const workflowResponse = await mockAPI.workflows.get(response.data.ownerId);
+    const workflowResponse = await mockAPI.workflows.get(response.data.workflowId);
     if (!workflowResponse.status)
         throw new Error('Failed to load workflow');
 
@@ -94,6 +88,8 @@ export function AssignmentEvaluationPage() {
 }
 
 export function AssignmentListPage() {
+    // FIXME This needs to work.
+
     // const { assignment } = useRouteLoaderData<AssignmentLoaded>(routes.assignment.$id)!;
 
     // return (

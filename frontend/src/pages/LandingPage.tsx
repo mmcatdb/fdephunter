@@ -1,10 +1,8 @@
-// import { API } from '@/utils/api';
 import { routes } from '@/router';
 import { Workflow } from '@/types/workflow';
-import { Link, useNavigate } from 'react-router';
-// import { rawAPI } from '@/utils/api/rawAPI';
+import { useNavigate } from 'react-router';
 import { Button } from '@heroui/react';
-import { Page, TopbarContent } from '@/components/layout';
+import { Page } from '@/components/layout';
 import { mockAPI } from '@/utils/api/mockAPI';
 import { useState } from 'react';
 
@@ -14,7 +12,6 @@ export function LandingPage() {
 
     async function continueToWorkflow() {
         setIsFetching(true);
-        // const response = await API.workflows.create({}, {});
         const response = await mockAPI.workflows.create();
         if (!response.status) {
             setIsFetching(false);
@@ -26,10 +23,6 @@ export function LandingPage() {
 
     return (
         <Page>
-            {/* <TopbarContent>
-                <TopbarToolbar />
-            </TopbarContent> */}
-
             <h1 className='text-lg'>FDepHunter</h1>
 
             <p className='mt-12'>
@@ -52,31 +45,5 @@ export function LandingPage() {
                 </Button>
             </div>
         </Page>
-    );
-}
-
-function TopbarToolbar() {
-    // function resetDatabase() {
-    //     void rawAPI.POST('/demo/initialize');
-    // }
-
-    return (
-        <div className='space-x-4'>
-            <Link to={routes.root} className='hover:underline'>
-                Home
-            </Link>
-            <Link to={routes.workflow.example} className='hover:underline'>
-                Workflow
-            </Link>
-            <Link to={routes.worker.example} className='hover:underline'>
-                Worker
-            </Link>
-            <Link to={routes.assignment.example} className='hover:underline'>
-                Assignment
-            </Link>
-            {/* <Button color='secondary' size='sm' onPress={resetDatabase}>
-                Reset DB
-            </Button> */}
-        </div>
     );
 }
