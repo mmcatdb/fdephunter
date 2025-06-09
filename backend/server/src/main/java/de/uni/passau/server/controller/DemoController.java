@@ -4,13 +4,9 @@ import de.uni.passau.server.approach.Approach1Metadata;
 import de.uni.passau.server.approach.HyFDMetadata;
 import de.uni.passau.server.model.ApproachNode;
 import de.uni.passau.server.model.DatasetNode;
-import de.uni.passau.server.model.RoleNode;
-import de.uni.passau.server.model.RoleNode.RoleType;
-import de.uni.passau.server.model.UserNode;
 import de.uni.passau.server.model.WorkflowNode;
 import de.uni.passau.server.service.ApproachService;
 import de.uni.passau.server.service.DatasetService;
-import de.uni.passau.server.service.UserService;
 import de.uni.passau.server.service.WorkflowService;
 
 import java.util.ArrayList;
@@ -41,9 +37,6 @@ public class DemoController {
     @Autowired
     private ApproachService approachService;
 
-    @Autowired
-    private UserService userService;
-
     @PostMapping("/demo/initialize")
     public Mono<String> initialize() {
         return initializeDatabase();
@@ -51,10 +44,6 @@ public class DemoController {
 
     private Mono<String> initializeDatabase() {
 
-        var expertRole = List.of(RoleNode.createNew(RoleType.EXPERT));
-        var ownerRole = List.of(RoleNode.createNew(RoleType.OWNER));
-
-        var owner = UserNode.createNew("James", "Gosling", "james@java.com", ownerRole);
         var workflow = WorkflowNode.createNew();
         workflow.setId("710c85bf-def8-4b38-a92e-fdd9ae372a95");
 
@@ -93,32 +82,10 @@ public class DemoController {
                 Flux<DatasetNode> allDatasetNodes = datasetService.saveAll(datasets);
                 return Mono.when(allDatasetNodes);
             }))
-            // initialize users roles
-            .then(Mono.defer(() -> {
-                LOGGER.info("Initializing user roles.");
-                Flux<RoleNode> roles = userService.initializeRoles();
-                return Mono.when(roles);
-            }))
-            // initialize users
-            .then(Mono.defer(() -> {
-                LOGGER.info("Initializing users.");
-                Mono<UserNode> user1 = userService.saveUser(UserNode.createNew("Albert", "Einstein", "albert@has.no.email", expertRole));
-                Mono<UserNode> user2 = userService.saveUser(UserNode.createNew("Alan", "Turing", "alan@has.no.email", expertRole));
-                Mono<UserNode> user3 = userService.saveUser(UserNode.createNew("Ray", "Tomlinson", "ray@has.no.email", expertRole));
-                Mono<UserNode> user4 = userService.saveUser(UserNode.createNew("John", "McCarthy", "john@has.no.email", expertRole));
-                Mono<UserNode> user5 = userService.saveUser(owner);
-                Mono<UserNode> user6 = userService.saveUser(UserNode.createNew("Margaret", "Hamilton", "margaret@has.no.email", expertRole));
-                return Mono.when(user1, user2, user3, user4, user5, user6);
-            }))
             // initialize workflow
             .then(Mono.defer(() -> {
                 LOGGER.info("Initializing workflow.");
                 return workflowService.saveWorkflow(workflow);
-            }))
-            // add owner to workflow
-            .then(Mono.defer(() -> {
-                LOGGER.info("Adding owner to workflow.");
-                return userService.makeOwnerOfWorkflow(owner.getId(), workflow.getId());
             }))
             .subscribe();
         return Mono.just("{\"message\" : \"ok\"}");

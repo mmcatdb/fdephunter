@@ -14,7 +14,7 @@ public class WorkflowNode {
         INITIAL_SETTINGS,
         /** Wait for the initial discovery job. */
         INITIAL_FD_DISCOVERY,
-        /** The initial discovery job is finished, now we wait for the user to distribute the negative examples and for the workers to finish their evaluation. */
+        /** The initial discovery job is finished, now we wait for the user to distribute the negative examples and to finish their evaluation. */
         NEGATIVE_EXAMPLES,
         /** Wait for the rediscovery job. */
         JOB_WAITING,

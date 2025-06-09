@@ -10,7 +10,6 @@ import java.util.List;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,15 +21,6 @@ public class DummyController {
     @GetMapping("/dummy")
     public String dummy() {
         return "{\"message\": \"Dummy controller works!\"}";
-    }
-
-    @PostMapping("/dummy/workers/{workerId}/stop")
-    public void stopWorker(@PathVariable String workerId) {
-        // TODO
-        // Here, the worker should be stopped - meaning he won't get any new assignments. However, we should still keep him in the DB so that we can show him to the workflow owner.
-        // There are two possible cases for calling this route:
-        // - The worker declined to help with the workflow.
-        // - The worker agreed to help, but then he decided to stop. Maybe he did evaluate some examples, maybe he didn't.
     }
 
     @GetMapping("/dummy/weight-functions")

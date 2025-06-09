@@ -11,11 +11,11 @@ import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
 @Node("Assignment")
 public class AssignmentNode {
 
-    public enum ExpertVerdict {
+    public enum AssignmentVerdict {
         NEW,
         ACCEPTED,
         REJECTED,
-        I_DONT_KNOW,
+        DONT_KNOW,
     }
 
     @Id @GeneratedValue(UUIDStringGenerator.class)
@@ -25,14 +25,14 @@ public class AssignmentNode {
     private String decision;
 
     @Property
-    private ExpertVerdict verdict;
+    private AssignmentVerdict verdict;
 
     @Property
     private Long createdAt;
 
     public static AssignmentNode createNew() {
         final var assignment = new AssignmentNode();
-        assignment.setVerdict(ExpertVerdict.NEW);
+        assignment.setVerdict(AssignmentVerdict.NEW);
         assignment.setCreatedAt(new Date().getTime());
 
         return assignment;
@@ -54,11 +54,11 @@ public class AssignmentNode {
         this.decision = decision;
     }
 
-    public ExpertVerdict getVerdict() {
+    public AssignmentVerdict getVerdict() {
         return verdict;
     }
 
-    public void setVerdict(ExpertVerdict verdict) {
+    public void setVerdict(AssignmentVerdict verdict) {
         this.verdict = verdict;
     }
 

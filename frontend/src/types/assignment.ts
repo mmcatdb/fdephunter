@@ -5,7 +5,7 @@ export enum AssignmentVerdict {
     New = 'NEW',
     Accepted = 'ACCEPTED',
     Rejected = 'REJECTED',
-    DontKnow = 'I_DONT_KNOW',
+    DontKnow = 'DONT_KNOW',
 }
 
 export type AssignmentInfo = {

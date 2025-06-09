@@ -17,7 +17,6 @@ public class Cron {
     @Scheduled(cron = "*/6 * * * * *")
     public void scheduledJobEverySecond() {
         scheduledJobsService.executeUpdateNegativeExampleJobs();
-        scheduledJobsService.executeAssignJobs();
     }
 
     @Scheduled(cron = "*/30 * * * * *")

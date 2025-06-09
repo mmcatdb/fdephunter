@@ -88,12 +88,6 @@
             <version>BETA</version>
             <type>jar</type>
         </dependency>
-        <dependency>
-            <groupId>de.uni.passau</groupId>
-            <artifactId>crowdsourcing</artifactId>
-            <version>BETA</version>
-            <type>jar</type>
-        </dependency>
     </dependencies>
     
     <build>

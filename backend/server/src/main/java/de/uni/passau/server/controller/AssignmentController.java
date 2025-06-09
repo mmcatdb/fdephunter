@@ -2,7 +2,6 @@ package de.uni.passau.server.controller;
 
 import de.uni.passau.core.nex.Decision;
 import de.uni.passau.server.clientdto.Assignment;
-import de.uni.passau.server.clientdto.AssignmentInfo;
 import de.uni.passau.server.clientdto.DatasetData;
 import de.uni.passau.server.service.AssignmentService;
 import de.uni.passau.server.service.DatasetService;
@@ -21,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -46,11 +44,6 @@ public class AssignmentController {
                 .map(dataset -> DatasetData.fromNodes(dataset, numberLimit))
                 .map(datasetData -> Assignment.fromNodes(assignmentGroup, datasetData))
         );
-    }
-
-    @GetMapping("/domain-experts/{expertId}/answered-assignments")
-    public Flux<AssignmentInfo> getAnsweredAssignments(@PathVariable String expertId) {
-        return assignmentService.findAllAnsweredFromExpert(expertId).map(AssignmentInfo::fromNodes);
     }
 
     private static record DecisionInit(

@@ -7,15 +7,11 @@ import de.uni.passau.core.dataset.Dataset;
 import de.uni.passau.core.graph.Vertex;
 import de.uni.passau.core.graph.WeightedGraph;
 import de.uni.passau.core.nex.Decision;
-import de.uni.passau.core.nex.NegativeExample;
 import de.uni.passau.core.nex.NegativeExampleBuilder;
 import de.uni.passau.core.nex.NegativeExampleUpdater;
 import de.uni.passau.server.approach.HyFDAlgorithm;
 import de.uni.passau.server.approach.OurApproachAlgorithm;
-import de.uni.passau.server.crowdsourcing.CrowdSourcingDummyAlgorithm;
-import de.uni.passau.server.crowdsourcing.serverdto.Assignment;
-import de.uni.passau.server.crowdsourcing.serverdto.ExpertUser;
-import de.uni.passau.server.model.AssignmentNode.ExpertVerdict;
+import de.uni.passau.server.model.AssignmentNode.AssignmentVerdict;
 import de.uni.passau.server.model.DiscoveryJobNode;
 import de.uni.passau.server.model.DiscoveryJobNode.DiscoveryJobState;
 import de.uni.passau.server.model.NegativeExampleNode;
@@ -23,7 +19,6 @@ import de.uni.passau.server.model.NegativeExampleNode.NegativeExampleState;
 import de.uni.passau.server.model.WorkflowNode;
 import de.uni.passau.server.model.WorkflowNode.WorkflowState;
 import de.uni.passau.server.repository.ClassRepository;
-import de.uni.passau.server.repository.ExpertRepository.ExpertNodeGroup;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,9 +46,6 @@ public class ScheduledJobsService {
     private NegativeExampleService negativeExampleService;
 
     @Autowired
-    private ExpertService expertService;
-
-    @Autowired
     private WorkflowService workflowService;
 
     @Autowired
@@ -76,20 +68,20 @@ public class ScheduledJobsService {
                 if (
                     // there is no assignment to negative example -> exit
                     assignments.isEmpty()
-                    // at least one domain expert has not answered yet -> exit
-                    || assignments.stream().anyMatch(assignment -> assignment.getVerdict().equals(ExpertVerdict.NEW))
+                    // assignment has not been answered -> exit
+                    || assignments.stream().anyMatch(assignment -> assignment.getVerdict().equals(AssignmentVerdict.NEW))
                 )
                     return Mono.empty();
 
                 // check whether negative example is answered by all expert users:
-                int[] verdictsCounter = new int[ExpertVerdict.values().length];
+                int[] verdictsCounter = new int[AssignmentVerdict.values().length];
                 for (var assignment : assignments)
                     verdictsCounter[assignment.getVerdict().ordinal()] += 1;    // increment
 
                 // We have collected all verdicts, hence we need to check the majority verdict:
                 // all verdicts or at least 75% of them are accept -> accept example
                 int quorum = (int) Math.ceil(assignments.size() * 0.75);    // quorum >= 75%
-                if (verdictsCounter[ExpertVerdict.ACCEPTED.ordinal()] >= quorum) {
+                if (verdictsCounter[AssignmentVerdict.ACCEPTED.ordinal()] >= quorum) {
                     LOGGER.info("ACCEPTED");
                     return negativeExampleService.changeExampleState(example.id, NegativeExampleState.ACCEPTED);
                 }
@@ -119,35 +111,6 @@ public class ScheduledJobsService {
                     .flatMap(classNode -> negativeExampleService.createExample(classNode.getId(), updatedExample));
             })
         ).subscribe(x -> LOGGER.info("NEGATIVE EXAMPLE JOB FINISHED"));
-    }
-
-    public void executeAssignJobs() {
-        LOGGER.info("EXECUTING ASSIGN JOB");
-
-        workflowService.getAllWorkflows().flatMap(workflow -> {
-            Flux<NegativeExample> unassignedNegativeExamples = negativeExampleService.fetchUnassignedExamples(workflow.getId());
-            Flux<ExpertNodeGroup> idleExperts = expertService.findAllIdleInWorkflow(workflow.getId());
-            return Mono.zip(unassignedNegativeExamples.collectList(), idleExperts.collectList());
-        }).flatMap(tuple -> {
-            final List<ExpertUser> idleExperts = tuple.getT2().stream().map(expert -> new ExpertUser(expert.expert().getId())).toList();
-            final List<NegativeExample> unassignedNegativeExamples = tuple.getT1();
-
-            //TODO: DISTRIBUTE WORK HERE!
-            final var algorithm = new CrowdSourcingDummyAlgorithm();
-            final List<Assignment> assignments = algorithm.makeAssignment(idleExperts, unassignedNegativeExamples);
-
-            assignments.forEach(assignment -> {
-                LOGGER.info("ASSIGNMENT: {}", assignment);
-
-                assignmentService.createAssignment(assignment.expert.id, assignment.negativeExample.id).subscribe(value -> {
-                    LOGGER.info("NEGATIVE EXAMPLE HAS BEEN ASSIGNED: {}", value);
-                });
-
-                // AND CHANGE STATE OF USER FROM IDLE TO DIFFERENT!
-            });
-
-            return Mono.empty();
-        }).subscribe(x -> LOGGER.info("ASSIGN JOB FINISHED"));
     }
 
     public void executeDiscoveryJobs() {

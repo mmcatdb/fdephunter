@@ -12,7 +12,6 @@
     <modules>
         <module>core</module>
         <module>server</module>
-        <module>crowdsourcing</module>
         <module>discovery</module>
         <module>weightfunctions</module>
     </modules>
