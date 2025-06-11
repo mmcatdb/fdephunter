@@ -26,8 +26,8 @@ class NegativeExampleBuilderTest {
     public void testBuildNegativeExample() {
 //        NegativeExample example = builder.buildNegativeExample(1, 2);
 //        assertNotNull(example);
-//        assertEquals("UNANSWERED", example.getDecision().getStatus().toString());
-//        assertEquals("[]", example.getDecision().getPredefinedReasons().toString());
+//        assertEquals("UNANSWERED", example.decision.getStatus().toString());
+//        assertEquals("[]", example.decision.getPredefinedReasons().toString());
     }
 
     @Test

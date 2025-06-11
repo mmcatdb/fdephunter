@@ -1,4 +1,4 @@
-package de.uni.passau.server.model;
+package de.uni.passau.server.model.entity;
 
 import org.springframework.data.neo4j.core.schema.GeneratedValue;
 import org.springframework.data.neo4j.core.schema.Id;
@@ -6,48 +6,29 @@ import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Property;
 import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
 
+/** @deprecated */
 @Node("Class")
 public class ClassNode {
 
     @Id @GeneratedValue(UUIDStringGenerator.class)
     private String id;
 
-    @Property
-    private String label;
-
-    @Property
-    private Double weight;
-
-    public static ClassNode createNew(String label, double weight) {
-        final var classX = new ClassNode();
-        classX.setLabel(label);
-        classX.setWeight(weight);
-
-        return classX;
-    }
-
     public String getId() {
         return id;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
+    @Property
+    public String label;
 
-    public String getLabel() {
-        return label;
-    }
+    @Property
+    public Double weight;
 
-    public void setLabel(String label) {
-        this.label = label;
-    }
+    public static ClassNode createNew(String label, double weight) {
+        final var clazz = new ClassNode();
+        clazz.label = label;
+        clazz.weight = weight;
 
-    public Double getWeight() {
-        return weight;
-    }
-
-    public void setWeight(Double weight) {
-        this.weight = weight;
+        return clazz;
     }
 
     @Override

@@ -2,7 +2,7 @@ package de.uni.passau.server.service;
 
 import de.uni.passau.core.dataset.Dataset;
 import de.uni.passau.core.dataset.csv.CSVDataset;
-import de.uni.passau.server.model.DatasetNode;
+import de.uni.passau.server.model.entity.DatasetNode;
 import de.uni.passau.server.repository.DatasetRepository;
 
 import java.util.List;
@@ -47,8 +47,8 @@ public class DatasetService {
     }
 
     public Dataset getLoadedDataset(DatasetNode datasetNode) {
-        return CACHE.containsKey(datasetNode.getName())
-            ? getCachedDataset(datasetNode.getName())
+        return CACHE.containsKey(datasetNode.name)
+            ? getCachedDataset(datasetNode.name)
             : createCachedDataset(datasetNode);
     }
 
@@ -70,18 +70,18 @@ public class DatasetService {
         final Dataset dataset = createDataset(node);
         dataset.load();
 
-        CACHE.put(node.getName(), dataset);
+        CACHE.put(node.name, dataset);
 
         return dataset;
     }
 
     private Dataset createDataset(DatasetNode node) {
-        switch (node.getType()) {
+        switch (node.type) {
             case ARRAY ->
                 throw new UnsupportedOperationException("Not supported yet.");
             case CSV -> {
                 LOGGER.warn("TODO: EXTEND METADATA -- ADD PROPERTY CONTAINS HEADER");
-                return new CSVDataset(node.getSource(), true);
+                return new CSVDataset(node.source, true);
             }
             case JSON ->
                 throw new UnsupportedOperationException("Not supported yet.");

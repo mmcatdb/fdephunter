@@ -1,4 +1,4 @@
-package de.uni.passau.server.model;
+package de.uni.passau.server.model.entity;
 
 import java.util.Date;
 
@@ -7,6 +7,8 @@ import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Property;
 import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
+
+import de.uni.passau.core.approach.AbstractApproach.ApproachName;
 
 @Node("DiscoveryJob")
 public class DiscoveryJobNode {
@@ -21,66 +23,33 @@ public class DiscoveryJobNode {
     @Id @GeneratedValue(UUIDStringGenerator.class)
     private String id;
 
-    @Property
-    private String description;
-
-    @Property
-    private DiscoveryJobState state;
-
-    @Property
-    private Integer iteration;
-
-    @Property
-    private Date startedAt;
-
-    public static DiscoveryJobNode createNew(String description, int iteration) {
-        final var job = new DiscoveryJobNode();
-        job.setDescription(description);
-        job.setState(DiscoveryJobState.WAITING);
-        job.setIteration(iteration);
-        job.setStartedAt(new Date());
-
-        return job;
-    }
-
     public String getId() {
         return id;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
+    @Property
+    public String description;
 
-    public String getDescription() {
-        return description;
-    }
+    @Property
+    public DiscoveryJobState state;
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    @Property
+    public Integer iteration;
 
-    public DiscoveryJobState getState() {
-        return state;
-    }
+    @Property
+    public Date startedAt;
 
-    public void setState(DiscoveryJobState state) {
-        this.state = state;
-    }
+    @Property
+    public ApproachName approach;
 
-    public Integer getIteration() {
-        return iteration;
-    }
+    public static DiscoveryJobNode createNew(String description, int iteration) {
+        final var job = new DiscoveryJobNode();
+        job.description = description;
+        job.state = DiscoveryJobState.WAITING;
+        job.iteration = iteration;
+        job.startedAt = new Date();
 
-    public void setIteration(Integer iteration) {
-        this.iteration = iteration;
-    }
-
-    public Date getStartedAt() {
-        return startedAt;
-    }
-
-    public void setStartedAt(Date startedAt) {
-        this.startedAt = startedAt;
+        return job;
     }
 
     @Override

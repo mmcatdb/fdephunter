@@ -2,11 +2,11 @@ import { memo, type ReactNode, useMemo, useState } from 'react';
 import { NODE_OPTIONS, type RFGraph, type RFNode, type RFEdge } from '@/types/FD';
 import { Handle, type NodeProps, Position, ReactFlow } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { computeColumnIndexesForLatticeRow, computeEdgesForLatticeCell, type Lattice, McType } from '@/types/armstrongRelation';
+import { computeColumnIndexesForLatticeRow, computeEdgesForLatticeCell, type LatticeForClass, McType } from '@/types/armstrongRelation';
 import { Button, cn, Divider, Popover, PopoverContent, PopoverTrigger, Select, SelectItem, type SharedSelection, Switch } from '@heroui/react';
 import clsx from 'clsx';
 
-export function LatticeDisplay({ lattices }: { lattices: Lattice[] }) {
+export function LatticeDisplay({ lattices }: { lattices: LatticeForClass[] }) {
     const [ classIndex, setClassIndex ] = useState(new Set([ '0' ]));
     const classItems = useMemo(() => lattices.map((lattice, index) => ({ value: index, label: lattice.class })), [ lattices ]);
     const lattice = lattices[Number(classIndex.values().next().value!)];
@@ -116,7 +116,7 @@ function LegendItem({ type, text }: { type: McType, text: ReactNode }) {
 }
 
 /** If the row index is undefined, we want to create the whole graph. */
-function createLatticeGraph(lattice: Lattice, rowIndex: number | undefined): RFGraph {
+function createLatticeGraph(lattice: LatticeForClass, rowIndex: number | undefined): RFGraph {
     if (rowIndex !== undefined) {
         const columnIndexes = computeColumnIndexesForLatticeRow(rowIndex, lattice.columns.length);
         return {
@@ -149,7 +149,7 @@ function createLatticeGraph(lattice: Lattice, rowIndex: number | undefined): RFG
     };
 }
 
-function createRowNodes(lattice: Lattice, rowIndex: number, columnIndexes: number[][], xOffset: number, yOffset: number): RFNode[] {
+function createRowNodes(lattice: LatticeForClass, rowIndex: number, columnIndexes: number[][], xOffset: number, yOffset: number): RFNode[] {
     const types = lattice.rows[rowIndex].cells;
 
     return columnIndexes.map((columnIndexes, cellIndex) => {
@@ -181,7 +181,7 @@ function computeNodeId(cell: number[]): string {
     return cell.join('-');
 }
 
-function createRowEdges(lattice: Lattice, columnIndexes: number[][]): RFEdge[] {
+function createRowEdges(lattice: LatticeForClass, columnIndexes: number[][]): RFEdge[] {
     return columnIndexes.flatMap(cell => {
         const source = computeNodeId(cell);
         const edgesForCells = computeEdgesForLatticeCell(cell, lattice.columns.length);

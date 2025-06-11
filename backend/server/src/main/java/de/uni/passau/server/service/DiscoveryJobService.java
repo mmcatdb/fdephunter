@@ -2,21 +2,23 @@ package de.uni.passau.server.service;
 
 import de.uni.passau.core.approach.AbstractApproach.ApproachName;
 import de.uni.passau.core.graph.WeightedGraph;
-import de.uni.passau.server.model.DiscoveryJobNode;
-import de.uni.passau.server.model.DiscoveryJobNode.DiscoveryJobState;
-import de.uni.passau.server.model.DiscoveryResultNode;
-import de.uni.passau.server.model.NegativeExampleNode.NegativeExampleState;
-import de.uni.passau.server.model.WorkflowNode.WorkflowState;
+import de.uni.passau.server.model.entity.DiscoveryJobNode;
+import de.uni.passau.server.model.entity.JobResultNode;
+import de.uni.passau.server.model.entity.DiscoveryJobNode.DiscoveryJobState;
+import de.uni.passau.server.model.entity.NegativeExampleNode.NegativeExampleState;
+import de.uni.passau.server.model.entity.WorkflowNode.WorkflowState;
 import de.uni.passau.server.repository.ClassRepository;
 import de.uni.passau.server.repository.DiscoveryJobRepository;
 import de.uni.passau.server.repository.DiscoveryJobRepository.DiscoveryJobNodeGroup;
-import de.uni.passau.server.repository.DiscoveryResultRepository;
+import de.uni.passau.server.repository.JobResultRepository;
 import de.uni.passau.server.repository.WorkflowRepository;
 
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +37,7 @@ public class DiscoveryJobService {
     private DiscoveryJobRepository discoveryJobRepository;
 
     @Autowired
-    private DiscoveryResultRepository discoveryResultRepository;
+    private JobResultRepository jobResultRepository;
 
     @Autowired
     private WorkflowRepository workflowRepository;
@@ -54,7 +56,7 @@ public class DiscoveryJobService {
         return discoveryJobRepository.findAllGroupsByState(state);
     }
 
-    public Mono<DiscoveryResultNode> saveResult(String jobId, WeightedGraph result) {
+    public Mono<JobResultNode> saveResult(String jobId, WeightedGraph result) {
         String payload;
         try {
             payload = objectMapperJSON.writeValueAsString(result);
@@ -66,7 +68,7 @@ public class DiscoveryJobService {
 
         String resultId = jobId + "::" + System.currentTimeMillis();
 
-        return discoveryResultRepository.createResult(jobId, resultId, payload)
+        return jobResultRepository.createResult(jobId, resultId, payload)
                 .onErrorResume(InvalidDataAccessResourceUsageException.class, e -> {
                     // Handle the specific exception for invalid resource usage
                     String errorMessage = "Invalid data access resource usage: " + e.getMessage();
@@ -79,8 +81,8 @@ public class DiscoveryJobService {
                 });
     }
 
-    public Mono<DiscoveryResultNode> getResult(String workflowId, int iteration) {
-        return discoveryResultRepository.findByWorkflowIdAndIteration(workflowId, iteration);
+    public Mono<JobResultNode> getResult(String workflowId, int iteration) {
+        return jobResultRepository.findByWorkflowIdAndIteration(workflowId, iteration);
         // throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
@@ -92,37 +94,34 @@ public class DiscoveryJobService {
         return discoveryJobRepository.getLastDiscoveryByWorkflowId(workflowId);
     }
 
-    private Mono<DiscoveryJobNode> createJob(String workflowId, ApproachName approachName, String description, List<String> datasets, WorkflowState newState) {
+    /** @param dataset Nullable only for rediscovery job. */
+    private Mono<DiscoveryJobNode> createJob(String workflowId, ApproachName approachName, String description, @Nullable String dataset, WorkflowState newState) {
         return workflowRepository.findById(workflowId).flatMap(workflow -> {
-            final var node = DiscoveryJobNode.createNew(description, workflow.getIteration() + 1);
+            final var node = DiscoveryJobNode.createNew(description, workflow.iteration + 1);
             return discoveryJobRepository.save(node).flatMap(job ->
                 workflowRepository.saveHasJob(workflowId, job.getId())
                     .then(workflowRepository.setState(workflowId, newState))
-                    .then(
-                        Flux.fromIterable(datasets)
-                            .flatMap(dataset -> workflowRepository.saveHasAssignedDataset(workflowId, dataset))
-                            .collectList()
-                    )
-                    .then(discoveryJobRepository.saveUtilizesApproach(job.getId(), approachName))
+                    .then(workflowRepository.saveHasAssignedDataset(workflowId, dataset))
+                    // .then(discoveryJobRepository.saveUtilizesApproach(job.getId(), approachName))
             );
         });
     }
 
-    public Mono<DiscoveryJobNode> createDiscoveryJob(String workflowId, ApproachName approachName, String description, List<String> datasets) {
-        return createJob(workflowId, approachName, description, datasets, WorkflowState.INITIAL_FD_DISCOVERY);
+    public Mono<DiscoveryJobNode> createDiscoveryJob(String workflowId, ApproachName approachName, String description, String dataset) {
+        return createJob(workflowId, approachName, description, dataset, WorkflowState.INITIAL_FD_DISCOVERY);
     }
 
     public Mono<DiscoveryJobNode> createRediscoveryJob(String workflowId, ApproachName approachName, String description) {
-        return createJob(workflowId, approachName, description, List.of(), WorkflowState.JOB_WAITING);
+        return createJob(workflowId, approachName, description, null, WorkflowState.JOB_WAITING);
     }
 
     public Mono<Boolean> canCreateRediscoveryJob(String workflowId) {
         return workflowRepository.findById(workflowId)
             // If the workflow isn't in the correct state ...
-            .flatMap(workflow -> workflow.getState() == WorkflowState.NEGATIVE_EXAMPLES
+            .flatMap(workflow -> workflow.state == WorkflowState.NEGATIVE_EXAMPLES
                 ? classRepository.findAllGroupsByWorkflowId(workflowId).collectList().map(classes ->
                     // If there still are unresolved classes ...
-                    classes.stream().allMatch(c -> c.lastExample() != null && c.lastExample().getState() == NegativeExampleState.ACCEPTED)
+                    classes.stream().allMatch(c -> c.lastExample() != null && c.lastExample().state == NegativeExampleState.ACCEPTED)
                 )
                 : Mono.just(false)
             );

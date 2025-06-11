@@ -1,15 +1,16 @@
 package de.uni.passau.server.repository;
 
-import de.uni.passau.server.model.ClassNode;
-import de.uni.passau.server.model.NegativeExampleNode;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.data.neo4j.repository.ReactiveNeo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.repository.query.Param;
+
+import de.uni.passau.server.model.entity.ClassNode;
+import de.uni.passau.server.model.entity.NegativeExampleNode;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+/** @deprecated */
 public interface ClassRepository extends ReactiveNeo4jRepository<ClassNode, String> {
 
     // find class of related negative example
@@ -39,7 +40,7 @@ public interface ClassRepository extends ReactiveNeo4jRepository<ClassNode, Stri
     }
 
     @Query("""
-        MATCH (workflow:Workflow { id: $workflowId })-[:HAS_JOB]->(job:DiscoveryJob)-[:HAS_RESULT]->(:DiscoveryResult)-[:HAS_CLASS]->(class:Class)
+        MATCH (workflow:Workflow { id: $workflowId })-[:HAS_JOB]->(job:DiscoveryJob)-[:HAS_RESULT]->(:JobResult)-[:HAS_CLASS]->(class:Class)
         WHERE workflow.iteration = job.iteration
         OPTIONAL MATCH (class)-[:HAS_NEGATIVE_EXAMPLE]->(example:NegativeExample)
         OPTIONAL MATCH (class)-[:HAS_NEGATIVE_EXAMPLE]->(lastExample:NegativeExample)

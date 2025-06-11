@@ -1,4 +1,4 @@
-package de.uni.passau.server.model;
+package de.uni.passau.server.model.entity;
 
 import de.uni.passau.core.approach.FDInit;
 
@@ -11,6 +11,7 @@ import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Property;
 import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
 
+/** @deprecated */
 @Node("NegativeExample")
 public class NegativeExampleNode {
 
@@ -19,49 +20,28 @@ public class NegativeExampleNode {
         REJECTED,
         ACCEPTED,
         ANSWERED,
-        CONFLICT,
     }
 
     @Id @GeneratedValue(UUIDStringGenerator.class)
     private String id;
 
-    @Property
-    private String payload;
-
-    @Property
-    private NegativeExampleState state;
-
-    public static NegativeExampleNode createNew(String id, String payload) {
-        final var example = new NegativeExampleNode();
-        example.setId(id);
-        example.setPayload(payload);
-        example.setState(NegativeExampleState.NEW);
-
-        return example;
-    }
-
     public String getId() {
         return id;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
+    @Property
+    public String payload;
 
-    public String getPayload() {
-        return payload;
-    }
+    @Property
+    public NegativeExampleState state;
 
-    public void setPayload(String payload) {
-        this.payload = payload;
-    }
+    public static NegativeExampleNode createNew(String id, String payload) {
+        final var example = new NegativeExampleNode();
+        example.id = id;
+        example.payload = payload;
+        example.state = NegativeExampleState.NEW;
 
-    public NegativeExampleState getState() {
-        return state;
-    }
-
-    public void setState(NegativeExampleState state) {
-        this.state = state;
+        return example;
     }
 
     @Override

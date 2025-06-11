@@ -1,9 +1,9 @@
-package de.uni.passau.server.clientdto;
-
-import de.uni.passau.server.model.NegativeExampleNode;
-import de.uni.passau.server.model.NegativeExampleNode.NegativeExampleState;
+package de.uni.passau.server.controller.response;
 
 import java.io.Serializable;
+
+import de.uni.passau.server.model.entity.NegativeExampleNode;
+import de.uni.passau.server.model.entity.NegativeExampleNode.NegativeExampleState;
 
 public record NegativeExampleInfo(
     String id,
@@ -13,7 +13,7 @@ public record NegativeExampleInfo(
     public static NegativeExampleInfo fromNodes(NegativeExampleNode exampleNode) {
         return new NegativeExampleInfo(
             exampleNode.getId(),
-            exampleNode.getState()
+            exampleNode.state
         );
     }
 

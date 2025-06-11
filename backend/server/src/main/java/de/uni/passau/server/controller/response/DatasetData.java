@@ -1,4 +1,4 @@
-package de.uni.passau.server.clientdto;
+package de.uni.passau.server.controller.response;
 
 import de.uni.passau.core.dataset.Dataset;
 

@@ -25,15 +25,3 @@ export type DataResult<Data = any> = {
     status: false;
     error: any;
 };
-
-export enum Crud {
-    None,
-    Create,
-    Update,
-    Delete
-}
-
-export type Operation<Data> = {
-    type: Crud;
-    data: Data;
-};

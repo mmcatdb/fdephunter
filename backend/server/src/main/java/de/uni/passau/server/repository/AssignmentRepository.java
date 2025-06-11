@@ -1,13 +1,13 @@
 package de.uni.passau.server.repository;
 
-import de.uni.passau.server.model.AssignmentNode;
-import de.uni.passau.server.model.AssignmentNode.AssignmentVerdict;
-import de.uni.passau.server.model.DiscoveryResultNode;
-import de.uni.passau.server.model.NegativeExampleNode;
-
 import org.springframework.data.neo4j.repository.ReactiveNeo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.repository.query.Param;
+
+import de.uni.passau.server.model.entity.AssignmentNode;
+import de.uni.passau.server.model.entity.JobResultNode;
+import de.uni.passau.server.model.entity.NegativeExampleNode;
+import de.uni.passau.server.model.entity.AssignmentNode.AssignmentState;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -22,10 +22,10 @@ public interface AssignmentRepository extends ReactiveNeo4jRepository<Assignment
 
     @Query("""
         MATCH (assignment:Assignment { id: $assignmentId })
-        SET assignment.verdict = $verdict, assignment.decision = $decision
+        SET assignment.status = $status, assignment.decision = $decision
         RETURN assignment
         """)
-    public Mono<AssignmentNode> evaluateAssignment(@Param("assignmentId") String assignmentId, @Param("verdict") AssignmentVerdict verdict, @Param("decision") String decision);
+    public Mono<AssignmentNode> evaluateAssignment(@Param("assignmentId") String assignmentId, @Param("status") AssignmentState status, @Param("decision") String decision);
 
     @Query("""
         MATCH (a:Assignment { id: $assignmentId })-[:IN_WORKFLOW]->(:Workflow)-[:HAS_ASSIGNED_DATASET]->(dataset:Dataset)
@@ -45,12 +45,12 @@ public interface AssignmentRepository extends ReactiveNeo4jRepository<Assignment
     public static record AssignmentNodeGroup(
         AssignmentNode assignment,
         NegativeExampleNode example,
-        DiscoveryResultNode result
+        JobResultNode result
     ) {}
 
     @Query("""
         MATCH (assignment:Assignment { id: $assignmentId })-[:BELONGS_TO_EXAMPLE]->(example:NegativeExample)
-        MATCH (result:DiscoveryResult)-[:HAS_CLASS]->(:Class)-[:HAS_NEGATIVE_EXAMPLE]->(example)
+        MATCH (result:JobResult)-[:HAS_CLASS]->(:Class)-[:HAS_NEGATIVE_EXAMPLE]->(example)
         RETURN assignment, example, result
         """)
     public Mono<AssignmentNodeGroup> findGroupById(@Param("assignmentId") String assignmentId);

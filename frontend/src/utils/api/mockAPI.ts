@@ -1,14 +1,13 @@
 import { type DataResult, type Result } from '@/types/api/result';
-import { type AssignmentInfo, AssignmentVerdict, type AssignmentFromServer, type AssignmentInit } from '@/types/assignment';
-import { DecisionStatus, type DecisionInit } from '@/types/decision';
+import { type AssignmentInfo, AssignmentState, type AssignmentResponse, type AssignmentInit, DecisionStatus, type AssignmentDecision, DecisionColumnStatus } from '@/types/assignment';
 import { WorkflowState, type WorkflowFromServer } from '@/types/workflow';
 import { type CreateJobResponse } from './routes/workflows';
-import { JobState, type ExecuteDiscoveryParams, type ExecuteRediscoveryParams, type JobFromServer } from '@/types/job';
+import { type JobResultResponse, JobState, type ExecuteDiscoveryParams, type ExecuteRediscoveryParams, type JobResponse } from '@/types/job';
 import { v4 } from 'uuid';
 import { DateTime } from 'luxon';
-import { type JobResultFromServer } from '@/types/jobResult';
-import { type ArmstrongRelation, type ExampleRelation, ExampleState, MOCK_ARMSTRONG_RELATIONS } from '@/types/armstrongRelation';
-import { ColumnState } from '@/context/DecisionProvider';
+import { type ArmstrongRelation, type ExampleRelation, ExampleState, type LatticeForClass } from '@/types/armstrongRelation';
+import { MOCK_ARMSTRONG_RELATIONS, MOCK_DATASET_DATA, MOCK_DATASETS, MOCK_FDS, MOCK_LATTICES, type MockFDClass } from '../mockData';
+import { type DatasetData, type DatasetResponse } from '@/types/dataset';
 
 export const mockAPI = {
     assignments: {
@@ -17,6 +16,7 @@ export const mockAPI = {
         getAllAssignments,
         evaluate: evaluateAssignment,
         reset: resetAssignment,
+        getLattices,
     },
     workflows: {
         create: createWorkflow,
@@ -26,24 +26,29 @@ export const mockAPI = {
         acceptAllExamples,
         getLastJob,
         getLastJobResult,
+        getDatasetData,
+        getFdClasses,
+    },
+    datasets: {
+        getAll: getAllDatasets,
     },
 };
 
 // Assignments
 
-type AssignmentDB = Omit<AssignmentFromServer, 'relation'> & {
+type AssignmentDB = Omit<AssignmentResponse, 'relation'> & {
     workflowId: string;
     iteration: number;
     jobResultId?: string;
 };
 
-async function createAssignment(init: AssignmentInit): Promise<Result<AssignmentFromServer>> {
+async function createAssignment(init: AssignmentInit): Promise<Result<AssignmentResponse>> {
     await wait();
 
     const workflow = get<WorkflowDB>(init.workflowId);
     if (!workflow?.jobId)
         return error();
-    const job = get<JobFromServer>(workflow.jobId);
+    const job = get<JobResponse>(workflow.jobId);
     if (!job?.resultId)
         return error();
 
@@ -62,7 +67,7 @@ function createAssignmentForWorkflow(init: AssignmentInit, workflow: WorkflowDB,
         workflowId: init.workflowId,
         iteration: workflow.iteration,
         rowIndex: init.rowIndex,
-        verdict: AssignmentVerdict.New,
+        state: AssignmentState.New,
         jobResultId,
         decision: undefined,
     };
@@ -79,10 +84,10 @@ function createExampleRelation({ workflowId, rowIndex }: { workflowId: string, r
     const workflow = get<WorkflowDB>(workflowId);
     if (!workflow?.jobId)
         return;
-    const job = get<JobFromServer>(workflow.jobId);
+    const job = get<JobResponse>(workflow.jobId);
     if (!job?.resultId)
         return;
-    const result = get<JobResultFromServer>(job.resultId);
+    const result = get<JobResultResponse>(job.resultId);
     if (!result)
         return;
 
@@ -97,7 +102,7 @@ function armstrongRelationToExampleRelation(relation: ArmstrongRelation, rowInde
     };
 }
 
-async function getAssignment(assignmentId: string): Promise<Result<AssignmentFromServer>> {
+async function getAssignment(assignmentId: string): Promise<Result<AssignmentResponse>> {
     await wait();
 
     const assignment = get<AssignmentDB>(assignmentId);
@@ -122,7 +127,7 @@ async function getAllAssignments(workflowId: string): Promise<Result<AssignmentI
     return success(assignments as AssignmentInfo[]);
 }
 
-async function evaluateAssignment(assignmentId: string, decision: DecisionInit): Promise<Result<AssignmentFromServer>> {
+async function evaluateAssignment(assignmentId: string, decision: AssignmentDecision): Promise<Result<AssignmentResponse>> {
     await wait();
 
     const assignment = get<AssignmentDB>(assignmentId);
@@ -131,15 +136,15 @@ async function evaluateAssignment(assignmentId: string, decision: DecisionInit):
     const workflow = get<WorkflowDB>(assignment.workflowId);
     if (!workflow?.jobId)
         return error();
-    const job = get<JobFromServer>(workflow.jobId);
+    const job = get<JobResponse>(workflow.jobId);
     if (!job?.resultId)
         return error();
-    const result = get<JobResultFromServer>(job.resultId);
+    const result = get<JobResultResponse>(job.resultId);
     if (!result)
         return error();
 
     assignment.decision = decision;
-    assignment.verdict = decisionToAssignment[decision.status];
+    assignment.state = decisionToAssignment[decision.status];
 
     result.relation.exampleRows[assignment.rowIndex].state = decisionToExample[decision.status];
 
@@ -149,17 +154,17 @@ async function evaluateAssignment(assignmentId: string, decision: DecisionInit):
     return success({ ...assignment, relation: armstrongRelationToExampleRelation(result.relation, assignment.rowIndex) });
 }
 
-async function resetAssignment(assignmentId: string): Promise<Result<AssignmentFromServer>> {
+async function resetAssignment(assignmentId: string): Promise<Result<AssignmentResponse>> {
     await wait();
 
     const assignment = get<AssignmentDB>(assignmentId);
     if (!assignment?.jobResultId)
         return error();
-    const result = get<JobResultFromServer>(assignment.jobResultId);
+    const result = get<JobResultResponse>(assignment.jobResultId);
     if (!result)
         return error();
 
-    assignment.verdict = AssignmentVerdict.New;
+    assignment.state = AssignmentState.New;
     assignment.decision = undefined;
 
     result.relation.exampleRows[assignment.rowIndex].state = ExampleState.New;
@@ -172,9 +177,9 @@ async function resetAssignment(assignmentId: string): Promise<Result<AssignmentF
 }
 
 const decisionToAssignment = {
-    [DecisionStatus.Accepted]: AssignmentVerdict.Accepted,
-    [DecisionStatus.Rejected]: AssignmentVerdict.Rejected,
-    [DecisionStatus.Unanswered]: AssignmentVerdict.DontKnow,
+    [DecisionStatus.Accepted]: AssignmentState.Accepted,
+    [DecisionStatus.Rejected]: AssignmentState.Rejected,
+    [DecisionStatus.Unanswered]: AssignmentState.DontKnow,
 };
 
 const decisionToExample = {
@@ -225,7 +230,7 @@ async function executeDiscovery(workflowId: string, params: ExecuteDiscoveryPara
     if (!workflow)
         return error();
 
-    const job: JobFromServer = {
+    const job: JobResponse = {
         id: v4(),
         state: JobState.Waiting,
         description: 'Wait for FD discovery ...',
@@ -259,7 +264,7 @@ async function executeRediscovery(workflowId: string, params: ExecuteRediscovery
 
     workflow.iteration++;
 
-    const job: JobFromServer = {
+    const job: JobResponse = {
         id: v4(),
         state: JobState.Waiting,
         description: workflow.iteration === 1 ? 'Wait for negative example generation ...' : 'Applying approved examples ...',
@@ -286,10 +291,10 @@ async function acceptAllExamples(workflowId: string): Promise<Result<WorkflowFro
     const workflow = get<WorkflowDB>(workflowId);
     if (!workflow?.jobId)
         return error();
-    const job = get<JobFromServer>(workflow.jobId);
+    const job = get<JobResponse>(workflow.jobId);
     if (!job?.resultId)
         return error();
-    const result = get<JobResultFromServer>(job.resultId);
+    const result = get<JobResultResponse>(job.resultId);
     if (!result)
         return error();
 
@@ -304,7 +309,7 @@ async function acceptAllExamples(workflowId: string): Promise<Result<WorkflowFro
     const assignments = workflow.assignmentIds
         .map(id => get<AssignmentDB>(id))
         .filter(a => !!a && a.iteration === workflow.iteration) as AssignmentDB[];
-    const openAssignments = assignments.filter(a => a.verdict === AssignmentVerdict.New);
+    const openAssignments = assignments.filter(a => a.state === AssignmentState.New);
 
     for (const rowIndex of availableIndexes) {
         const assignment = openAssignments.find(a => a.rowIndex === rowIndex);
@@ -324,12 +329,12 @@ async function acceptAllExamples(workflowId: string): Promise<Result<WorkflowFro
         const columns = relation.columns.map((name, colIndex) => ({
             colIndex,
             name,
-            state: relation.exampleRow.maxSet.includes(colIndex) ? undefined : ColumnState.Valid,
+            status: relation.exampleRow.maxSet.includes(colIndex) ? undefined : DecisionColumnStatus.Valid,
             reasons: [],
         }));
-        const init = { status: DecisionStatus.Accepted, columns };
+        const init = { status: DecisionStatus.Accepted, columns } satisfies AssignmentDecision;
 
-        assignment.verdict = decisionToAssignment[init.status];
+        assignment.state = decisionToAssignment[init.status];
         assignment.decision = init;
         result.relation.exampleRows[assignment.rowIndex].state = decisionToExample[init.status];
 
@@ -341,14 +346,14 @@ async function acceptAllExamples(workflowId: string): Promise<Result<WorkflowFro
     return success(workflow);
 }
 
-async function getLastJob(workflowId: string): Promise<Result<JobFromServer>> {
+async function getLastJob(workflowId: string): Promise<Result<JobResponse>> {
     await wait();
 
     const workflow = get<WorkflowDB>(workflowId);
     if (!workflow || !workflow.jobId)
         return error();
 
-    const job = get<JobFromServer>(workflow.jobId);
+    const job = get<JobResponse>(workflow.jobId);
     if (!job)
         return error();
 
@@ -381,7 +386,7 @@ async function getLastJob(workflowId: string): Promise<Result<JobFromServer>> {
     return success(job);
 }
 
-function finishJob(job: JobFromServer, workflow: WorkflowDB) {
+function finishJob(job: JobResponse, workflow: WorkflowDB) {
     job.state = JobState.Finished;
     workflow.state = workflow.iteration < MOCK_ARMSTRONG_RELATIONS.length
         ? MOCK_ARMSTRONG_RELATIONS[workflow.iteration].isEvaluatingPositives
@@ -390,7 +395,7 @@ function finishJob(job: JobFromServer, workflow: WorkflowDB) {
         : WorkflowState.DisplayFinalFDs;
 }
 
-async function getLastJobResult(workflowId: string): Promise<Result<JobResultFromServer>> {
+async function getLastJobResult(workflowId: string): Promise<Result<JobResultResponse>> {
     const jobResponse = await getLastJob(workflowId);
     if (!jobResponse.status)
         return error();
@@ -398,7 +403,7 @@ async function getLastJobResult(workflowId: string): Promise<Result<JobResultFro
     const job = jobResponse.data;
 
     if (job.resultId) {
-        const result = get<JobResultFromServer>(job.resultId);
+        const result = get<JobResultResponse>(job.resultId);
         return result ? success(result) : error();
     }
 
@@ -406,7 +411,7 @@ async function getLastJobResult(workflowId: string): Promise<Result<JobResultFro
         return error('Job is not finished yet');
 
     const workflow = get<WorkflowDB>(workflowId)!;
-    const result: JobResultFromServer = {
+    const result: JobResultResponse = {
         id: v4(),
         payload: 'TODO',
         relation: MOCK_ARMSTRONG_RELATIONS[workflow.iteration],
@@ -418,6 +423,45 @@ async function getLastJobResult(workflowId: string): Promise<Result<JobResultFro
     set(job);
 
     return success(result);
+}
+
+async function getAllDatasets(): Promise<Result<DatasetResponse[]>> {
+    await wait();
+
+    return success(MOCK_DATASETS);
+}
+
+async function getLattices(workflowId: string): Promise<Result<LatticeForClass[]>> {
+    await wait();
+    const workflow = get<WorkflowDB>(workflowId);
+    if (!workflow)
+        return error();
+
+    const index = workflow.iteration === 0 ? 0 : 1;
+
+    return success(MOCK_LATTICES[index]);
+}
+
+async function getDatasetData(workflowId: string): Promise<Result<DatasetData>> {
+    await wait();
+
+    const workflow = get<WorkflowDB>(workflowId);
+    if (!workflow)
+        return error();
+
+    return success(MOCK_DATASET_DATA);
+}
+
+async function getFdClasses(workflowId: string): Promise<Result<MockFDClass[]>> {
+    await wait();
+
+    const workflow = get<WorkflowDB>(workflowId);
+    if (!workflow)
+        return error();
+
+    const index = workflow.iteration === 0 ? 0 : 1;
+
+    return success(MOCK_FDS[index]);
 }
 
 // Utils

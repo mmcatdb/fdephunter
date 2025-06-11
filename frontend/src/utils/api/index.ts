@@ -1,4 +1,3 @@
-import { approaches } from './routes/approaches';
 import { assignments } from './routes/assignments';
 import { datasets } from './routes/datasets';
 import { workflows } from './routes/workflows';
@@ -15,7 +14,6 @@ function prepareAbort(): [ AbortSignal, () => void ] {
 }
 
 export const API = {
-    // approaches,
     // assignments,
     // datasets,
     // workflows,

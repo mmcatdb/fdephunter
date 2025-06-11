@@ -1,24 +1,18 @@
 import { createContext, type Dispatch, type ReactNode, type SetStateAction, useContext, useState } from 'react';
 import { type ExampleRelation } from '@/types/armstrongRelation';
-import { type DecisionInit } from '@/types/decision';
-
-export enum ColumnState {
-    Undecided = 'undecided',
-    Valid = 'valid',
-    Invalid = 'invalid',
-}
+import { type AssignmentDecision, DecisionColumnStatus } from '@/types/assignment';
 
 export type DecisionColumn = {
     colIndex: number;
     name: string;
-    state?: ColumnState;
+    status?: DecisionColumnStatus;
     reasons: string[];
 };
 
 export enum DecisionPhase {
-    Evaluation = 'evaluation',
-    JustFinished = 'justFinished',
-    Finished = 'finished',
+    Evaluation = 'EVALUATION',
+    JustFinished = 'JUSTFINISHED',
+    Finished = 'FINISHED',
 }
 
 type DecisionState = {
@@ -36,7 +30,7 @@ const decisionContext = createContext<DecisionContext | undefined>(undefined);
 type DecisionProviderProps = {
     children: ReactNode;
     relation: ExampleRelation;
-    inputDecision: DecisionInit | undefined;
+    inputDecision: AssignmentDecision | undefined;
 };
 
 export function DecisionProvider({ children, relation, inputDecision }: DecisionProviderProps) {
@@ -57,18 +51,18 @@ export function useDecisionContext(): DecisionContext {
     return context;
 }
 
-function createDefaultDecision(relation: ExampleRelation, inputDecision: DecisionInit | undefined): DecisionState {
+function createDefaultDecision(relation: ExampleRelation, inputDecision: AssignmentDecision | undefined): DecisionState {
     const columns = inputDecision
         ? relation.columns.map((name, colIndex) => ({
             colIndex,
             name,
-            state: inputDecision.columns[colIndex].state,
+            state: inputDecision.columns[colIndex].status,
             reasons: inputDecision.columns[colIndex].reasons,
         }))
         : relation.columns.map((name, colIndex) => ({
             colIndex,
             name,
-            state: relation.exampleRow.maxSet.includes(colIndex) ? undefined : ColumnState.Undecided,
+            state: relation.exampleRow.maxSet.includes(colIndex) ? undefined : DecisionColumnStatus.Undecided,
             reasons: [],
         }));
 

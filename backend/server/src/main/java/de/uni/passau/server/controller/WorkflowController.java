@@ -1,12 +1,12 @@
 package de.uni.passau.server.controller;
 
-import de.uni.passau.server.clientdto.DiscoveryJob;
-import de.uni.passau.server.clientdto.Workflow;
 import de.uni.passau.server.controller.request.DiscoveryJobRequest;
 import de.uni.passau.server.controller.request.RediscoveryJobRequest;
-import de.uni.passau.server.model.DiscoveryJobNode;
-import de.uni.passau.server.model.DiscoveryResultNode;
-import de.uni.passau.server.model.WorkflowNode;
+import de.uni.passau.server.controller.response.DiscoveryJob;
+import de.uni.passau.server.controller.response.Workflow;
+import de.uni.passau.server.model.entity.DiscoveryJobNode;
+import de.uni.passau.server.model.entity.JobResultNode;
+import de.uni.passau.server.model.entity.WorkflowNode;
 import de.uni.passau.server.service.DiscoveryJobService;
 import de.uni.passau.server.service.WorkflowService;
 
@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -35,12 +34,6 @@ public class WorkflowController {
 
     @Autowired
     private DiscoveryJobService discoveryJobService;
-
-    @Deprecated
-    @GetMapping("/workflows")
-    public Flux<Workflow> getAllWorkflows() {
-        return workflowService.getAllWorkflows().map(Workflow::fromNodes);
-    }
 
     @GetMapping("/workflows/{workflowId}")
     public Mono<Workflow> getWorkflowById(@PathVariable String workflowId) {
@@ -63,7 +56,7 @@ public class WorkflowController {
 
     @PostMapping("/workflows/{workflowId}/execute-discovery")
     public Mono<CreateJobResponse> createDiscoveryJob(@RequestBody DiscoveryJobRequest init, @PathVariable String workflowId) {
-        return discoveryJobService.createDiscoveryJob(workflowId, init.getApproach(), init.getDescription(), init.getDatasets())
+        return discoveryJobService.createDiscoveryJob(workflowId, init.approach(), init.description(), init.dataset())
             .flatMap(jobNode ->
                 workflowService.getWorkflowById(workflowId).map(workflowNode -> CreateJobResponse.fromNodes(workflowNode, jobNode))
             );
@@ -74,7 +67,7 @@ public class WorkflowController {
         return discoveryJobService.canCreateRediscoveryJob(workflowId).filter(value -> value)
             .switchIfEmpty(Mono.error(new RuntimeException("cannot create new rediscovery job")))
             .then(
-                discoveryJobService.createRediscoveryJob(workflowId, init.getApproach(), init.getDescription())
+                discoveryJobService.createRediscoveryJob(workflowId, init.approach(), init.description())
                     .flatMap(jobNode ->
                         workflowService.getWorkflowById(workflowId).map(workflowNode -> CreateJobResponse.fromNodes(workflowNode, jobNode))
                     )
@@ -88,13 +81,8 @@ public class WorkflowController {
     }
 
     @GetMapping("/workflows/{workflowId}/last-result")
-    public Mono<DiscoveryResultNode> getLastDiscoveryResult(@PathVariable String workflowId) {
+    public Mono<JobResultNode> getLastJobResult(@PathVariable String workflowId) {
         return workflowService.getLastResultByWorkflowId(workflowId);
-    }
-
-    @GetMapping("/workflows/{workflowId}/classes")
-    public Flux<de.uni.passau.server.clientdto.Class> getClasses(@PathVariable String workflowId) {
-        return workflowService.getClassesForWorkflow(workflowId).map(de.uni.passau.server.clientdto.Class::fromNodes);
     }
 
 }

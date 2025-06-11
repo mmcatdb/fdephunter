@@ -8,13 +8,12 @@ import { Link, matchPath, Outlet, type Params, useLocation, useNavigate, useReva
 import { type WorkflowLoaded } from './WorkflowPage';
 import { routes } from '@/router';
 import { useCallback, useMemo, useState } from 'react';
-import { ExampleState, MOCK_ARMSTRONG_RELATIONS, MOCK_LATTICES } from '@/types/armstrongRelation';
-import { JobResult } from '@/types/jobResult';
-import { MOCK_DATASET } from '@/types/dataset';
+import { ExampleState } from '@/types/armstrongRelation';
 import clsx from 'clsx';
 import { mockAPI } from '@/utils/api/mockAPI';
 import { type AssignmentInfo } from '@/types/assignment';
-import { createFdEdges, MOCK_FDS } from './WorkflowResultsPage';
+import { createFdEdges } from './WorkflowResultsPage';
+import { JobResult } from '@/types/job';
 
 export function WorkflowDashboardPage() {
     const { workflow } = useRouteLoaderData<WorkflowLoaded>(routes.workflow.$id)!;
@@ -100,7 +99,7 @@ export function WorkflowOverviewPage() {
         setFetching(FID_CONTINUE);
         // const response = await API.workflows.executeRediscovery({ workflowId: workflow.id }, {
         const response = await mockAPI.workflows.executeRediscovery(workflow.id, {
-            // approach: approach.name,
+            // approach,
             approach: 'HyFD',
         });
         if (!response.status) {
@@ -192,16 +191,18 @@ const FID_CONTINUE = 'continue';
 const FID_ACCEPT_ALL = 'accept-all';
 
 export function WorkflowDatasetPage() {
+    const { dataset } = useRouteLoaderData<WorkflowLoaded>(routes.workflow.$id)!;
 
     return (
-        <DatasetTable data={MOCK_DATASET} />
+        <DatasetTable data={dataset} />
     );
 }
 
 export function WorkflowListPage() {
-    const { workflow } = useRouteLoaderData<WorkflowLoaded>(routes.workflow.$id)!;
+    const { workflow, fdClasses, jobResult } = useRouteLoaderData<WorkflowLoaded>(routes.workflow.$id)!;
+
     const index = workflow.iteration === 0 ? 0 : 1;
-    const fds = useMemo(() => createFdEdges(MOCK_FDS[index], MOCK_ARMSTRONG_RELATIONS[0].columns), [ index ]);
+    const fds = useMemo(() => createFdEdges(fdClasses, jobResult!.relation.columns), [ index ]);
 
     return (
         <Card className='mx-auto w-fit'>
@@ -213,10 +214,9 @@ export function WorkflowListPage() {
 }
 
 export function WorkflowGraphPage() {
-    const { workflow } = useRouteLoaderData<WorkflowLoaded>(routes.workflow.$id)!;
-    const index = workflow.iteration === 0 ? 0 : 1;
+    const { lattices } = useRouteLoaderData<WorkflowLoaded>(routes.workflow.$id)!;
 
     return (
-        <LatticeDisplay lattices={MOCK_LATTICES[index]} />
+        <LatticeDisplay lattices={lattices} />
     );
 }

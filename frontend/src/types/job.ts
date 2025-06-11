@@ -1,11 +1,11 @@
 import { DateTime } from 'luxon';
+import { type ArmstrongRelation } from './armstrongRelation';
 
 export type ExecuteRediscoveryParams = {
     approach: string;
 };
 
 export type ExecuteDiscoveryParams = ExecuteRediscoveryParams & {
-    datasets: string[];
     approach: string;
     datasetName: string;
 };
@@ -17,7 +17,7 @@ export enum JobState {
     Finished = 'FINISHED',
 }
 
-export type JobFromServer = {
+export type JobResponse = {
     id: string;
     state: JobState;
     description: string;
@@ -37,7 +37,7 @@ export class Job {
         readonly progress: number, // from 0 to 1
     ) {}
 
-    static fromServer(input: JobFromServer): Job {
+    static fromServer(input: JobResponse): Job {
         const prevProgress = progressCache.get(input.id) ?? 0;
         const progress = computeNextProgress(prevProgress, input.state);
         progressCache.set(input.id, progress);
@@ -68,4 +68,24 @@ function computeNextProgress(prev: number, state: JobState): number {
     const next = Math.random() * range + prev;
 
     return next;
+}
+
+export type JobResultResponse = {
+    id: string;
+    payload: string;
+    relation: ArmstrongRelation;
+};
+
+export class JobResult {
+    private constructor(
+        readonly id: string,
+        readonly relation: ArmstrongRelation,
+    ) {}
+
+    static fromServer(input: JobResultResponse): JobResult {
+        return new JobResult(
+            input.id,
+            input.relation,
+        );
+    }
 }

@@ -1,9 +1,9 @@
-package de.uni.passau.server.clientdto;
-
-import de.uni.passau.server.model.WorkflowNode;
-import de.uni.passau.server.model.WorkflowNode.WorkflowState;
+package de.uni.passau.server.controller.response;
 
 import java.io.Serializable;
+
+import de.uni.passau.server.model.entity.WorkflowNode;
+import de.uni.passau.server.model.entity.WorkflowNode.WorkflowState;
 
 public record Workflow(
     String id,
@@ -14,8 +14,8 @@ public record Workflow(
     public static Workflow fromNodes(WorkflowNode workflowNode) {
         return new Workflow(
             workflowNode.getId(),
-            workflowNode.getState(),
-            workflowNode.getIteration()
+            workflowNode.state,
+            workflowNode.iteration
         );
     }
 

@@ -2,12 +2,12 @@ package de.uni.passau.server.service;
 
 import de.uni.passau.core.graph.Vertex;
 import de.uni.passau.core.nex.NegativeExample;
-import de.uni.passau.server.model.ClassNode;
-import de.uni.passau.server.model.NegativeExampleNode;
-import de.uni.passau.server.model.NegativeExampleNode.NegativeExampleState;
-import de.uni.passau.server.model.NegativeExampleNode.Payload;
+import de.uni.passau.server.model.entity.ClassNode;
+import de.uni.passau.server.model.entity.NegativeExampleNode;
+import de.uni.passau.server.model.entity.NegativeExampleNode.NegativeExampleState;
+import de.uni.passau.server.model.entity.NegativeExampleNode.Payload;
 import de.uni.passau.server.repository.ClassRepository;
-import de.uni.passau.server.repository.DiscoveryResultRepository;
+import de.uni.passau.server.repository.JobResultRepository;
 import de.uni.passau.server.repository.NegativeExampleRepository;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -32,7 +32,7 @@ public class NegativeExampleService {
     private ClassRepository classRepository;
 
     @Autowired
-    private DiscoveryResultRepository discoveryResultRepository;
+    private JobResultRepository jobResultRepository;
 
     @Autowired
     private ObjectMapper objectMapperJSON;
@@ -44,7 +44,7 @@ public class NegativeExampleService {
     public Mono<ClassNode> createClass(String resultId, Vertex dependencyClass) {
         final var node = ClassNode.createNew(dependencyClass.__getLabel(), dependencyClass.__getWeight());
         return classRepository.save(node).flatMap(classX ->
-            discoveryResultRepository.saveHasClass(resultId, classX.getId())
+            jobResultRepository.saveHasClass(resultId, classX.getId())
                 .then(Mono.just(classX))
         );
     }
@@ -76,11 +76,11 @@ public class NegativeExampleService {
 
     private NegativeExample nodeToObject(NegativeExampleNode node, @Nullable String lastExampleId) {
         try {
-            final var payload = objectMapperJSON.readValue(node.getPayload(), NegativeExampleNode.Payload.class);
+            final var payload = objectMapperJSON.readValue(node.payload, NegativeExampleNode.Payload.class);
             return new NegativeExample(node.getId(), lastExampleId, payload.innerValues(), payload.originalValues(), payload.view(), payload.fds());
         }
         catch (JsonProcessingException exception) {
-            LOGGER.error("Can't deserialize example node: " + node.getId() + "\nwith payload: " + node.getPayload(), exception);
+            LOGGER.error("Can't deserialize example node: " + node.getId() + "\nwith payload: " + node.payload, exception);
             throw new RuntimeException(exception);
         }
     }

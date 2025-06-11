@@ -8,8 +8,8 @@ import { mockAPI } from '@/utils/api/mockAPI';
 import { Workflow } from '@/types/workflow';
 import { type FDEdge } from '@/types/FD';
 import { compareStringsAscii } from '@/utils/common';
-import { MOCK_ARMSTRONG_RELATIONS } from '@/types/armstrongRelation';
 import { FDListDisplay } from '@/components/dataset/FDListDisplay';
+import { type MockFDClass } from '@/utils/mockData';
 
 export function WorkflowResultsPage() {
     const { workflow } = useRouteLoaderData<WorkflowLoaded>(routes.workflow.$id)!;
@@ -40,7 +40,7 @@ function WorkflowResultsTabs({ workflowId }: { workflowId: string }) {
 }
 
 export function WorkflowFinalPage() {
-    const { workflow } = useRouteLoaderData<WorkflowLoaded>(routes.workflow.$id)!;
+    const { workflow, fdClasses, jobResult } = useRouteLoaderData<WorkflowLoaded>(routes.workflow.$id)!;
 
     const [ isFetching, setIsFetching ] = useState(false);
 
@@ -54,7 +54,7 @@ export function WorkflowFinalPage() {
         window.open(routes.workflow.settings.resolve({ workflowId: Workflow.fromServer(response.data).id }), '_blank');
     }
 
-    const fds = useMemo(() => createFdEdges(MOCK_FDS[1], MOCK_ARMSTRONG_RELATIONS[0].columns), []);
+    const fds = useMemo(() => createFdEdges(fdClasses, jobResult!.relation.columns), []);
 
     return (
         <div className='mx-auto w-fit flex flex-col gap-8'>
@@ -113,70 +113,6 @@ export function WorkflowFinalPage() {
         </div>
     );
 }
-
-
-type MockFDClass = {
-    /** Indexes in the relations's columns. */
-    colIndex: number;
-    minimalFds: number[][];
-};
-
-export const MOCK_FDS: MockFDClass[][] = [
-    [ {
-        colIndex: 0,
-        minimalFds: [
-            [ 2, 3 ],
-            [ 2, 4 ],
-            [ 3, 4 ],
-        ],
-    }, {
-        colIndex: 1,
-        minimalFds: [
-            [ 0 ],
-            [ 2 ],
-            [ 4 ],
-        ],
-    }, {
-        colIndex: 2,
-        minimalFds: [
-            [ 0 ],
-            [ 3, 4 ],
-        ],
-    }, {
-        colIndex: 3,
-        minimalFds: [
-            [ 0 ],
-            [ 2, 4 ],
-        ],
-    }, {
-        colIndex: 4,
-        minimalFds: [
-            [ 0 ],
-            [ 2, 3 ],
-        ],
-    } ],
-    [ {
-        colIndex: 1,
-        minimalFds: [
-            [ 0 ],
-        ],
-    }, {
-        colIndex: 2,
-        minimalFds: [
-            [ 0 ],
-        ],
-    }, {
-        colIndex: 3,
-        minimalFds: [
-            [ 0 ],
-        ],
-    }, {
-        colIndex: 4,
-        minimalFds: [
-            [ 1, 2, 3 ],
-        ],
-    } ],
-];
 
 export function createFdEdges(classes: MockFDClass[], columns: string[]): FDEdge[] {
     return classes.flatMap(({ colIndex, minimalFds }) => minimalFds.map(minimalFd => ({

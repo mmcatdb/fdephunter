@@ -1,7 +1,8 @@
 export type ArmstrongRelation = {
     /** Names of the columns. They are expected to be unique. */
     columns: string[];
-    referenceRow: ReferenceRow;
+    /** Values of the reference row. */
+    referenceRow: string[];
     exampleRows: ExampleRow[];
     /**
      * Whether we are evaluating the positive examples or the negative ones.
@@ -15,15 +16,19 @@ export type ArmstrongRelation = {
     lhsSize: number;
 };
 
-export type ReferenceRow = {
-    values: string[];
+export type ExampleRelation = {
+    /** Names of the columns. They are expected to be unique. */
+    columns: string[];
+    /** Values of the reference row. */
+    referenceRow: string[];
+    exampleRow: ExampleRow;
 };
 
 export type ExampleRow = {
     values: string[];
-    /** The indexes of the columns that form the maximal set. Undefined for the first row. */
+    /** The indexes of the columns that form the maximal set. */
     maxSet: number[];
-    /** Whether it is a negative or positive example. Undefined for the first row. */
+    /** Whether it is a negative or positive example. */
     isPositive: boolean;
     state: ExampleState;
 };
@@ -33,16 +38,9 @@ export enum ExampleState {
     Rejected = 'REJECTED',
     Accepted = 'ACCEPTED',
     Undecided = 'UNDECIDED',
-    Conflict = 'CONFLICT',
 }
 
-export type ExampleRelation = {
-    columns: string[];
-    referenceRow: ReferenceRow;
-    exampleRow: ExampleRow;
-};
-
-export type Lattice = {
+export type LatticeForClass = {
     class: string;
     /** Names of the columns. They are expected to be unique. */
     columns: string[];
@@ -55,15 +53,15 @@ type LatticeRow = {
 };
 
 export enum McType {
-    Final = 'final',
-    Initial = 'initial',
-    Subset = 'subset',
-    Genuine = 'genuine',
-    Candidate = 'candidate',
-    Derived = 'derived',
-    Eliminated = 'eliminated',
-    Targeted = 'targeted',
-    Coincidental = 'coincidental',
+    Final = 'FINAL',
+    Initial = 'INITIAL',
+    Subset = 'SUBSET',
+    Genuine = 'GENUINE',
+    Candidate = 'CANDIDATE',
+    Derived = 'DERIVED',
+    Eliminated = 'ELIMINATED',
+    Targeted = 'TARGETED',
+    Coincidental = 'COINCIDENTAL',
 }
 
 /** Computes indexes of columns that form this max set. */
@@ -148,225 +146,3 @@ export function computeEdgesForLatticeCell(cell: number[], columnsCount: number)
 
     return output;
 }
-
-export const MOCK_ARMSTRONG_RELATIONS: ArmstrongRelation[] = [ {
-    columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
-    referenceRow: { values: [ 'tt0036443', 'Titanic', '1943', '85', 'Action+Drama+History' ] },
-    exampleRows: [
-        { maxSet: [ 1, 2 ], isPositive: true, state: ExampleState.New, values: [ 'tt0079836', 'Titanic', '1943', '194', 'Drama+History' ] },
-        { maxSet: [ 1, 3 ], isPositive: true, state: ExampleState.New, values: [ 'tt0115392', 'Titanic', '1979', '85', 'Drama+Romance' ] },
-        { maxSet: [ 1, 4 ], isPositive: true, state: ExampleState.New, values: [ 'tt0120338', 'Titanic', '1996', '87', 'Action+Drama+History' ] },
-        { maxSet: [ 3 ], isPositive: true, state: ExampleState.New, values: [ 'tt0143942', 'S.O.S. Titanic', '1997', '85', 'History' ] },
-    ],
-    isEvaluatingPositives: false,
-
-    minimalFDs: 12,
-    otherFDs: 40,
-    lhsSize: 0,
-}, {
-    columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
-    referenceRow: { values: [ 'tt0036443', 'Titanic', '1943', '85', 'Action+Drama+History' ] },
-    exampleRows: [
-        { maxSet: [ 0 ], isPositive: false, state: ExampleState.New, values: [ 'tt0036443', 'S.O.S. Titanic', '1979', '194', 'Drama+History' ] },
-        { maxSet: [ 1, 2 ], isPositive: true, state: ExampleState.New, values: [ 'tt0079836', 'Titanic', '1943', '87', 'Drama+Romance' ] },
-        { maxSet: [ 1, 3 ], isPositive: true, state: ExampleState.New, values: [ 'tt0115392', 'Titanic', '1996', '85', 'History' ] },
-        { maxSet: [ 1, 4 ], isPositive: true, state: ExampleState.New, values: [ 'tt0120338', 'Titanic', '1997', 'null', 'Action+Drama+History' ] },
-        { maxSet: [ 2 ], isPositive: false, state: ExampleState.New, values: [ 'tt0155274', 'The Titanic', '1943', '51', 'Documentary+Short' ] },
-        { maxSet: [ 3 ], isPositive: true, state: ExampleState.New, values: [ 'tt0594950', 'Titanic Tech', '1915', '85', 'Documentary' ] },
-        { maxSet: [ 4 ], isPositive: false, state: ExampleState.New, values: [ 'tt0771984', 'Titanic\'s Ghosts', '2006', '46', 'Action+Drama+History' ] },
-    ],
-    isEvaluatingPositives: false,
-
-    minimalFDs: 9,
-    otherFDs: 37,
-    lhsSize: 1,
-}, {
-    columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
-    referenceRow: { values: [ 'tt0036443', 'Titanic', '1943', '85', 'Action+Drama+History' ] },
-    exampleRows: [
-        { maxSet: [ 1, 2 ], isPositive: true, state: ExampleState.New, values: [ 'tt0079836', 'Titanic', '1943', '194', 'Drama+History' ] },
-        { maxSet: [ 1, 3 ], isPositive: true, state: ExampleState.New, values: [ 'tt0115392', 'Titanic', '1979', '85', 'Drama+Romance' ] },
-        { maxSet: [ 1, 4 ], isPositive: true, state: ExampleState.New, values: [ 'tt0120338', 'Titanic', '1996', '87', 'Action+Drama+History' ] },
-        { maxSet: [ 2, 3 ], isPositive: false, state: ExampleState.New, values: [ 'tt0155274', 'S.O.S. Titanic', '1943', '85', 'History' ] },
-        { maxSet: [ 2, 4 ], isPositive: false, state: ExampleState.New, values: [ 'tt0594950', 'Titanic Tech', '1943', 'null', 'Action+Drama+History' ] },
-        { maxSet: [ 3, 4 ], isPositive: false, state: ExampleState.New, values: [ 'tt0650185', 'The Titanic', '1997', '85', 'Action+Drama+History' ] },
-    ],
-    isEvaluatingPositives: false,
-
-    minimalFDs: 12,
-    otherFDs: 29,
-    lhsSize: 2,
-}, {
-    columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
-    referenceRow: { values: [ 'tt0036443', 'Titanic', '1943', '85', 'Action+Drama+History' ] },
-    exampleRows: [
-        { maxSet: [ 1, 2, 3 ], isPositive: false, state: ExampleState.New, values: [ 'tt0079836', 'Titanic', '1943', '85', 'Drama+History' ] },
-        { maxSet: [ 1, 2, 4 ], isPositive: false, state: ExampleState.New, values: [ 'tt0115392', 'Titanic', '1943', '194', 'Action+Drama+History' ] },
-        { maxSet: [ 1, 3, 4 ], isPositive: false, state: ExampleState.New, values: [ 'tt0120338', 'Titanic', '1979', '85', 'Action+Drama+History' ] },
-        { maxSet: [ 2, 3, 4 ], isPositive: false, state: ExampleState.New, values: [ 'tt0155274', 'S.O.S. Titanic', '1943', '85', 'Action+Drama+History' ] },
-    ],
-    isEvaluatingPositives: false,
-
-    minimalFDs: 4,
-    otherFDs: 29,
-    lhsSize: 3,
-}, {
-    columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
-    referenceRow: { values: [ 'tt0036443', 'Titanic', '1943', '85', 'Action+Drama+History' ] },
-    exampleRows: [
-        { maxSet: [ 1, 2, 3, 4 ], isPositive: false, state: ExampleState.New, values: [ 'tt0079836', 'Titanic', '1943', '85', 'Action+Drama+History' ] },
-        { maxSet: [ 1, 2, 4 ], isPositive: false, state: ExampleState.Accepted, values: [ 'tt0115392', 'Titanic', '1943', '194', 'Action+Drama+History' ] },
-        { maxSet: [ 1, 2 ], isPositive: true, state: ExampleState.New, values: [ 'tt0120338', 'Titanic', '1943', '87', 'Drama+History' ] },
-        { maxSet: [ 1, 3, 4 ], isPositive: false, state: ExampleState.Accepted, values: [ 'tt0155274', 'Titanic', '1979', '85', 'Action+Drama+History' ] },
-        { maxSet: [ 1, 3 ], isPositive: true, state: ExampleState.New, values: [ 'tt0594950', 'Titanic', '1996', '85', 'Drama+Romance' ] },
-        { maxSet: [ 2, 3, 4 ], isPositive: false, state: ExampleState.Accepted, values: [ 'tt0650185', 'S.O.S. Titanic', '1943', '85', 'Action+Drama+History' ] },
-        { maxSet: [ 2, 3 ], isPositive: false, state: ExampleState.Accepted, values: [ 'tt0771984', 'The Titanic', '1943', '85', 'History' ] },
-    ],
-    isEvaluatingPositives: false,
-
-    minimalFDs: 4,
-    otherFDs: 28,
-    lhsSize: 4,
-}, {
-    columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
-    referenceRow: { values: [ 'tt0036443', 'Titanic', '1943', '85', 'Action+Drama+History' ] },
-    exampleRows: [
-        { maxSet: [ 1, 2, 3, 4 ], isPositive: false, state: ExampleState.Accepted, values: [ 'tt0079836', 'Titanic', '1943', '85', 'Action+Drama+History' ] },
-        { maxSet: [ 1, 2, 4 ], isPositive: false, state: ExampleState.Accepted, values: [ 'tt0115392', 'Titanic', '1943', '194', 'Action+Drama+History' ] },
-        { maxSet: [ 1, 2 ], isPositive: true, state: ExampleState.New, values: [ 'tt0120338', 'Titanic', '1943', '87', 'Drama+History' ] },
-        { maxSet: [ 1, 3, 4 ], isPositive: false, state: ExampleState.Accepted, values: [ 'tt0155274', 'Titanic', '1979', '85', 'Action+Drama+History' ] },
-        { maxSet: [ 1, 3 ], isPositive: true, state: ExampleState.New, values: [ 'tt0594950', 'Titanic', '1996', '85', 'Drama+Romance' ] },
-        { maxSet: [ 2, 3, 4 ], isPositive: false, state: ExampleState.Accepted, values: [ 'tt0650185', 'S.O.S. Titanic', '1943', '85', 'Action+Drama+History' ] },
-        { maxSet: [ 2, 3 ], isPositive: false, state: ExampleState.Accepted, values: [ 'tt0771984', 'The Titanic', '1943', '85', 'History' ] },
-    ],
-    isEvaluatingPositives: true,
-
-    minimalFDs: 4,
-    otherFDs: 28,
-    lhsSize: 2,
-} ];
-
-export const MOCK_LATTICES: Lattice[][] = [
-    [ {
-        class: 'tconst',
-        columns: [ 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
-        rows: [ {
-            cells: [ McType.Subset, McType.Subset, McType.Subset, McType.Subset ],
-        }, {
-            cells: [ McType.Initial, McType.Initial, McType.Initial, McType.Candidate, McType.Candidate, McType.Candidate ],
-        }, {
-            cells: [ McType.Derived, McType.Derived, McType.Derived, McType.Derived ],
-        }, {
-            cells: [ McType.Derived ],
-        } ],
-    }, {
-        class: 'primaryTitle',
-        columns: [ 'tconst', 'startYear', 'runtimeMinutes', 'genres' ],
-        rows: [ {
-            cells: [ McType.Candidate, McType.Candidate, McType.Initial, McType.Candidate ],
-        }, {
-            cells: [ McType.Derived, McType.Derived, McType.Derived, McType.Derived, McType.Derived, McType.Derived ],
-        }, {
-            cells: [ McType.Derived, McType.Derived, McType.Derived, McType.Derived ],
-        }, {
-            cells: [ McType.Derived ],
-        } ],
-    }, {
-        class: 'startYear',
-        columns: [ 'tconst', 'primaryTitle', 'runtimeMinutes', 'genres' ],
-        rows: [ {
-            cells: [ McType.Candidate, McType.Subset, McType.Subset, McType.Subset ],
-        }, {
-            cells: [ McType.Derived, McType.Derived, McType.Derived, McType.Initial, McType.Initial, McType.Candidate ],
-        }, {
-            cells: [ McType.Derived, McType.Derived, McType.Derived, McType.Derived ],
-        }, {
-            cells: [ McType.Derived ],
-        } ],
-    }, {
-        class: 'runtimeMinutes',
-        columns: [ 'tconst', 'primaryTitle', 'startYear', 'genres' ],
-        rows: [ {
-            cells: [ McType.Candidate, McType.Subset, McType.Subset, McType.Subset ],
-        }, {
-            cells: [ McType.Derived, McType.Derived, McType.Derived, McType.Initial, McType.Initial, McType.Candidate ],
-        }, {
-            cells: [ McType.Derived, McType.Derived, McType.Derived, McType.Derived ],
-        }, {
-            cells: [ McType.Derived ],
-        } ],
-    }, {
-        class: 'genres',
-        columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes' ],
-        rows: [ {
-            cells: [ McType.Candidate, McType.Subset, McType.Subset, McType.Subset ],
-        }, {
-            cells: [ McType.Derived, McType.Derived, McType.Derived, McType.Initial, McType.Initial, McType.Candidate ],
-        }, {
-            cells: [ McType.Derived, McType.Derived, McType.Derived, McType.Derived ],
-        }, {
-            cells: [ McType.Derived ],
-        } ],
-    } ],
-    [ {
-        class: 'tconst',
-        columns: [ 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
-        rows: [ {
-            cells: [ McType.Subset, McType.Subset, McType.Subset, McType.Subset ],
-        }, {
-            cells: [ McType.Subset, McType.Subset, McType.Subset, McType.Coincidental, McType.Coincidental, McType.Coincidental ],
-        }, {
-            cells: [ McType.Coincidental, McType.Coincidental, McType.Coincidental, McType.Coincidental ],
-        }, {
-            cells: [ McType.Eliminated ],
-        } ],
-    }, {
-        class: 'primaryTitle',
-        columns: [ 'tconst', 'startYear', 'runtimeMinutes', 'genres' ],
-        rows: [ {
-            cells: [ McType.Genuine, McType.Coincidental, McType.Subset, McType.Coincidental ],
-        }, {
-            cells: [ McType.Derived, McType.Derived, McType.Derived, McType.Coincidental, McType.Coincidental, McType.Coincidental ],
-        }, {
-            cells: [ McType.Derived, McType.Derived, McType.Derived, McType.Eliminated ],
-        }, {
-            cells: [ McType.Derived ],
-        } ],
-    }, {
-        class: 'startYear',
-        columns: [ 'tconst', 'primaryTitle', 'runtimeMinutes', 'genres' ],
-        rows: [ {
-            cells: [ McType.Genuine, McType.Subset, McType.Subset, McType.Subset ],
-        }, {
-            cells: [ McType.Derived, McType.Derived, McType.Derived, McType.Subset, McType.Subset, McType.Coincidental ],
-        }, {
-            cells: [ McType.Derived, McType.Derived, McType.Derived, McType.Eliminated ],
-        }, {
-            cells: [ McType.Derived ],
-        } ],
-    }, {
-        class: 'runtimeMinutes',
-        columns: [ 'tconst', 'primaryTitle', 'startYear', 'genres' ],
-        rows: [ {
-            cells: [ McType.Genuine, McType.Subset, McType.Subset, McType.Subset ],
-        }, {
-            cells: [ McType.Derived, McType.Derived, McType.Derived, McType.Subset, McType.Subset, McType.Coincidental ],
-        }, {
-            cells: [ McType.Derived, McType.Derived, McType.Derived, McType.Eliminated ],
-        }, {
-            cells: [ McType.Derived ],
-        } ],
-    }, {
-        class: 'genres',
-        columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes' ],
-        rows: [ {
-            cells: [ McType.Genuine, McType.Subset, McType.Subset, McType.Subset ],
-        }, {
-            cells: [ McType.Derived, McType.Derived, McType.Derived, McType.Final, McType.Final, McType.Eliminated ],
-        }, {
-            cells: [ McType.Derived, McType.Derived, McType.Derived, McType.Genuine ],
-        }, {
-            cells: [ McType.Derived ],
-        } ],
-    } ],
-];

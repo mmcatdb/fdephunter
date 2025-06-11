@@ -1,7 +1,6 @@
 import { type ExampleRelation, type ExampleState } from './armstrongRelation';
-import { type DecisionInit } from './decision';
 
-export enum AssignmentVerdict {
+export enum AssignmentState {
     New = 'NEW',
     Accepted = 'ACCEPTED',
     Rejected = 'REJECTED',
@@ -10,14 +9,14 @@ export enum AssignmentVerdict {
 
 export type AssignmentInfo = {
     id: string;
-    verdict: AssignmentVerdict;
+    state: AssignmentState;
     rowIndex: number;
 };
 
-export type AssignmentFromServer = AssignmentInfo & {
+export type AssignmentResponse = AssignmentInfo & {
     workflowId: string;
     relation: ExampleRelation;
-    decision: DecisionInit | undefined;
+    decision: AssignmentDecision | undefined;
 };
 
 // TODO Replace by a simple type (if possible).
@@ -25,18 +24,18 @@ export class Assignment {
     private constructor(
         readonly id: string,
         readonly workflowId: string,
-        readonly verdict: AssignmentVerdict,
+        readonly state: AssignmentState,
         readonly isFinished: boolean,
         readonly relation: ExampleRelation,
-        readonly decision: DecisionInit | undefined,
+        readonly decision: AssignmentDecision | undefined,
     ) {}
 
-    static fromServer(input: AssignmentFromServer): Assignment {
+    static fromServer(input: AssignmentResponse): Assignment {
         return new Assignment(
             input.id,
             input.workflowId,
-            input.verdict,
-            input.verdict !== AssignmentVerdict.New,
+            input.state,
+            input.state !== AssignmentState.New,
             input.relation,
             input.decision,
         );
@@ -48,8 +47,23 @@ export type AssignmentInit = {
     rowIndex: number;
 };
 
-/** @deprecated */
-export type NegativeExampleInfo = {
-    id: string;
-    state: ExampleState;
+export type AssignmentDecision = {
+    status: DecisionStatus;
+    columns: {
+        name: string;
+        status: DecisionColumnStatus | undefined;
+        reasons: string[];
+    }[];
+};
+
+export enum DecisionStatus {
+    Accepted = 'ACCEPTED',
+    Rejected = 'REJECTED',
+    Unanswered = 'UNANSWERED',
+}
+
+export enum DecisionColumnStatus {
+    Undecided = 'UNDECIDED',
+    Valid = 'VALID',
+    Invalid = 'INVALID',
 }

@@ -1,9 +1,10 @@
 import type { Empty, StringLike } from '@/types/api/routes';
-import { GET } from '../routeFunctions';
-import type { DatasetData, DatasetFromServer } from '@/types/dataset';
+import { GET, POST } from '../routeFunctions';
+import type { DatasetData, DatasetResponse } from '@/types/dataset';
+import { type FileResponse } from '@/types/file';
 
 export const datasets = {
-    getAll: GET<Empty, DatasetFromServer[]>(
+    getAll: GET<Empty, DatasetResponse[]>(
         () => `/datasets`,
     ),
     getDataForWorkflow: GET<{ workflowId: StringLike }, DatasetData>(
@@ -11,5 +12,9 @@ export const datasets = {
     ),
     getDataForAssignment: GET<{ assignmentId: StringLike }, DatasetData>(
         u => `/datasets/assignments/${u.assignmentId}/data`,
+    ),
+    // FIXME Not implemented yet on the backend!
+    uploadFile: POST<Empty, FileResponse, FormData>(
+        () => `/files`,
     ),
 };

@@ -1,10 +1,10 @@
-package de.uni.passau.server.clientdto;
-
-import de.uni.passau.server.model.DiscoveryJobNode;
-import de.uni.passau.server.model.DiscoveryJobNode.DiscoveryJobState;
+package de.uni.passau.server.controller.response;
 
 import java.io.Serializable;
 import java.util.Date;
+
+import de.uni.passau.server.model.entity.DiscoveryJobNode;
+import de.uni.passau.server.model.entity.DiscoveryJobNode.DiscoveryJobState;
 
 public record DiscoveryJob(
     String id,
@@ -17,10 +17,10 @@ public record DiscoveryJob(
     public static DiscoveryJob fromNodes(DiscoveryJobNode jobNode) {
         return new DiscoveryJob(
             jobNode.getId(),
-            jobNode.getState(),
-            jobNode.getDescription(),
-            jobNode.getIteration(),
-            jobNode.getStartedAt()
+            jobNode.state,
+            jobNode.description,
+            jobNode.iteration,
+            jobNode.startedAt
         );
     }
 

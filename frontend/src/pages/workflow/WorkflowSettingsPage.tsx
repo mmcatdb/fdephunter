@@ -1,6 +1,4 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Dataset, DatasetType } from '@/types/dataset';
-import { Approach } from '@/types/approach';
 // import { API } from '@/utils/api';
 import { Button, Card, CardBody, Select, SelectItem, type SharedSelection } from '@heroui/react';
 import { Page } from '@/components/layout';
@@ -10,10 +8,12 @@ import { type WorkflowLoaded } from './WorkflowPage';
 import { WorkflowState } from '@/types/workflow';
 import { FileInput, type FileInputValue } from '@/components/common/FileInput';
 import { mockAPI } from '@/utils/api/mockAPI';
+import { type DatasetResponse } from '@/types/dataset';
+import { getStringEnumValues } from '@/utils/common';
 
 export function WorkflowSettingsPage() {
     const { workflow } = useRouteLoaderData<WorkflowLoaded>(routes.workflow.$id)!;
-    const { datasets, approaches } = useLoaderData<WorkflowSettingsLoaded>();
+    const { datasets } = useLoaderData<WorkflowSettingsLoaded>();
 
     const [ fetching, setFetching ] = useState(false);
     const navigate = useNavigate();
@@ -22,8 +22,7 @@ export function WorkflowSettingsPage() {
         setFetching(true);
         // const response = await API.workflows.executeDiscovery({ workflowId: workflow.id }, {
         const response = await mockAPI.workflows.executeDiscovery(workflow.id, {
-            datasets: settings.datasets.map(d => d.name),
-            approach: settings.approach.name,
+            approach: settings.approach,
             datasetName: settings.datasetName,
         });
         if (!response.status) {
@@ -43,7 +42,6 @@ export function WorkflowSettingsPage() {
                     <CardBody>
                         <InitialSettingsForm
                             datasets={datasets}
-                            approaches={approaches}
                             onSubmit={runInitialDiscovery}
                             fetching={fetching}
                         />
@@ -65,52 +63,46 @@ export function WorkflowSettingsPage() {
 }
 
 type WorkflowSettingsLoaded = {
-    datasets: Dataset[];
-    approaches: Approach[];
+    datasets: DatasetResponse[];
 };
 
 WorkflowSettingsPage.loader = async (): Promise<WorkflowSettingsLoaded> => {
-    // const [ datasetsResponse, approachesResponse ] = await Promise.all([
+    // const [ datasetsResponse ] = await Promise.all([
     //     API.datasets.getAll(undefined, {}),
-    //     API.approaches.getAll(undefined, {}),
     // ]);
     // if (!datasetsResponse.status)
     //     throw new Error('Failed to load datasets');
-    // if (!approachesResponse.status)
-    //     throw new Error('Failed to load approaches');
 
     // return {
     //     datasets: datasetsResponse.data.map(Dataset.fromServer),
-    //     approaches: approachesResponse.data.map(Approach.fromServer),
     // };
 
-    await new Promise(resolve => setTimeout(resolve, (1 + Math.random()) * 200));
+    const datasetsResponse = await mockAPI.datasets.getAll();
+    if (!datasetsResponse.status)
+        throw new Error('Failed to load datasets');
 
     return {
-        datasets: [ Dataset.fromServer({ name: 'temp', type: DatasetType.Csv }) ],
-        approaches: [ Approach.fromServer({ name: 'temp', author: 'temp' }) ],
+        datasets: datasetsResponse.data,
     };
 };
 
 type DiscoverySettings = {
-    datasets: Dataset[];
-    approach: Approach;
+    approach: string;
     datasetName: string;
 };
 
 type InitialSettingsFormProps = {
-    datasets: Dataset[];
-    approaches: Approach[];
+    datasets: DatasetResponse[];
     onSubmit: (settings: DiscoverySettings) => void;
     fetching: boolean;
 };
 
-function InitialSettingsForm({ datasets, approaches, onSubmit, fetching }: InitialSettingsFormProps) {
+function InitialSettingsForm({ datasets, onSubmit, fetching }: InitialSettingsFormProps) {
     const [ selected, setSelected ] = useState({
         dataset: new Set<string>(),
         file: undefined as FileInputValue,
     });
-    const datasetOptions = useMemo(() => MOCK_DATASETS.map(nameToOption), []);
+    const datasetOptions = useMemo(() => datasets.map(datasetToOption), []);
 
     // const [ selectedApproach, setSelectedApproach ] = useState(new Set<string>());
     // const approachOptions = useMemo(() => approaches.map(a => nameToOption(a.name)), [ approaches ]);
@@ -121,18 +113,14 @@ function InitialSettingsForm({ datasets, approaches, onSubmit, fetching }: Initi
         // const finalDatasets = [ ...selectedDatasets.values() ]
         //     .map(dataset => datasets.find(d => d.name === dataset))
         //     .filter((d): d is Dataset => !!d);
-        // const selectedApproachName = selectedApproach.values().next().value;
-        // const approach = approaches.find(a => a.name === selectedApproachName);
         const approach = approaches[0];
 
         // if (finalDatasets.length === 0 || !approach)
         //     return;
 
         onSubmit({
-            // datasets: finalDatasets,
-            datasets: [ datasets[0] ],
             approach,
-            datasetName: selected.file?.originalName ?? MOCK_DATASETS[Number(selected.dataset.values().next().value)],
+            datasetName: selected.file?.originalName ?? datasets[Number(selected.dataset.values().next().value)].name,
         });
     }
 
@@ -179,54 +167,21 @@ function InitialSettingsForm({ datasets, approaches, onSubmit, fetching }: Initi
     </>);
 }
 
+enum ApproachName {
+    HyFD = 'HyFD',
+    DepMiner = 'DepMiner',
+}
+
+const approaches = getStringEnumValues(ApproachName);
+
 type Option = {
     key: string;
     label: string;
 };
 
-function nameToOption(name: string): Option {
+function datasetToOption(dataset: DatasetResponse): Option {
     return {
-        key: name,
-        label: name,
+        key: dataset.name,
+        label: dataset.name,
     };
 }
-
-const MOCK_DATASETS = [
-    'iris',
-    'balance-scale',
-    'chess',
-    'abalone',
-    'nursery',
-    'breast-cancer-wisconsin',
-    'bridges',
-    'echocardiogram',
-    'adult',
-    'letter',
-    'ncvoter',
-    'ncvoter',
-    'hepatitis',
-    'horse',
-    'fd-reduced-30',
-    'plista',
-    'flight',
-    'flight',
-    'uniprot',
-    'TPC H lineitem',
-    'School results',
-    'Adult',
-    'Classification',
-    'Reflns',
-    'Atom sites',
-    'DB status',
-    'Entity source',
-    'Bio entry',
-    'Voter',
-    'FDR-15',
-    'FDR-30',
-    'Atom',
-    'Census',
-    'Wiki image',
-    'Spots',
-    'Struct sheet',
-    'Ditag feature',
-];

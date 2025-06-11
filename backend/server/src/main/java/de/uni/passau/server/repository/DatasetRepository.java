@@ -1,10 +1,10 @@
 package de.uni.passau.server.repository;
 
-import de.uni.passau.server.model.DatasetNode;
-
 import org.springframework.data.neo4j.repository.ReactiveNeo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.repository.query.Param;
+
+import de.uni.passau.server.model.entity.DatasetNode;
 import reactor.core.publisher.Mono;
 
 public interface DatasetRepository extends ReactiveNeo4jRepository<DatasetNode, Long> {

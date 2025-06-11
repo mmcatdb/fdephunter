@@ -1,11 +1,10 @@
 import { type ReactNode, useCallback, useMemo, useState } from 'react';
-import { ColumnState, type DecisionColumn, DecisionPhase, useDecisionContext } from '@/context/DecisionProvider';
-import { DecisionStatus } from '@/types/decision';
+import { type DecisionColumn, DecisionPhase, useDecisionContext } from '@/context/DecisionProvider';
 import { useNavigate } from 'react-router';
 import { IoAdd, IoClose } from 'react-icons/io5';
 import { routes } from '@/router';
-import { AssignmentVerdictLabel } from './AssignmentVerdictLabel';
-import { type Assignment } from '@/types/assignment';
+import { AssignmentStateLabel } from './AssignmentStateLabel';
+import { DecisionColumnStatus, DecisionStatus, type Assignment } from '@/types/assignment';
 // import { API } from '@/utils/api';
 import { TbPointFilled } from 'react-icons/tb';
 import { Button, Card, CardBody, CardFooter, CardHeader, Checkbox, Input, Switch } from '@heroui/react';
@@ -59,7 +58,7 @@ function ControlCard({ assignment, onEvaluated }: ControlCardProps) {
         const columns = status === DecisionStatus.Accepted
             ? decision.columns.map(col => ({
                 name: col.name,
-                state: col.state === ColumnState.Undecided ? ColumnState.Valid : col.state,
+                status: col.status === DecisionColumnStatus.Undecided ? DecisionColumnStatus.Valid : col.status,
                 reasons: [],
             }))
             : decision.columns.map(col => {
@@ -68,7 +67,7 @@ function ControlCard({ assignment, onEvaluated }: ControlCardProps) {
 
                 return {
                     name: col.name,
-                    state: col.state,
+                    status: col.status,
                     reasons: uniqueReasons,
                 };
             });
@@ -102,7 +101,7 @@ function ControlCard({ assignment, onEvaluated }: ControlCardProps) {
         void navigate(routes.workflow.dashboard.root.resolve({ workflowId: assignment.workflowId }));
     }
 
-    const isUndecided = decision.columns.some(column => column.state === ColumnState.Undecided);
+    const isUndecided = decision.columns.some(column => column.status === DecisionColumnStatus.Undecided);
 
     return (
         <Card className='self-stretch'>
@@ -117,7 +116,7 @@ function ControlCard({ assignment, onEvaluated }: ControlCardProps) {
 
                 {decision.phase === DecisionPhase.Finished && (
                     <p>
-                        This example was evaluated as <AssignmentVerdictLabel verdict={assignment.verdict} />. Do you want to re-evaluate it?
+                        This example was evaluated as <AssignmentStateLabel status={assignment.state} />. Do you want to re-evaluate it?
                     </p>
                 )}
             </CardBody>
@@ -203,7 +202,7 @@ function EditableDecisionCard({ relation, selectedFDIndex }: DecisionCardProps) 
     const { exampleRow, columns } = relation;
     const { decision, setDecision } = useDecisionContext();
     const selected = decision.columns[selectedFDIndex];
-    const isValid = selected.state === ColumnState.Valid;
+    const isValid = selected.status === DecisionColumnStatus.Valid;
 
     const updateColumn = useCallback((nextCol: Partial<DecisionColumn>) => {
         setDecision(prev => ({
@@ -231,13 +230,13 @@ function EditableDecisionCard({ relation, selectedFDIndex }: DecisionCardProps) 
 
                 <FdDisplay relation={relation} selectedFDIndex={selectedFDIndex} />
 
-                {selected.state === ColumnState.Undecided ? (
+                {selected.status === DecisionColumnStatus.Undecided ? (
                     <div className='mt-6 flex gap-3'>
-                        <Button color='success' onPress={() => updateColumn({ state: ColumnState.Valid })}>
+                        <Button color='success' onPress={() => updateColumn({ status: DecisionColumnStatus.Valid })}>
                             Yes, it's possible!
                         </Button>
 
-                        <Button color='danger' onPress={() => updateColumn({ state: ColumnState.Invalid })}>
+                        <Button color='danger' onPress={() => updateColumn({ status: DecisionColumnStatus.Invalid })}>
                             No ...
                         </Button>
                     </div>
@@ -245,7 +244,7 @@ function EditableDecisionCard({ relation, selectedFDIndex }: DecisionCardProps) 
                     <div className='mt-6'>
                         <Switch
                             isSelected={isValid}
-                            onValueChange={value => updateColumn({ state: value ? ColumnState.Valid : ColumnState.Invalid })}
+                            onValueChange={value => updateColumn({ status: value ? DecisionColumnStatus.Valid : DecisionColumnStatus.Invalid })}
                             classNames={{ label: 'text-base' }}
                         >
                             {isValid ? (<>
@@ -278,7 +277,7 @@ function FinalDecisionCard({ relation, selectedFDIndex }: DecisionCardProps) {
     const { exampleRow, columns } = relation;
     const { decision } = useDecisionContext();
     const selected = decision.columns[selectedFDIndex];
-    const isValid = selected.state === ColumnState.Valid;
+    const isValid = selected.status === DecisionColumnStatus.Valid;
 
     return (
         <Card>

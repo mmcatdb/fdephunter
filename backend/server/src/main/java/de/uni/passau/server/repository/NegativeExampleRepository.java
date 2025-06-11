@@ -1,12 +1,12 @@
 package de.uni.passau.server.repository;
 
-import de.uni.passau.server.model.NegativeExampleNode;
-import de.uni.passau.server.model.NegativeExampleNode.NegativeExampleState;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.data.neo4j.repository.ReactiveNeo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.repository.query.Param;
+
+import de.uni.passau.server.model.entity.NegativeExampleNode;
+import de.uni.passau.server.model.entity.NegativeExampleNode.NegativeExampleState;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -14,7 +14,7 @@ public interface NegativeExampleRepository extends ReactiveNeo4jRepository<Negat
 
     @Query("""
         MATCH (example:NegativeExample)
-        WHERE (example.state = 'ANSWERED' OR example.state = 'CONFLICT')
+        WHERE (example.state = 'ANSWERED')
         AND NOT EXISTS (
             (:NegativeExample)-[:HAS_PREVIOUS_ITERATION]->(example)
         )
@@ -32,7 +32,7 @@ public interface NegativeExampleRepository extends ReactiveNeo4jRepository<Negat
     ) {}
 
     @Query("""
-        MATCH (:Workflow { id: $workflowId })-[:HAS_JOB]->(:DiscoveryJob)-[:HAS_RESULT]->(:DiscoveryResult)-[:HAS_CLASS]->(:Class)-[:HAS_NEGATIVE_EXAMPLE]->(example:NegativeExample)
+        MATCH (:Workflow { id: $workflowId })-[:HAS_JOB]->(:DiscoveryJob)-[:HAS_RESULT]->(:JobResult)-[:HAS_CLASS]->(:Class)-[:HAS_NEGATIVE_EXAMPLE]->(example:NegativeExample)
         WHERE NOT EXISTS (
             (:Assignment)-[:BELONGS_TO_EXAMPLE]->(example)
         )
@@ -45,7 +45,7 @@ public interface NegativeExampleRepository extends ReactiveNeo4jRepository<Negat
     @Query("""
         MATCH (:Assignment { id: $assignmentId })-[:BELONGS_TO_EXAMPLE]->(nex:NegativeExample)
         WHERE NOT EXISTS (
-            (:Assignment { verdict: 'NEW' })-[:BELONGS_TO_EXAMPLE]->(nex)
+            (:Assignment { status: 'NEW' })-[:BELONGS_TO_EXAMPLE]->(nex)
         )
         SET nex.state = 'ANSWERED'
         RETURN nex

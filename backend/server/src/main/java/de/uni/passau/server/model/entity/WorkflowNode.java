@@ -1,4 +1,4 @@
-package de.uni.passau.server.model;
+package de.uni.passau.server.model.entity;
 
 import org.springframework.data.neo4j.core.schema.GeneratedValue;
 import org.springframework.data.neo4j.core.schema.Id;
@@ -25,42 +25,22 @@ public class WorkflowNode {
     @Id @GeneratedValue(UUIDStringGenerator.class)
     private String id;
 
-    @Property
-    private WorkflowState state;
-
-    @Property
-    private Integer iteration;
-
-    public static WorkflowNode createNew() {
-        final var workflow = new WorkflowNode();
-        workflow.setState(WorkflowState.INITIAL_SETTINGS);
-        workflow.setIteration(0);
-
-        return workflow;
-    }
-
     public String getId() {
         return id;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
+    @Property
+    public WorkflowState state;
 
-    public WorkflowState getState() {
-        return state;
-    }
+    @Property
+    public Integer iteration;
 
-    public void setState(WorkflowState state) {
-        this.state = state;
-    }
+    public static WorkflowNode createNew() {
+        final var workflow = new WorkflowNode();
+        workflow.state = WorkflowState.INITIAL_SETTINGS;
+        workflow.iteration = 0;
 
-    public Integer getIteration() {
-        return iteration;
-    }
-
-    public void setIteration(Integer iteration) {
-        this.iteration = iteration;
+        return workflow;
     }
 
     @Override

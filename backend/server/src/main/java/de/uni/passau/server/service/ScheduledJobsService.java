@@ -11,13 +11,13 @@ import de.uni.passau.core.nex.NegativeExampleBuilder;
 import de.uni.passau.core.nex.NegativeExampleUpdater;
 import de.uni.passau.server.approach.HyFDAlgorithm;
 import de.uni.passau.server.approach.OurApproachAlgorithm;
-import de.uni.passau.server.model.AssignmentNode.AssignmentVerdict;
-import de.uni.passau.server.model.DiscoveryJobNode;
-import de.uni.passau.server.model.DiscoveryJobNode.DiscoveryJobState;
-import de.uni.passau.server.model.NegativeExampleNode;
-import de.uni.passau.server.model.NegativeExampleNode.NegativeExampleState;
-import de.uni.passau.server.model.WorkflowNode;
-import de.uni.passau.server.model.WorkflowNode.WorkflowState;
+import de.uni.passau.server.model.entity.DiscoveryJobNode;
+import de.uni.passau.server.model.entity.NegativeExampleNode;
+import de.uni.passau.server.model.entity.WorkflowNode;
+import de.uni.passau.server.model.entity.AssignmentNode.AssignmentState;
+import de.uni.passau.server.model.entity.DiscoveryJobNode.DiscoveryJobState;
+import de.uni.passau.server.model.entity.NegativeExampleNode.NegativeExampleState;
+import de.uni.passau.server.model.entity.WorkflowNode.WorkflowState;
 import de.uni.passau.server.repository.ClassRepository;
 
 import java.util.ArrayList;
@@ -54,9 +54,6 @@ public class ScheduledJobsService {
     @Autowired
     private ClassRepository classRepository;
 
-    @Autowired
-    private ConflictService conflictService;
-
     private static final NegativeExampleUpdater NEGATIVE_EXAMPLE_UPDATER = new NegativeExampleUpdater();    // TODO: Change to @Service
 
     public void executeUpdateNegativeExampleJobs() {
@@ -69,41 +66,34 @@ public class ScheduledJobsService {
                     // there is no assignment to negative example -> exit
                     assignments.isEmpty()
                     // assignment has not been answered -> exit
-                    || assignments.stream().anyMatch(assignment -> assignment.getVerdict().equals(AssignmentVerdict.NEW))
+                    || assignments.stream().anyMatch(assignment -> assignment.state.equals(AssignmentState.NEW))
                 )
                     return Mono.empty();
 
                 // check whether negative example is answered by all expert users:
-                int[] verdictsCounter = new int[AssignmentVerdict.values().length];
+                int[] statusesCounter = new int[AssignmentState.values().length];
                 for (var assignment : assignments)
-                    verdictsCounter[assignment.getVerdict().ordinal()] += 1;    // increment
+                    statusesCounter[assignment.state.ordinal()] += 1;    // increment
 
                 // We have collected all verdicts, hence we need to check the majority verdict:
                 // all verdicts or at least 75% of them are accept -> accept example
                 int quorum = (int) Math.ceil(assignments.size() * 0.75);    // quorum >= 75%
-                if (verdictsCounter[AssignmentVerdict.ACCEPTED.ordinal()] >= quorum) {
+                if (statusesCounter[AssignmentState.ACCEPTED.ordinal()] >= quorum) {
                     LOGGER.info("ACCEPTED");
                     return negativeExampleService.changeExampleState(example.id, NegativeExampleState.ACCEPTED);
                 }
 
                 final var decisions = new ArrayList<Decision>();
                 try {
+                    // FIXME There should be only one assignment (the crowdsourcing was dithed). So there is no need to iterate over them.
                     for (var assignment : assignments)
-                        decisions.add(Decision.jsonReader.readValue(assignment.getDecision()));
+                        decisions.add(Decision.jsonReader.readValue(assignment.decision));
                 }
                 catch (JsonProcessingException ex) {
                     LOGGER.error("EXCEPTION THROWN TODO", ex);
                     return Mono.empty();    // ERROR: BUG
                 }
 
-                // the example has not been accepted yet -> check reasons
-                if (conflictService.hasColumnConflicts(decisions)) {
-                    LOGGER.info("HAS CONFLICTS");
-                    return negativeExampleService.changeExampleState(example.id, NegativeExampleState.CONFLICT);
-                }
-
-                // there are no conflicts -> it is simple, we have to update negative example
-                // as long as there are no conflicts in columns and we know that there is at least 1 assignment, this is safe
                 final var updatedExample = NEGATIVE_EXAMPLE_UPDATER.updateNegativeExample(example, decisions.get(0));
 
                 return classRepository
@@ -122,7 +112,7 @@ public class ScheduledJobsService {
                 final var dataset = datasetService.getLoadedDataset(group.dataset());
 
                 // execute functional dependency discovery
-                final List<FDInit> result = executeDiscoveryByApproach(dataset, group.approach().getName());
+                final List<FDInit> result = executeDiscoveryByApproach(dataset, group.job().approach);
                 final WeightedGraph graph = new FDGraphBuilder().buildGraph(result);
 
                 return discoveryJobService.saveResult(group.job().getId(), graph).flatMap(storedResult -> {
@@ -158,10 +148,10 @@ public class ScheduledJobsService {
                 .doOnNext(value -> LOGGER.info("Job {} has finished.", value.getId()));
 
             Mono<WorkflowNode> updatedWorkflow = workflowService.setState(group.workflow().getId(), WorkflowState.NEGATIVE_EXAMPLES)
-                .doOnNext(value -> LOGGER.info("Workflow uuid={} state was updated to {}", value.getId(), value.getState()));
+                .doOnNext(value -> LOGGER.info("Workflow uuid={} state was updated to {}", value.getId(), value.state));
 
-            Mono<WorkflowNode> updatedWorkflow2 = workflowService.setIteration(group.workflow().getId(), group.job().getIteration())
-                .doOnNext(value -> LOGGER.info("Workflow uuid={} iteration was updated to {}", value.getId(), value.getIteration()));
+            Mono<WorkflowNode> updatedWorkflow2 = workflowService.setIteration(group.workflow().getId(), group.job().iteration)
+                .doOnNext(value -> LOGGER.info("Workflow uuid={} iteration was updated to {}", value.getId(), value.iteration));
 
             return Mono.when(updatedJob, updatedWorkflow, updatedWorkflow2);
             // return Mono.empty();

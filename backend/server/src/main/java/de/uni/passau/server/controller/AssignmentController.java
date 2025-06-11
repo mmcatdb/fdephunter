@@ -1,8 +1,8 @@
 package de.uni.passau.server.controller;
 
 import de.uni.passau.core.nex.Decision;
-import de.uni.passau.server.clientdto.Assignment;
-import de.uni.passau.server.clientdto.DatasetData;
+import de.uni.passau.server.controller.response.AssignmentResponse;
+import de.uni.passau.server.controller.response.DatasetData;
 import de.uni.passau.server.service.AssignmentService;
 import de.uni.passau.server.service.DatasetService;
 
@@ -36,13 +36,13 @@ public class AssignmentController {
     private DatasetService datasetService;
 
     @GetMapping("/assignments/{assignmentId}")
-    public Mono<Assignment> getAssignment(@PathVariable String assignmentId, @RequestParam(required = false, defaultValue = "5") String limit) {
+    public Mono<AssignmentResponse> getAssignment(@PathVariable String assignmentId, @RequestParam(required = false, defaultValue = "5") String limit) {
         int numberLimit = DatasetController.tryParseLimit(limit);
         return assignmentService.findGroupById(assignmentId).flatMap(assignmentGroup ->
             assignmentService.getDatasetName(assignmentId)
                 .flatMap(name -> datasetService.getLoadedDatasetByName(name))
                 .map(dataset -> DatasetData.fromNodes(dataset, numberLimit))
-                .map(datasetData -> Assignment.fromNodes(assignmentGroup, datasetData))
+                .map(datasetData -> AssignmentResponse.fromNodes(assignmentGroup, datasetData))
         );
     }
 
@@ -73,7 +73,7 @@ public class AssignmentController {
     }
 
     @PostMapping("/assignments/{assignmentId}/evaluate")
-    public Mono<Assignment> evaluateAssignment(
+    public Mono<AssignmentResponse> evaluateAssignment(
         @PathVariable String assignmentId,
         @RequestBody DecisionInit init,
         @RequestParam(required = false, defaultValue = "5") String limit

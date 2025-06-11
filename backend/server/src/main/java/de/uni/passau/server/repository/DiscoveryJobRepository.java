@@ -1,11 +1,9 @@
 package de.uni.passau.server.repository;
 
-import de.uni.passau.core.approach.AbstractApproach.ApproachName;
-import de.uni.passau.server.model.ApproachNode;
-import de.uni.passau.server.model.DatasetNode;
-import de.uni.passau.server.model.DiscoveryJobNode;
-import de.uni.passau.server.model.DiscoveryJobNode.DiscoveryJobState;
-import de.uni.passau.server.model.WorkflowNode;
+import de.uni.passau.server.model.entity.DatasetNode;
+import de.uni.passau.server.model.entity.DiscoveryJobNode;
+import de.uni.passau.server.model.entity.WorkflowNode;
+import de.uni.passau.server.model.entity.DiscoveryJobNode.DiscoveryJobState;
 
 import org.springframework.data.neo4j.repository.ReactiveNeo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
@@ -14,13 +12,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface DiscoveryJobRepository extends ReactiveNeo4jRepository<DiscoveryJobNode, String> {
-
-    @Query("""
-        MATCH (job:DiscoveryJob { id: $jobId }), (approach:Approach { name: $name })
-        CREATE (job)-[:UTILIZES_APPROACH]->(approach)
-        RETURN job
-        """)
-    public Mono<DiscoveryJobNode> saveUtilizesApproach(@Param("jobId") String id, @Param("name") ApproachName name);
 
     @Query("MATCH(job:DiscoveryJob { id: $jobId }) RETURN job")
     public Mono<DiscoveryJobNode> getJobById(@Param("jobId") String id);
@@ -37,15 +28,14 @@ public interface DiscoveryJobRepository extends ReactiveNeo4jRepository<Discover
     public Mono<DiscoveryJobNode> getLastDiscoveryByWorkflowId(@Param("workflowId") String workflowId);
 
     public static record DiscoveryJobNodeGroup(
-        ApproachNode approach,
         DiscoveryJobNode job,
         WorkflowNode workflow,
         DatasetNode dataset
     ) {}
 
     @Query("""
-        MATCH (approach:Approach)<-[:UTILIZES_APPROACH]-(job:DiscoveryJob { state: $state })<-[:HAS_JOB]-(workflow:Workflow)-[:HAS_ASSIGNED_DATASET]->(dataset:Dataset)
-        RETURN approach, job, workflow, dataset
+        MATCH (job:DiscoveryJob { state: $state })<-[:HAS_JOB]-(workflow:Workflow)-[:HAS_ASSIGNED_DATASET]->(dataset:Dataset)
+        RETURN job, workflow, dataset
         """)
     public Flux<DiscoveryJobNodeGroup> findAllGroupsByState(@Param("state") DiscoveryJobState state);
 

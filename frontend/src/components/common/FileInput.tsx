@@ -1,12 +1,12 @@
 import { type ReactNode, useCallback, useRef, useState } from 'react';
-import { type FileFromServer } from '@/types/file';
+import { type FileResponse } from '@/types/file';
 import clsx from 'clsx';
 import { LuPaperclip } from 'react-icons/lu';
 import { MdModeEdit } from 'react-icons/md';
 import { TbTrashX } from 'react-icons/tb';
 import { Spinner } from '@heroui/react';
 
-export type FileInputValue = FileFromServer | undefined;
+export type FileInputValue = FileResponse | undefined;
 
 type FileInputProps = Readonly<{
     id?: string;
@@ -28,7 +28,7 @@ export function FileInput({ id, value, onChange }: FileInputProps) {
 
         setIsFetching(true);
         // TODO This is not implemented yet on the backend!
-        // const response = await API.approaches.uploadFile({}, formData);
+        // const response = await API.datasets.uploadFile({}, formData);
         await new Promise(resolve => setTimeout(resolve, (1 + Math.random()) / 2 * 1000));
         setIsFetching(false);
 

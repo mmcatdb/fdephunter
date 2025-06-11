@@ -1,11 +1,11 @@
 package de.uni.passau.server.repository;
 
-import de.uni.passau.server.model.WorkflowNode;
-import de.uni.passau.server.model.WorkflowNode.WorkflowState;
-
 import org.springframework.data.neo4j.repository.ReactiveNeo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.repository.query.Param;
+
+import de.uni.passau.server.model.entity.WorkflowNode;
+import de.uni.passau.server.model.entity.WorkflowNode.WorkflowState;
 import reactor.core.publisher.Mono;
 
 public interface WorkflowRepository extends ReactiveNeo4jRepository<WorkflowNode, String> {

@@ -1,5 +1,3 @@
-import { type NegativeExampleInfo } from './assignment';
-
 export enum WorkflowState {
     /**
      * Initial screen. The user is selecting dataset and algorithm.
@@ -58,31 +56,3 @@ export type WorkflowStats = {
     examplesNegative: number;
     // examplesTotal = examplesPositive + examplesNegative
 };
-
-export type ClassFromServer = {
-    id: string;
-    label: string;
-    weight: number;
-    iteration: number;
-    example?: NegativeExampleInfo;
-};
-
-export class Class {
-    private constructor(
-        readonly id: string,
-        readonly label: string,
-        readonly weight: number,
-        readonly iteration: number,
-        readonly example?: NegativeExampleInfo,
-    ) {}
-
-    static fromServer(input: ClassFromServer): Class {
-        return new Class(
-            input.id,
-            input.label,
-            input.weight,
-            input.iteration,
-            input.example,
-        );
-    }
-}

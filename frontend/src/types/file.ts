@@ -1,4 +1,4 @@
-export type FileFromServer = {
+export type FileResponse = {
     id: string;
     originalName: string;
     hashName: string;

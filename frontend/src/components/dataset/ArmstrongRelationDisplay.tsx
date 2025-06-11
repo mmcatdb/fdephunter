@@ -4,10 +4,10 @@ import { Button } from '@heroui/react';
 import { ColumnNameBadge } from './FDListDisplay';
 import clsx, { type ClassValue } from 'clsx';
 import { BiCollapseHorizontal, BiExpandHorizontal } from 'react-icons/bi';
-import { IoCheckmark, IoClose, IoHelp, IoCheckmarkCircleOutline, IoCloseCircleOutline, IoReloadCircleOutline, IoStopCircleOutline } from 'react-icons/io5';
-import { ColumnState, useDecisionContext } from '@/context/DecisionProvider';
+import { IoCheckmark, IoClose, IoHelp, IoCheckmarkCircleOutline, IoCloseCircleOutline, IoReloadCircleOutline } from 'react-icons/io5';
+import { useDecisionContext } from '@/context/DecisionProvider';
 import { type IconType } from 'react-icons';
-import { type AssignmentInfo } from '@/types/assignment';
+import { DecisionColumnStatus, type AssignmentInfo } from '@/types/assignment';
 import { Link } from 'react-router';
 import { routes } from '@/router';
 
@@ -83,7 +83,7 @@ export function ArmstrongRelationDisplay({ relation, assignRow, assignments }: A
             </div>
 
 
-            <ReferenceRowDisplay row={relation.referenceRow} />
+            <ReferenceRowDisplay rowValues={relation.referenceRow} />
 
             {relation.exampleRows.map((row, rowIndex) => (
                 <ExampleRowDisplay
@@ -121,16 +121,16 @@ function getSpecialCellClasses(rowIndex: number) {
 }
 
 type ReferenceRowDisplayProps = {
-    row: { values: string[] };
+    rowValues: string[];
 };
 
-function ReferenceRowDisplay({ row }: ReferenceRowDisplayProps) {
+function ReferenceRowDisplay({ rowValues }: ReferenceRowDisplayProps) {
     const { leftClass, rightClass } = getSpecialCellClasses(-1);
 
     return (<>
         <div className={leftClass} />
 
-        {row.values.map((value, colIndex) => (
+        {rowValues.map((value, colIndex) => (
             <div key={colIndex} className={getCellClass(-1, colIndex, true)}>
                 {value}
             </div>
@@ -220,7 +220,6 @@ const exampleStateData: Record<ExampleState, {
     [ExampleState.Rejected]: { color: 'text-danger', icon: IoCloseCircleOutline },
     [ExampleState.Accepted]: { color: 'text-success', icon: IoCheckmarkCircleOutline },
     [ExampleState.Undecided]: { color: 'text-warning', icon: IoReloadCircleOutline },
-    [ExampleState.Conflict]: { color: 'text-danger', icon: IoStopCircleOutline },
 };
 
 type ExampleRelationDisplayProps = {
@@ -243,14 +242,14 @@ export function ExampleRelationDisplay({ relation: { columns, referenceRow, exam
                 </div>
             ))}
 
-            {referenceRow.values.map((value, colIndex) => (
+            {referenceRow.map((value, colIndex) => (
                 <div key={colIndex} className={getCellClass(-1, colIndex, true)}>
                     {value}
                 </div>
             ))}
 
             {exampleRow.values.map((value, colIndex) => {
-                const state = decision.columns[colIndex].state;
+                const state = decision.columns[colIndex].status;
 
                 // If the selection function isn't provided, the cells aren't interactive. Also, if the state isn't defined, the cell is in the maximal set.
                 if (!setSelectedColIndex || !state) {
@@ -279,11 +278,11 @@ export function ExampleRelationDisplay({ relation: { columns, referenceRow, exam
     );
 }
 
-const columnStateData: Record<ColumnState, {
+const columnStateData: Record<DecisionColumnStatus, {
     color: string;
     icon: IconType;
 }> = {
-    [ColumnState.Undecided]: { color: 'text-warning', icon: IoHelp },
-    [ColumnState.Valid]: { color: 'text-success', icon: IoCheckmark },
-    [ColumnState.Invalid]: { color: 'text-danger', icon: IoClose },
+    [DecisionColumnStatus.Undecided]: { color: 'text-warning', icon: IoHelp },
+    [DecisionColumnStatus.Valid]: { color: 'text-success', icon: IoCheckmark },
+    [DecisionColumnStatus.Invalid]: { color: 'text-danger', icon: IoClose },
 };

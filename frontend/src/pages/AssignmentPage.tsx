@@ -8,9 +8,9 @@ import { Link, matchPath, Outlet, type Params, useLoaderData, useLocation, useRe
 import { Button, Tab, Tabs } from '@heroui/react';
 import { Page, Sidebar, TopbarContent } from '@/components/layout';
 import { mockAPI } from '@/utils/api/mockAPI';
-import { MOCK_LATTICES } from '@/types/armstrongRelation';
 import { WorkflowProgressDisplay } from '@/components/worklow/WorkflowProgressDisplay';
 import { Workflow } from '@/types/workflow';
+import { type LatticeForClass } from '@/types/armstrongRelation';
 // import { API } from '@/utils/api';
 
 export function AssignmentPage() {
@@ -44,6 +44,7 @@ type AssignmentLoaded = {
     assignment: Assignment;
     /** @deprecated Workflow shouldn't be available from the assignment. */
     workflow: Workflow;
+    lattices: LatticeForClass[];
 };
 
 AssignmentPage.loader = async ({ params: { assignmentId } }: { params: Params<'assignmentId'> }): Promise<AssignmentLoaded> => {
@@ -59,9 +60,14 @@ AssignmentPage.loader = async ({ params: { assignmentId } }: { params: Params<'a
     if (!workflowResponse.status)
         throw new Error('Failed to load workflow');
 
+    const latticesResponse = await mockAPI.assignments.getLattices(response.data.workflowId);
+    if (!latticesResponse.status)
+        throw new Error('Failed to load lattices');
+
     return {
         assignment: Assignment.fromServer(response.data),
         workflow: Workflow.fromServer(workflowResponse.data),
+        lattices: latticesResponse.data,
     };
 };
 
@@ -93,7 +99,7 @@ export function AssignmentListPage() {
     // const { assignment } = useRouteLoaderData<AssignmentLoaded>(routes.assignment.$id)!;
 
     // return (
-    //     <FDListDisplay graph={assignment.discoveryResult.fdGraph.edges} />
+    //     <FDListDisplay graph={assignment.jobResult.fdGraph.edges} />
     // );
 
     return (
@@ -102,9 +108,9 @@ export function AssignmentListPage() {
 }
 
 export function AssignmentGraphPage() {
-    const { assignment } = useRouteLoaderData<AssignmentLoaded>(routes.assignment.$id)!;
+    const { assignment, lattices } = useRouteLoaderData<AssignmentLoaded>(routes.assignment.$id)!;
 
     return (
-        <LatticeDisplay lattices={MOCK_LATTICES[0]} />
+        <LatticeDisplay lattices={lattices} />
     );
 }

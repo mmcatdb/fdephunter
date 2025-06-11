@@ -1,7 +1,7 @@
 package de.uni.passau.server.controller;
 
-import de.uni.passau.server.clientdto.DatasetData;
-import de.uni.passau.server.model.DatasetNode;
+import de.uni.passau.server.controller.response.DatasetData;
+import de.uni.passau.server.model.entity.DatasetNode;
 import de.uni.passau.server.service.DatasetService;
 import de.uni.passau.server.service.WorkflowService;
 
@@ -11,8 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,57 +33,6 @@ public class DatasetController {
     @GetMapping("/datasets")
     public Flux<DatasetNode> getAllDatasets() {
         return datasetService.getAllDatasets();
-    }
-
-    @Deprecated
-    @GetMapping("/datasets/{name}")
-    public Mono<DatasetNode> getDatasetByName(@PathVariable String name) {
-        return datasetService.getDatasetByName(name);
-    }
-
-    @Deprecated
-    @PostMapping("/datasets")
-    public Mono<DatasetNode> createDataset(@RequestBody DatasetNode dataset) {
-        return datasetService.save(dataset);
-    }
-
-    @Deprecated
-    @GetMapping("/datasets/create")
-    public Mono<DatasetNode> createDataset(
-            @RequestParam String name,
-            @RequestParam String type,
-            @RequestParam String source,
-            @RequestParam(required = false) String entityName,
-            @RequestParam(required = false) Long columns,
-            @RequestParam(required = false) Long rows,
-            @RequestParam(required = false) Double size,
-            @RequestParam(required = false) Long fds) {
-
-        DatasetNode dataset = new DatasetNode();
-        dataset.setName(name);
-        dataset.setType(DatasetNode.DatasetType.valueOf(type));
-        dataset.setSource(source);
-
-        if (entityName != null) {
-            dataset.setKindName(entityName);
-        }
-
-        if (columns != null) {
-            dataset.setColumns(columns);
-        }
-
-        if (rows != null) {
-            dataset.setRows(rows);
-        }
-
-        if (size != null) {
-            dataset.setSize(size);
-        }
-
-        if (fds != null) {
-            dataset.setFds(fds);
-        }
-        return datasetService.save(dataset);
     }
 
     @GetMapping("/datasets/workflows/{workflowId}/data")
