@@ -1,31 +1,31 @@
 package de.uni.passau.server.repository;
 
+import java.util.List;
+
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.springframework.data.neo4j.repository.ReactiveNeo4jRepository;
+import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.repository.query.Param;
 
 import de.uni.passau.server.model.ClassNode;
 import de.uni.passau.server.model.NegativeExampleNode;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 /** @deprecated */
-public interface ClassRepository extends ReactiveNeo4jRepository<ClassNode, String> {
+public interface ClassRepository extends Neo4jRepository<ClassNode, String> {
 
     // find class of related negative example
     @Query("""
         MATCH (class:Class)-[:HAS_NEGATIVE_EXAMPLE]->(:NegativeExample { id: $exampleId })
         RETURN class
         """)
-    public Mono<ClassNode> findHasNegativeExample(@Param("exampleId") String exampleId);
+    public ClassNode findHasNegativeExample(@Param("exampleId") String exampleId);
 
     @Query("""
         MATCH (class:Class { id: $classId }), (example:NegativeExample { id: $exampleId })
         CREATE (class)-[:HAS_NEGATIVE_EXAMPLE]->(example)
         RETURN class
         """)
-    public Mono<ClassNode> saveHasNegativeExample(@Param("classId") String classId, @Param("exampleId") String exampleId);
+    public ClassNode saveHasNegativeExample(@Param("classId") String classId, @Param("exampleId") String exampleId);
 
     public static record ClassNodeGroup(
         ClassNode classX,
@@ -49,6 +49,6 @@ public interface ClassRepository extends ReactiveNeo4jRepository<ClassNode, Stri
         )
         RETURN class as classX, count(example) as iteration, CASE WHEN lastExample IS NULL THEN {} ELSE lastExample END AS lastExample
         """)
-    public Flux<ClassNodeGroup> findAllGroupsByWorkflowId(@Param("workflowId") String workflowId);
+    public List<ClassNodeGroup> findAllGroupsByWorkflowId(@Param("workflowId") String workflowId);
 
 }

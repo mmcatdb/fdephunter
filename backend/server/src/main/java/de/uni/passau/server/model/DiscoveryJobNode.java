@@ -42,12 +42,13 @@ public class DiscoveryJobNode {
     @Property
     public ApproachName approach;
 
-    public static DiscoveryJobNode createNew(String description, int iteration) {
+    public static DiscoveryJobNode createNew(String description, int iteration, ApproachName approach) {
         final var job = new DiscoveryJobNode();
         job.description = description;
         job.state = DiscoveryJobState.WAITING;
         job.iteration = iteration;
         job.startedAt = new Date();
+        job.approach = approach;
 
         return job;
     }

@@ -4,7 +4,6 @@ import de.uni.passau.core.approach.AbstractApproach.ApproachName;
 import de.uni.passau.core.approach.FDGraphBuilder;
 import de.uni.passau.core.approach.FDInit;
 import de.uni.passau.core.dataset.Dataset;
-import de.uni.passau.core.example.ExampleDecision;
 import de.uni.passau.core.example.NegativeExampleBuilder;
 import de.uni.passau.core.graph.Vertex;
 import de.uni.passau.core.graph.WeightedGraph;
@@ -13,13 +12,9 @@ import de.uni.passau.server.approach.OurApproachAlgorithm;
 import de.uni.passau.server.model.DiscoveryJobNode;
 import de.uni.passau.server.model.NegativeExampleNode;
 import de.uni.passau.server.model.WorkflowNode;
-import de.uni.passau.server.model.AssignmentNode.AssignmentState;
 import de.uni.passau.server.model.DiscoveryJobNode.DiscoveryJobState;
-import de.uni.passau.server.model.NegativeExampleNode.NegativeExampleState;
 import de.uni.passau.server.model.WorkflowNode.WorkflowState;
-import de.uni.passau.server.repository.AssignmentRepository;
 import de.uni.passau.server.repository.DiscoveryJobRepository;
-import de.uni.passau.server.repository.NegativeExampleRepository;
 import de.uni.passau.server.repository.WorkflowRepository;
 
 import java.util.ArrayList;
@@ -28,8 +23,6 @@ import java.util.List;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 @Service
 public class ScheduledJobsService {
@@ -46,115 +39,63 @@ public class ScheduledJobsService {
     private DatasetService datasetService;
 
     @Autowired
-    private NegativeExampleRepository negativeExampleRepository;
-
-    @Autowired
     private NegativeExampleService negativeExampleService;
 
     @Autowired
     private WorkflowRepository workflowRepository;
 
-    @Autowired
-    private AssignmentRepository assignmentRepository;
-
-    public void executeUpdateNegativeExampleJobs() {
-        LOGGER.info("EXECUTING NEGATIVE EXAMPLE JOB");
-
-        negativeExampleService.getAllUnresolvedExamples().flatMap(example ->
-            // fetch all assignments that belong to the same
-            assignmentRepository.findAllBelongsToExample(example.id).collectList().flatMap(assignments -> {
-                if (
-                    // there is no assignment to negative example -> exit
-                    assignments.isEmpty()
-                    // assignment has not been answered -> exit
-                    || assignments.stream().anyMatch(assignment -> assignment.state.equals(AssignmentState.NEW))
-                )
-                    return Mono.empty();
-
-                // check whether negative example is answered by all expert users:
-                int[] statusesCounter = new int[AssignmentState.values().length];
-                for (var assignment : assignments)
-                    statusesCounter[assignment.state.ordinal()] += 1;    // increment
-
-                // We have collected all verdicts, hence we need to check the majority verdict:
-                // all verdicts or at least 75% of them are accept -> accept example
-                int quorum = (int) Math.ceil(assignments.size() * 0.75);    // quorum >= 75%
-                if (statusesCounter[AssignmentState.ACCEPTED.ordinal()] >= quorum) {
-                    LOGGER.info("ACCEPTED");
-                    return negativeExampleRepository.saveState(example.id, NegativeExampleState.ACCEPTED);
-                }
-
-                final var decisions = new ArrayList<ExampleDecision>();
-                    // FIXME There should be only one assignment (the crowdsourcing was dithed). So there is no need to iterate over them.
-                for (var assignment : assignments)
-                    decisions.add(assignment.decision);
-
-                // final var updatedExample = NEGATIVE_EXAMPLE_UPDATER.updateNegativeExample(example, decisions.get(0));
-
-                // return classRepository
-                    // .findHasNegativeExample(example.id)
-                    // .flatMap(classNode -> negativeExampleService.createExample(classNode.getId(), updatedExample));
-
-
-                // FIXME After flux is removed.
-                return Mono.from(null);
-            })
-        ).subscribe(x -> LOGGER.info("NEGATIVE EXAMPLE JOB FINISHED"));
-    }
-
     public void executeDiscoveryJobs() {
         LOGGER.info("EXECUTING (RE)DISCOVERY JOB");
-        discoveryJobRepository.findAllGroupsByState(DiscoveryJobState.WAITING).flatMap(group -> {
-            Mono<List<NegativeExampleNode>> negativeExamplesForResult = discoveryJobRepository.setState(group.job().getId(), DiscoveryJobState.RUNNING).flatMap(value -> {
+        final var groups = discoveryJobRepository.findAllGroupsByState(DiscoveryJobState.WAITING);
 
-                LOGGER.info("Functional dependency discovery job {} has started.", value.getId());
-                final var dataset = datasetService.getLoadedDataset(group.dataset());
+        for (final var group : groups) {
+            final var job = discoveryJobRepository.setState(group.job().getId(), DiscoveryJobState.RUNNING);
 
-                // execute functional dependency discovery
-                final List<FDInit> result = executeDiscoveryByApproach(dataset, group.job().approach);
-                final WeightedGraph graph = new FDGraphBuilder().buildGraph(result);
+            LOGGER.info("Functional dependency discovery job {} has started.", job.getId());
+            final var dataset = datasetService.getLoadedDataset(group.dataset());
 
-                return discoveryJobService.saveResult(group.job().getId(), graph).flatMap(storedResult -> {
-                    LOGGER.info("Stored result: {}", storedResult);
+            // TODO Do this async!
 
-                    Flux<Vertex> dependencyClasses = Flux.fromIterable(graph.__getRankedVertices());
-                    LOGGER.info("RANKED VERTICES: " + graph.__getRankedVertices());
+            // execute functional dependency discovery
+            final List<FDInit> result = executeDiscoveryByApproach(dataset, group.job().approach);
+            final WeightedGraph graph = new FDGraphBuilder().buildGraph(result);
 
-                    Flux<NegativeExampleNode> fluxClasses = dependencyClasses.flatMap(dependencyClass -> {
-                        LOGGER.info("Iterating class {}", dependencyClass);
-                        return negativeExampleService.createClass(storedResult.getId(), dependencyClass)
-                            .flatMap(classNode -> {
-                                LOGGER.info("Class created: {}", classNode);
-                                final var builder = new NegativeExampleBuilder(dataset);
-                                final var negativeExample = builder.createNew(dependencyClass, 5);    // WARN: TEMPORARY SETTING 5! THE UNDERLYING METHOD MUST BE BETTER IMPLEMENTED
-                                return negativeExampleService.createExample(classNode.getId(), negativeExample);
-                            });
+            final var jobResult = discoveryJobService.saveResult(group.job().getId(), graph);
 
-                    });
-                    return fluxClasses.collectList();
+            LOGGER.info("Job result: {}", jobResult);
 
-                });
-            });
+            List<Vertex> dependencyClasses = graph.__getRankedVertices();
+            LOGGER.info("RANKED VERTICES: " + graph.__getRankedVertices());
 
-            return Mono.zip(Mono.just(group), negativeExamplesForResult);
-        }).flatMap(tuple -> {
-            var group = tuple.getT1();
-            var neX = tuple.getT2();
+            final List<NegativeExampleNode> negativeExamples = new ArrayList<>();
 
-            LOGGER.info("NEGATIVE SAMPLES: {}", neX);
+            for (final var dependencyClass : dependencyClasses) {
+                LOGGER.info("Iterating class {}", dependencyClass);
 
-            Mono<DiscoveryJobNode> updatedJob = discoveryJobRepository.setState(group.job().getId(), DiscoveryJobState.FINISHED)
-                .doOnNext(value -> LOGGER.info("Job {} has finished.", value.getId()));
+                final var clazz = negativeExampleService.createClass(jobResult.getId(), dependencyClass);
+                LOGGER.info("Class created: {}", clazz);
 
-            Mono<WorkflowNode> updatedWorkflow = workflowRepository.setState(group.workflow().getId(), WorkflowState.NEGATIVE_EXAMPLES)
-                .doOnNext(value -> LOGGER.info("Workflow uuid={} state was updated to {}", value.getId(), value.state));
+                final var builder = new NegativeExampleBuilder(dataset);
+                // TODO: TEMPORARY SETTING 5! THE UNDERLYING METHOD MUST BE BETTER IMPLEMENTED
+                final var negativeExample = builder.createNew(dependencyClass, 5);
 
-            Mono<WorkflowNode> updatedWorkflow2 = workflowRepository.setIteration(group.workflow().getId(), group.job().iteration)
-                .doOnNext(value -> LOGGER.info("Workflow uuid={} iteration was updated to {}", value.getId(), value.iteration));
+                final var example = negativeExampleService.createExample(clazz.getId(), negativeExample);
+                negativeExamples.add(example);
+            }
 
-            return Mono.when(updatedJob, updatedWorkflow, updatedWorkflow2);
-            // return Mono.empty();
-        }).subscribe(x -> LOGGER.info("(RE)DISCOVERY JOB FINISHED"));
+            LOGGER.info("NEGATIVE EXAMPLES: {}", negativeExamples);
+
+            DiscoveryJobNode updatedJob = discoveryJobRepository.setState(group.job().getId(), DiscoveryJobState.FINISHED);
+            LOGGER.info("Job {} has finished.", updatedJob.getId());
+
+            WorkflowNode updatedWorkflow = workflowRepository.setState(group.workflow().getId(), WorkflowState.NEGATIVE_EXAMPLES);
+            LOGGER.info("Workflow uuid={} state was updated to {}", updatedWorkflow.getId(), updatedWorkflow.state);
+
+            WorkflowNode updatedWorkflow2 = workflowRepository.setIteration(group.workflow().getId(), group.job().iteration);
+            LOGGER.info("Workflow uuid={} iteration was updated to {}", updatedWorkflow2.getId(), updatedWorkflow2.iteration);
+        }
+
+        LOGGER.info("(RE)DISCOVERY JOB FINISHED");
     }
 
     private List<FDInit> executeDiscoveryByApproach(Dataset dataset, ApproachName name) {

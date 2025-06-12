@@ -5,14 +5,14 @@ import java.io.Serializable;
 import de.uni.passau.server.model.WorkflowNode;
 import de.uni.passau.server.model.WorkflowNode.WorkflowState;
 
-public record Workflow(
+public record WorkflowResponse(
     String id,
     WorkflowState state,
     int iteration
 ) implements Serializable {
 
-    public static Workflow fromNodes(WorkflowNode workflowNode) {
-        return new Workflow(
+    public static WorkflowResponse fromNodes(WorkflowNode workflowNode) {
+        return new WorkflowResponse(
             workflowNode.getId(),
             workflowNode.state,
             workflowNode.iteration

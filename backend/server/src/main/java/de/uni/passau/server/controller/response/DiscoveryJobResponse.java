@@ -6,7 +6,7 @@ import java.util.Date;
 import de.uni.passau.server.model.DiscoveryJobNode;
 import de.uni.passau.server.model.DiscoveryJobNode.DiscoveryJobState;
 
-public record DiscoveryJob(
+public record DiscoveryJobResponse(
     String id,
     DiscoveryJobState state,
     String description,
@@ -14,8 +14,8 @@ public record DiscoveryJob(
     Date startedAt
 ) implements Serializable {
 
-    public static DiscoveryJob fromNodes(DiscoveryJobNode jobNode) {
-        return new DiscoveryJob(
+    public static DiscoveryJobResponse fromNodes(DiscoveryJobNode jobNode) {
+        return new DiscoveryJobResponse(
             jobNode.getId(),
             jobNode.state,
             jobNode.description,

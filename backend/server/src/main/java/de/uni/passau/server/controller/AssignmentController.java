@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -37,24 +36,25 @@ public class AssignmentController {
     private DatasetService datasetService;
 
     @GetMapping("/assignments/{assignmentId}")
-    public Mono<AssignmentResponse> getAssignment(@PathVariable String assignmentId, @RequestParam(required = false, defaultValue = "5") String limit) {
-        int numberLimit = DatasetController.tryParseLimit(limit);
-        return assignmentRepository.findGroupById(assignmentId).flatMap(assignmentGroup ->
-            assignmentRepository.getDatasetName(assignmentId)
-                .flatMap(name -> datasetService.getLoadedDatasetByName(name))
-                .map(dataset -> DatasetData.fromNodes(dataset, numberLimit))
-                .map(datasetData -> AssignmentResponse.fromNodes(assignmentGroup, datasetData))
-        );
+    public AssignmentResponse getAssignment(@PathVariable String assignmentId, @RequestParam(required = false, defaultValue = "5") String limit) {
+        final int numberLimit = DatasetController.tryParseLimit(limit);
+
+        final var assignmentGroup = assignmentRepository.findGroupById(assignmentId);
+        final var datasetName = assignmentRepository.getDatasetName(assignmentId);
+        final var dataset = datasetService.getLoadedDatasetByName(datasetName);
+        final var datasetData = DatasetData.fromNodes(dataset, numberLimit);
+
+        return AssignmentResponse.fromNodes(assignmentGroup, datasetData);
     }
 
     @PostMapping("/assignments/{assignmentId}/evaluate")
-    public Mono<AssignmentResponse> evaluateAssignment(
+    public AssignmentResponse evaluateAssignment(
         @PathVariable String assignmentId,
         @RequestBody ExampleDecision decision,
         @RequestParam(required = false, defaultValue = "5") String limit
     ) {
-        return assignmentService.evaluateAssignment(assignmentId, decision)
-            .then(getAssignment(assignmentId, limit));
+        assignmentService.evaluateAssignment(assignmentId, decision);
+        return getAssignment(assignmentId, limit);
     }
 
 }

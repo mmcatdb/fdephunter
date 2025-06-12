@@ -9,14 +9,14 @@ import de.uni.passau.server.repository.ClassRepository;
 import de.uni.passau.server.repository.JobResultRepository;
 import de.uni.passau.server.repository.NegativeExampleRepository;
 
+import java.util.List;
+
 import org.checkerframework.checker.nullness.qual.Nullable;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 @Service
 public class NegativeExampleService {
@@ -36,30 +36,32 @@ public class NegativeExampleService {
     @Autowired
     private ObjectMapper objectMapperJSON;
 
-    public Flux<NegativeExample> fetchUnassignedExamples(String workflowId) {
-        return negativeExampleRepository.findUnassignedExamplesForWorkflow(workflowId).map(group -> nodeToObject(group.example(), group.lastExampleId()));
+    public List<NegativeExample> fetchUnassignedExamples(String workflowId) {
+        return negativeExampleRepository.findUnassignedExamplesForWorkflow(workflowId).stream()
+            .map(group -> nodeToObject(group.example(), group.lastExampleId()))
+            .toList();
     }
 
-    public Mono<ClassNode> createClass(String resultId, Vertex dependencyClass) {
-        final var node = ClassNode.createNew(dependencyClass.__getLabel(), dependencyClass.__getWeight());
-        return classRepository.save(node).flatMap(classX ->
-            jobResultRepository.saveHasClass(resultId, classX.getId())
-                .then(Mono.just(classX))
-        );
+    public ClassNode createClass(String resultId, Vertex dependencyClass) {
+        var clazz = ClassNode.createNew(dependencyClass.__getLabel(), dependencyClass.__getWeight());
+
+        clazz = classRepository.save(clazz);
+        jobResultRepository.saveHasClass(resultId, clazz.getId());
+
+        return clazz;
     }
 
-    public Mono<NegativeExampleNode> createExample(String classId, NegativeExample negativeExample) {
-        final String payload = objectToPayload(negativeExample);
-        final var node = NegativeExampleNode.createNew(negativeExample.id, payload);
+    public NegativeExampleNode createExample(String classId, NegativeExample example) {
+        final String payload = objectToPayload(example);
+        var node = NegativeExampleNode.createNew(example.id, payload);
 
-        return negativeExampleRepository.save(node).flatMap(example ->
-            classRepository.saveHasNegativeExample(classId, example.getId())
-                .then(
-                    negativeExample.previousIterationId == null
-                        ? Mono.just(example)
-                        : negativeExampleRepository.saveHasPrevious(negativeExample.previousIterationId, example.getId())
-                )
-        );
+        node = negativeExampleRepository.save(node);
+        classRepository.saveHasNegativeExample(classId, node.getId());
+
+        if (example.previousIterationId != null)
+            node = negativeExampleRepository.saveHasPrevious(example.previousIterationId, node.getId());
+
+        return node;
     }
 
     private String objectToPayload(NegativeExample example) {
@@ -73,6 +75,12 @@ public class NegativeExampleService {
         }
     }
 
+    public List<NegativeExample> getAllUnresolvedExamples() {
+        return negativeExampleRepository.findAllUnresolved().stream()
+            .map(node -> nodeToObject(node, null))
+            .toList();
+    }
+
     private NegativeExample nodeToObject(NegativeExampleNode node, @Nullable String lastExampleId) {
         try {
             final var payload = objectMapperJSON.readValue(node.payload, NegativeExampleNode.Payload.class);
@@ -82,10 +90,6 @@ public class NegativeExampleService {
             LOGGER.error("Can't deserialize example node: " + node.getId() + "\nwith payload: " + node.payload, exception);
             throw new RuntimeException(exception);
         }
-    }
-
-    public Flux<NegativeExample> getAllUnresolvedExamples() {
-        return negativeExampleRepository.findAllUnresolved().map(node -> nodeToObject(node, null));
     }
 
 }

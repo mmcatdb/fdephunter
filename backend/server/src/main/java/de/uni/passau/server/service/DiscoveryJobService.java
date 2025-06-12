@@ -18,11 +18,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 @Service
 public class DiscoveryJobService {
@@ -44,7 +40,7 @@ public class DiscoveryJobService {
     @Autowired
     private ObjectMapper objectMapperJSON;
 
-    public Mono<JobResultNode> saveResult(String jobId, WeightedGraph result) {
+    public JobResultNode saveResult(String jobId, WeightedGraph result) {
         String payload;
         try {
             payload = objectMapperJSON.writeValueAsString(result);
@@ -54,54 +50,45 @@ public class DiscoveryJobService {
             LOGGER.error("FIX THIS ERROR - INVALID SERIALIZATION OF GRAPH");
         }
 
-        String resultId = jobId + "::" + System.currentTimeMillis();
+        final String resultId = jobId + "::" + System.currentTimeMillis();
 
-        return jobResultRepository.createResult(jobId, resultId, payload)
-                .onErrorResume(InvalidDataAccessResourceUsageException.class, e -> {
-                    // Handle the specific exception for invalid resource usage
-                    String errorMessage = "Invalid data access resource usage: " + e.getMessage();
-                    return Mono.error(new Exception(errorMessage));
-                })
-                .onErrorResume(DataAccessException.class, e -> {
-                    // Handle other data access exceptions
-                    String errorMessage = "Data access exception: " + e.getMessage();
-                    return Mono.error(new Exception(errorMessage));
-                });
+        return jobResultRepository.createResult(jobId, resultId, payload);
     }
 
-    public Mono<DiscoveryJobNode> createDiscoveryJob(String workflowId, ApproachName approachName, String description, String dataset) {
+    public DiscoveryJobNode createDiscoveryJob(String workflowId, ApproachName approachName, String description, String dataset) {
         return createJob(workflowId, approachName, description, dataset, WorkflowState.INITIAL_FD_DISCOVERY);
     }
 
-    public Mono<DiscoveryJobNode> createRediscoveryJob(String workflowId, ApproachName approachName, String description) {
+    public DiscoveryJobNode createRediscoveryJob(String workflowId, ApproachName approachName, String description) {
         return createJob(workflowId, approachName, description, null, WorkflowState.JOB_WAITING);
     }
 
     /** @param dataset Nullable only for rediscovery job. */
-    private Mono<DiscoveryJobNode> createJob(String workflowId, ApproachName approachName, String description, @Nullable String dataset, WorkflowState newState) {
-        return workflowRepository.findById(workflowId).flatMap(workflow -> {
-            final var node = DiscoveryJobNode.createNew(description, workflow.iteration + 1);
-            return discoveryJobRepository.save(node).flatMap(job ->
-                workflowRepository.saveHasJob(workflowId, job.getId())
-                    .then(workflowRepository.setState(workflowId, newState))
-                    .then(workflowRepository.saveHasAssignedDataset(workflowId, dataset))
-                    // .then(discoveryJobRepository.saveUtilizesApproach(job.getId(), approachName))
-                    // FIXME After flux is removed.
-                    .then(Mono.from(null))
-            );
-        });
+    private DiscoveryJobNode createJob(String workflowId, ApproachName approachName, String description, @Nullable String dataset, WorkflowState newState) {
+        var workflow = workflowRepository.findById(workflowId).get();
+        var job = DiscoveryJobNode.createNew(description, workflow.iteration + 1, approachName);
+
+        job = discoveryJobRepository.save(job);
+
+        workflowRepository.saveHasJob(workflowId, job.getId());
+        workflowRepository.saveHasAssignedDataset(workflowId, dataset);
+
+        workflow.state = newState;
+        workflow = workflowRepository.save(workflow);
+
+        return job;
     }
 
-    public Mono<Boolean> canCreateRediscoveryJob(String workflowId) {
-        return workflowRepository.findById(workflowId)
-            // If the workflow isn't in the correct state ...
-            .flatMap(workflow -> workflow.state == WorkflowState.NEGATIVE_EXAMPLES
-                ? classRepository.findAllGroupsByWorkflowId(workflowId).collectList().map(classes ->
-                    // If there still are unresolved classes ...
-                    classes.stream().allMatch(c -> c.lastExample() != null && c.lastExample().state == NegativeExampleState.ACCEPTED)
-                )
-                : Mono.just(false)
-            );
+    public boolean canCreateRediscoveryJob(String workflowId) {
+        final var workflow = workflowRepository.findById(workflowId).get();
+
+        // If the workflow isn't in the correct state ...
+        if (workflow.state != WorkflowState.NEGATIVE_EXAMPLES)
+            return false;
+
+        // If there still are unresolved classes ...
+        final var classGroups = classRepository.findAllGroupsByWorkflowId(workflowId);
+        return classGroups.stream().allMatch(c -> c.lastExample() != null && c.lastExample().state == NegativeExampleState.ACCEPTED);
     }
 
 }

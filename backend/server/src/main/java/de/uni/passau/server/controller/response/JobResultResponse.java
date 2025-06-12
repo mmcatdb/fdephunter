@@ -4,13 +4,13 @@ import java.io.Serializable;
 
 import de.uni.passau.server.model.JobResultNode;
 
-public record JobResult(
+public record JobResultResponse(
     String id,
     String payload
 ) implements Serializable {
 
-    public static JobResult fromNodes(JobResultNode resultNode) {
-        return new JobResult(
+    public static JobResultResponse fromNodes(JobResultNode resultNode) {
+        return new JobResultResponse(
             resultNode.getId(),
             resultNode.payload
         );

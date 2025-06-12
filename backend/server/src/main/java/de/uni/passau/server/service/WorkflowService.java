@@ -7,7 +7,6 @@ import de.uni.passau.server.repository.WorkflowRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 
 @Service
 public class WorkflowService {
@@ -18,14 +17,13 @@ public class WorkflowService {
     @Autowired
     private ClassRepository classRepository;
 
-    public Mono<WorkflowNode> createWorkflow() {
+    public WorkflowNode createWorkflow() {
         return workflowRepository.save(WorkflowNode.createNew());
     }
 
-    public Mono<Boolean> canCreateRediscoveryJob(String workflowId) {
-        return classRepository.findAllGroupsByWorkflowId(workflowId).collectList().map(classes ->
-            classes.stream().allMatch(c -> c.lastExample() != null && c.lastExample().state == NegativeExampleState.ACCEPTED)
-        );
+    public boolean canCreateRediscoveryJob(String workflowId) {
+        return classRepository.findAllGroupsByWorkflowId(workflowId).stream()
+            .allMatch(c -> c.lastExample() != null && c.lastExample().state == NegativeExampleState.ACCEPTED);
     }
 
 }

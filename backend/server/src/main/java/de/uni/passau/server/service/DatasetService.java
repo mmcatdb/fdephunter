@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 
 @Service
 public class DatasetService {
@@ -30,10 +29,10 @@ public class DatasetService {
             : createCachedDataset(datasetNode);
     }
 
-    public Mono<Dataset> getLoadedDatasetByName(String name) {
+    public Dataset getLoadedDatasetByName(String name) {
         return CACHE.containsKey(name)
-            ? Mono.just(getCachedDataset(name))
-            : datasetRepository.getDatasetByName(name).map(this::createCachedDataset);
+            ? getCachedDataset(name)
+            : createCachedDataset(datasetRepository.getDatasetByName(name));
     }
 
     private Dataset getCachedDataset(String name) {

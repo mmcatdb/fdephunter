@@ -4,11 +4,9 @@ import de.uni.passau.core.example.ExampleDecision;
 import de.uni.passau.server.model.AssignmentNode;
 import de.uni.passau.server.model.AssignmentNode.AssignmentState;
 import de.uni.passau.server.repository.AssignmentRepository;
-import de.uni.passau.server.repository.NegativeExampleRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 
 @Service
 public class AssignmentService {
@@ -16,31 +14,23 @@ public class AssignmentService {
     @Autowired
     private AssignmentRepository assignmentRepository;
 
-    @Autowired
-    private NegativeExampleRepository negativeExampleRepository;
+    public AssignmentNode createAssignment(String exampleId) {
+        var assignment = AssignmentNode.createNew();
 
-    public Mono<AssignmentNode> createAssignment(String exampleId) {
-        final var newAssignment = AssignmentNode.createNew();
+        assignment = assignmentRepository.save(assignment);
 
-        return assignmentRepository.save(newAssignment).flatMap(assignment ->
-            assignmentRepository.saveBelongsToExample(assignment.getId(), exampleId)
-                .switchIfEmpty(Mono.error(new RuntimeException("BELONGS_TO_EXAMPLE")))
-                .then(Mono.just(assignment))
-        );
+        assignmentRepository.saveBelongsToExample(assignment.getId(), exampleId);
+
+        return assignment;
     }
 
-    public Mono<Void> evaluateAssignment(String assignmentId, ExampleDecision decisionObject) {
-        // FIXME After flux is removed.
-        // final var assignment = assignmentRepository.findById(assignmentId);
-        // assignment.decision = decisionObject;
-        // assignment.state = toState(decisionObject.status());
-        // assignmentRepository.save(assignment)
+    public void evaluateAssignment(String assignmentId, ExampleDecision decisionObject) {
+        var assignment = assignmentRepository.findById(assignmentId).get();
 
-        final AssignmentState state = toState(decisionObject.status());
+        assignment.decision = decisionObject;
+        assignment.state = toState(decisionObject.status());
 
-        return assignmentRepository.evaluateAssignment(assignmentId, state, "TODO")
-            .then(negativeExampleRepository.updateState(assignmentId))
-            .then();
+        assignment = assignmentRepository.save(assignment);
     }
 
     private AssignmentState toState(ExampleDecision.DecisionStatus status) {

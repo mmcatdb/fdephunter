@@ -2,8 +2,8 @@ package de.uni.passau.server.controller;
 
 import de.uni.passau.server.controller.request.DiscoveryJobRequest;
 import de.uni.passau.server.controller.request.RediscoveryJobRequest;
-import de.uni.passau.server.controller.response.DiscoveryJob;
-import de.uni.passau.server.controller.response.Workflow;
+import de.uni.passau.server.controller.response.DiscoveryJobResponse;
+import de.uni.passau.server.controller.response.WorkflowResponse;
 import de.uni.passau.server.model.DiscoveryJobNode;
 import de.uni.passau.server.model.JobResultNode;
 import de.uni.passau.server.model.WorkflowNode;
@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -48,51 +47,53 @@ public class WorkflowController {
     private DiscoveryJobService discoveryJobService;
 
     @GetMapping("/workflows/{workflowId}")
-    public Mono<Workflow> getWorkflowById(@PathVariable String workflowId) {
-        return workflowRepository.findById(workflowId).map(Workflow::fromNodes);
+    public WorkflowResponse getWorkflowById(@PathVariable String workflowId) {
+        final var workflow = workflowRepository.findById(workflowId).get();
+        return WorkflowResponse.fromNodes(workflow);
     }
 
     @PostMapping("/workflows/create")
-    public Mono<Workflow> createWorkflow() {
-        return workflowService.createWorkflow().map(Workflow::fromNodes);
+    public WorkflowResponse createWorkflow() {
+        final var workflow = workflowService.createWorkflow();
+        return WorkflowResponse.fromNodes(workflow);
     }
 
     private record CreateJobResponse(
-        Workflow workflow,
-        DiscoveryJob job
+        WorkflowResponse workflow,
+        DiscoveryJobResponse job
     ) {
         static CreateJobResponse fromNodes(WorkflowNode workflowNode, DiscoveryJobNode jobNode) {
-            return new CreateJobResponse(Workflow.fromNodes(workflowNode), DiscoveryJob.fromNodes(jobNode));
+            return new CreateJobResponse(WorkflowResponse.fromNodes(workflowNode), DiscoveryJobResponse.fromNodes(jobNode));
         }
     }
 
     @PostMapping("/workflows/{workflowId}/execute-discovery")
-    public Mono<CreateJobResponse> createDiscoveryJob(@RequestBody DiscoveryJobRequest init, @PathVariable String workflowId) {
-        return discoveryJobService.createDiscoveryJob(workflowId, init.approach(), init.description(), init.dataset())
-            .flatMap(jobNode ->
-                workflowRepository.findById(workflowId).map(workflowNode -> CreateJobResponse.fromNodes(workflowNode, jobNode))
-            );
+    public CreateJobResponse createDiscoveryJob(@RequestBody DiscoveryJobRequest init, @PathVariable String workflowId) {
+        final var job = discoveryJobService.createDiscoveryJob(workflowId, init.approach(), init.description(), init.dataset());
+        final var workflow = workflowRepository.findById(workflowId).get();
+
+        return CreateJobResponse.fromNodes(workflow, job);
     }
 
     @PostMapping("/workflows/{workflowId}/execute-rediscovery")
-    public Mono<CreateJobResponse> createRediscoveryJob(@RequestBody RediscoveryJobRequest init, @PathVariable String workflowId) {
-        return discoveryJobService.canCreateRediscoveryJob(workflowId).filter(value -> value)
-            .switchIfEmpty(Mono.error(new RuntimeException("cannot create new rediscovery job")))
-            .then(
-                discoveryJobService.createRediscoveryJob(workflowId, init.approach(), init.description())
-                    .flatMap(jobNode ->
-                        workflowRepository.findById(workflowId).map(workflowNode -> CreateJobResponse.fromNodes(workflowNode, jobNode))
-                    )
-            );
+    public CreateJobResponse createRediscoveryJob(@RequestBody RediscoveryJobRequest init, @PathVariable String workflowId) {
+        if (!discoveryJobService.canCreateRediscoveryJob(workflowId))
+            throw new RuntimeException("cannot create new rediscovery job");
+
+        final var job = discoveryJobService.createRediscoveryJob(workflowId, init.approach(), init.description());
+        final var workflow = workflowRepository.findById(workflowId).get();
+
+        return CreateJobResponse.fromNodes(workflow, job);
     }
 
     @GetMapping("/workflows/{workflowId}/last-discovery")
-    public Mono<DiscoveryJob> getLastJobByWorkflowId(@PathVariable String workflowId) {
-        return discoveryJobRepository.getLastDiscoveryByWorkflowId(workflowId).map(DiscoveryJob::fromNodes);
+    public DiscoveryJobResponse getLastJobByWorkflowId(@PathVariable String workflowId) {
+        final var job = discoveryJobRepository.getLastDiscoveryByWorkflowId(workflowId);
+        return DiscoveryJobResponse.fromNodes(job);
     }
 
     @GetMapping("/workflows/{workflowId}/last-result")
-    public Mono<JobResultNode> getLastJobResult(@PathVariable String workflowId) {
+    public JobResultNode getLastJobResult(@PathVariable String workflowId) {
         return jobResultRepository.getLastResultByWorkflowId(workflowId);
     }
 
