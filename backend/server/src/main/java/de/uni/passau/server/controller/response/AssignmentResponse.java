@@ -2,7 +2,6 @@ package de.uni.passau.server.controller.response;
 
 import de.uni.passau.core.example.ExampleDecision;
 import de.uni.passau.core.example.ExampleRelation;
-import de.uni.passau.server.model.AssignmentNode;
 import de.uni.passau.server.model.AssignmentNode.AssignmentState;
 import de.uni.passau.server.repository.AssignmentRepository.AssignmentNodeGroup;
 
@@ -29,8 +28,11 @@ public record AssignmentResponse(
     //     );
     // }
 
-    // public static AssignmentResponse fromNodes(AssignmentNodeGroup group, DatasetData dataset) {
-    //     return AssignmentResponse.fromNodes(group.assignment(), group.example(), group.result(), dataset);
-    // }
+    /** @deprecated */
+    public static AssignmentResponse fromNodes(AssignmentNodeGroup group, DatasetData dataset) {
+        // return AssignmentResponse.fromNodes(group.assignment(), group.example(), group.result(), dataset);
+        // FIXME
+        return null;
+    }
 
 }

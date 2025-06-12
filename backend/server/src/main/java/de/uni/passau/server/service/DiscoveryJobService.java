@@ -4,16 +4,12 @@ import de.uni.passau.core.approach.AbstractApproach.ApproachName;
 import de.uni.passau.core.graph.WeightedGraph;
 import de.uni.passau.server.model.DiscoveryJobNode;
 import de.uni.passau.server.model.JobResultNode;
-import de.uni.passau.server.model.DiscoveryJobNode.DiscoveryJobState;
 import de.uni.passau.server.model.NegativeExampleNode.NegativeExampleState;
 import de.uni.passau.server.model.WorkflowNode.WorkflowState;
 import de.uni.passau.server.repository.ClassRepository;
 import de.uni.passau.server.repository.DiscoveryJobRepository;
-import de.uni.passau.server.repository.DiscoveryJobRepository.DiscoveryJobNodeGroup;
 import de.uni.passau.server.repository.JobResultRepository;
 import de.uni.passau.server.repository.WorkflowRepository;
-
-import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,14 +44,6 @@ public class DiscoveryJobService {
     @Autowired
     private ObjectMapper objectMapperJSON;
 
-    public Mono<DiscoveryJobNode> getJobById(String jobId) {
-        return discoveryJobRepository.getJobById(jobId);
-    }
-
-    public Flux<DiscoveryJobNodeGroup> findAllJobGroupsByState(DiscoveryJobState state) {
-        return discoveryJobRepository.findAllGroupsByState(state);
-    }
-
     public Mono<JobResultNode> saveResult(String jobId, WeightedGraph result) {
         String payload;
         try {
@@ -81,17 +69,12 @@ public class DiscoveryJobService {
                 });
     }
 
-    public Mono<JobResultNode> getResult(String workflowId, int iteration) {
-        return jobResultRepository.findByWorkflowIdAndIteration(workflowId, iteration);
-        // throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public Mono<DiscoveryJobNode> createDiscoveryJob(String workflowId, ApproachName approachName, String description, String dataset) {
+        return createJob(workflowId, approachName, description, dataset, WorkflowState.INITIAL_FD_DISCOVERY);
     }
 
-    public Mono<DiscoveryJobNode> setState(DiscoveryJobNode job, DiscoveryJobState discoveryJobState) {
-        return discoveryJobRepository.setState(job.getId(), discoveryJobState);
-    }
-
-    public Mono<DiscoveryJobNode> getLastDiscoveryByWorkflowId(String workflowId) {
-        return discoveryJobRepository.getLastDiscoveryByWorkflowId(workflowId);
+    public Mono<DiscoveryJobNode> createRediscoveryJob(String workflowId, ApproachName approachName, String description) {
+        return createJob(workflowId, approachName, description, null, WorkflowState.JOB_WAITING);
     }
 
     /** @param dataset Nullable only for rediscovery job. */
@@ -103,16 +86,10 @@ public class DiscoveryJobService {
                     .then(workflowRepository.setState(workflowId, newState))
                     .then(workflowRepository.saveHasAssignedDataset(workflowId, dataset))
                     // .then(discoveryJobRepository.saveUtilizesApproach(job.getId(), approachName))
+                    // FIXME After flux is removed.
+                    .then(Mono.from(null))
             );
         });
-    }
-
-    public Mono<DiscoveryJobNode> createDiscoveryJob(String workflowId, ApproachName approachName, String description, String dataset) {
-        return createJob(workflowId, approachName, description, dataset, WorkflowState.INITIAL_FD_DISCOVERY);
-    }
-
-    public Mono<DiscoveryJobNode> createRediscoveryJob(String workflowId, ApproachName approachName, String description) {
-        return createJob(workflowId, approachName, description, null, WorkflowState.JOB_WAITING);
     }
 
     public Mono<Boolean> canCreateRediscoveryJob(String workflowId) {

@@ -3,11 +3,9 @@ package de.uni.passau.server.controller;
 import de.uni.passau.core.example.ExampleDecision;
 import de.uni.passau.server.controller.response.AssignmentResponse;
 import de.uni.passau.server.controller.response.DatasetData;
+import de.uni.passau.server.repository.AssignmentRepository;
 import de.uni.passau.server.service.AssignmentService;
 import de.uni.passau.server.service.DatasetService;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +28,9 @@ public class AssignmentController {
     private static final Logger LOGGER = LoggerFactory.getLogger(AssignmentController.class);
 
     @Autowired
+    private AssignmentRepository assignmentRepository;
+
+    @Autowired
     private AssignmentService assignmentService;
 
     @Autowired
@@ -38,8 +39,8 @@ public class AssignmentController {
     @GetMapping("/assignments/{assignmentId}")
     public Mono<AssignmentResponse> getAssignment(@PathVariable String assignmentId, @RequestParam(required = false, defaultValue = "5") String limit) {
         int numberLimit = DatasetController.tryParseLimit(limit);
-        return assignmentService.findGroupById(assignmentId).flatMap(assignmentGroup ->
-            assignmentService.getDatasetName(assignmentId)
+        return assignmentRepository.findGroupById(assignmentId).flatMap(assignmentGroup ->
+            assignmentRepository.getDatasetName(assignmentId)
                 .flatMap(name -> datasetService.getLoadedDatasetByName(name))
                 .map(dataset -> DatasetData.fromNodes(dataset, numberLimit))
                 .map(datasetData -> AssignmentResponse.fromNodes(assignmentGroup, datasetData))

@@ -2,8 +2,8 @@ package de.uni.passau.server.controller;
 
 import de.uni.passau.server.model.DatasetNode;
 import de.uni.passau.server.model.WorkflowNode;
-import de.uni.passau.server.service.DatasetService;
-import de.uni.passau.server.service.WorkflowService;
+import de.uni.passau.server.repository.DatasetRepository;
+import de.uni.passau.server.repository.WorkflowRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,10 +25,10 @@ public class DemoController {
     private static final Logger LOGGER = LoggerFactory.getLogger(DemoController.class);
 
     @Autowired
-    private WorkflowService workflowService;
+    private WorkflowRepository workflowRepository;
 
     @Autowired
-    private DatasetService datasetService;
+    private DatasetRepository datasetRepository;
 
     @PostMapping("/demo/initialize")
     public Mono<String> initialize() {
@@ -40,7 +40,7 @@ public class DemoController {
         var workflow = WorkflowNode.createNew();
 
         // remove all data from database
-        workflowService.purge()
+        workflowRepository.purgeDatabase()
             // initialize datasets
             .then(Mono.defer(() -> {
                 LOGGER.info("Initializing datasets.");
@@ -64,13 +64,13 @@ public class DemoController {
                 datasets.add(new DatasetNode("uniprot", DatasetNode.DatasetType.CSV, "data/uniprot.csv", "uniprot", null, null, null, null));
                 datasets.add(new DatasetNode("lineitem", DatasetNode.DatasetType.CSV, "data/lineitem.csv", "lineitem", null, null, null, null));
 
-                Flux<DatasetNode> allDatasetNodes = datasetService.saveAll(datasets);
+                Flux<DatasetNode> allDatasetNodes = datasetRepository.saveAll(datasets);
                 return Mono.when(allDatasetNodes);
             }))
             // initialize workflow
             .then(Mono.defer(() -> {
                 LOGGER.info("Initializing workflow.");
-                return workflowService.saveWorkflow(workflow);
+                return workflowRepository.save(workflow);
             }))
             .subscribe();
         return Mono.just("{\"message\" : \"ok\"}");

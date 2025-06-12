@@ -8,6 +8,8 @@ import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Property;
 import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
 
+import de.uni.passau.core.example.ExampleDecision;
+
 @Node("Assignment")
 public class AssignmentNode {
 
@@ -25,8 +27,9 @@ public class AssignmentNode {
         return id;
     }
 
+    // FIXME Probably some value conversion is needed here.
     @Property
-    public String decision;
+    public ExampleDecision decision;
 
     @Property
     public AssignmentState state;

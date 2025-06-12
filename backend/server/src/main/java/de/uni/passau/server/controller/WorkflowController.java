@@ -7,6 +7,9 @@ import de.uni.passau.server.controller.response.Workflow;
 import de.uni.passau.server.model.DiscoveryJobNode;
 import de.uni.passau.server.model.JobResultNode;
 import de.uni.passau.server.model.WorkflowNode;
+import de.uni.passau.server.repository.DiscoveryJobRepository;
+import de.uni.passau.server.repository.JobResultRepository;
+import de.uni.passau.server.repository.WorkflowRepository;
 import de.uni.passau.server.service.DiscoveryJobService;
 import de.uni.passau.server.service.WorkflowService;
 
@@ -30,14 +33,23 @@ public class WorkflowController {
     private static final Logger LOGGER = LoggerFactory.getLogger(WorkflowController.class);
 
     @Autowired
+    private WorkflowRepository workflowRepository;
+
+    @Autowired
     private WorkflowService workflowService;
+
+    @Autowired
+    private JobResultRepository jobResultRepository;
+
+    @Autowired
+    private DiscoveryJobRepository discoveryJobRepository;
 
     @Autowired
     private DiscoveryJobService discoveryJobService;
 
     @GetMapping("/workflows/{workflowId}")
     public Mono<Workflow> getWorkflowById(@PathVariable String workflowId) {
-        return workflowService.getWorkflowById(workflowId).map(Workflow::fromNodes);
+        return workflowRepository.findById(workflowId).map(Workflow::fromNodes);
     }
 
     @PostMapping("/workflows/create")
@@ -58,7 +70,7 @@ public class WorkflowController {
     public Mono<CreateJobResponse> createDiscoveryJob(@RequestBody DiscoveryJobRequest init, @PathVariable String workflowId) {
         return discoveryJobService.createDiscoveryJob(workflowId, init.approach(), init.description(), init.dataset())
             .flatMap(jobNode ->
-                workflowService.getWorkflowById(workflowId).map(workflowNode -> CreateJobResponse.fromNodes(workflowNode, jobNode))
+                workflowRepository.findById(workflowId).map(workflowNode -> CreateJobResponse.fromNodes(workflowNode, jobNode))
             );
     }
 
@@ -69,20 +81,19 @@ public class WorkflowController {
             .then(
                 discoveryJobService.createRediscoveryJob(workflowId, init.approach(), init.description())
                     .flatMap(jobNode ->
-                        workflowService.getWorkflowById(workflowId).map(workflowNode -> CreateJobResponse.fromNodes(workflowNode, jobNode))
+                        workflowRepository.findById(workflowId).map(workflowNode -> CreateJobResponse.fromNodes(workflowNode, jobNode))
                     )
             );
     }
 
     @GetMapping("/workflows/{workflowId}/last-discovery")
     public Mono<DiscoveryJob> getLastJobByWorkflowId(@PathVariable String workflowId) {
-        // informace o jobu, nevracej vysledky (uzivatel musi potvrdit)
-        return discoveryJobService.getLastDiscoveryByWorkflowId(workflowId).map(DiscoveryJob::fromNodes);
+        return discoveryJobRepository.getLastDiscoveryByWorkflowId(workflowId).map(DiscoveryJob::fromNodes);
     }
 
     @GetMapping("/workflows/{workflowId}/last-result")
     public Mono<JobResultNode> getLastJobResult(@PathVariable String workflowId) {
-        return workflowService.getLastResultByWorkflowId(workflowId);
+        return jobResultRepository.getLastResultByWorkflowId(workflowId);
     }
 
 }

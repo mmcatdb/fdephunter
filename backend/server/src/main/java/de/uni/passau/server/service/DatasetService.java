@@ -5,7 +5,6 @@ import de.uni.passau.core.dataset.csv.CSVDataset;
 import de.uni.passau.server.model.DatasetNode;
 import de.uni.passau.server.repository.DatasetRepository;
 
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -13,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -26,26 +24,6 @@ public class DatasetService {
     @Autowired
     private DatasetRepository datasetRepository;
 
-    public Flux<DatasetNode> getAllDatasets() {
-        return datasetRepository.findAll();
-    }
-
-    public Mono<Void> removeWorkflow(Long id) {
-        return datasetRepository.deleteById(id);
-    }
-
-    public Mono<DatasetNode> save(DatasetNode dataset) {
-        return datasetRepository.save(dataset);
-    }
-
-    public Flux<DatasetNode> saveAll(List<DatasetNode> datasets) {
-        return datasetRepository.saveAll(datasets);
-    }
-
-    public Mono<DatasetNode> getDatasetByName(String name) {
-        return datasetRepository.getDatasetByName(name);
-    }
-
     public Dataset getLoadedDataset(DatasetNode datasetNode) {
         return CACHE.containsKey(datasetNode.name)
             ? getCachedDataset(datasetNode.name)
@@ -55,7 +33,7 @@ public class DatasetService {
     public Mono<Dataset> getLoadedDatasetByName(String name) {
         return CACHE.containsKey(name)
             ? Mono.just(getCachedDataset(name))
-            : getDatasetByName(name).map(this::createCachedDataset);
+            : datasetRepository.getDatasetByName(name).map(this::createCachedDataset);
     }
 
     private Dataset getCachedDataset(String name) {

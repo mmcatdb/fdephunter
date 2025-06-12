@@ -17,11 +17,14 @@ import de.uni.passau.server.model.AssignmentNode.AssignmentState;
 import de.uni.passau.server.model.DiscoveryJobNode.DiscoveryJobState;
 import de.uni.passau.server.model.NegativeExampleNode.NegativeExampleState;
 import de.uni.passau.server.model.WorkflowNode.WorkflowState;
+import de.uni.passau.server.repository.AssignmentRepository;
+import de.uni.passau.server.repository.DiscoveryJobRepository;
+import de.uni.passau.server.repository.NegativeExampleRepository;
+import de.uni.passau.server.repository.WorkflowRepository;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,7 +36,9 @@ public class ScheduledJobsService {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ScheduledJobsService.class);
 
-    // private AtomicBoolean LOCKED = new AtomicBoolean(Boolean.FALSE);
+    @Autowired
+    private DiscoveryJobRepository discoveryJobRepository;
+
     @Autowired
     private DiscoveryJobService discoveryJobService;
 
@@ -41,20 +46,23 @@ public class ScheduledJobsService {
     private DatasetService datasetService;
 
     @Autowired
+    private NegativeExampleRepository negativeExampleRepository;
+
+    @Autowired
     private NegativeExampleService negativeExampleService;
 
     @Autowired
-    private WorkflowService workflowService;
+    private WorkflowRepository workflowRepository;
 
     @Autowired
-    private AssignmentService assignmentService;
+    private AssignmentRepository assignmentRepository;
 
     public void executeUpdateNegativeExampleJobs() {
         LOGGER.info("EXECUTING NEGATIVE EXAMPLE JOB");
 
         negativeExampleService.getAllUnresolvedExamples().flatMap(example ->
             // fetch all assignments that belong to the same
-            assignmentService.findAllBelongsToExample(example.id).collectList().flatMap(assignments -> {
+            assignmentRepository.findAllBelongsToExample(example.id).collectList().flatMap(assignments -> {
                 if (
                     // there is no assignment to negative example -> exit
                     assignments.isEmpty()
@@ -73,33 +81,31 @@ public class ScheduledJobsService {
                 int quorum = (int) Math.ceil(assignments.size() * 0.75);    // quorum >= 75%
                 if (statusesCounter[AssignmentState.ACCEPTED.ordinal()] >= quorum) {
                     LOGGER.info("ACCEPTED");
-                    return negativeExampleService.changeExampleState(example.id, NegativeExampleState.ACCEPTED);
+                    return negativeExampleRepository.saveState(example.id, NegativeExampleState.ACCEPTED);
                 }
 
                 final var decisions = new ArrayList<ExampleDecision>();
-                try {
                     // FIXME There should be only one assignment (the crowdsourcing was dithed). So there is no need to iterate over them.
-                    for (var assignment : assignments)
-                        decisions.add(ExampleDecision.jsonReader.readValue(assignment.decision));
-                }
-                catch (JsonProcessingException ex) {
-                    LOGGER.error("EXCEPTION THROWN TODO", ex);
-                    return Mono.empty();    // ERROR: BUG
-                }
+                for (var assignment : assignments)
+                    decisions.add(assignment.decision);
 
                 // final var updatedExample = NEGATIVE_EXAMPLE_UPDATER.updateNegativeExample(example, decisions.get(0));
 
                 // return classRepository
                     // .findHasNegativeExample(example.id)
                     // .flatMap(classNode -> negativeExampleService.createExample(classNode.getId(), updatedExample));
+
+
+                // FIXME After flux is removed.
+                return Mono.from(null);
             })
         ).subscribe(x -> LOGGER.info("NEGATIVE EXAMPLE JOB FINISHED"));
     }
 
     public void executeDiscoveryJobs() {
         LOGGER.info("EXECUTING (RE)DISCOVERY JOB");
-        discoveryJobService.findAllJobGroupsByState(DiscoveryJobState.WAITING).flatMap(group -> {
-            Mono<List<NegativeExampleNode>> negativeExamplesForResult = discoveryJobService.setState(group.job(), DiscoveryJobState.RUNNING).flatMap(value -> {
+        discoveryJobRepository.findAllGroupsByState(DiscoveryJobState.WAITING).flatMap(group -> {
+            Mono<List<NegativeExampleNode>> negativeExamplesForResult = discoveryJobRepository.setState(group.job().getId(), DiscoveryJobState.RUNNING).flatMap(value -> {
 
                 LOGGER.info("Functional dependency discovery job {} has started.", value.getId());
                 final var dataset = datasetService.getLoadedDataset(group.dataset());
@@ -137,13 +143,13 @@ public class ScheduledJobsService {
 
             LOGGER.info("NEGATIVE SAMPLES: {}", neX);
 
-            Mono<DiscoveryJobNode> updatedJob = discoveryJobService.setState(group.job(), DiscoveryJobState.FINISHED)
+            Mono<DiscoveryJobNode> updatedJob = discoveryJobRepository.setState(group.job().getId(), DiscoveryJobState.FINISHED)
                 .doOnNext(value -> LOGGER.info("Job {} has finished.", value.getId()));
 
-            Mono<WorkflowNode> updatedWorkflow = workflowService.setState(group.workflow().getId(), WorkflowState.NEGATIVE_EXAMPLES)
+            Mono<WorkflowNode> updatedWorkflow = workflowRepository.setState(group.workflow().getId(), WorkflowState.NEGATIVE_EXAMPLES)
                 .doOnNext(value -> LOGGER.info("Workflow uuid={} state was updated to {}", value.getId(), value.state));
 
-            Mono<WorkflowNode> updatedWorkflow2 = workflowService.setIteration(group.workflow().getId(), group.job().iteration)
+            Mono<WorkflowNode> updatedWorkflow2 = workflowRepository.setIteration(group.workflow().getId(), group.job().iteration)
                 .doOnNext(value -> LOGGER.info("Workflow uuid={} iteration was updated to {}", value.getId(), value.iteration));
 
             return Mono.when(updatedJob, updatedWorkflow, updatedWorkflow2);

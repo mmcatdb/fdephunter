@@ -2,8 +2,9 @@ package de.uni.passau.server.controller;
 
 import de.uni.passau.server.controller.response.DatasetData;
 import de.uni.passau.server.model.DatasetNode;
+import de.uni.passau.server.repository.DatasetRepository;
+import de.uni.passau.server.repository.WorkflowRepository;
 import de.uni.passau.server.service.DatasetService;
-import de.uni.passau.server.service.WorkflowService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,21 +26,24 @@ public class DatasetController {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatasetController.class);
 
     @Autowired
+    private DatasetRepository datasetRepository;
+
+    @Autowired
     private DatasetService datasetService;
 
     @Autowired
-    private WorkflowService workflowService;
+    private WorkflowRepository workflowRepository;
 
     @GetMapping("/datasets")
     public Flux<DatasetNode> getAllDatasets() {
-        return datasetService.getAllDatasets();
+        return datasetRepository.findAll();
     }
 
     @GetMapping("/datasets/workflows/{workflowId}/data")
     public Mono<DatasetData> getDataForWorkflow(@PathVariable String workflowId, @RequestParam(required = false, defaultValue = "10") String limit) {
         int numberLimit = tryParseLimit(limit);
 
-        return workflowService.getDatasetName(workflowId)
+        return workflowRepository.getDatasetName(workflowId)
             .flatMap(name -> datasetService.getLoadedDatasetByName(name))
             .map(dataset -> new DatasetData(dataset.getHeader(), dataset.getRows().stream().limit(numberLimit).toList()));
     }

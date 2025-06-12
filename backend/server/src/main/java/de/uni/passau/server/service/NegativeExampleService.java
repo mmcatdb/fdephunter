@@ -4,7 +4,6 @@ import de.uni.passau.core.example.NegativeExample;
 import de.uni.passau.core.graph.Vertex;
 import de.uni.passau.server.model.ClassNode;
 import de.uni.passau.server.model.NegativeExampleNode;
-import de.uni.passau.server.model.NegativeExampleNode.NegativeExampleState;
 import de.uni.passau.server.model.NegativeExampleNode.Payload;
 import de.uni.passau.server.repository.ClassRepository;
 import de.uni.passau.server.repository.JobResultRepository;
@@ -87,10 +86,6 @@ public class NegativeExampleService {
 
     public Flux<NegativeExample> getAllUnresolvedExamples() {
         return negativeExampleRepository.findAllUnresolved().map(node -> nodeToObject(node, null));
-    }
-
-    public Mono<NegativeExampleNode> changeExampleState(String exampleId, NegativeExampleState negativeExampleState) {
-        return negativeExampleRepository.saveState(exampleId, negativeExampleState);
     }
 
 }
