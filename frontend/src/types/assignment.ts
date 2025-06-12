@@ -50,7 +50,7 @@ export type AssignmentInit = {
 export type ExampleDecision = {
     status: DecisionStatus;
     columns: {
-        /** If undefined, the column isn't a part of the maximal set (so it should be ignored). */
+        /** If undefined, the column isn't a part of the max set (so it should be ignored). */
         status: DecisionColumnStatus | undefined;
         reasons: string[];
     }[];

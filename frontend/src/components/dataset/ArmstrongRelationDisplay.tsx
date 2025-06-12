@@ -77,7 +77,7 @@ export function ArmstrongRelationDisplay({ relation, assignRow, assignments }: A
 
                 {!state.isMaxSetCollapsed && (
                     <span className='font-semibold text-primary'>
-                        Maximal set
+                        Max set
                     </span>
                 )}
             </div>
@@ -251,7 +251,7 @@ export function ExampleRelationDisplay({ relation: { columns, referenceRow, exam
             {exampleRow.values.map((value, colIndex) => {
                 const status = decision.columns[colIndex].status;
 
-                // If the selection function isn't provided, the cells aren't interactive. Also, if the status isn't defined, the cell is in the maximal set.
+                // If the selection function isn't provided, the cells aren't interactive. Also, if the status isn't defined, the cell is in the max set.
                 if (!setSelectedColIndex || !status) {
                     return (
                         <div key={colIndex} className={getCellClass(0, colIndex, !status)}>

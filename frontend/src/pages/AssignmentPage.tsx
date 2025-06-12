@@ -10,7 +10,7 @@ import { Page, Sidebar, TopbarContent } from '@/components/layout';
 import { mockAPI } from '@/utils/api/mockAPI';
 import { WorkflowProgressDisplay } from '@/components/worklow/WorkflowProgressDisplay';
 import { Workflow } from '@/types/workflow';
-import { type LatticeForClass } from '@/types/armstrongRelation';
+import { type McLattice } from '@/types/armstrongRelation';
 // import { API } from '@/utils/api';
 
 export function AssignmentPage() {
@@ -26,9 +26,16 @@ export function AssignmentPage() {
             <div className='space-x-4'>
                 <AssignmentTabs assignmentId={assignment.id} />
 
+                {/* FIXME */}
                 <Button as={Link} to={routes.workflow.dashboard.root.resolve({ workflowId: assignment.workflowId })}>
                     Back to Workflow
                 </Button>
+
+                <Link to={routes.workflow.dashboard.root.resolve({ workflowId: assignment.workflowId })}>
+                    <Button>
+                        Back to Workflow
+                    </Button>
+                </Link>
             </div>
         </TopbarContent>
 
@@ -44,7 +51,7 @@ type AssignmentLoaded = {
     assignment: Assignment;
     /** @deprecated Workflow shouldn't be available from the assignment. */
     workflow: Workflow;
-    lattices: LatticeForClass[];
+    lattices: McLattice[];
 };
 
 AssignmentPage.loader = async ({ params: { assignmentId } }: { params: Params<'assignmentId'> }): Promise<AssignmentLoaded> => {

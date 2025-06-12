@@ -7,12 +7,14 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Represents the user decision for an example.
+ * The whole class is immutable - only the user can evaluate / re-evaluate the example.
  */
-public class ExampleDecision implements Serializable {
-
-    public DecisionStatus status;
+public record ExampleDecision(
+    DecisionStatus status,
     /** The columns are in the same order as in the original relation. */
-    public DecisionColumn[] columns;
+    DecisionColumn[] columns
+) implements Serializable {
+
 
     public enum DecisionStatus {
         ACCEPTED,
@@ -21,11 +23,11 @@ public class ExampleDecision implements Serializable {
     }
 
     public record DecisionColumn(
-        /** If null, the column isn't a part of the maximal set (so it should be ignored). */
+        /** If null, the column isn't a part of the max set (so it should be ignored). */
         @Nullable DecisionColumnStatus status,
         /** User provided strings. Probably not important right now. */
         List<String> reasons
-    ) {}
+    ) implements Serializable {}
 
     public enum DecisionColumnStatus {
         UNDECIDED,

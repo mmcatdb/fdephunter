@@ -5,7 +5,7 @@ import { type ExampleDecision, DecisionColumnStatus } from '@/types/assignment';
 export type DecisionColumn = {
     colIndex: number;
     name: string;
-    status?: DecisionColumnStatus;
+    status: DecisionColumnStatus | undefined;
     reasons: string[];
 };
 
@@ -56,13 +56,13 @@ function createDefaultDecision(relation: ExampleRelation, inputDecision: Example
         ? relation.columns.map((name, colIndex) => ({
             colIndex,
             name,
-            state: inputDecision.columns[colIndex].status,
+            status: inputDecision.columns[colIndex].status,
             reasons: inputDecision.columns[colIndex].reasons,
         }))
         : relation.columns.map((name, colIndex) => ({
             colIndex,
             name,
-            state: relation.exampleRow.maxSet.includes(colIndex) ? undefined : DecisionColumnStatus.Undecided,
+            status: relation.exampleRow.maxSet.includes(colIndex) ? undefined : DecisionColumnStatus.Undecided,
             reasons: [],
         }));
 

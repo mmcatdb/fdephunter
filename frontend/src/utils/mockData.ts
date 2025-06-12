@@ -1,4 +1,4 @@
-import { type ArmstrongRelation, ExampleState, type LatticeForClass, McType } from '@/types/armstrongRelation';
+import { type ArmstrongRelation, ExampleState, type McLattice, McType } from '@/types/armstrongRelation';
 import { type DatasetResponse, DatasetType, type DatasetData } from '@/types/dataset';
 
 export const MOCK_ARMSTRONG_RELATIONS: ArmstrongRelation[] = [ {
@@ -98,9 +98,9 @@ export const MOCK_ARMSTRONG_RELATIONS: ArmstrongRelation[] = [ {
     lhsSize: 2,
 } ];
 
-export const MOCK_LATTICES: LatticeForClass[][] = [
+export const MOCK_LATTICES: McLattice[][] = [
     [ {
-        class: 'tconst',
+        classColumn: 'tconst',
         columns: [ 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
         rows: [
             [ McType.Subset, McType.Subset, McType.Subset, McType.Subset ],
@@ -109,7 +109,7 @@ export const MOCK_LATTICES: LatticeForClass[][] = [
             [ McType.Derived ],
         ],
     }, {
-        class: 'primaryTitle',
+        classColumn: 'primaryTitle',
         columns: [ 'tconst', 'startYear', 'runtimeMinutes', 'genres' ],
         rows: [
             [ McType.Candidate, McType.Candidate, McType.Initial, McType.Candidate ],
@@ -118,7 +118,7 @@ export const MOCK_LATTICES: LatticeForClass[][] = [
             [ McType.Derived ],
         ],
     }, {
-        class: 'startYear',
+        classColumn: 'startYear',
         columns: [ 'tconst', 'primaryTitle', 'runtimeMinutes', 'genres' ],
         rows: [
             [ McType.Candidate, McType.Subset, McType.Subset, McType.Subset ],
@@ -127,7 +127,7 @@ export const MOCK_LATTICES: LatticeForClass[][] = [
             [ McType.Derived ],
         ],
     }, {
-        class: 'runtimeMinutes',
+        classColumn: 'runtimeMinutes',
         columns: [ 'tconst', 'primaryTitle', 'startYear', 'genres' ],
         rows: [
             [ McType.Candidate, McType.Subset, McType.Subset, McType.Subset ],
@@ -136,7 +136,7 @@ export const MOCK_LATTICES: LatticeForClass[][] = [
             [ McType.Derived ],
         ],
     }, {
-        class: 'genres',
+        classColumn: 'genres',
         columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes' ],
         rows: [
             [ McType.Candidate, McType.Subset, McType.Subset, McType.Subset ],
@@ -146,7 +146,7 @@ export const MOCK_LATTICES: LatticeForClass[][] = [
         ],
     } ],
     [ {
-        class: 'tconst',
+        classColumn: 'tconst',
         columns: [ 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
         rows: [
             [ McType.Subset, McType.Subset, McType.Subset, McType.Subset ],
@@ -155,7 +155,7 @@ export const MOCK_LATTICES: LatticeForClass[][] = [
             [ McType.Eliminated ],
         ],
     }, {
-        class: 'primaryTitle',
+        classColumn: 'primaryTitle',
         columns: [ 'tconst', 'startYear', 'runtimeMinutes', 'genres' ],
         rows: [
             [ McType.Genuine, McType.Coincidental, McType.Subset, McType.Coincidental ],
@@ -164,7 +164,7 @@ export const MOCK_LATTICES: LatticeForClass[][] = [
             [ McType.Derived ],
         ],
     }, {
-        class: 'startYear',
+        classColumn: 'startYear',
         columns: [ 'tconst', 'primaryTitle', 'runtimeMinutes', 'genres' ],
         rows: [
             [ McType.Genuine, McType.Subset, McType.Subset, McType.Subset ],
@@ -173,7 +173,7 @@ export const MOCK_LATTICES: LatticeForClass[][] = [
             [ McType.Derived ],
         ],
     }, {
-        class: 'runtimeMinutes',
+        classColumn: 'runtimeMinutes',
         columns: [ 'tconst', 'primaryTitle', 'startYear', 'genres' ],
         rows: [
             [ McType.Genuine, McType.Subset, McType.Subset, McType.Subset ],
@@ -182,7 +182,7 @@ export const MOCK_LATTICES: LatticeForClass[][] = [
             [ McType.Derived ],
         ],
     }, {
-        class: 'genres',
+        classColumn: 'genres',
         columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes' ],
         rows: [
             [ McType.Genuine, McType.Subset, McType.Subset, McType.Subset ],

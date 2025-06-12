@@ -10,9 +10,11 @@ export type ArmstrongRelation = {
      */
     isEvaluatingPositives: boolean;
 
-    /** This probably shouldn't be here, but we need it now for the stats. */
+    /** @deprecated This probably shouldn't be here, but we need it now for the stats. */
     minimalFDs: number;
+    /** @deprecated This probably shouldn't be here, but we need it now for the stats. */
     otherFDs: number;
+    /** @deprecated This probably shouldn't be here, but we need it now for the stats. */
     lhsSize: number;
 };
 
@@ -26,7 +28,7 @@ export type ExampleRelation = {
 
 export type ExampleRow = {
     values: string[];
-    /** The indexes of the columns that form the maximal set. */
+    /** The indexes of the columns that form the max set. */
     maxSet: number[];
     /** Whether it is a negative or positive example. */
     isPositive: boolean;
@@ -40,15 +42,20 @@ export enum ExampleState {
     Undecided = 'UNDECIDED',
 }
 
-export type LatticeForClass = {
-    class: string;
+/**
+ * The lattice of of elements for a specific class. Each element is a set of columns, the class is also a column. Each element then corresponds to an element of the max set for the class (max set of attributes of on the LHS that do not form a functional dependency with the class on the RHS).
+ * No, the lattice is not from Scotland, although it could be.
+ */
+export type McLattice = {
+    /** Name of the class column. */
+    classColumn: string;
     /** Names of the columns. They are expected to be unique. */
     columns: string[];
     /** States of the cells in the rows. Each cell max set should be computable form its cell and row index. */
     rows: McType[][];
 };
 
-/** A type of an element from the maximal set for a class. */
+/** A type of an element from the max set for a class. */
 export enum McType {
     Final = 'FINAL',
     Initial = 'INITIAL',
@@ -61,8 +68,10 @@ export enum McType {
     Coincidental = 'COINCIDENTAL',
 }
 
-/** Computes indexes of columns that form this max set. */
-export function computeColumnIndexesForLatticeRow(rowIndex: number, columnsCount: number): number[][] {
+/**
+ * For a given row index, returns an array of sets. Each set is an array of indexes of columns that form the max set for the given cell.
+ */
+export function computeColumnIndexesForLatticeRow(rowIndex: number, columnCount: number): number[][] {
     // The most bottom row (0) is: 0, 1, 2, ...
     // The next row (1) is: 01, 02, 03, ..., 12, 13, ...
     // The last row is: 0123...
@@ -76,7 +85,7 @@ export function computeColumnIndexesForLatticeRow(rowIndex: number, columnsCount
     // Starts at [ 0, 1, 2 ] (for the 3rd row).
     const indexes = [ ...new Array(cellSize).keys() ];
     // The max values of the indexes. Should be [ 7, 8, 9 ] (for 10 columns).
-    const maxIndexes = indexes.map(i => columnsCount + i - cellSize);
+    const maxIndexes = indexes.map(i => columnCount + i - cellSize);
 
     while (indexes[0] <= maxIndexes[0]) {
         output.push([ ...indexes ]);
@@ -101,14 +110,14 @@ export function computeColumnIndexesForLatticeRow(rowIndex: number, columnsCount
     return output;
 }
 
-export function computeEdgesForLatticeCell(cell: number[], columnsCount: number): number[][] {
+export function computeEdgesForLatticeCell(cell: number[], columnCount: number): number[][] {
     const output = [];
 
     // Let's try to insert i between the values of the cell (for all possible i).
     // We know that our i is larger than cell values on all previous indexes.
     let maxUncheckedIndex = 0;
 
-    for (let insert = 0; insert < columnsCount; insert++) {
+    for (let insert = 0; insert < columnCount; insert++) {
         let skip = false;
 
         // First, we find the current largest index.

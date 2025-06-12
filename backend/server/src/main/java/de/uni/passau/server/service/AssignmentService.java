@@ -43,9 +43,9 @@ public class AssignmentService {
     public Mono<Void> evaluateAssignment(String assignmentId, ExampleDecision decisionObject) {
         try {
             final String decision = ExampleDecision.jsonWriter.writeValueAsString(decisionObject);
-            final AssignmentState status = toStatus(decisionObject.status);
+            final AssignmentState state = toState(decisionObject.status());
 
-            return assignmentRepository.evaluateAssignment(assignmentId, status, decision)
+            return assignmentRepository.evaluateAssignment(assignmentId, state, decision)
                 .then(negativeExampleRepository.updateState(assignmentId))
                 .then();
         }
@@ -54,7 +54,7 @@ public class AssignmentService {
         }
     }
 
-    private AssignmentState toStatus(ExampleDecision.DecisionStatus status) {
+    private AssignmentState toState(ExampleDecision.DecisionStatus status) {
         return switch (status) {
             case ACCEPTED -> AssignmentState.ACCEPTED;
             case REJECTED -> AssignmentState.REJECTED;

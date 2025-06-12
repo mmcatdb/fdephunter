@@ -5,7 +5,7 @@ import { type CreateJobResponse } from './routes/workflows';
 import { type JobResultResponse, JobState, type ExecuteDiscoveryParams, type ExecuteRediscoveryParams, type JobResponse } from '@/types/job';
 import { v4 } from 'uuid';
 import { DateTime } from 'luxon';
-import { type ArmstrongRelation, type ExampleRelation, ExampleState, type LatticeForClass } from '@/types/armstrongRelation';
+import { type ArmstrongRelation, type ExampleRelation, ExampleState, type McLattice } from '@/types/armstrongRelation';
 import { MOCK_ARMSTRONG_RELATIONS, MOCK_DATASET_DATA, MOCK_DATASETS, MOCK_FDS, MOCK_LATTICES, type MockFDClass } from '../mockData';
 import { type DatasetData, type DatasetResponse } from '@/types/dataset';
 
@@ -431,7 +431,7 @@ async function getAllDatasets(): Promise<Result<DatasetResponse[]>> {
     return success(MOCK_DATASETS);
 }
 
-async function getLattices(workflowId: string): Promise<Result<LatticeForClass[]>> {
+async function getLattices(workflowId: string): Promise<Result<McLattice[]>> {
     await wait();
     const workflow = get<WorkflowDB>(workflowId);
     if (!workflow)
@@ -467,7 +467,7 @@ async function getFdClasses(workflowId: string): Promise<Result<MockFDClass[]>> 
 // Utils
 
 async function wait() {
-    return new Promise(resolve => setTimeout(resolve, (1 + Math.random()) * 100));
+    // return new Promise(resolve => setTimeout(resolve, (1 + Math.random()) * 10));
 }
 
 function get<T>(key: string): T | undefined {

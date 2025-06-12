@@ -92,6 +92,7 @@ function ControlCard({ assignment, onEvaluated }: ControlCardProps) {
             return;
         }
 
+        // FIXME This is wery inefficient, reloading the whole page takes forever.
         await navigate(0);
     }
 

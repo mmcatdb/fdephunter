@@ -120,7 +120,7 @@ function InitialSettingsForm({ datasets, onSubmit, fetching }: InitialSettingsFo
 
         onSubmit({
             approach,
-            datasetName: selected.file?.originalName ?? datasets[Number(selected.dataset.values().next().value)].name,
+            datasetName: selected.file?.originalName ?? selected.dataset.values().next().value!,
         });
     }
 
