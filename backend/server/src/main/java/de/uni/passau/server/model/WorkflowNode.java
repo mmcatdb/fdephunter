@@ -1,4 +1,4 @@
-package de.uni.passau.server.model.entity;
+package de.uni.passau.server.model;
 
 import org.springframework.data.neo4j.core.schema.GeneratedValue;
 import org.springframework.data.neo4j.core.schema.Id;

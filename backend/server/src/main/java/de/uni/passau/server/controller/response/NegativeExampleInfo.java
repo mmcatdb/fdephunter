@@ -2,8 +2,8 @@ package de.uni.passau.server.controller.response;
 
 import java.io.Serializable;
 
-import de.uni.passau.server.model.entity.NegativeExampleNode;
-import de.uni.passau.server.model.entity.NegativeExampleNode.NegativeExampleState;
+import de.uni.passau.server.model.NegativeExampleNode;
+import de.uni.passau.server.model.NegativeExampleNode.NegativeExampleState;
 
 public record NegativeExampleInfo(
     String id,

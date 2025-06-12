@@ -4,7 +4,7 @@ import org.springframework.data.neo4j.repository.ReactiveNeo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.repository.query.Param;
 
-import de.uni.passau.server.model.entity.JobResultNode;
+import de.uni.passau.server.model.JobResultNode;
 import reactor.core.publisher.Mono;
 
 public interface JobResultRepository extends ReactiveNeo4jRepository<JobResultNode, String> {

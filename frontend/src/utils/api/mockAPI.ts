@@ -1,5 +1,5 @@
 import { type DataResult, type Result } from '@/types/api/result';
-import { type AssignmentInfo, AssignmentState, type AssignmentResponse, type AssignmentInit, DecisionStatus, type AssignmentDecision, DecisionColumnStatus } from '@/types/assignment';
+import { type AssignmentInfo, AssignmentState, type AssignmentResponse, type AssignmentInit, DecisionStatus, type ExampleDecision, DecisionColumnStatus } from '@/types/assignment';
 import { WorkflowState, type WorkflowFromServer } from '@/types/workflow';
 import { type CreateJobResponse } from './routes/workflows';
 import { type JobResultResponse, JobState, type ExecuteDiscoveryParams, type ExecuteRediscoveryParams, type JobResponse } from '@/types/job';
@@ -127,7 +127,7 @@ async function getAllAssignments(workflowId: string): Promise<Result<AssignmentI
     return success(assignments as AssignmentInfo[]);
 }
 
-async function evaluateAssignment(assignmentId: string, decision: AssignmentDecision): Promise<Result<AssignmentResponse>> {
+async function evaluateAssignment(assignmentId: string, decision: ExampleDecision): Promise<Result<AssignmentResponse>> {
     await wait();
 
     const assignment = get<AssignmentDB>(assignmentId);
@@ -332,7 +332,7 @@ async function acceptAllExamples(workflowId: string): Promise<Result<WorkflowFro
             status: relation.exampleRow.maxSet.includes(colIndex) ? undefined : DecisionColumnStatus.Valid,
             reasons: [],
         }));
-        const init = { status: DecisionStatus.Accepted, columns } satisfies AssignmentDecision;
+        const init = { status: DecisionStatus.Accepted, columns } satisfies ExampleDecision;
 
         assignment.state = decisionToAssignment[init.status];
         assignment.decision = init;

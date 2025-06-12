@@ -3,8 +3,8 @@ package de.uni.passau.server.controller.response;
 import java.io.Serializable;
 import java.util.Date;
 
-import de.uni.passau.server.model.entity.DiscoveryJobNode;
-import de.uni.passau.server.model.entity.DiscoveryJobNode.DiscoveryJobState;
+import de.uni.passau.server.model.DiscoveryJobNode;
+import de.uni.passau.server.model.DiscoveryJobNode.DiscoveryJobState;
 
 public record DiscoveryJob(
     String id,

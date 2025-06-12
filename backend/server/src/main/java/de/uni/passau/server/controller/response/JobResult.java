@@ -2,7 +2,7 @@ package de.uni.passau.server.controller.response;
 
 import java.io.Serializable;
 
-import de.uni.passau.server.model.entity.JobResultNode;
+import de.uni.passau.server.model.JobResultNode;
 
 public record JobResult(
     String id,

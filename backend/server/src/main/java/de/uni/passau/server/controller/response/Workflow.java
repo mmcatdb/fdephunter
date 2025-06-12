@@ -2,8 +2,8 @@ package de.uni.passau.server.controller.response;
 
 import java.io.Serializable;
 
-import de.uni.passau.server.model.entity.WorkflowNode;
-import de.uni.passau.server.model.entity.WorkflowNode.WorkflowState;
+import de.uni.passau.server.model.WorkflowNode;
+import de.uni.passau.server.model.WorkflowNode.WorkflowState;
 
 public record Workflow(
     String id,

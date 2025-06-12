@@ -4,9 +4,9 @@ import de.uni.passau.server.controller.request.DiscoveryJobRequest;
 import de.uni.passau.server.controller.request.RediscoveryJobRequest;
 import de.uni.passau.server.controller.response.DiscoveryJob;
 import de.uni.passau.server.controller.response.Workflow;
-import de.uni.passau.server.model.entity.DiscoveryJobNode;
-import de.uni.passau.server.model.entity.JobResultNode;
-import de.uni.passau.server.model.entity.WorkflowNode;
+import de.uni.passau.server.model.DiscoveryJobNode;
+import de.uni.passau.server.model.JobResultNode;
+import de.uni.passau.server.model.WorkflowNode;
 import de.uni.passau.server.service.DiscoveryJobService;
 import de.uni.passau.server.service.WorkflowService;
 

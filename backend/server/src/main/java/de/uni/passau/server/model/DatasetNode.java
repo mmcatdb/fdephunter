@@ -1,4 +1,4 @@
-package de.uni.passau.server.model.entity;
+package de.uni.passau.server.model;
 
 import org.springframework.data.neo4j.core.schema.GeneratedValue;
 import org.springframework.data.neo4j.core.schema.Id;
@@ -10,7 +10,13 @@ import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
 public class DatasetNode {
 
     public static enum DatasetType {
-        CSV, JSON, XML, LABELED_GRAPH, RELATIONAL, ARRAY, RDF;
+        CSV,
+        JSON,
+        XML,
+        LABELED_GRAPH,
+        RELATIONAL,
+        ARRAY,
+        RDF,
     }
 
     @Id @GeneratedValue(UUIDStringGenerator.class)

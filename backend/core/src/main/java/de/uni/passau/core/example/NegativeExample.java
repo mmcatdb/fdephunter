@@ -1,4 +1,4 @@
-package de.uni.passau.core.nex;
+package de.uni.passau.core.example;
 
 import de.uni.passau.core.approach.FDInit;
 
@@ -12,6 +12,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * Represents a negative example, which is a row in a database or CSV file.
  * A negative example identifies individual cells by their column name. Users may reject or accept a negative example,
  * and the decision is stored in the assignment. Users can also provide a reason for rejecting a negative example.
+ * @deprecated
  */
 public class NegativeExample implements Comparable<NegativeExample> {
 

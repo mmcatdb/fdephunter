@@ -2,7 +2,7 @@ package de.uni.passau.server.service;
 
 import de.uni.passau.core.dataset.Dataset;
 import de.uni.passau.core.dataset.csv.CSVDataset;
-import de.uni.passau.server.model.entity.DatasetNode;
+import de.uni.passau.server.model.DatasetNode;
 import de.uni.passau.server.repository.DatasetRepository;
 
 import java.util.List;

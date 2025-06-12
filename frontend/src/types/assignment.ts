@@ -1,4 +1,4 @@
-import { type ExampleRelation, type ExampleState } from './armstrongRelation';
+import { type ExampleRelation } from './armstrongRelation';
 
 export enum AssignmentState {
     New = 'NEW',
@@ -16,7 +16,7 @@ export type AssignmentInfo = {
 export type AssignmentResponse = AssignmentInfo & {
     workflowId: string;
     relation: ExampleRelation;
-    decision: AssignmentDecision | undefined;
+    decision: ExampleDecision | undefined;
 };
 
 // TODO Replace by a simple type (if possible).
@@ -27,7 +27,7 @@ export class Assignment {
         readonly state: AssignmentState,
         readonly isFinished: boolean,
         readonly relation: ExampleRelation,
-        readonly decision: AssignmentDecision | undefined,
+        readonly decision: ExampleDecision | undefined,
     ) {}
 
     static fromServer(input: AssignmentResponse): Assignment {
@@ -47,10 +47,10 @@ export type AssignmentInit = {
     rowIndex: number;
 };
 
-export type AssignmentDecision = {
+export type ExampleDecision = {
     status: DecisionStatus;
     columns: {
-        name: string;
+        /** If undefined, the column isn't a part of the maximal set (so it should be ignored). */
         status: DecisionColumnStatus | undefined;
         reasons: string[];
     }[];

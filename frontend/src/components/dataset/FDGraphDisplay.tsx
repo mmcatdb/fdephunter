@@ -150,7 +150,7 @@ function createLatticeGraph(lattice: LatticeForClass, rowIndex: number | undefin
 }
 
 function createRowNodes(lattice: LatticeForClass, rowIndex: number, columnIndexes: number[][], xOffset: number, yOffset: number): RFNode[] {
-    const types = lattice.rows[rowIndex].cells;
+    const types = lattice.rows[rowIndex];
 
     return columnIndexes.map((columnIndexes, cellIndex) => {
         const id = computeNodeId(columnIndexes);

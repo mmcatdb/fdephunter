@@ -1,7 +1,7 @@
 package de.uni.passau.server.controller;
 
-import de.uni.passau.server.model.entity.DatasetNode;
-import de.uni.passau.server.model.entity.WorkflowNode;
+import de.uni.passau.server.model.DatasetNode;
+import de.uni.passau.server.model.WorkflowNode;
 import de.uni.passau.server.service.DatasetService;
 import de.uni.passau.server.service.WorkflowService;
 

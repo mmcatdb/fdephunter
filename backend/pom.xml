@@ -13,7 +13,6 @@
         <module>core</module>
         <module>server</module>
         <module>discovery</module>
-        <module>weightfunctions</module>
     </modules>
     
     <properties>

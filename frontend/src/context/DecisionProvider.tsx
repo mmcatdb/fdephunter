@@ -1,6 +1,6 @@
 import { createContext, type Dispatch, type ReactNode, type SetStateAction, useContext, useState } from 'react';
 import { type ExampleRelation } from '@/types/armstrongRelation';
-import { type AssignmentDecision, DecisionColumnStatus } from '@/types/assignment';
+import { type ExampleDecision, DecisionColumnStatus } from '@/types/assignment';
 
 export type DecisionColumn = {
     colIndex: number;
@@ -30,7 +30,7 @@ const decisionContext = createContext<DecisionContext | undefined>(undefined);
 type DecisionProviderProps = {
     children: ReactNode;
     relation: ExampleRelation;
-    inputDecision: AssignmentDecision | undefined;
+    inputDecision: ExampleDecision | undefined;
 };
 
 export function DecisionProvider({ children, relation, inputDecision }: DecisionProviderProps) {
@@ -51,7 +51,7 @@ export function useDecisionContext(): DecisionContext {
     return context;
 }
 
-function createDefaultDecision(relation: ExampleRelation, inputDecision: AssignmentDecision | undefined): DecisionState {
+function createDefaultDecision(relation: ExampleRelation, inputDecision: ExampleDecision | undefined): DecisionState {
     const columns = inputDecision
         ? relation.columns.map((name, colIndex) => ({
             colIndex,

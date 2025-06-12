@@ -249,18 +249,18 @@ export function ExampleRelationDisplay({ relation: { columns, referenceRow, exam
             ))}
 
             {exampleRow.values.map((value, colIndex) => {
-                const state = decision.columns[colIndex].status;
+                const status = decision.columns[colIndex].status;
 
-                // If the selection function isn't provided, the cells aren't interactive. Also, if the state isn't defined, the cell is in the maximal set.
-                if (!setSelectedColIndex || !state) {
+                // If the selection function isn't provided, the cells aren't interactive. Also, if the status isn't defined, the cell is in the maximal set.
+                if (!setSelectedColIndex || !status) {
                     return (
-                        <div key={colIndex} className={getCellClass(0, colIndex, !state)}>
+                        <div key={colIndex} className={getCellClass(0, colIndex, !status)}>
                             {value}
                         </div>
                     );
                 }
 
-                const { color, icon } = columnStateData[state];
+                const { color, icon } = columnStateData[status];
                 const isSelected = colIndex === selectedColIndex;
 
                 return (

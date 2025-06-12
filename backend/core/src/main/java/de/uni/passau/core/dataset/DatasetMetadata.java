@@ -13,4 +13,5 @@ public interface DatasetMetadata {
     public int getNumberOfColumns();
 
     public int getNumberOfRows();
+
 }

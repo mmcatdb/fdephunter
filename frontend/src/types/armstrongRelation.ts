@@ -44,14 +44,11 @@ export type LatticeForClass = {
     class: string;
     /** Names of the columns. They are expected to be unique. */
     columns: string[];
-    rows: LatticeRow[];
+    /** States of the cells in the rows. Each cell max set should be computable form its cell and row index. */
+    rows: McType[][];
 };
 
-type LatticeRow = {
-    /** States of the cells in the row. Each cell max set should be computable form its cell and row index. */
-    cells: McType[];
-};
-
+/** A type of an element from the maximal set for a class. */
 export enum McType {
     Final = 'FINAL',
     Initial = 'INITIAL',

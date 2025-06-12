@@ -4,10 +4,10 @@ import org.springframework.data.neo4j.repository.ReactiveNeo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.repository.query.Param;
 
-import de.uni.passau.server.model.entity.AssignmentNode;
-import de.uni.passau.server.model.entity.JobResultNode;
-import de.uni.passau.server.model.entity.NegativeExampleNode;
-import de.uni.passau.server.model.entity.AssignmentNode.AssignmentState;
+import de.uni.passau.server.model.AssignmentNode;
+import de.uni.passau.server.model.JobResultNode;
+import de.uni.passau.server.model.NegativeExampleNode;
+import de.uni.passau.server.model.AssignmentNode.AssignmentState;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

@@ -1,6 +1,6 @@
 package de.uni.passau.server.controller;
 
-import de.uni.passau.core.nex.Decision;
+import de.uni.passau.core.example.ExampleDecision;
 import de.uni.passau.server.controller.response.AssignmentResponse;
 import de.uni.passau.server.controller.response.DatasetData;
 import de.uni.passau.server.service.AssignmentService;
@@ -46,41 +46,12 @@ public class AssignmentController {
         );
     }
 
-    private static record DecisionInit(
-        Decision.Status status,
-        List<ColumnInit> columns
-    ) {}
-
-    private static record ColumnInit(
-        String name,
-        List<String> reasons
-    ) {
-        Decision.Column toColumn() {
-            final var userReasons = new ArrayList<String>();
-            final var predefinedReasons = new ArrayList<Decision.PredefinedReason>();
-
-            reasons.forEach(reason -> {
-                try {
-                    predefinedReasons.add(Decision.PredefinedReason.valueOf(reason));
-                }
-                catch (IllegalArgumentException e) {
-                    userReasons.add(reason);
-                }
-            });
-
-            return new Decision.Column(name, userReasons, predefinedReasons);
-        }
-    }
-
     @PostMapping("/assignments/{assignmentId}/evaluate")
     public Mono<AssignmentResponse> evaluateAssignment(
         @PathVariable String assignmentId,
-        @RequestBody DecisionInit init,
+        @RequestBody ExampleDecision decision,
         @RequestParam(required = false, defaultValue = "5") String limit
     ) {
-        final var columns = init.columns.stream().map(ColumnInit::toColumn).toList();
-        final var decision = new Decision(init.status, columns);
-
         return assignmentService.evaluateAssignment(assignmentId, decision)
             .then(getAssignment(assignmentId, limit));
     }

@@ -5,8 +5,8 @@ import org.springframework.data.neo4j.repository.ReactiveNeo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.repository.query.Param;
 
-import de.uni.passau.server.model.entity.ClassNode;
-import de.uni.passau.server.model.entity.NegativeExampleNode;
+import de.uni.passau.server.model.ClassNode;
+import de.uni.passau.server.model.NegativeExampleNode;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

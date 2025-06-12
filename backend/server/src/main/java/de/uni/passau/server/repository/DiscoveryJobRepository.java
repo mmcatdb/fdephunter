@@ -1,13 +1,13 @@
 package de.uni.passau.server.repository;
 
-import de.uni.passau.server.model.entity.DatasetNode;
-import de.uni.passau.server.model.entity.DiscoveryJobNode;
-import de.uni.passau.server.model.entity.WorkflowNode;
-import de.uni.passau.server.model.entity.DiscoveryJobNode.DiscoveryJobState;
-
 import org.springframework.data.neo4j.repository.ReactiveNeo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.repository.query.Param;
+
+import de.uni.passau.server.model.DatasetNode;
+import de.uni.passau.server.model.DiscoveryJobNode;
+import de.uni.passau.server.model.WorkflowNode;
+import de.uni.passau.server.model.DiscoveryJobNode.DiscoveryJobState;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

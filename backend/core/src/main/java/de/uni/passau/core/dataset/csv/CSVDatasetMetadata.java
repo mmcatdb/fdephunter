@@ -3,6 +3,7 @@ package de.uni.passau.core.dataset.csv;
 import de.uni.passau.core.dataset.DatasetMetadata;
 
 public class CSVDatasetMetadata implements DatasetMetadata {
+
     private String filepath;
     private String filename;
     private Boolean hasHeader;
@@ -48,4 +49,5 @@ public class CSVDatasetMetadata implements DatasetMetadata {
     public int getNumberOfRows() {
         return this.numberOfRows;
     }
+
 }

@@ -2,11 +2,11 @@ package de.uni.passau.server.service;
 
 import de.uni.passau.core.approach.AbstractApproach.ApproachName;
 import de.uni.passau.core.graph.WeightedGraph;
-import de.uni.passau.server.model.entity.DiscoveryJobNode;
-import de.uni.passau.server.model.entity.JobResultNode;
-import de.uni.passau.server.model.entity.DiscoveryJobNode.DiscoveryJobState;
-import de.uni.passau.server.model.entity.NegativeExampleNode.NegativeExampleState;
-import de.uni.passau.server.model.entity.WorkflowNode.WorkflowState;
+import de.uni.passau.server.model.DiscoveryJobNode;
+import de.uni.passau.server.model.JobResultNode;
+import de.uni.passau.server.model.DiscoveryJobNode.DiscoveryJobState;
+import de.uni.passau.server.model.NegativeExampleNode.NegativeExampleState;
+import de.uni.passau.server.model.WorkflowNode.WorkflowState;
 import de.uni.passau.server.repository.ClassRepository;
 import de.uni.passau.server.repository.DiscoveryJobRepository;
 import de.uni.passau.server.repository.DiscoveryJobRepository.DiscoveryJobNodeGroup;

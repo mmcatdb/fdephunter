@@ -1,11 +1,11 @@
 package de.uni.passau.server.service;
 
+import de.uni.passau.core.example.NegativeExample;
 import de.uni.passau.core.graph.Vertex;
-import de.uni.passau.core.nex.NegativeExample;
-import de.uni.passau.server.model.entity.ClassNode;
-import de.uni.passau.server.model.entity.NegativeExampleNode;
-import de.uni.passau.server.model.entity.NegativeExampleNode.NegativeExampleState;
-import de.uni.passau.server.model.entity.NegativeExampleNode.Payload;
+import de.uni.passau.server.model.ClassNode;
+import de.uni.passau.server.model.NegativeExampleNode;
+import de.uni.passau.server.model.NegativeExampleNode.NegativeExampleState;
+import de.uni.passau.server.model.NegativeExampleNode.Payload;
 import de.uni.passau.server.repository.ClassRepository;
 import de.uni.passau.server.repository.JobResultRepository;
 import de.uni.passau.server.repository.NegativeExampleRepository;

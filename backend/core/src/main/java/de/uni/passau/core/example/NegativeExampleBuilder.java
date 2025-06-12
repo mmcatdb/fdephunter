@@ -1,12 +1,9 @@
-package de.uni.passau.core.nex;
+package de.uni.passau.core.example;
 
 import de.uni.passau.core.approach.FDInit;
 import de.uni.passau.core.dataset.DatasetData;
 import de.uni.passau.core.graph.Vertex;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +11,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
+/** @deprecated */
 public class NegativeExampleBuilder {
 
     private static final String ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -117,45 +115,6 @@ public class NegativeExampleBuilder {
      */
     private boolean isValueInColumn(String uniqueValue, int columnIndex) {
         return relation.stream().anyMatch(row -> row[columnIndex].equals(uniqueValue));
-    }
-
-    /**
-     * Returns the next negative example for the given decision.
-     * Only to be called when we want to continue with the current negative example
-     * (i.e. the same set of FDs).
-     */
-    public List<NegativeExample> getNextNegativeExamples(NegativeExample negEx, Decision decision, @Nullable List<Decision> decisionHistory) throws IllegalStateException {
-        if (decision.getStatus() != Decision.Status.REJECTED)
-            throw new IllegalStateException("Decision must be REJECTED.");
-
-        final List<String> view = negEx.view;
-        final List<FDInit> fds = negEx.fds;
-        final List<String> columnsToIgnore = decision.getProblematicColumns();
-        if (columnsToIgnore.isEmpty())
-            throw new IllegalStateException("Reject decision must have at least one problematic column.");
-
-        final List<List<String>> newViews = new ArrayList<>();
-        for (String column : columnsToIgnore) {
-            final List<String> newView = new ArrayList<>(view);
-            if (!newView.contains(column))
-                throw new IllegalStateException("Column " + column + " not in view.");
-
-            newView.remove(column);
-            newViews.add(newView);
-        }
-
-        if (!continueWithSameFDs(view, fds))
-            throw new IllegalStateException("Cannot continue with the example as no FDs can be violated by the view.");
-
-        final int row = random.nextInt(originalRowCount - 1); // TODO: select same row as before? When should we chose a different row?
-
-        final List<NegativeExample> newNegExs = new ArrayList<>();
-        for (final List<String> newView : newViews) {
-            final var values = computeExampleValues(fds, row);
-            newNegExs.add(new NegativeExample(generateExampleId(), negEx.id, values.innerValues, values.originalValues, newView, fds));
-        }
-
-        return newNegExs;
     }
 
     // TODO what about the function above?

@@ -57,7 +57,6 @@ function ControlCard({ assignment, onEvaluated }: ControlCardProps) {
     async function evaluate(status: DecisionStatus, fid: string) {
         const columns = status === DecisionStatus.Accepted
             ? decision.columns.map(col => ({
-                name: col.name,
                 status: col.status === DecisionColumnStatus.Undecided ? DecisionColumnStatus.Valid : col.status,
                 reasons: [],
             }))
@@ -66,7 +65,6 @@ function ControlCard({ assignment, onEvaluated }: ControlCardProps) {
                 const uniqueReasons = [ ...new Set(trimmedReasons) ];
 
                 return {
-                    name: col.name,
                     status: col.status,
                     reasons: uniqueReasons,
                 };

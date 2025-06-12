@@ -1,9 +1,9 @@
 package de.uni.passau.server.controller.response;
 
-import de.uni.passau.server.model.AssignmentDecision;
-import de.uni.passau.server.model.ExampleRelation;
-import de.uni.passau.server.model.entity.AssignmentNode;
-import de.uni.passau.server.model.entity.AssignmentNode.AssignmentState;
+import de.uni.passau.core.example.ExampleDecision;
+import de.uni.passau.core.example.ExampleRelation;
+import de.uni.passau.server.model.AssignmentNode;
+import de.uni.passau.server.model.AssignmentNode.AssignmentState;
 import de.uni.passau.server.repository.AssignmentRepository.AssignmentNodeGroup;
 
 import java.io.Serializable;
@@ -16,7 +16,7 @@ public record AssignmentResponse(
     int rowIndex,
     String workflowId,
     ExampleRelation relation,
-    @Nullable AssignmentDecision decision
+    @Nullable ExampleDecision decision
 ) implements Serializable {
 
     // public static AssignmentResponse fromNodes(AssignmentNode assignmentNode, NegativeExampleNode exampleNode, JobResultNode resultNode, DatasetData dataset) {

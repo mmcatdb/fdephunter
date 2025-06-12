@@ -3,7 +3,7 @@ package de.uni.passau.core.nex;
 import static org.junit.jupiter.api.Assertions.*;
 
 import de.uni.passau.core.dataset.csv.CSVDataset;
-import de.uni.passau.core.nex.NegativeExampleBuilder;
+import de.uni.passau.core.example.NegativeExampleBuilder;
 
 import java.util.List;
 

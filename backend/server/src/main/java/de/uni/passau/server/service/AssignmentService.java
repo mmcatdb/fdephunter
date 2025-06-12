@@ -1,8 +1,8 @@
 package de.uni.passau.server.service;
 
-import de.uni.passau.core.nex.Decision;
-import de.uni.passau.server.model.entity.AssignmentNode;
-import de.uni.passau.server.model.entity.AssignmentNode.AssignmentState;
+import de.uni.passau.core.example.ExampleDecision;
+import de.uni.passau.server.model.AssignmentNode;
+import de.uni.passau.server.model.AssignmentNode.AssignmentState;
 import de.uni.passau.server.repository.AssignmentRepository;
 import de.uni.passau.server.repository.AssignmentRepository.AssignmentNodeGroup;
 import de.uni.passau.server.repository.NegativeExampleRepository;
@@ -40,10 +40,10 @@ public class AssignmentService {
         );
     }
 
-    public Mono<Void> evaluateAssignment(String assignmentId, Decision decisionObject) {
+    public Mono<Void> evaluateAssignment(String assignmentId, ExampleDecision decisionObject) {
         try {
-            final String decision = Decision.jsonWriter.writeValueAsString(decisionObject);
-            final AssignmentState status = toStatus(decisionObject.getStatus());
+            final String decision = ExampleDecision.jsonWriter.writeValueAsString(decisionObject);
+            final AssignmentState status = toStatus(decisionObject.status);
 
             return assignmentRepository.evaluateAssignment(assignmentId, status, decision)
                 .then(negativeExampleRepository.updateState(assignmentId))
@@ -54,7 +54,7 @@ public class AssignmentService {
         }
     }
 
-    private AssignmentState toStatus(Decision.Status status) {
+    private AssignmentState toStatus(ExampleDecision.DecisionStatus status) {
         return switch (status) {
             case ACCEPTED -> AssignmentState.ACCEPTED;
             case REJECTED -> AssignmentState.REJECTED;

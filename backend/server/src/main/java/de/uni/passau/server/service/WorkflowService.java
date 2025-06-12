@@ -1,9 +1,9 @@
 package de.uni.passau.server.service;
 
-import de.uni.passau.server.model.entity.JobResultNode;
-import de.uni.passau.server.model.entity.WorkflowNode;
-import de.uni.passau.server.model.entity.NegativeExampleNode.NegativeExampleState;
-import de.uni.passau.server.model.entity.WorkflowNode.WorkflowState;
+import de.uni.passau.server.model.JobResultNode;
+import de.uni.passau.server.model.WorkflowNode;
+import de.uni.passau.server.model.NegativeExampleNode.NegativeExampleState;
+import de.uni.passau.server.model.WorkflowNode.WorkflowState;
 import de.uni.passau.server.repository.ClassRepository;
 import de.uni.passau.server.repository.JobResultRepository;
 import de.uni.passau.server.repository.WorkflowRepository;

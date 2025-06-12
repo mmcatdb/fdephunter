@@ -4,21 +4,19 @@ import de.uni.passau.core.approach.AbstractApproach.ApproachName;
 import de.uni.passau.core.approach.FDGraphBuilder;
 import de.uni.passau.core.approach.FDInit;
 import de.uni.passau.core.dataset.Dataset;
+import de.uni.passau.core.example.ExampleDecision;
+import de.uni.passau.core.example.NegativeExampleBuilder;
 import de.uni.passau.core.graph.Vertex;
 import de.uni.passau.core.graph.WeightedGraph;
-import de.uni.passau.core.nex.Decision;
-import de.uni.passau.core.nex.NegativeExampleBuilder;
-import de.uni.passau.core.nex.NegativeExampleUpdater;
 import de.uni.passau.server.approach.HyFDAlgorithm;
 import de.uni.passau.server.approach.OurApproachAlgorithm;
-import de.uni.passau.server.model.entity.DiscoveryJobNode;
-import de.uni.passau.server.model.entity.NegativeExampleNode;
-import de.uni.passau.server.model.entity.WorkflowNode;
-import de.uni.passau.server.model.entity.AssignmentNode.AssignmentState;
-import de.uni.passau.server.model.entity.DiscoveryJobNode.DiscoveryJobState;
-import de.uni.passau.server.model.entity.NegativeExampleNode.NegativeExampleState;
-import de.uni.passau.server.model.entity.WorkflowNode.WorkflowState;
-import de.uni.passau.server.repository.ClassRepository;
+import de.uni.passau.server.model.DiscoveryJobNode;
+import de.uni.passau.server.model.NegativeExampleNode;
+import de.uni.passau.server.model.WorkflowNode;
+import de.uni.passau.server.model.AssignmentNode.AssignmentState;
+import de.uni.passau.server.model.DiscoveryJobNode.DiscoveryJobState;
+import de.uni.passau.server.model.NegativeExampleNode.NegativeExampleState;
+import de.uni.passau.server.model.WorkflowNode.WorkflowState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,11 +49,6 @@ public class ScheduledJobsService {
     @Autowired
     private AssignmentService assignmentService;
 
-    @Autowired
-    private ClassRepository classRepository;
-
-    private static final NegativeExampleUpdater NEGATIVE_EXAMPLE_UPDATER = new NegativeExampleUpdater();    // TODO: Change to @Service
-
     public void executeUpdateNegativeExampleJobs() {
         LOGGER.info("EXECUTING NEGATIVE EXAMPLE JOB");
 
@@ -83,22 +76,22 @@ public class ScheduledJobsService {
                     return negativeExampleService.changeExampleState(example.id, NegativeExampleState.ACCEPTED);
                 }
 
-                final var decisions = new ArrayList<Decision>();
+                final var decisions = new ArrayList<ExampleDecision>();
                 try {
                     // FIXME There should be only one assignment (the crowdsourcing was dithed). So there is no need to iterate over them.
                     for (var assignment : assignments)
-                        decisions.add(Decision.jsonReader.readValue(assignment.decision));
+                        decisions.add(ExampleDecision.jsonReader.readValue(assignment.decision));
                 }
                 catch (JsonProcessingException ex) {
                     LOGGER.error("EXCEPTION THROWN TODO", ex);
                     return Mono.empty();    // ERROR: BUG
                 }
 
-                final var updatedExample = NEGATIVE_EXAMPLE_UPDATER.updateNegativeExample(example, decisions.get(0));
+                // final var updatedExample = NEGATIVE_EXAMPLE_UPDATER.updateNegativeExample(example, decisions.get(0));
 
-                return classRepository
-                    .findHasNegativeExample(example.id)
-                    .flatMap(classNode -> negativeExampleService.createExample(classNode.getId(), updatedExample));
+                // return classRepository
+                    // .findHasNegativeExample(example.id)
+                    // .flatMap(classNode -> negativeExampleService.createExample(classNode.getId(), updatedExample));
             })
         ).subscribe(x -> LOGGER.info("NEGATIVE EXAMPLE JOB FINISHED"));
     }

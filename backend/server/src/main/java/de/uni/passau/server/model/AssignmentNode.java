@@ -1,4 +1,4 @@
-package de.uni.passau.server.model.entity;
+package de.uni.passau.server.model;
 
 import java.util.Date;
 
