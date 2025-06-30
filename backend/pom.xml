@@ -3,16 +3,17 @@
     <modelVersion>4.0.0</modelVersion>
     
     <groupId>de.uni.passau</groupId>
-    <artifactId>fd-cleaner</artifactId>
+    <artifactId>fdephunter</artifactId>
     <version>BETA</version>
     <packaging>pom</packaging>
     
-    <name>FD Cleaner (Java 17)</name>
+    <name>FDepHunter</name>
 
     <modules>
         <module>core</module>
-        <module>server</module>
+        <module>algorithms</module>
         <module>discovery</module>
+        <module>server</module>
     </modules>
     
     <properties>
@@ -24,6 +25,7 @@
         <!-- This generates metadata for reflection on method parameters. This is crucial for, e.g., the @PathVariable annotation when getting the name of the parameter automatically. -->
         <maven.compiler.parameters>true</maven.compiler.parameters>
         <spring.jackson.time-zone>UTC</spring.jackson.time-zone>
+        <jackson.version>2.14.2</jackson.version>
         <!--<maven.test.skip>true</maven.test.skip>-->
     </properties>
     
@@ -31,7 +33,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.14.2</version>
+            <version>${jackson.version}</version>
         </dependency>
 
         <dependency>
@@ -39,6 +41,12 @@
             <artifactId>slf4j-api</artifactId>
             <version>2.0.2</version>
             <type>jar</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org.checkerframework</groupId>
+            <artifactId>checker-qual</artifactId>
+            <version>3.38.0</version>
         </dependency>
     </dependencies>
 

@@ -72,8 +72,8 @@ AssignmentPage.loader = async ({ params: { assignmentId } }: { params: Params<'a
         throw new Error('Failed to load lattices');
 
     return {
-        assignment: Assignment.fromServer(response.data),
-        workflow: Workflow.fromServer(workflowResponse.data),
+        assignment: Assignment.fromResponse(response.data),
+        workflow: Workflow.fromResponse(workflowResponse.data),
         lattices: latticesResponse.data,
     };
 };

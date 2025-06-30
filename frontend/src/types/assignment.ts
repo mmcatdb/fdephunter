@@ -25,17 +25,15 @@ export class Assignment {
         readonly id: string,
         readonly workflowId: string,
         readonly state: AssignmentState,
-        readonly isFinished: boolean,
         readonly relation: ExampleRelation,
         readonly decision: ExampleDecision | undefined,
     ) {}
 
-    static fromServer(input: AssignmentResponse): Assignment {
+    static fromResponse(input: AssignmentResponse): Assignment {
         return new Assignment(
             input.id,
             input.workflowId,
             input.state,
-            input.state !== AssignmentState.New,
             input.relation,
             input.decision,
         );

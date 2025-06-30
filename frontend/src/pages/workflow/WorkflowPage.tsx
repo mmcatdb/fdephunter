@@ -49,10 +49,10 @@ WorkflowPage.loader = async ({ params: { workflowId } }: { params: Params<'workf
     if (!responses[3].status)
         throw new Error('Failed to load FD classes');
 
-    const jobResult = responses[4].status ? JobResult.fromServer(responses[4].data) : undefined;
+    const jobResult = responses[4].status ? JobResult.fromResponse(responses[4].data) : undefined;
 
     return {
-        workflow: Workflow.fromServer(responses[0].data),
+        workflow: Workflow.fromResponse(responses[0].data),
         lattices: responses[1].data,
         dataset: responses[2].data,
         fdClasses: responses[3].data,

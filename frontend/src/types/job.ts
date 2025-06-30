@@ -37,7 +37,7 @@ export class Job {
         readonly progress: number, // from 0 to 1
     ) {}
 
-    static fromServer(input: JobResponse): Job {
+    static fromResponse(input: JobResponse): Job {
         const prevProgress = progressCache.get(input.id) ?? 0;
         const progress = computeNextProgress(prevProgress, input.state);
         progressCache.set(input.id, progress);
@@ -82,7 +82,7 @@ export class JobResult {
         readonly relation: ArmstrongRelation,
     ) {}
 
-    static fromServer(input: JobResultResponse): JobResult {
+    static fromResponse(input: JobResultResponse): JobResult {
         return new JobResult(
             input.id,
             input.relation,

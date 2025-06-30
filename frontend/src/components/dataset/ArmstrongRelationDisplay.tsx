@@ -150,7 +150,7 @@ type ExampleRowDisplayProps = {
 };
 
 function ExampleRowDisplay({ relation, row, rowIndex, assignRow, assignments, gridState }: ExampleRowDisplayProps) {
-    const maxSetCols = row.maxSet.map(index => relation.columns[index]);
+    const maxSetCols = row.maxSetElement.map(index => relation.columns[index]);
     const exampleBgClass = row.isPositive ? 'bg-danger-400' : 'bg-warning-400';
     const { leftClass, rightClass } = getSpecialCellClasses(rowIndex);
 
@@ -180,7 +180,7 @@ function ExampleRowDisplay({ relation, row, rowIndex, assignRow, assignments, gr
         </div>
 
         {row.values.map((value, colIndex) => (
-            <div key={colIndex} className={getCellClass(rowIndex, colIndex, row.maxSet.includes(colIndex))}>
+            <div key={colIndex} className={getCellClass(rowIndex, colIndex, row.maxSetElement.includes(colIndex))}>
                 {value}
             </div>
         ))}

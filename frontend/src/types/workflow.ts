@@ -23,7 +23,7 @@ export enum WorkflowState {
     DisplayFinalFDs = 'FINAL',
 }
 
-export type WorkflowFromServer = {
+export type WorkflowResponse = {
     id: string;
     state: WorkflowState;
     iteration: number;
@@ -39,7 +39,7 @@ export class Workflow {
         readonly datasetName: string | undefined,
     ) {}
 
-    static fromServer(input: WorkflowFromServer): Workflow {
+    static fromResponse(input: WorkflowResponse): Workflow {
         return new Workflow(
             input.id,
             input.state,

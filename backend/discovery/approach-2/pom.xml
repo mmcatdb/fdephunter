@@ -28,15 +28,15 @@
             <version>1.2-SNAPSHOT</version>
         </dependency>-->
         <dependency>
-            <groupId>de.uni.passau</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>algorithm_integration</artifactId>
-            <version>BETA</version>
+            <version>${project.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>de.uni.passau</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>utils</artifactId>
-            <version>BETA</version>
+            <version>${project.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
@@ -46,9 +46,9 @@
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>de.uni.passau</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>core</artifactId>
-            <version>BETA</version>
+            <version>${project.version}</version>
             <type>jar</type>
         </dependency>
     </dependencies>

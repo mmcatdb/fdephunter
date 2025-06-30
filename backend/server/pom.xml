@@ -4,12 +4,12 @@
     
     <parent>
         <groupId>de.uni.passau</groupId>
-        <artifactId>fd-cleaner</artifactId>
+        <artifactId>fdephunter</artifactId>
         <version>BETA</version>
     </parent>
     
     <artifactId>server</artifactId>
-    <name>FD Cleaner Server</name>
+    <name>FDepHunter Server</name>
     
     <properties>
         <exec.mainClass>de.uni.passau.server.App</exec.mainClass>
@@ -65,28 +65,28 @@
         </dependency>
 
         <dependency>
-            <groupId>de.uni.passau</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>core</artifactId>
-            <version>BETA</version>
-            <type>jar</type>
+            <version>${project.version}</version>
         </dependency>
+
         <dependency>
-            <groupId>de.uni.passau</groupId>
-            <artifactId>function-api</artifactId>
-            <version>BETA</version>
-            <type>jar</type>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>algorithms</artifactId>
+            <version>${project.version}</version>
         </dependency>
+
+       <!-- Deprecated. -->
         <dependency>
-            <groupId>de.uni.passau</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>approach-1</artifactId>
-            <version>BETA</version>
-            <type>jar</type>
+            <version>${project.version}</version>
         </dependency>
+        <!-- Deprecated. -->
         <dependency>
-            <groupId>de.uni.passau</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>approach-2</artifactId>
-            <version>BETA</version>
-            <type>jar</type>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
     

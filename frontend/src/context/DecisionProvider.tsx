@@ -62,7 +62,7 @@ function createDefaultDecision(relation: ExampleRelation, inputDecision: Example
         : relation.columns.map((name, colIndex) => ({
             colIndex,
             name,
-            status: relation.exampleRow.maxSet.includes(colIndex) ? undefined : DecisionColumnStatus.Undecided,
+            status: relation.exampleRow.maxSetElement.includes(colIndex) ? undefined : DecisionColumnStatus.Undecided,
             reasons: [],
         }));
 

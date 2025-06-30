@@ -19,10 +19,9 @@
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>de.uni.passau</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>core</artifactId>
-            <version>BETA</version>
-            <type>jar</type>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

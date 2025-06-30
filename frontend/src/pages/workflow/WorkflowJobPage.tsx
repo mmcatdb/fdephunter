@@ -61,5 +61,5 @@ WorkflowJobPage.loader = async ({ params: { workflowId } }: { params: Params<'wo
     if (!response.status)
         throw new Error('Failed to load job');
 
-    return Job.fromServer(response.data);
+    return Job.fromResponse(response.data);
 };

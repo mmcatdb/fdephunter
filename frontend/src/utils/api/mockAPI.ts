@@ -1,6 +1,6 @@
 import { type DataResult, type Result } from '@/types/api/result';
 import { type AssignmentInfo, AssignmentState, type AssignmentResponse, type AssignmentInit, DecisionStatus, type ExampleDecision, DecisionColumnStatus } from '@/types/assignment';
-import { WorkflowState, type WorkflowFromServer } from '@/types/workflow';
+import { WorkflowState, type WorkflowResponse } from '@/types/workflow';
 import { type CreateJobResponse } from './routes/workflows';
 import { type JobResultResponse, JobState, type ExecuteDiscoveryParams, type ExecuteRediscoveryParams, type JobResponse } from '@/types/job';
 import { v4 } from 'uuid';
@@ -190,12 +190,12 @@ const decisionToExample = {
 
 // Workflows
 
-type WorkflowDB = WorkflowFromServer & {
+type WorkflowDB = WorkflowResponse & {
     jobId?: string;
     assignmentIds: string[];
 };
 
-async function createWorkflow(): Promise<Result<WorkflowFromServer>> {
+async function createWorkflow(): Promise<Result<WorkflowResponse>> {
     await wait();
 
     const workflow: WorkflowDB = {
@@ -211,7 +211,7 @@ async function createWorkflow(): Promise<Result<WorkflowFromServer>> {
     return success(workflow);
 }
 
-async function getWorkflow(workflowId: string): Promise<Result<WorkflowFromServer>> {
+async function getWorkflow(workflowId: string): Promise<Result<WorkflowResponse>> {
     await wait();
 
     const workflow = get<WorkflowDB>(workflowId);
@@ -285,7 +285,7 @@ async function executeRediscovery(workflowId: string, params: ExecuteRediscovery
     });
 }
 
-async function acceptAllExamples(workflowId: string): Promise<Result<WorkflowFromServer>> {
+async function acceptAllExamples(workflowId: string): Promise<Result<WorkflowResponse>> {
     await wait();
 
     const workflow = get<WorkflowDB>(workflowId);
@@ -329,7 +329,7 @@ async function acceptAllExamples(workflowId: string): Promise<Result<WorkflowFro
         const columns = relation.columns.map((name, colIndex) => ({
             colIndex,
             name,
-            status: relation.exampleRow.maxSet.includes(colIndex) ? undefined : DecisionColumnStatus.Valid,
+            status: relation.exampleRow.maxSetElement.includes(colIndex) ? undefined : DecisionColumnStatus.Valid,
             reasons: [],
         }));
         const init = { status: DecisionStatus.Accepted, columns } satisfies ExampleDecision;

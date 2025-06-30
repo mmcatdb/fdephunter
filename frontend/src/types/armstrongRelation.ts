@@ -28,8 +28,8 @@ export type ExampleRelation = {
 
 export type ExampleRow = {
     values: string[];
-    /** The indexes of the columns that form the max set. */
-    maxSet: number[];
+    /** The indexes of the columns that form the max set element. */
+    maxSetElement: number[];
     /** Whether it is a negative or positive example. */
     isPositive: boolean;
     state: ExampleState;

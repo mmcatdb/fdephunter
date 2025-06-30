@@ -74,7 +74,7 @@ WorkflowSettingsPage.loader = async (): Promise<WorkflowSettingsLoaded> => {
     //     throw new Error('Failed to load datasets');
 
     // return {
-    //     datasets: datasetsResponse.data.map(Dataset.fromServer),
+    //     datasets: datasetsResponse.data.map(Dataset.fromResponse),
     // };
 
     const datasetsResponse = await mockAPI.datasets.getAll();

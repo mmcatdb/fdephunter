@@ -51,7 +51,7 @@ export function WorkflowFinalPage() {
         if (!response.status)
             return;
 
-        window.open(routes.workflow.settings.resolve({ workflowId: Workflow.fromServer(response.data).id }), '_blank');
+        window.open(routes.workflow.settings.resolve({ workflowId: Workflow.fromResponse(response.data).id }), '_blank');
     }
 
     const fds = useMemo(() => createFdEdges(fdClasses, jobResult!.relation.columns), []);

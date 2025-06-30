@@ -1,18 +1,18 @@
 import type { Empty, StringLike } from '@/types/api/routes';
 import { GET, POST } from '../routeFunctions';
 import type { ExecuteDiscoveryParams, ExecuteRediscoveryParams, JobResponse, JobResultResponse } from '@/types/job';
-import { type WorkflowFromServer } from '@/types/workflow';
+import { type WorkflowResponse } from '@/types/workflow';
 
 export type CreateJobResponse = {
-    workflow: WorkflowFromServer;
+    workflow: WorkflowResponse;
     job: JobResponse;
 };
 
 export const workflows = {
-    create: POST<Empty, WorkflowFromServer, Empty>(
+    create: POST<Empty, WorkflowResponse, Empty>(
         () => `/workflows/create`,
     ),
-    get: GET<{ workflowId: StringLike }, WorkflowFromServer>(
+    get: GET<{ workflowId: StringLike }, WorkflowResponse>(
         u => `/workflows/${u.workflowId}`,
     ),
     executeDiscovery: POST<{ workflowId: StringLike }, CreateJobResponse, ExecuteDiscoveryParams>(

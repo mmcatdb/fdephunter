@@ -51,7 +51,7 @@ WorkflowDashboardPage.loader = async ({ params: { workflowId } }: { params: Para
         throw new Error('Failed to load assignments');
 
     return {
-        jobResult: JobResult.fromServer(jobResponse.data),
+        jobResult: JobResult.fromResponse(jobResponse.data),
         assignments: assignmentsResponse.data,
     };
 };
@@ -109,8 +109,8 @@ export function WorkflowOverviewPage() {
 
         // TODO Is this needed?
         // onNextStep(
-        //     Workflow.fromServer(response.data.workflow),
-        //     Job.fromServer(response.data.job),
+        //     Workflow.fromResponse(response.data.workflow),
+        //     Job.fromResponse(response.data.job),
         // );
 
         void navigate(routes.workflow.job.resolve({ workflowId: workflow.id }));

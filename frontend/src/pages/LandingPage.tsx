@@ -18,7 +18,7 @@ export function LandingPage() {
             return;
         }
 
-        void navigate(routes.workflow.settings.resolve({ workflowId: Workflow.fromServer(response.data).id }));
+        void navigate(routes.workflow.settings.resolve({ workflowId: Workflow.fromResponse(response.data).id }));
     }
 
     return (

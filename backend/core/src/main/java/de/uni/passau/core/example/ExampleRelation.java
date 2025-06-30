@@ -15,8 +15,8 @@ public class ExampleRelation {
     public static class ExampleRow {
 
         String[] values;
-        /** The indexes of the columns that form the max set. */
-        int[] maxSet;
+        /** The indexes of the columns that form the max set element. */
+        int[] maxSetElement;
         /** Whether it is a negative or positive example. */
         boolean isPositive;
         /** A state of the evaluation of the whole example. */
