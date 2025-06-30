@@ -1,8 +1,7 @@
 package de.uni.passau.server.controller.response;
 
 import de.uni.passau.core.example.ExampleDecision;
-import de.uni.passau.core.example.ExampleRelation;
-import de.uni.passau.server.model.AssignmentNode.AssignmentState;
+import de.uni.passau.core.example.ExampleRow;
 import de.uni.passau.server.repository.AssignmentRepository.AssignmentNodeGroup;
 
 import java.io.Serializable;
@@ -11,7 +10,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public record AssignmentResponse(
     String id,
-    AssignmentState state,
+    // ExampleState state,
     int rowIndex,
     String workflowId,
     ExampleRelation relation,
@@ -34,5 +33,17 @@ public record AssignmentResponse(
         // FIXME
         return null;
     }
+
+    /**
+     * An example consists of a reference row and an example row. The two rows form a "relation".
+     */
+    public record ExampleRelation(
+        /** Names of the columns. They are expected to be unique. */
+        String[] columns,
+        /** Values of the reference row. */
+        String[] referenceRow,
+        /** The example relation contains exactly one example row. */
+        ExampleRow exampleRow
+    ) {}
 
 }

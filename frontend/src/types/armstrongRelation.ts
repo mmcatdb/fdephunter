@@ -44,9 +44,8 @@ export enum ExampleState {
 
 /**
  * The lattice of of elements for a specific class. Each element is a set of columns, the class is also a column. Each element then corresponds to an element of the max set for the class (max set of attributes of on the LHS that do not form a functional dependency with the class on the RHS).
- * No, the lattice is not from Scotland, although it could be.
  */
-export type McLattice = {
+export type Lattice = {
     /** Name of the class column. */
     classColumn: string;
     /** Names of the columns. They are expected to be unique. */

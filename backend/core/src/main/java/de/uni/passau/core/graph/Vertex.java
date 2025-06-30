@@ -10,6 +10,7 @@ import java.util.Objects;
  * which is a string that uniquely identifies the vertex within the graph. A vertex can have incoming edges, which are
  * edges that connect to the vertex and have the vertex as their destination.
  * This class is mutable, meaning that its state can be changed after it is constructed.
+ * @deprecated
  */
 public class Vertex {
 

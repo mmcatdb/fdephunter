@@ -8,6 +8,7 @@ import java.util.Objects;
  * numerical value that represents the cost or distance associated with traversing the edge.
  * This class is immutable, meaning that its state cannot be changed after it is constructed. To change the weight of an
  * edge, a new edge object must be created with the updated weight.
+ * @deprecated
  */
 public class Edge {
 

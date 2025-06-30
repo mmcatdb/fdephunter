@@ -5,13 +5,14 @@ import de.uni.passau.core.graph.WeightedGraph;
 
 import java.util.List;
 
+/** @deprecated */
 public class FDGraphBuilder {
 
     /**
      * Build a graph from a list of functional dependencies.
      * @param fds the list of functional dependencies
      * @return the graph
-     * 
+     *
      * TODO: list of FDs has no weight. We may compute the weight on some criteria later. Currently, all edges have weight 0.
      */
     public WeightedGraph buildGraph(List<FDInit> fds) {
@@ -20,7 +21,7 @@ public class FDGraphBuilder {
         for (FDInit fd : fds) {
             List<String> lhs = fd.lhs();
             String rhs = fd.rhs();
-            
+
             Vertex rhsVertex = graph.__getVertex(rhs);
             if (rhsVertex == null)
                 rhsVertex = graph.__addVertex(rhs);

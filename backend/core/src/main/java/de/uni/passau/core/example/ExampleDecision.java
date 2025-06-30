@@ -15,7 +15,6 @@ public record ExampleDecision(
     DecisionColumn[] columns
 ) implements Serializable {
 
-
     public enum DecisionStatus {
         ACCEPTED,
         REJECTED,
@@ -30,9 +29,9 @@ public record ExampleDecision(
     ) implements Serializable {}
 
     public enum DecisionColumnStatus {
-        UNDECIDED,
         VALID,
         INVALID,
+        UNDECIDED,
     }
 
 }

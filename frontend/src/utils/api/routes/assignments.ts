@@ -1,7 +1,7 @@
 import type { StringLike } from '@/types/api/routes';
 import { GET, POST } from '../routeFunctions';
 import { type AssignmentInit, type ExampleDecision, type AssignmentResponse } from '@/types/assignment';
-import { type McLattice } from '@/types/armstrongRelation';
+import { type Lattice } from '@/types/armstrongRelation';
 
 export const assignments = {
     create: POST<AssignmentInit, AssignmentResponse, { workflowId: StringLike }>(
@@ -19,7 +19,7 @@ export const assignments = {
     reset: POST<{ assignmentId: StringLike }, AssignmentResponse>(
         u => `/assignments/${u.assignmentId}/reset`,
     ),
-    getLattices: POST<{ workflowId: StringLike }, McLattice[]>(
+    getLattices: POST<{ workflowId: StringLike }, Lattice[]>(
         u => `/workflows/${u.workflowId}/lattices`,
     ),
 };

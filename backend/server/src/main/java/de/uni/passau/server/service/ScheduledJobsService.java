@@ -4,20 +4,17 @@ import de.uni.passau.core.approach.AbstractApproach.ApproachName;
 import de.uni.passau.core.approach.FDGraphBuilder;
 import de.uni.passau.core.approach.FDInit;
 import de.uni.passau.core.dataset.Dataset;
-import de.uni.passau.core.example.NegativeExampleBuilder;
 import de.uni.passau.core.graph.Vertex;
 import de.uni.passau.core.graph.WeightedGraph;
 import de.uni.passau.server.approach.HyFDAlgorithm;
 import de.uni.passau.server.approach.OurApproachAlgorithm;
 import de.uni.passau.server.model.DiscoveryJobNode;
-import de.uni.passau.server.model.NegativeExampleNode;
 import de.uni.passau.server.model.WorkflowNode;
 import de.uni.passau.server.model.DiscoveryJobNode.DiscoveryJobState;
 import de.uni.passau.server.model.WorkflowNode.WorkflowState;
 import de.uni.passau.server.repository.DiscoveryJobRepository;
 import de.uni.passau.server.repository.WorkflowRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.LoggerFactory;
@@ -37,9 +34,6 @@ public class ScheduledJobsService {
 
     @Autowired
     private DatasetService datasetService;
-
-    @Autowired
-    private NegativeExampleService negativeExampleService;
 
     @Autowired
     private WorkflowRepository workflowRepository;
@@ -67,23 +61,8 @@ public class ScheduledJobsService {
             List<Vertex> dependencyClasses = graph.__getRankedVertices();
             LOGGER.info("RANKED VERTICES: " + graph.__getRankedVertices());
 
-            final List<NegativeExampleNode> negativeExamples = new ArrayList<>();
+            // TODO create examples
 
-            for (final var dependencyClass : dependencyClasses) {
-                LOGGER.info("Iterating class {}", dependencyClass);
-
-                final var clazz = negativeExampleService.createClass(jobResult.getId(), dependencyClass);
-                LOGGER.info("Class created: {}", clazz);
-
-                final var builder = new NegativeExampleBuilder(dataset);
-                // TODO: TEMPORARY SETTING 5! THE UNDERLYING METHOD MUST BE BETTER IMPLEMENTED
-                final var negativeExample = builder.createNew(dependencyClass, 5);
-
-                final var example = negativeExampleService.createExample(clazz.getId(), negativeExample);
-                negativeExamples.add(example);
-            }
-
-            LOGGER.info("NEGATIVE EXAMPLES: {}", negativeExamples);
 
             DiscoveryJobNode updatedJob = discoveryJobRepository.setState(group.job().getId(), DiscoveryJobState.FINISHED);
             LOGGER.info("Job {} has finished.", updatedJob.getId());

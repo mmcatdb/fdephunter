@@ -10,7 +10,7 @@ import { Page, Sidebar, TopbarContent } from '@/components/layout';
 import { mockAPI } from '@/utils/api/mockAPI';
 import { WorkflowProgressDisplay } from '@/components/worklow/WorkflowProgressDisplay';
 import { Workflow } from '@/types/workflow';
-import { type McLattice } from '@/types/armstrongRelation';
+import { type Lattice } from '@/types/armstrongRelation';
 // import { API } from '@/utils/api';
 
 export function AssignmentPage() {
@@ -51,7 +51,7 @@ type AssignmentLoaded = {
     assignment: Assignment;
     /** @deprecated Workflow shouldn't be available from the assignment. */
     workflow: Workflow;
-    lattices: McLattice[];
+    lattices: Lattice[];
 };
 
 AssignmentPage.loader = async ({ params: { assignmentId } }: { params: Params<'assignmentId'> }): Promise<AssignmentLoaded> => {

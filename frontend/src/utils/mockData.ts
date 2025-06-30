@@ -1,4 +1,4 @@
-import { type ArmstrongRelation, ExampleState, type McLattice, McType } from '@/types/armstrongRelation';
+import { type ArmstrongRelation, ExampleState, type Lattice, McType } from '@/types/armstrongRelation';
 import { type DatasetResponse, DatasetType, type DatasetData } from '@/types/dataset';
 
 export const MOCK_ARMSTRONG_RELATIONS: ArmstrongRelation[] = [ {
@@ -98,7 +98,7 @@ export const MOCK_ARMSTRONG_RELATIONS: ArmstrongRelation[] = [ {
     lhsSize: 2,
 } ];
 
-export const MOCK_LATTICES: McLattice[][] = [
+export const MOCK_LATTICES: Lattice[][] = [
     [ {
         classColumn: 'tconst',
         columns: [ 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],

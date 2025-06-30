@@ -4,7 +4,7 @@ import { Outlet, type Params, useLoaderData } from 'react-router';
 import { Sidebar } from '@/components/layout';
 // import { API } from '@/utils/api';
 import { mockAPI } from '@/utils/api/mockAPI';
-import { type McLattice } from '@/types/armstrongRelation';
+import { type Lattice } from '@/types/armstrongRelation';
 import { type DatasetData } from '@/types/dataset';
 import { type MockFDClass } from '@/utils/mockData';
 import { JobResult } from '@/types/job';
@@ -23,7 +23,7 @@ export function WorkflowPage() {
 
 export type WorkflowLoaded = {
     workflow: Workflow;
-    lattices: McLattice[];
+    lattices: Lattice[];
     dataset: DatasetData;
     fdClasses: MockFDClass[];
     jobResult: JobResult | undefined;

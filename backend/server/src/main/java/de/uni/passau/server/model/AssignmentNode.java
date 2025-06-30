@@ -13,13 +13,6 @@ import de.uni.passau.core.example.ExampleDecision;
 @Node("Assignment")
 public class AssignmentNode {
 
-    public enum AssignmentState {
-        NEW,
-        ACCEPTED,
-        REJECTED,
-        DONT_KNOW,
-    }
-
     @Id @GeneratedValue(UUIDStringGenerator.class)
     private String id;
 
@@ -31,8 +24,8 @@ public class AssignmentNode {
     @Property
     public ExampleDecision decision;
 
-    @Property
-    public AssignmentState state;
+    // @Property
+    // public ExampleState state;
 
     @Property
     public int rowIndex;
@@ -42,7 +35,7 @@ public class AssignmentNode {
 
     public static AssignmentNode createNew() {
         final var assignment = new AssignmentNode();
-        assignment.state = AssignmentState.NEW;
+        // assignment.state = ExampleState.NEW;
         assignment.createdAt = new Date().getTime();
 
         return assignment;

@@ -10,6 +10,7 @@ import java.util.Map;
  * A weighted graph is a graph in which each edge has a weight or cost associated with it. This class represents a
  * weighted graph using an adjacency list data structure.
  * This class is mutable, meaning that its state can be changed after it is constructed.
+ * @deprecated
  */
 public class WeightedGraph {
 
@@ -175,7 +176,7 @@ public class WeightedGraph {
      * Returns the vertex with the given ranking. Only vertices with incoming edges are considered.
      * If the ranking is negative, this method throws an IllegalArgumentException.
      * If the ranking is greater than or equal to the number of vertices with incoming edges, this method returns null.
-     * 
+     *
      * @param ranking the ranking of the vertex to get
      * @return the vertex with the given ranking, or null if the ranking is greater than or equal to the number of vertices with incoming edges
      */
