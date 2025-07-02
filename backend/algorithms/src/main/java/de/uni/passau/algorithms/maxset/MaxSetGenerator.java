@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package de.uni.passau.algorithms.maxset;
 
 import java.util.LinkedList;
@@ -43,7 +39,7 @@ public class MaxSetGenerator {
 	public List<MaxSet> generateMaxSet() throws Exception {
 
 		this.maxSet = new LinkedList<>();
-		
+
 		for (int i = 0; i < this.numberOfAttributes; ++i) {
 			// System.out.println("A_index: " + i);
 			executeMax_Set_Task(i);

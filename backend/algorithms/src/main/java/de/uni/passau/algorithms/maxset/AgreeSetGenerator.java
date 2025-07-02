@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package de.uni.passau.algorithms.maxset;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
