@@ -1,6 +1,6 @@
 package de.uni.passau.core.model;
 
-import java.util.Arrays;
+import java.util.BitSet;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -9,54 +9,36 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class ColumnSet implements Comparable<ColumnSet> {
 
-    /**
-     * Ordered indexes of the column indexes.
-     * It's a set, although it's represented as an array.
-     */
-    public final int[] columns;
+    /** Indexes of the columns. */
+    public final BitSet columns;
 
-    private ColumnSet(int[] columns) {
+    private ColumnSet(BitSet columns) {
         this.columns = columns;
     }
 
-    public static ColumnSet fromSorted(int[] columns) {
-        final int[] copy = copyAndCheckInputColumns(columns, false);
-        return new ColumnSet(copy);
-    }
-
-    public static ColumnSet fromUnsorted(int[] unsortedColumns) {
-        final int[] copy = copyAndCheckInputColumns(unsortedColumns, true);
-        return new ColumnSet(copy);
-    }
-
-    private static int[] copyAndCheckInputColumns(int[] input, boolean doSort) {
-        if (input.length == 0)
+    public static ColumnSet fromIndexes(int[] columns) {
+        if (columns.length == 0)
             throw new IllegalArgumentException("ColumnSet must contain at least one column.");
 
-        final int[] output = Arrays.copyOf(input, input.length);
+        final BitSet bitSet = new BitSet();
+        for (int column : columns)
+            bitSet.set(column);
 
-        if (doSort)
-            java.util.Arrays.sort(output);
-
-        // Check if the columns are sorted or not unique.
-        for (int i = 0; i < output.length - 1; i++) {
-            if (output[i] >= output[i + 1])
-                throw new IllegalArgumentException("ColumnSet columns must be sorted in ascending order.");
-        }
-
-        return output;
+        return new ColumnSet(bitSet);
     }
 
-    @Override public int compareTo(ColumnSet o) {
-        if (this.columns.length != o.columns.length)
-            return this.columns.length - o.columns.length;
+    @Override public int compareTo(ColumnSet other) {
+        if (this.columns.size() != other.columns.size())
+            return this.columns.size() - other.columns.size();
 
-        for (int i = 0; i < this.columns.length; i++) {
-            if (this.columns[i] != o.columns[i])
-                return this.columns[i] - o.columns[i];
-        }
+        final BitSet xor = (BitSet) columns.clone();
+        xor.xor(other.columns);
 
-        return 0;
+        final int firstDifferent = xor.length() - 1;
+        if(firstDifferent == -1)
+            return 0;
+
+        return other.columns.get(firstDifferent) ? 1 : -1;
     }
 
     @Override public String toString() {

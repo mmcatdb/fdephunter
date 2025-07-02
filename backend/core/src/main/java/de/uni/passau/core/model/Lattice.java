@@ -60,7 +60,7 @@ public class Lattice {
         final int[] maxIndexes = IntStream.range(columnCount - cellSize, columnCount).toArray();
 
         while (indexes[0] <= maxIndexes[0]) {
-            output.add(ColumnSet.fromSorted(indexes));
+            output.add(ColumnSet.fromIndexes(indexes));
 
             int position = cellSize - 1;
             indexes[position]++;

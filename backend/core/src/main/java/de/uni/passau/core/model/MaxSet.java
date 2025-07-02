@@ -4,7 +4,7 @@ import java.util.List;
 
 /**
  * Contains all maximal set elements for given class.
- * Each element (represented by {@link ColumnSet}) is a maximal set of columns such that when put on LHS, it doesn't form a functional dependency (if the given class is on RHS).
+ * Each element (represented by column set {@link ColumnSet}) is a maximal set of columns such that when put on LHS, it doesn't form a functional dependency (if the given class is on RHS).
  */
 public class MaxSet {
 
