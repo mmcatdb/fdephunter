@@ -17,8 +17,7 @@ export const workflow = {
     continueWorkflow: POST<{ workflowId: Id }, CreateJobResponse, ContinueWorkflowRequest>(
         u => `/workflows/${u.workflowId}/continue`,
     ),
-    acceptAllExamples: POST<{ workflowId: Id }, WorkflowResponse>(
-        // TODO
+    acceptAllAssignments: POST<{ workflowId: Id }, WorkflowResponse>(
         u => `/workflows/${u.workflowId}/accept-all`,
     ),
     getLastJob: GET<{ workflowId: Id }, JobResponse>(

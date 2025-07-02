@@ -15,7 +15,7 @@ import it.unimi.dsi.fastutil.longs.LongList;
 public class ColumnSet implements Comparable<ColumnSet> {
 
     /** Indexes of the columns. */
-    public final BitSet columns;
+    private final BitSet columns;
 
     private ColumnSet(BitSet columns) {
         this.columns = columns;
@@ -34,20 +34,6 @@ public class ColumnSet implements Comparable<ColumnSet> {
             bitSet.set(column);
 
         return new ColumnSet(bitSet);
-    }
-
-    @Override public int compareTo(ColumnSet other) {
-        if (this.columns.size() != other.columns.size())
-            return this.columns.size() - other.columns.size();
-
-        final BitSet xor = (BitSet) columns.clone();
-        xor.xor(other.columns);
-
-        final int firstDifferent = xor.length() - 1;
-        if(firstDifferent == -1)
-            return 0;
-
-        return other.columns.get(firstDifferent) ? 1 : -1;
     }
 
     @Override public String toString() {
@@ -75,8 +61,11 @@ public class ColumnSet implements Comparable<ColumnSet> {
 		return bits;
 	}
 
-    @Override
-    public ColumnSet clone() {
+    public int size() {
+        return columns.cardinality();
+    }
+
+    @Override public ColumnSet clone() {
         return new ColumnSet((BitSet) this.columns.clone());
     }
 
@@ -116,8 +105,21 @@ public class ColumnSet implements Comparable<ColumnSet> {
         return new ColumnSet(result);
     }
 
-    @Override
-    public boolean equals(Object obj) {
+    @Override public int compareTo(ColumnSet other) {
+        if (this.columns.size() != other.columns.size())
+            return this.columns.size() - other.columns.size();
+
+        final BitSet xor = (BitSet) columns.clone();
+        xor.xor(other.columns);
+
+        final int firstDifferent = xor.length() - 1;
+        if(firstDifferent == -1)
+            return 0;
+
+        return other.columns.get(firstDifferent) ? 1 : -1;
+    }
+
+    @Override public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         ColumnSet other = (ColumnSet) obj;

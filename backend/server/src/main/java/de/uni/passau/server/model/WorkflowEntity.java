@@ -2,6 +2,7 @@ package de.uni.passau.server.model;
 
 import java.util.UUID;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -15,25 +16,29 @@ public class WorkflowEntity {
         return id;
     }
 
+    public @Nullable UUID datasetId;
+
     public WorkflowState state;
 
     public Integer iteration;
 
-    public UUID datasetId;
+    public boolean isEvaluatingPositives;
 
-    public WorkflowEntity(UUID id, WorkflowState state, Integer iteration, UUID datasetId) {
+    public WorkflowEntity(UUID id, UUID datasetId, WorkflowState state, Integer iteration, boolean isEvaluatingPositives) {
         this.id = id;
+        this.datasetId = datasetId;
         this.state = state;
         this.iteration = iteration;
-        this.datasetId = datasetId;
+        this.isEvaluatingPositives = isEvaluatingPositives;
     }
 
     public static WorkflowEntity create() {
         return new WorkflowEntity(
             UUID.randomUUID(),
+            null,
             WorkflowState.INITIAL_SETTINGS,
-            0,
-            null
+            1,
+            false
         );
     }
 

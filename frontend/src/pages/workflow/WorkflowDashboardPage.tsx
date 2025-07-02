@@ -16,6 +16,7 @@ import { createFdEdges } from './WorkflowResultsPage';
 import { type Id } from '@/types/id';
 import { type DatasetData } from '@/types/dataset';
 import { type FdSet } from '@/types/functionalDependency';
+import { API } from '@/utils/api/api';
 
 export function WorkflowDashboardPage() {
     const { workflow } = useRouteLoaderData<WorkflowLoaded>(routes.workflow.$id)!;
@@ -41,7 +42,7 @@ WorkflowDashboardPage.loader = async ({ params: { workflowId } }: { params: Para
     if (!workflowId)
         throw new Error('Missing workflow ID');
 
-    const response = await mockAPI.assignment.getAssignments(workflowId);
+    const response = await API.assignment.getAssignments(undefined, { workflowId });
     if (!response.status)
         throw new Error('Failed to load assignments');
 
@@ -90,7 +91,7 @@ export function WorkflowOverviewPage() {
 
     async function acceptAll() {
         setFetching(FID_ACCEPT_ALL);
-        const response = await mockAPI.workflow.acceptAllExamples(workflow.id);
+        const response = await API.workflow.acceptAllAssignments({ workflowId: workflow.id });
         if (!response.status) {
             setFetching(undefined);
             return;

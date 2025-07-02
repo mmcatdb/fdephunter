@@ -58,8 +58,7 @@ AssignmentPage.loader = async ({ params: { assignmentId } }: { params: Params<'a
     if (!assignmentId)
         throw new Error('Missing assignment ID');
 
-    // const response = await API.assignments.get(undefined, { assignmentId });
-    const response = await mockAPI.assignment.getAssignment(assignmentId);
+    const response = await API.assignment.getAssignment(undefined, { assignmentId });
     if (!response.status)
         throw new Error('Failed to load assignment');
 

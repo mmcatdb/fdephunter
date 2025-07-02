@@ -1,8 +1,13 @@
 package de.uni.passau.server.service;
 
 import de.uni.passau.core.example.ExampleDecision;
-import de.uni.passau.server.model.AssignmentNode;
+import de.uni.passau.core.example.ExampleDecision.DecisionColumn;
+import de.uni.passau.core.example.ExampleDecision.DecisionColumnStatus;
+import de.uni.passau.core.example.ExampleDecision.DecisionStatus;
+import de.uni.passau.server.model.WorkflowEntity;
 import de.uni.passau.server.repository.AssignmentRepository;
+
+import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,23 +18,25 @@ public class AssignmentService {
     @Autowired
     private AssignmentRepository assignmentRepository;
 
-    public AssignmentNode createAssignment(String exampleId) {
-        var assignment = AssignmentNode.createNew();
+    public void acceptAllAssignments(WorkflowEntity workflow) {
+        final var openAssignments = assignmentRepository.findAllByWorkflowId(workflow.getId()).stream()
+            .filter(assignment -> assignment.exampleRow.decision == null || assignment.exampleRow.isPositive == workflow.isEvaluatingPositives)
+            // TODO something like which assignments are active in the workflow
+            .filter(assignment -> assignment.exampleRow.maxSetElement.size() == workflow.iteration)
+            .toList();
 
-        assignment = assignmentRepository.save(assignment);
+        for (final var assignment : openAssignments) {
+            final var columns = new ArrayList<DecisionColumn>();
 
-        assignmentRepository.saveBelongsToExample(assignment.getId(), exampleId);
+            for (int i = 0; i < assignment.columns.length; i++) {
+                final var isEvaluated = !assignment.exampleRow.maxSetElement.get(i);
+                columns.add(new DecisionColumn(isEvaluated ? DecisionColumnStatus.VALID : null, new ArrayList<String>()));
+            }
 
-        return assignment;
-    }
+            assignment.exampleRow.decision = new ExampleDecision(DecisionStatus.ACCEPTED, columns.toArray(DecisionColumn[]::new));
+        }
 
-    public void evaluateAssignment(String assignmentId, ExampleDecision decisionObject) {
-        var assignment = assignmentRepository.findById(assignmentId).get();
-
-        assignment.decision = decisionObject;
-        // assignment.state = toState(decisionObject.status());
-
-        assignment = assignmentRepository.save(assignment);
+        assignmentRepository.saveAll(openAssignments);
     }
 
 }

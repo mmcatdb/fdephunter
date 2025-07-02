@@ -1,11 +1,10 @@
 import { type DataResult, type Result } from '@/types/api/result';
-import { type AssignmentResponse } from '@/types/assignment';
 import { WorkflowState, type WorkflowResponse } from '@/types/workflow';
 import { type StartWorkflowRequest, type CreateJobResponse, type ContinueWorkflowRequest } from './routes/workflow';
 import { JobState, type JobResponse } from '@/types/job';
 import { v4 } from 'uuid';
 import { DateTime } from 'luxon';
-import { type ArmstrongRelation, DecisionColumnStatus, DecisionStatus, type ExampleDecision, type ExampleRelation, type Lattice } from '@/types/armstrongRelation';
+import { type Lattice } from '@/types/armstrongRelation';
 import { MOCK_ARMSTRONG_RELATIONS, MOCK_DATASET_DATA, MOCK_FD_SETS, MOCK_LATTICES } from '../mockData';
 import { type DatasetData } from '@/types/dataset';
 import { type FdSet } from '@/types/functionalDependency';
@@ -17,15 +16,15 @@ export const mockAPI = {
         getDatasetData,
     },
     assignment: {
-        getAssignment,
-        getAssignments,
-        evaluateAssignment,
-        resetAssignment,
+        // getAssignment,
+        // getAssignments,
+        // evaluateAssignment,
+        // resetAssignment,
     },
     workflow: {
         startWorkflow,
         continueWorkflow,
-        acceptAllExamples,
+        // acceptAllAssignments,
         getLastJob,
     },
     view: {
@@ -36,11 +35,11 @@ export const mockAPI = {
 
 // Assignments
 
-type AssignmentDB = Omit<AssignmentResponse, 'relation'> & {
-    workflowId: Id;
-    iteration: number;
-    jobResultId?: string;
-};
+// type AssignmentDB = Omit<AssignmentResponse, 'relation'> & {
+//     workflowId: Id;
+//     iteration: number;
+//     jobResultId?: string;
+// };
 
 // async function createAssignment(init: AssignmentInit): Promise<Result<AssignmentResponse>> {
 //     await wait();
@@ -61,121 +60,121 @@ type AssignmentDB = Omit<AssignmentResponse, 'relation'> & {
 //     return success({ ...assignment, relation });
 // }
 
-type AssignmentInit = {
-    workflowId: Id;
-    rowIndex: number;
-};
+// type AssignmentInit = {
+//     workflowId: Id;
+//     rowIndex: number;
+// };
 
-function createAssignmentForWorkflow(init: AssignmentInit, workflow: WorkflowDB, jobResultId: Id): AssignmentDB {
-    const assignment: AssignmentDB = {
-        id: v4(),
-        workflowId: init.workflowId,
-        iteration: workflow.iteration,
-        rowIndex: init.rowIndex,
-        jobResultId,
-        decision: undefined,
-    };
+// function createAssignmentForWorkflow(init: AssignmentInit, workflow: WorkflowDB, jobResultId: Id): AssignmentDB {
+//     const assignment: AssignmentDB = {
+//         id: v4(),
+//         workflowId: init.workflowId,
+//         iteration: workflow.iteration,
+//         rowIndex: init.rowIndex,
+//         jobResultId,
+//         decision: undefined,
+//     };
 
-    workflow.assignmentIds.push(assignment.id);
+//     workflow.assignmentIds.push(assignment.id);
 
-    set(assignment);
-    set(workflow);
+//     set(assignment);
+//     set(workflow);
 
-    return assignment;
-}
+//     return assignment;
+// }
 
-function createExampleRelation({ workflowId, rowIndex }: { workflowId: Id, rowIndex: number }): ExampleRelation | undefined {
-    const workflow = get<WorkflowDB>(workflowId);
-    if (!workflow?.jobId)
-        return;
-    const job = get<JobResponse>(workflow.jobId);
-    if (!job?.resultId)
-        return;
-    const result = get<JobResultResponse>(job.resultId);
-    if (!result)
-        return;
+// function createExampleRelation({ workflowId, rowIndex }: { workflowId: Id, rowIndex: number }): ExampleRelation | undefined {
+//     const workflow = get<WorkflowDB>(workflowId);
+//     if (!workflow?.jobId)
+//         return;
+//     const job = get<JobResponse>(workflow.jobId);
+//     if (!job?.resultId)
+//         return;
+//     const result = get<JobResultResponse>(job.resultId);
+//     if (!result)
+//         return;
 
-    return armstrongRelationToExampleRelation(result.relation, rowIndex);
-}
+//     return armstrongRelationToExampleRelation(result.relation, rowIndex);
+// }
 
-function armstrongRelationToExampleRelation(relation: ArmstrongRelation, rowIndex: number): ExampleRelation {
-    return {
-        columns: relation.columns,
-        referenceRow: relation.referenceRow,
-        exampleRow: relation.exampleRows[rowIndex],
-    };
-}
+// function armstrongRelationToExampleRelation(relation: ArmstrongRelation, rowIndex: number): ExampleRelation {
+//     return {
+//         columns: relation.columns,
+//         referenceRow: relation.referenceRow,
+//         exampleRow: relation.exampleRows[rowIndex],
+//     };
+// }
 
-async function getAssignment(assignmentId: Id): Promise<Result<AssignmentResponse>> {
-    await wait();
+// async function getAssignment(assignmentId: Id): Promise<Result<AssignmentResponse>> {
+//     await wait();
 
-    const assignment = get<AssignmentDB>(assignmentId);
-    if (!assignment)
-        return error();
+//     const assignment = get<AssignmentDB>(assignmentId);
+//     if (!assignment)
+//         return error();
 
-    const relation = createExampleRelation(assignment);
-    return relation ? success({ ...assignment, relation }) : error();
-}
+//     const relation = createExampleRelation(assignment);
+//     return relation ? success({ ...assignment, relation }) : error();
+// }
 
-async function getAssignments(workflowId: Id): Promise<Result<AssignmentResponse[]>> {
-    await wait();
+// async function getAssignments(workflowId: Id): Promise<Result<AssignmentResponse[]>> {
+//     await wait();
 
-    const workflow = get<WorkflowDB>(workflowId);
-    if (!workflow)
-        return error();
+//     const workflow = get<WorkflowDB>(workflowId);
+//     if (!workflow)
+//         return error();
 
-    const assignments = workflow.assignmentIds
-        .map(id => get<AssignmentDB>(id))
-        .filter(a => !!a && a.iteration === workflow.iteration);
+//     const assignments = workflow.assignmentIds
+//         .map(id => get<AssignmentDB>(id))
+//         .filter(a => !!a && a.iteration === workflow.iteration);
 
-    return success(assignments as AssignmentResponse[]);
-}
+//     return success(assignments as AssignmentResponse[]);
+// }
 
-async function evaluateAssignment(assignmentId: Id, decision: ExampleDecision): Promise<Result<AssignmentResponse>> {
-    await wait();
+// async function evaluateAssignment(assignmentId: Id, decision: ExampleDecision): Promise<Result<AssignmentResponse>> {
+//     await wait();
 
-    const assignment = get<AssignmentDB>(assignmentId);
-    if (!assignment)
-        return error();
-    const workflow = get<WorkflowDB>(assignment.workflowId);
-    if (!workflow?.jobId)
-        return error();
-    const job = get<JobResponse>(workflow.jobId);
-    if (!job?.resultId)
-        return error();
-    const result = get<JobResultResponse>(job.resultId);
-    if (!result)
-        return error();
+//     const assignment = get<AssignmentDB>(assignmentId);
+//     if (!assignment)
+//         return error();
+//     const workflow = get<WorkflowDB>(assignment.workflowId);
+//     if (!workflow?.jobId)
+//         return error();
+//     const job = get<JobResponse>(workflow.jobId);
+//     if (!job?.resultId)
+//         return error();
+//     const result = get<JobResultResponse>(job.resultId);
+//     if (!result)
+//         return error();
 
-    assignment.decision = decision;
-    assignment.state = decisionToAssignment[decision.status];
+//     assignment.decision = decision;
+//     assignment.state = decisionToAssignment[decision.status];
 
-    result.relation.exampleRows[assignment.rowIndex].decision = decision;
+//     result.relation.exampleRows[assignment.rowIndex].decision = decision;
 
-    set(assignment);
-    set(result);
+//     set(assignment);
+//     set(result);
 
-    return success({ ...assignment, relation: armstrongRelationToExampleRelation(result.relation, assignment.rowIndex) });
-}
+//     return success({ ...assignment, relation: armstrongRelationToExampleRelation(result.relation, assignment.rowIndex) });
+// }
 
-async function resetAssignment(assignmentId: Id): Promise<Result<AssignmentResponse>> {
-    await wait();
+// async function resetAssignment(assignmentId: Id): Promise<Result<AssignmentResponse>> {
+//     await wait();
 
-    const assignment = get<AssignmentDB>(assignmentId);
-    if (!assignment?.jobResultId)
-        return error();
-    const result = get<JobResultResponse>(assignment.jobResultId);
-    if (!result)
-        return error();
+//     const assignment = get<AssignmentDB>(assignmentId);
+//     if (!assignment?.jobResultId)
+//         return error();
+//     const result = get<JobResultResponse>(assignment.jobResultId);
+//     if (!result)
+//         return error();
 
-    result.relation.exampleRows[assignment.rowIndex].decision = undefined;
+//     result.relation.exampleRows[assignment.rowIndex].decision = undefined;
 
-    set(assignment);
-    set(result);
+//     set(assignment);
+//     set(result);
 
-    const relation = createExampleRelation(assignment);
-    return relation ? success({ ...assignment, relation }) : error();
-}
+//     const relation = createExampleRelation(assignment);
+//     return relation ? success({ ...assignment, relation }) : error();
+// }
 
 // Workflows
 
@@ -264,65 +263,63 @@ async function continueWorkflow(workflowId: Id, request: ContinueWorkflowRequest
     });
 }
 
-async function acceptAllExamples(workflowId: Id): Promise<Result<WorkflowResponse>> {
-    await wait();
+// async function acceptAllAssignments(workflowId: Id): Promise<Result<WorkflowResponse>> {
+//     await wait();
 
-    const workflow = get<WorkflowDB>(workflowId);
-    if (!workflow?.jobId)
-        return error();
-    const job = get<JobResponse>(workflow.jobId);
-    if (!job?.resultId)
-        return error();
-    const result = get<JobResultResponse>(job.resultId);
-    if (!result)
-        return error();
+//     const workflow = get<WorkflowDB>(workflowId);
+//     if (!workflow?.jobId)
+//         return error();
+//     const job = get<JobResponse>(workflow.jobId);
+//     if (!job?.resultId)
+//         return error();
+//     const result = get<JobResultResponse>(job.resultId);
+//     if (!result)
+//         return error();
 
-    const availableIndexes: number[] = [];
-    for (let i = 0; i < result.relation.exampleRows.length; i++) {
-        const row = result.relation.exampleRows[i];
-        const isRowAvailable = !row.decision && (row.isPositive === result.relation.isEvaluatingPositives);
-        if (isRowAvailable)
-            availableIndexes.push(i);
-    }
+//     const availableIndexes: number[] = [];
+//     for (let i = 0; i < result.relation.exampleRows.length; i++) {
+//         const row = result.relation.exampleRows[i];
+//         const isRowAvailable = !row.decision && (row.isPositive === result.relation.isEvaluatingPositives);
+//         if (isRowAvailable)
+//             availableIndexes.push(i);
+//     }
 
-    const assignments = workflow.assignmentIds
-        .map(id => get<AssignmentDB>(id))
-        .filter(a => !!a && a.iteration === workflow.iteration) as AssignmentDB[];
-    const openAssignments = assignments.filter(a => !a.relation.exampleRow.decision);
+//     const assignments = workflow.assignmentIds
+//         .map(id => get<AssignmentDB>(id))
+//         .filter(a => !!a && a.iteration === workflow.iteration) as AssignmentDB[];
+//     const openAssignments = assignments.filter(a => !a.relation.exampleRow.decision);
 
-    for (const rowIndex of availableIndexes) {
-        const assignment = openAssignments.find(a => a.rowIndex === rowIndex);
-        if (!assignment) {
-            const init = {
-                workflowId,
-                rowIndex,
-            };
+//     for (const rowIndex of availableIndexes) {
+//         const assignment = openAssignments.find(a => a.rowIndex === rowIndex);
+//         if (!assignment) {
+//             const init = {
+//                 workflowId,
+//                 rowIndex,
+//             };
 
-            const assignment = createAssignmentForWorkflow(init, workflow, job.resultId);
-            openAssignments.push(assignment);
-        }
-    }
+//             const assignment = createAssignmentForWorkflow(init, workflow, job.resultId);
+//             openAssignments.push(assignment);
+//         }
+//     }
 
-    for (const assignment of openAssignments) {
-        const relation = armstrongRelationToExampleRelation(result.relation, assignment.rowIndex);
-        const columns = relation.columns.map((name, colIndex) => ({
-            colIndex,
-            name,
-            status: relation.exampleRow.maxSetElement.columns.includes(colIndex) ? undefined : DecisionColumnStatus.Valid,
-            reasons: [],
-        }));
-        const init = { status: DecisionStatus.Accepted, columns } satisfies ExampleDecision;
+//     for (const assignment of openAssignments) {
+//         const relation = armstrongRelationToExampleRelation(result.relation, assignment.rowIndex);
+//         const columns = relation.columns.map((_, colIndex) => ({
+//             status: relation.exampleRow.maxSetElement.columns.includes(colIndex) ? undefined : DecisionColumnStatus.Valid,
+//             reasons: [],
+//         }));
+//         const init = { status: DecisionStatus.Accepted, columns } satisfies ExampleDecision;
 
-        assignment.decision = init;
-        result.relation.exampleRows[assignment.rowIndex].decision = init;
+//         assignment.decision = init;
+//         result.relation.exampleRows[assignment.rowIndex].decision = init;
 
-        set(assignment);
-    }
+//         set(assignment);
+//     }
 
-    set(result);
+//     set(result);
 
-    return success(workflow);
-}
+//     return success(workflow);
+// }
 
 async function getLastJob(workflowId: Id): Promise<Result<JobResponse>> {
     await wait();

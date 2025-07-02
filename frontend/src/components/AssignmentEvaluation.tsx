@@ -9,7 +9,6 @@ import { ExampleRelationDisplay } from './dataset/ArmstrongRelationDisplay';
 import { type DecisionColumn, DecisionColumnStatus, DecisionStatus, type ExampleDecision, type ExampleRelation } from '@/types/armstrongRelation';
 import { ColumnNameBadge } from './dataset/FdListDisplay';
 import { FaArrowRight } from 'react-icons/fa';
-import { mockAPI } from '@/utils/api/mockAPI';
 
 type AssignmentEvaluationProps = {
     assignment: Assignment;
@@ -68,8 +67,7 @@ function ControlCard({ assignment, onEvaluated }: ControlCardProps) {
             });
 
         setFetching(fid);
-        // const response = await API.assignments.evaluate({ assignmentId: assignment.id }, {
-        const response = await mockAPI.assignment.evaluateAssignment(assignment.id, {
+        const response = await API.assignment.evaluateAssignment({ assignmentId: assignment.id }, {
             status,
             columns,
         });
@@ -83,7 +81,7 @@ function ControlCard({ assignment, onEvaluated }: ControlCardProps) {
 
     async function reevaluate(fid: string) {
         setFetching(fid);
-        const response = await mockAPI.assignment.resetAssignment(assignment.id);
+        const response = await API.assignment.resetAssignment({ assignmentId: assignment.id });
         if (!response.status) {
             setFetching(undefined);
             return;

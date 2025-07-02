@@ -6,8 +6,8 @@ import de.uni.passau.server.model.DiscoveryJobNode;
 import de.uni.passau.server.model.WorkflowEntity;
 import de.uni.passau.server.repository.DiscoveryJobRepository;
 import de.uni.passau.server.repository.WorkflowRepository;
+import de.uni.passau.server.service.AssignmentService;
 import de.uni.passau.server.service.DiscoveryJobService;
-import de.uni.passau.server.service.WorkflowService;
 
 import java.util.UUID;
 
@@ -30,7 +30,7 @@ public class WorkflowController {
     private WorkflowRepository workflowRepository;
 
     @Autowired
-    private WorkflowService workflowService;
+    private AssignmentService assignmentService;
 
     @Autowired
     private DiscoveryJobRepository discoveryJobRepository;
@@ -45,7 +45,7 @@ public class WorkflowController {
 
     @PostMapping("/workflows/create")
     public WorkflowEntity createWorkflow() {
-        return workflowService.createWorkflow();
+        return workflowRepository.save(WorkflowEntity.create());
     }
 
     private record CreateJobResponse(
@@ -64,7 +64,7 @@ public class WorkflowController {
     ) {}
 
     @PostMapping("/workflows/{workflowId}/start")
-    public CreateJobResponse startWorkflow(@RequestBody StartWorkflowRequest init, @PathVariable UUID workflowId) {
+    public CreateJobResponse startWorkflow(@PathVariable UUID workflowId, @RequestBody StartWorkflowRequest init) {
         final var job = discoveryJobService.createDiscoveryJob(workflowId, init.approach(), init.description(), init.datasetId());
         final var workflow = workflowRepository.findById(workflowId).get();
 
@@ -76,7 +76,7 @@ public class WorkflowController {
     ) {}
 
     @PostMapping("/workflows/{workflowId}/continue")
-    public CreateJobResponse continueWorkflow(@RequestBody ContinueWorkflowRequest init, @PathVariable UUID workflowId) {
+    public CreateJobResponse continueWorkflow(@PathVariable UUID workflowId, @RequestBody ContinueWorkflowRequest init) {
         // final var job = discoveryJobService.createDiscoveryJob(workflowId, init.approach(), init.description(), init.dataset());
         // final var workflow = workflowRepository.findById(workflowId).get();
 
@@ -89,6 +89,15 @@ public class WorkflowController {
     public DiscoveryJobResponse getLastJobByWorkflowId(@PathVariable UUID workflowId) {
         final var job = discoveryJobRepository.getLastDiscoveryByWorkflowId(workflowId);
         return DiscoveryJobResponse.fromNodes(job);
+    }
+
+    @PostMapping("/workflows/{workflowId}/accept-all")
+    public WorkflowEntity acceptAllAssignments(@PathVariable UUID workflowId) {
+        final var workflow = workflowRepository.findById(workflowId).get();
+
+        assignmentService.acceptAllAssignments(workflow);
+
+        return workflow;
     }
 
 }

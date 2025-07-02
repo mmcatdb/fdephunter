@@ -1,9 +1,9 @@
 package de.uni.passau.server.controller;
 
 import de.uni.passau.core.example.ExampleDecision;
-import de.uni.passau.server.controller.response.AssignmentResponse;
+import de.uni.passau.server.model.AssignmentEntity;
+import de.uni.passau.server.model.WorkflowEntity;
 import de.uni.passau.server.repository.AssignmentRepository;
-import de.uni.passau.server.service.AssignmentService;
 
 import java.util.List;
 import java.util.UUID;
@@ -26,31 +26,36 @@ public class AssignmentController {
     @Autowired
     private AssignmentRepository assignmentRepository;
 
-    @Autowired
-    private AssignmentService assignmentService;
-
     @GetMapping("/assignments/{assignmentId}")
-    public AssignmentResponse getAssignment(@PathVariable String assignmentId) {
-        final var assignmentGroup = assignmentRepository.findGroupById(assignmentId);
-
-        // return AssignmentResponse.fromNodes(assignmentGroup, datasetData);
-        throw new UnsupportedOperationException("Not implemented yet.");
+    public AssignmentEntity getAssignment(@PathVariable UUID assignmentId) {
+        return assignmentRepository.findById(assignmentId).get();
     }
 
     @GetMapping("/workflows/{workflowId}/assignments")
-    public List<AssignmentResponse> getAssignments(@PathVariable UUID workflowId) {
-        throw new UnsupportedOperationException("Not implemented yet.");
+    public List<AssignmentEntity> getAssignments(@PathVariable UUID workflowId) {
+        return assignmentRepository.findAllByWorkflowId(workflowId);
     }
 
     @PostMapping("/assignments/{assignmentId}/evaluate")
-    public AssignmentResponse evaluateAssignment(@PathVariable String assignmentId, @RequestBody ExampleDecision decision) {
-        assignmentService.evaluateAssignment(assignmentId, decision);
-        return getAssignment(assignmentId);
+    public AssignmentEntity evaluateAssignment(@PathVariable String assignmentId, @RequestBody ExampleDecision decision) {
+        AssignmentEntity assignment = assignmentRepository.findById(UUID.fromString(assignmentId)).get();
+
+        assignment.exampleRow.decision = decision;
+
+        assignmentRepository.save(assignment);
+
+        return assignment;
     }
 
     @PostMapping("/assignments/{assignmentId}/reset")
-    public AssignmentResponse resetAssignment(@PathVariable String assignmentId, @RequestBody ExampleDecision decision) {
-        throw new UnsupportedOperationException("Not implemented yet.");
+    public AssignmentEntity resetAssignment(@PathVariable String assignmentId, @RequestBody ExampleDecision decision) {
+        AssignmentEntity assignment = assignmentRepository.findById(UUID.fromString(assignmentId)).get();
+
+        assignment.exampleRow.decision = null;
+
+        assignmentRepository.save(assignment);
+
+        return assignment;
     }
 
 }
