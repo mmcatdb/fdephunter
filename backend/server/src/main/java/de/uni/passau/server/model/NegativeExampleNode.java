@@ -15,13 +15,6 @@ import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
 @Node("NegativeExample")
 public class NegativeExampleNode {
 
-    public enum NegativeExampleState {
-        NEW,
-        REJECTED,
-        ACCEPTED,
-        ANSWERED,
-    }
-
     @Id @GeneratedValue(UUIDStringGenerator.class)
     private String id;
 
@@ -44,17 +37,6 @@ public class NegativeExampleNode {
         return example;
     }
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("NegativeExampleNode{");
-        sb.append("id=").append(id);
-        sb.append(", payload=").append(payload);
-        sb.append(", state=").append(state);
-        sb.append('}');
-        return sb.toString();
-    }
-
     public static record Payload(
         Map<String, String> innerValues,
         Map<String, String> originalValues,
@@ -62,5 +44,12 @@ public class NegativeExampleNode {
         List<FDInit> fds,
         Map<String, String> values
     ) {}
+
+    public enum NegativeExampleState {
+        NEW,
+        REJECTED,
+        ACCEPTED,
+        ANSWERED,
+    }
 
 }

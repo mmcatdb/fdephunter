@@ -1,6 +1,5 @@
 import { AssignmentEvaluation } from '@/components/AssignmentEvaluation';
 import { LatticeDisplay } from '@/components/dataset/FdGraphDisplay';
-import { FdListDisplay } from '@/components/dataset/FdListDisplay';
 import { DecisionProvider } from '@/context/DecisionProvider';
 import { routes } from '@/router';
 import { Assignment } from '@/types/assignment';
@@ -11,7 +10,8 @@ import { mockAPI } from '@/utils/api/mockAPI';
 import { WorkflowProgressDisplay } from '@/components/worklow/WorkflowProgressDisplay';
 import { Workflow } from '@/types/workflow';
 import { type Lattice } from '@/types/armstrongRelation';
-// import { API } from '@/utils/api';
+import { type Id } from '@/types/id';
+import { API } from '@/utils/api/api';
 
 export function AssignmentPage() {
     const { assignment, workflow } = useLoaderData<AssignmentLoaded>();
@@ -39,7 +39,7 @@ export function AssignmentPage() {
             </div>
         </TopbarContent>
 
-        <DecisionProvider relation={assignment.relation} inputDecision={assignment.decision}>
+        <DecisionProvider relation={assignment.relation} inputDecision={assignment.relation.exampleRow.decision}>
             <Page>
                 <Outlet />
             </Page>
@@ -63,11 +63,11 @@ AssignmentPage.loader = async ({ params: { assignmentId } }: { params: Params<'a
     if (!response.status)
         throw new Error('Failed to load assignment');
 
-    const workflowResponse = await mockAPI.workflow.getWorkflow(response.data.workflowId);
+    const workflowResponse = await API.workflow.getWorkflow(undefined, { workflowId: response.data.workflowId });
     if (!workflowResponse.status)
         throw new Error('Failed to load workflow');
 
-    const latticesResponse = await mockAPI.assignment.getLattices(response.data.workflowId);
+    const latticesResponse = await mockAPI.view.getLattices(response.data.workflowId);
     if (!latticesResponse.status)
         throw new Error('Failed to load lattices');
 
@@ -78,7 +78,7 @@ AssignmentPage.loader = async ({ params: { assignmentId } }: { params: Params<'a
     };
 };
 
-function AssignmentTabs({ assignmentId }: { assignmentId: string }) {
+function AssignmentTabs({ assignmentId }: { assignmentId: Id }) {
     const { pathname } = useLocation();
     const selectedKey = matchPath(routes.assignment.tabs.path, pathname)?.params.tab ?? 'index';
 
@@ -115,7 +115,7 @@ export function AssignmentListPage() {
 }
 
 export function AssignmentGraphPage() {
-    const { assignment, lattices } = useRouteLoaderData<AssignmentLoaded>(routes.assignment.$id)!;
+    const { lattices } = useRouteLoaderData<AssignmentLoaded>(routes.assignment.$id)!;
 
     return (
         <LatticeDisplay lattices={lattices} />

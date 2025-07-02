@@ -1,18 +1,19 @@
-import type { StringLike } from '@/types/api/routes';
+import { type ExampleDecision } from '@/types/armstrongRelation';
 import { GET, POST } from '../routeFunctions';
-import { type ExampleDecision, type AssignmentResponse } from '@/types/assignment';
+import { type AssignmentResponse } from '@/types/assignment';
+import { type Id } from '@/types/id';
 
 export const assignment = {
-    getAssignment: GET<{ assignmentId: StringLike }, AssignmentResponse>(
+    getAssignment: GET<{ assignmentId: Id }, AssignmentResponse>(
         u => `/assignments/${u.assignmentId}`,
     ),
-    getAssignments: GET<{ workflowId: StringLike }, AssignmentResponse[]>(
+    getAssignments: GET<{ workflowId: Id }, AssignmentResponse[]>(
         u => `/workflows/${u.workflowId}/assignments`,
     ),
-    evaluateAssignment: POST<{ assignmentId: StringLike }, AssignmentResponse, ExampleDecision>(
+    evaluateAssignment: POST<{ assignmentId: Id }, AssignmentResponse, ExampleDecision>(
         u => `/assignments/${u.assignmentId}/evaluate`,
     ),
-    resetAssignment: POST<{ assignmentId: StringLike }, AssignmentResponse>(
+    resetAssignment: POST<{ assignmentId: Id }, AssignmentResponse>(
         u => `/assignments/${u.assignmentId}/reset`,
     ),
 };

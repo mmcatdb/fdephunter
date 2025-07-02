@@ -1,37 +1,35 @@
-import type { Empty, StringLike } from '@/types/api/routes';
+import type { Empty } from '@/types/api/routes';
 import { GET, POST } from '../routeFunctions';
-import type { JobResponse, JobResultResponse } from '@/types/job';
+import type { JobResponse } from '@/types/job';
 import { type WorkflowResponse } from '@/types/workflow';
+import { type Id } from '@/types/id';
 
 export const workflow = {
-    createWorkflow: POST<Empty, WorkflowResponse, Empty>(
+    createWorkflow: POST<Empty, WorkflowResponse>(
         () => `/workflows/create`,
     ),
-    getWorkflow: GET<{ workflowId: StringLike }, WorkflowResponse>(
+    getWorkflow: GET<{ workflowId: Id }, WorkflowResponse>(
         u => `/workflows/${u.workflowId}`,
     ),
-    startWorkflow: POST<{ workflowId: StringLike }, CreateJobResponse, StartWorkflowRequest>(
+    startWorkflow: POST<{ workflowId: Id }, CreateJobResponse, StartWorkflowRequest>(
         u => `/workflows/${u.workflowId}/start`,
     ),
-    continueWorkflow: POST<{ workflowId: StringLike }, CreateJobResponse, ContinueWorkflowRequest>(
+    continueWorkflow: POST<{ workflowId: Id }, CreateJobResponse, ContinueWorkflowRequest>(
         u => `/workflows/${u.workflowId}/continue`,
     ),
-    acceptAllExamples: POST<{ workflowId: StringLike }, WorkflowResponse>(
+    acceptAllExamples: POST<{ workflowId: Id }, WorkflowResponse>(
         // TODO
         u => `/workflows/${u.workflowId}/accept-all`,
     ),
-    getLastJob: GET<{ workflowId: StringLike }, JobResponse>(
+    getLastJob: GET<{ workflowId: Id }, JobResponse>(
         u => `/workflows/${u.workflowId}/last-discovery`,
-    ),
-    getLastJobResult: GET<{ workflowId: StringLike }, JobResultResponse>(
-        u => `/workflows/${u.workflowId}/last-result`,
     ),
 };
 
 export type StartWorkflowRequest = {
     description: string;
     approach: string;
-    datasetName: string;
+    datasetId: Id;
 };
 
 export type ContinueWorkflowRequest = {

@@ -1,3 +1,5 @@
+import { type Empty } from '@/types/api/routes';
+import { POST } from './routeFunctions';
 import { assignment } from './routes/assignment';
 import { dataset } from './routes/dataset';
 import { view } from './routes/view';
@@ -20,4 +22,7 @@ export const API = {
     view,
     workflow,
     prepareAbort,
+    resetDatabase: POST<Empty, Empty>(
+        () => `/demo/reset-database`,
+    ),
 };

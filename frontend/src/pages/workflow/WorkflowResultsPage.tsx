@@ -1,14 +1,16 @@
 import { Button, Card, CardBody, CardHeader, Tab, Tabs } from '@heroui/react';
 import { type WorkflowLoaded } from './WorkflowPage';
-import { Link, matchPath, Outlet, useLocation, useRouteLoaderData } from 'react-router';
+import { Link, matchPath, Outlet, type Params, useLoaderData, useLocation, useRouteLoaderData } from 'react-router';
 import { routes } from '@/router';
 import { Page, TopbarContent } from '@/components/layout';
 import { useMemo, useState } from 'react';
-import { mockAPI } from '@/utils/api/mockAPI';
 import { Workflow } from '@/types/workflow';
 import { type FdSet, type FdEdge } from '@/types/functionalDependency';
 import { compareStringsAscii } from '@/utils/common';
 import { FdListDisplay } from '@/components/dataset/FdListDisplay';
+import { type Id } from '@/types/id';
+import { API } from '@/utils/api/api';
+import { mockAPI } from '@/utils/api/mockAPI';
 
 export function WorkflowResultsPage() {
     const { workflow } = useRouteLoaderData<WorkflowLoaded>(routes.workflow.$id)!;
@@ -24,7 +26,7 @@ export function WorkflowResultsPage() {
     </>);
 }
 
-function WorkflowResultsTabs({ workflowId }: { workflowId: string }) {
+function WorkflowResultsTabs({ workflowId }: { workflowId: Id }) {
     const { pathname } = useLocation();
     const selectedKey = matchPath(routes.workflow.results.tabs.path, pathname)?.params.tab ?? 'index';
 
@@ -39,13 +41,14 @@ function WorkflowResultsTabs({ workflowId }: { workflowId: string }) {
 }
 
 export function WorkflowFinalPage() {
-    const { workflow, fdSet: fdClasses } = useRouteLoaderData<WorkflowLoaded>(routes.workflow.$id)!;
+    const { workflow } = useRouteLoaderData<WorkflowLoaded>(routes.workflow.$id)!;
+    const { fdSet } = useLoaderData<WorkflowFinalLoaded>();
 
     const [ isFetching, setIsFetching ] = useState(false);
 
     async function continueToWorkflow() {
         setIsFetching(true);
-        const response = await mockAPI.workflow.createWorkflow();
+        const response = await API.workflow.createWorkflow({});
         setIsFetching(false);
         if (!response.status)
             return;
@@ -53,7 +56,7 @@ export function WorkflowFinalPage() {
         window.open(routes.workflow.settings.resolve({ workflowId: Workflow.fromResponse(response.data).id }), '_blank');
     }
 
-    const fds = useMemo(() => createFdEdges(fdClasses), []);
+    const fds = useMemo(() => createFdEdges(fdSet), []);
 
     return (
         <div className='mx-auto w-fit flex flex-col gap-8'>
@@ -65,7 +68,8 @@ export function WorkflowFinalPage() {
                 <CardBody className='grid grid-cols-3 gap-x-8 gap-y-2'>
                     <div>Total iterations:<span className='px-2 text-primary font-semibold'>{workflow.iteration}</span></div>
 
-                    <div className='col-span-2 flex items-center'>Dataset:<div className='truncate px-2 text-primary font-semibold'>{workflow.datasetName}</div></div>
+                    {/* FIXME Use datasetName instead of id. */}
+                    <div className='col-span-2 flex items-center'>Dataset:<div className='truncate px-2 text-primary font-semibold'>{workflow.datasetId}</div></div>
 
                     <div>Minimal FDs:<span className='px-2 text-primary font-semibold'>{4}</span></div>
 
@@ -112,6 +116,21 @@ export function WorkflowFinalPage() {
         </div>
     );
 }
+
+type WorkflowFinalLoaded = {
+    fdSet: FdSet;
+};
+
+WorkflowFinalPage.loader = async ({ params: { workflowId } }: { params: Params<'workflowId'> }): Promise<WorkflowFinalLoaded> => {
+    if (!workflowId)
+        throw new Error('Missing workflow ID');
+
+    const response = await mockAPI.view.getFds(workflowId);
+    if (!response.status)
+        throw new Error('Failed to load functional dependencies');
+
+    return { fdSet: response.data };
+};
 
 export function createFdEdges(fdSet: FdSet): FdEdge[] {
     return fdSet.fdClasses.flatMap((minimalFds, colIndex) => minimalFds.map(minimalFd => ({

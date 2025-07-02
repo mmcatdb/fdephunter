@@ -1,19 +1,14 @@
 package de.uni.passau.server.controller.response;
 
-import de.uni.passau.core.example.ExampleDecision;
 import de.uni.passau.core.example.ExampleRow;
 
 import java.io.Serializable;
-
-import org.checkerframework.checker.nullness.qual.Nullable;
+import java.util.UUID;
 
 public record AssignmentResponse(
     String id,
-    // ExampleState state,
-    int rowIndex,
-    String workflowId,
-    ExampleRelation relation,
-    @Nullable ExampleDecision decision
+    UUID workflowId,
+    ExampleRelation relation
 ) implements Serializable {
 
     // public static AssignmentResponse fromNodes(AssignmentNode assignmentNode, NegativeExampleNode exampleNode, JobResultNode resultNode, DatasetData dataset) {

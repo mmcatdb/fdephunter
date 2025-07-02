@@ -2,11 +2,12 @@ package de.uni.passau.server.service;
 
 import de.uni.passau.core.dataset.Dataset;
 import de.uni.passau.core.dataset.csv.CSVDataset;
-import de.uni.passau.server.model.DatasetNode;
+import de.uni.passau.server.model.DatasetEntity;
 import de.uni.passau.server.repository.DatasetRepository;
 
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,47 +19,47 @@ public class DatasetService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatasetService.class);
 
-    private static final Map<String, Dataset> CACHE = new TreeMap<>();
+    private static final Map<UUID, Dataset> CACHE = new TreeMap<>();
 
     @Autowired
     private DatasetRepository datasetRepository;
 
-    public Dataset getLoadedDataset(DatasetNode datasetNode) {
-        return CACHE.containsKey(datasetNode.name)
-            ? getCachedDataset(datasetNode.name)
-            : createCachedDataset(datasetNode);
+    public Dataset getLoadedDataset(DatasetEntity dataset) {
+        return CACHE.containsKey(dataset.getId())
+            ? getCachedDataset(dataset.getId())
+            : createCachedDataset(dataset);
     }
 
-    public Dataset getLoadedDatasetByName(String name) {
-        return CACHE.containsKey(name)
-            ? getCachedDataset(name)
-            : createCachedDataset(datasetRepository.getDatasetByName(name));
+    public Dataset getLoadedDatasetById(UUID id) {
+        return CACHE.containsKey(id)
+            ? getCachedDataset(id)
+            : createCachedDataset(datasetRepository.findById(id).get());
     }
 
-    private Dataset getCachedDataset(String name) {
-        final var dataset = CACHE.get(name);
+    private Dataset getCachedDataset(UUID id) {
+        final var dataset = CACHE.get(id);
         if (!dataset.isLoaded())
             dataset.load();
 
         return dataset;
     }
 
-    private Dataset createCachedDataset(DatasetNode node) {
-        final Dataset dataset = createDataset(node);
-        dataset.load();
+    private Dataset createCachedDataset(DatasetEntity dataset) {
+        final Dataset datasetObject = createDataset(dataset);
+        datasetObject.load();
 
-        CACHE.put(node.name, dataset);
+        CACHE.put(dataset.getId(), datasetObject);
 
-        return dataset;
+        return datasetObject;
     }
 
-    private Dataset createDataset(DatasetNode node) {
-        switch (node.type) {
+    private Dataset createDataset(DatasetEntity dataset) {
+        switch (dataset.type) {
             case ARRAY ->
                 throw new UnsupportedOperationException("Not supported yet.");
             case CSV -> {
                 LOGGER.warn("TODO: EXTEND METADATA -- ADD PROPERTY CONTAINS HEADER");
-                return new CSVDataset(node.source, true);
+                return new CSVDataset(dataset.source, true);
             }
             case JSON ->
                 throw new UnsupportedOperationException("Not supported yet.");

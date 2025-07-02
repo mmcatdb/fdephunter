@@ -1,5 +1,7 @@
+import { type Id } from './id';
+
 export type FileResponse = {
-    id: string;
+    id: Id;
     originalName: string;
     hashName: string;
     size: number;

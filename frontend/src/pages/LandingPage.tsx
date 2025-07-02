@@ -3,8 +3,8 @@ import { Workflow } from '@/types/workflow';
 import { useNavigate } from 'react-router';
 import { Button } from '@heroui/react';
 import { Page } from '@/components/layout';
-import { mockAPI } from '@/utils/api/mockAPI';
 import { useState } from 'react';
+import { API } from '@/utils/api/api';
 
 export function LandingPage() {
     const [ isFetching, setIsFetching ] = useState(false);
@@ -12,13 +12,17 @@ export function LandingPage() {
 
     async function continueToWorkflow() {
         setIsFetching(true);
-        const response = await mockAPI.workflow.createWorkflow();
+        const response = await API.workflow.createWorkflow({});
         if (!response.status) {
             setIsFetching(false);
             return;
         }
 
         void navigate(routes.workflow.settings.resolve({ workflowId: Workflow.fromResponse(response.data).id }));
+    }
+
+    function resetDatabase() {
+        void API.resetDatabase({});
     }
 
     return (
@@ -42,6 +46,13 @@ export function LandingPage() {
 
                 <Button color='secondary' className='md:w-1/2 lg:w-1/3'>
                     Read documentation
+                </Button>
+            </div>
+
+            {/* TODO Remove this once finished. */}
+            <div>
+                <Button color='danger' onPress={resetDatabase}>
+                    Reset DB
                 </Button>
             </div>
         </Page>

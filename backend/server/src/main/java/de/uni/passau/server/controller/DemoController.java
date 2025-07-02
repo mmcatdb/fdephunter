@@ -1,7 +1,7 @@
 package de.uni.passau.server.controller;
 
-import de.uni.passau.server.model.DatasetNode;
-import de.uni.passau.server.model.WorkflowNode;
+import de.uni.passau.server.model.DatasetEntity;
+import de.uni.passau.server.model.DatasetEntity.DatasetType;
 import de.uni.passau.server.repository.DatasetRepository;
 import de.uni.passau.server.repository.WorkflowRepository;
 
@@ -25,48 +25,51 @@ public class DemoController {
     @Autowired
     private DatasetRepository datasetRepository;
 
-    @PostMapping("/demo/initialize")
-    public String initialize() {
-        return initializeDatabase();
+    @PostMapping("/demo/reset-database")
+    public String resetDatabase() {
+        purgeDatabase();
+        initializeDatasets();
+
+        return "{\"message\": \"ok\"}";
     }
 
-    private String initializeDatabase() {
-        var workflow = WorkflowNode.createNew();
+    private void purgeDatabase() {
+        LOGGER.info("Purging database.");
 
-        // remove all data from database
-        workflowRepository.purgeDatabase();
+        // TODO Add all repositories.
+        datasetRepository.deleteAll();
+        workflowRepository.deleteAll();
 
-        // initialize datasets
+        LOGGER.info("Database purged.");
+    }
+
+    private void initializeDatasets() {
         LOGGER.info("Initializing datasets.");
 
-        List<DatasetNode> datasets = new ArrayList<>();
+        List<DatasetEntity> datasets = new ArrayList<>();
 
-        datasets.add(new DatasetNode("iris", DatasetNode.DatasetType.CSV, "data/iris.csv", "iris", null, null, null, null));
-        datasets.add(new DatasetNode("balance-scale", DatasetNode.DatasetType.CSV, "data/balance-scale.csv", "balance-scale", null, null, null, null));
-        datasets.add(new DatasetNode("chess", DatasetNode.DatasetType.CSV, "data/chess.csv", "chess", null, null, null, null));
-        datasets.add(new DatasetNode("abalone", DatasetNode.DatasetType.CSV, "data/abalone.csv", "abalone", null, null, null, null));
-        datasets.add(new DatasetNode("nursery", DatasetNode.DatasetType.CSV, "data/nursery.csv", "nursery", null, null, null, null));
-        datasets.add(new DatasetNode("breast-cancer-wisconsin", DatasetNode.DatasetType.CSV, "data/breast-cancer-wisconsin.csv", "breast-cancer-wisconsin", null, null, null, null));
-        datasets.add(new DatasetNode("bridges", DatasetNode.DatasetType.CSV, "data/bridges.csv", "bridges", null, null, null, null));
-        datasets.add(new DatasetNode("echocardiogram", DatasetNode.DatasetType.CSV, "data/echocardiogram.csv", "echocardiogram", null, null, null, null));
-        datasets.add(new DatasetNode("adult", DatasetNode.DatasetType.CSV, "data/adult.csv", "adult", null, null, null, null));
-        datasets.add(new DatasetNode("letter", DatasetNode.DatasetType.CSV, "data/letter.csv", "letter", null, null, null, null));
-        datasets.add(new DatasetNode("ncvoter", DatasetNode.DatasetType.CSV, "data/ncvoter.csv", "ncvoter", null, null, null, null));
-        datasets.add(new DatasetNode("hepatitis", DatasetNode.DatasetType.CSV, "data/hepatitis.csv", "hepatitis", null, null, null, null));
-        datasets.add(new DatasetNode("horse", DatasetNode.DatasetType.CSV, "data/horse.csv", "horse", null, null, null, null));
-        datasets.add(new DatasetNode("fd-reduced-30", DatasetNode.DatasetType.CSV, "data/fd-reduced-30.csv", "fd-reduced-30", null, null, null, null));
-        datasets.add(new DatasetNode("plista", DatasetNode.DatasetType.CSV, "data/plista.csv", "plista", null, null, null, null));
-        datasets.add(new DatasetNode("flight", DatasetNode.DatasetType.CSV, "data/flight.csv", "flight", null, null, null, null));
-        datasets.add(new DatasetNode("uniprot", DatasetNode.DatasetType.CSV, "data/uniprot.csv", "uniprot", null, null, null, null));
-        datasets.add(new DatasetNode("lineitem", DatasetNode.DatasetType.CSV, "data/lineitem.csv", "lineitem", null, null, null, null));
+        datasets.add(DatasetEntity.create("iris", DatasetType.CSV, "data/iris.csv"));
+        datasets.add(DatasetEntity.create("balance-scale", DatasetType.CSV, "data/balance-scale.csv"));
+        datasets.add(DatasetEntity.create("chess", DatasetType.CSV, "data/chess.csv"));
+        datasets.add(DatasetEntity.create("abalone", DatasetType.CSV, "data/abalone.csv"));
+        datasets.add(DatasetEntity.create("nursery", DatasetType.CSV, "data/nursery.csv"));
+        datasets.add(DatasetEntity.create("breast-cancer-wisconsin", DatasetType.CSV, "data/breast-cancer-wisconsin.csv"));
+        datasets.add(DatasetEntity.create("bridges", DatasetType.CSV, "data/bridges.csv"));
+        datasets.add(DatasetEntity.create("echocardiogram", DatasetType.CSV, "data/echocardiogram.csv"));
+        datasets.add(DatasetEntity.create("adult", DatasetType.CSV, "data/adult.csv"));
+        datasets.add(DatasetEntity.create("letter", DatasetType.CSV, "data/letter.csv"));
+        datasets.add(DatasetEntity.create("ncvoter", DatasetType.CSV, "data/ncvoter.csv"));
+        datasets.add(DatasetEntity.create("hepatitis", DatasetType.CSV, "data/hepatitis.csv"));
+        datasets.add(DatasetEntity.create("horse", DatasetType.CSV, "data/horse.csv"));
+        datasets.add(DatasetEntity.create("fd-reduced-30", DatasetType.CSV, "data/fd-reduced-30.csv"));
+        datasets.add(DatasetEntity.create("plista", DatasetType.CSV, "data/plista.csv"));
+        datasets.add(DatasetEntity.create("flight", DatasetType.CSV, "data/flight.csv"));
+        datasets.add(DatasetEntity.create("uniprot", DatasetType.CSV, "data/uniprot.csv"));
+        datasets.add(DatasetEntity.create("lineitem", DatasetType.CSV, "data/lineitem.csv"));
 
         datasetRepository.saveAll(datasets);
 
-        // initialize workflow
-        LOGGER.info("Initializing workflow.");
-        workflow = workflowRepository.save(workflow);
-
-        return "{\"message\" : \"ok\"}";
+        LOGGER.info("Datasets initialized: {}", datasets.size());
     }
 
 }

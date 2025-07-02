@@ -19,12 +19,6 @@ public interface AssignmentRepository extends Neo4jRepository<AssignmentNode, St
         """)
     public NegativeExampleNode saveBelongsToExample(@Param("assignmentId") String assignmentId, @Param("exampleId") String exampleId);
 
-    @Query("""
-        MATCH (a:Assignment { id: $assignmentId })-[:IN_WORKFLOW]->(:Workflow)-[:HAS_ASSIGNED_DATASET]->(dataset:Dataset)
-        RETURN dataset.name
-        """)
-    public String getDatasetName(@Param("assignmentId") String assignmentId);
-
     /**
      * Returns the assignment related to the example that is identified by the exampleId.
      */

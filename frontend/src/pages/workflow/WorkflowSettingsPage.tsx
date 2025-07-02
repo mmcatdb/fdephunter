@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-// import { API } from '@/utils/api';
+import { API } from '@/utils/api/api';
 import { Button, Card, CardBody, Select, SelectItem, type SharedSelection } from '@heroui/react';
 import { Page } from '@/components/layout';
 import { Link, useLoaderData, useNavigate, useRouteLoaderData } from 'react-router';
@@ -21,9 +21,9 @@ export function WorkflowSettingsPage() {
     async function runInitialDiscovery(settings: DiscoverySettings) {
         setFetching(true);
         const response = await mockAPI.workflow.startWorkflow(workflow.id, {
-            description: `Initial discovery for ${settings.datasetName}`,
+            description: `Initial discovery for ${settings.dataset.name}`,
             approach: settings.approach,
-            datasetName: settings.datasetName,
+            datasetId: settings.dataset.id,
         });
         if (!response.status) {
             setFetching(false);
@@ -77,7 +77,7 @@ WorkflowSettingsPage.loader = async (): Promise<WorkflowSettingsLoaded> => {
     //     datasets: datasetsResponse.data.map(Dataset.fromResponse),
     // };
 
-    const datasetsResponse = await mockAPI.dataset.getDatasets();
+    const datasetsResponse = await API.dataset.getDatasets(undefined, {});
     if (!datasetsResponse.status)
         throw new Error('Failed to load datasets');
 
@@ -88,7 +88,7 @@ WorkflowSettingsPage.loader = async (): Promise<WorkflowSettingsLoaded> => {
 
 type DiscoverySettings = {
     approach: string;
-    datasetName: string;
+    dataset: DatasetResponse;
 };
 
 type InitialSettingsFormProps = {
@@ -118,9 +118,15 @@ function InitialSettingsForm({ datasets, onSubmit, fetching }: InitialSettingsFo
         // if (finalDatasets.length === 0 || !approach)
         //     return;
 
+        // FIXME Use file as dataset.
+        const datasetId = selected.dataset.values().next().value!;
+        const dataset = datasets.find(d => d.id === datasetId)!;
+
         onSubmit({
             approach,
-            datasetName: selected.file?.originalName ?? selected.dataset.values().next().value!,
+            // FIXME Use file as dataset.
+            // datasetName: selected.file?.originalName ?? selected.dataset.values().next().value!,
+            dataset,
         });
     }
 
@@ -181,7 +187,7 @@ type Option = {
 
 function datasetToOption(dataset: DatasetResponse): Option {
     return {
-        key: dataset.name,
+        key: dataset.id,
         label: dataset.name,
     };
 }

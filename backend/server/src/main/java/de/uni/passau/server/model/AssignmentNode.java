@@ -24,9 +24,6 @@ public class AssignmentNode {
     @Property
     public ExampleDecision decision;
 
-    // @Property
-    // public ExampleState state;
-
     @Property
     public int rowIndex;
 
@@ -35,7 +32,6 @@ public class AssignmentNode {
 
     public static AssignmentNode createNew() {
         final var assignment = new AssignmentNode();
-        // assignment.state = ExampleState.NEW;
         assignment.createdAt = new Date().getTime();
 
         return assignment;

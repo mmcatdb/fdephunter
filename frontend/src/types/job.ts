@@ -1,30 +1,33 @@
 import { DateTime } from 'luxon';
-import { type ArmstrongRelation } from './armstrongRelation';
+import { type Id } from './id';
 
 export enum JobState {
     Waiting = 'WAITING',
     Running = 'RUNNING',
-    Pending = 'PENDING',
     Finished = 'FINISHED',
+    Failed = 'FAILED',
 }
 
 export type JobResponse = {
-    id: string;
+    id: Id;
     state: JobState;
     description: string;
     iteration: number;
     /** In UTC. */
-    startedAt: string;
-    resultId?: string;
+    startedAt?: string;
+    /** In UTC. */
+    finishedAt?: string;
+    // resultId?: string;
 };
 
 export class Job {
     private constructor(
-        readonly id: string,
+        readonly id: Id,
         readonly state: JobState,
         readonly description: string,
         readonly iteration: number,
-        readonly startedAt: DateTime,
+        readonly startedAt: DateTime | undefined,
+        readonly finishedAt: DateTime | undefined,
         readonly progress: number, // from 0 to 1
     ) {}
 
@@ -38,7 +41,8 @@ export class Job {
             input.state,
             input.description,
             input.iteration,
-            DateTime.fromISO(input.startedAt),
+            input.startedAt ? DateTime.fromISO(input.startedAt) : undefined,
+            input.finishedAt ? DateTime.fromISO(input.finishedAt) : undefined,
             progress,
         );
     }
@@ -48,35 +52,17 @@ const progressCache = new Map<string, number>();
 
 // FIXME Implement on the backend later.
 
-/** @returns A number from 0 to 1. */
+/** @returns A number from 0 to 1. Or NaN for error. */
 function computeNextProgress(prev: number, state: JobState): number {
     if (state === JobState.Finished)
         return 1;
-    if (state === JobState.Waiting || state === JobState.Pending)
+    if (state === JobState.Waiting)
         return 0;
+    if (state === JobState.Failed)
+        return NaN;
 
     const range = (1 - prev) / 2;
     const next = Math.random() * range + prev;
 
     return next;
-}
-
-export type JobResultResponse = {
-    id: string;
-    payload: string;
-    relation: ArmstrongRelation;
-};
-
-export class JobResult {
-    private constructor(
-        readonly id: string,
-        readonly relation: ArmstrongRelation,
-    ) {}
-
-    static fromResponse(input: JobResultResponse): JobResult {
-        return new JobResult(
-            input.id,
-            input.relation,
-        );
-    }
 }

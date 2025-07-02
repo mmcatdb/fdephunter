@@ -1,15 +1,12 @@
-import { type ReactNode, useCallback, useMemo, useState } from 'react';
-import { type DecisionColumn, DecisionPhase, useDecisionContext } from '@/context/DecisionProvider';
+import { type ReactNode, useCallback, useState } from 'react';
+import { DecisionPhase, useDecisionContext } from '@/context/DecisionProvider';
 import { useNavigate } from 'react-router';
-import { IoAdd, IoClose } from 'react-icons/io5';
 import { routes } from '@/router';
-import { AssignmentStateLabel } from './AssignmentStateLabel';
-import { DecisionColumnStatus, DecisionStatus, type Assignment } from '@/types/assignment';
-// import { API } from '@/utils/api';
-import { TbPointFilled } from 'react-icons/tb';
-import { Button, Card, CardBody, CardFooter, CardHeader, Checkbox, Input, Switch } from '@heroui/react';
+import { type Assignment } from '@/types/assignment';
+import { API } from '@/utils/api/api';
+import { Button, Card, CardBody, CardFooter, CardHeader, Switch } from '@heroui/react';
 import { ExampleRelationDisplay } from './dataset/ArmstrongRelationDisplay';
-import { type ExampleRelation } from '@/types/armstrongRelation';
+import { type DecisionColumn, DecisionColumnStatus, DecisionStatus, type ExampleDecision, type ExampleRelation } from '@/types/armstrongRelation';
 import { ColumnNameBadge } from './dataset/FdListDisplay';
 import { FaArrowRight } from 'react-icons/fa';
 import { mockAPI } from '@/utils/api/mockAPI';
@@ -115,7 +112,7 @@ function ControlCard({ assignment, onEvaluated }: ControlCardProps) {
 
                 {decision.phase === DecisionPhase.Finished && (
                     <p>
-                        This example was evaluated as <AssignmentStateLabel status={assignment.state} />. Do you want to re-evaluate it?
+                        This example was evaluated as <AssignmentStateLabel decision={assignment.relation.exampleRow.decision} />. Do you want to re-evaluate it?
                     </p>
                 )}
             </CardBody>
@@ -157,6 +154,32 @@ const FID_REJECT = 'reject';
 const FID_PARTIALLY_REJECT = 'partially-reject';
 const FID_ANSWER = 'answer';
 const FID_REEVALUATE = 'reevaluate';
+
+type AssignmentStateLabelProps = {
+    decision: ExampleDecision | undefined;
+};
+
+function AssignmentStateLabel({ decision }: AssignmentStateLabelProps) {
+    const data = decision?.status ? decisionStatusData[decision.status] : { color: 'text-primary', label: 'not evaluated' };
+
+    return (
+        <span className={data.color}>
+            {data.label}
+        </span>
+    );
+}
+
+const decisionStatusData: {
+    [key in DecisionStatus]: {
+        color: string;
+        label: string;
+    };
+} = {
+    [DecisionStatus.Accepted]: { color: 'text-success', label: 'possible' },
+    [DecisionStatus.Rejected]: { color: 'text-danger', label: 'not possible' },
+    [DecisionStatus.Unanswered]: { color: 'text-warning', label: 'uncertain' },
+};
+
 
 const titles: { [key in DecisionPhase]: string } = {
     [DecisionPhase.Evaluation]: 'Is this example correct?',
@@ -317,7 +340,7 @@ function FinalDecisionCard({ relation, selectedFdIndex: selectedFdIndex }: Decis
 }
 
 function FdDisplay({ relation: { exampleRow, columns }, selectedFdIndex: selectedFdIndex }: DecisionCardProps) {
-    const maxSetCols = exampleRow.maxSetElement.map(index => columns[index]);
+    const maxSetCols = exampleRow.maxSetElement.columns.map(index => columns[index]);
 
     return (
         <div className='flex gap-4'>
@@ -334,6 +357,7 @@ function FdDisplay({ relation: { exampleRow, columns }, selectedFdIndex: selecte
     );
 }
 
+/*
 type DecisionReasonsFormProps = {
     data: string[];
     setData: (data: string[]) => void;
@@ -433,3 +457,4 @@ function DecisionReasonsOverview({ reasons }: DecisionReasonsOverviewProps) {
         </div>
     );
 }
+*/

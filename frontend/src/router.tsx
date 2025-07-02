@@ -87,12 +87,15 @@ export const router = createBrowserRouter([ {
             }, {
                 path: routes.workflow.dashboard.tabs.resolvePartial({ tab: 'dataset' }),
                 element: <WorkflowDatasetPage />,
+                loader: WorkflowDatasetPage.loader,
             }, {
                 path: routes.workflow.dashboard.tabs.resolvePartial({ tab: 'list' }),
                 element: <WorkflowListPage />,
+                loader: WorkflowListPage.loader,
             }, {
                 path: routes.workflow.dashboard.tabs.resolvePartial({ tab: 'graph' }),
                 element: <WorkflowGraphPage />,
+                loader: WorkflowGraphPage.loader,
             } ],
         }, {
             path: routes.workflow.results.root.path,
@@ -101,15 +104,19 @@ export const router = createBrowserRouter([ {
             children: [ {
                 index: true,
                 element: <WorkflowFinalPage />,
+                loader: WorkflowFinalPage.loader,
             }, {
                 path: routes.workflow.results.tabs.resolvePartial({ tab: 'dataset' }),
                 element: <WorkflowDatasetPage />,
+                loader: WorkflowDatasetPage.loader,
             }, {
                 path: routes.workflow.results.tabs.resolvePartial({ tab: 'list' }),
                 element: <WorkflowListPage />,
+                loader: WorkflowListPage.loader,
             }, {
                 path: routes.workflow.results.tabs.resolvePartial({ tab: 'graph' }),
                 element: <WorkflowGraphPage />,
+                loader: WorkflowGraphPage.loader,
             } ],
         } ],
     }, {

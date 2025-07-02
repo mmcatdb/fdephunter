@@ -2,15 +2,14 @@ package de.uni.passau.server.controller;
 
 import de.uni.passau.core.approach.AbstractApproach.ApproachName;
 import de.uni.passau.server.controller.response.DiscoveryJobResponse;
-import de.uni.passau.server.controller.response.WorkflowResponse;
 import de.uni.passau.server.model.DiscoveryJobNode;
-import de.uni.passau.server.model.JobResultNode;
-import de.uni.passau.server.model.WorkflowNode;
+import de.uni.passau.server.model.WorkflowEntity;
 import de.uni.passau.server.repository.DiscoveryJobRepository;
-import de.uni.passau.server.repository.JobResultRepository;
 import de.uni.passau.server.repository.WorkflowRepository;
 import de.uni.passau.server.service.DiscoveryJobService;
 import de.uni.passau.server.service.WorkflowService;
+
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,44 +33,39 @@ public class WorkflowController {
     private WorkflowService workflowService;
 
     @Autowired
-    private JobResultRepository jobResultRepository;
-
-    @Autowired
     private DiscoveryJobRepository discoveryJobRepository;
 
     @Autowired
     private DiscoveryJobService discoveryJobService;
 
     @GetMapping("/workflows/{workflowId}")
-    public WorkflowResponse getWorkflowById(@PathVariable String workflowId) {
-        final var workflow = workflowRepository.findById(workflowId).get();
-        return WorkflowResponse.fromNodes(workflow);
+    public WorkflowEntity getWorkflowById(@PathVariable UUID workflowId) {
+        return workflowRepository.findById(workflowId).get();
     }
 
     @PostMapping("/workflows/create")
-    public WorkflowResponse createWorkflow() {
-        final var workflow = workflowService.createWorkflow();
-        return WorkflowResponse.fromNodes(workflow);
+    public WorkflowEntity createWorkflow() {
+        return workflowService.createWorkflow();
     }
 
     private record CreateJobResponse(
-        WorkflowResponse workflow,
+        WorkflowEntity workflow,
         DiscoveryJobResponse job
     ) {
-        static CreateJobResponse fromNodes(WorkflowNode workflowNode, DiscoveryJobNode jobNode) {
-            return new CreateJobResponse(WorkflowResponse.fromNodes(workflowNode), DiscoveryJobResponse.fromNodes(jobNode));
+        static CreateJobResponse fromNodes(WorkflowEntity workflow, DiscoveryJobNode jobNode) {
+            return new CreateJobResponse(workflow, DiscoveryJobResponse.fromNodes(jobNode));
         }
     }
 
     private record StartWorkflowRequest(
         String description,
         ApproachName approach,
-        String dataset
+        UUID datasetId
     ) {}
 
     @PostMapping("/workflows/{workflowId}/start")
-    public CreateJobResponse startWorkflow(@RequestBody StartWorkflowRequest init, @PathVariable String workflowId) {
-        final var job = discoveryJobService.createDiscoveryJob(workflowId, init.approach(), init.description(), init.dataset());
+    public CreateJobResponse startWorkflow(@RequestBody StartWorkflowRequest init, @PathVariable UUID workflowId) {
+        final var job = discoveryJobService.createDiscoveryJob(workflowId, init.approach(), init.description(), init.datasetId());
         final var workflow = workflowRepository.findById(workflowId).get();
 
         return CreateJobResponse.fromNodes(workflow, job);
@@ -82,22 +76,19 @@ public class WorkflowController {
     ) {}
 
     @PostMapping("/workflows/{workflowId}/continue")
-    public CreateJobResponse continueWorkflow(@RequestBody ContinueWorkflowRequest init, @PathVariable String workflowId) {
-        final var job = discoveryJobService.createDiscoveryJob(workflowId, init.approach(), init.description(), init.dataset());
-        final var workflow = workflowRepository.findById(workflowId).get();
+    public CreateJobResponse continueWorkflow(@RequestBody ContinueWorkflowRequest init, @PathVariable UUID workflowId) {
+        // final var job = discoveryJobService.createDiscoveryJob(workflowId, init.approach(), init.description(), init.dataset());
+        // final var workflow = workflowRepository.findById(workflowId).get();
 
-        return CreateJobResponse.fromNodes(workflow, job);
+        // return CreateJobResponse.fromNodes(workflow, job);
+
+        throw new UnsupportedOperationException("Not implemented yet.");
     }
 
     @GetMapping("/workflows/{workflowId}/last-discovery")
-    public DiscoveryJobResponse getLastJobByWorkflowId(@PathVariable String workflowId) {
+    public DiscoveryJobResponse getLastJobByWorkflowId(@PathVariable UUID workflowId) {
         final var job = discoveryJobRepository.getLastDiscoveryByWorkflowId(workflowId);
         return DiscoveryJobResponse.fromNodes(job);
-    }
-
-    @GetMapping("/workflows/{workflowId}/last-result")
-    public JobResultNode getLastJobResult(@PathVariable String workflowId) {
-        return jobResultRepository.getLastResultByWorkflowId(workflowId);
     }
 
 }

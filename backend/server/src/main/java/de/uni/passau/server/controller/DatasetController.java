@@ -1,12 +1,13 @@
 package de.uni.passau.server.controller;
 
 import de.uni.passau.server.controller.response.DatasetData;
-import de.uni.passau.server.model.DatasetNode;
+import de.uni.passau.server.model.DatasetEntity;
 import de.uni.passau.server.repository.DatasetRepository;
 import de.uni.passau.server.repository.WorkflowRepository;
 import de.uni.passau.server.service.DatasetService;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,16 +33,16 @@ public class DatasetController {
     private WorkflowRepository workflowRepository;
 
     @GetMapping("/datasets")
-    public List<DatasetNode> getDatasets() {
+    public List<DatasetEntity> getDatasets() {
         return datasetRepository.findAll();
     }
 
     @GetMapping("/datasets/workflows/{workflowId}/data")
-    public DatasetData getDatasetData(@PathVariable String workflowId, @RequestParam(required = false, defaultValue = "10") String limit) {
+    public DatasetData getDatasetData(@PathVariable UUID workflowId, @RequestParam(required = false, defaultValue = "10") String limit) {
         final int numberLimit = Integer.parseInt(limit);
 
-        final var datasetName = workflowRepository.getDatasetName(workflowId);
-        final var dataset = datasetService.getLoadedDatasetByName(datasetName);
+        final var workflow = workflowRepository.findById(workflowId).get();
+        final var dataset = datasetService.getLoadedDatasetById(workflow.datasetId);
 
         return new DatasetData(dataset.getHeader(), dataset.getRows().stream().limit(numberLimit).toList());
     }

@@ -1,5 +1,7 @@
 package de.uni.passau.server.repository;
 
+import java.util.UUID;
+
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,7 +16,7 @@ public interface JobResultRepository extends Neo4jRepository<JobResultNode, Stri
         MATCH (result:JobResult)<-[:HAS_RESULT]-(job:DiscoveryJob { iteration: maxIteration })<-[:HAS_JOB]-(:Workflow { id: $workflowId })
         RETURN result
         """)
-    public JobResultNode getLastResultByWorkflowId(@Param("workflowId") String workflowId);
+    public JobResultNode getLastResultByWorkflowId(@Param("workflowId") UUID workflowId);
 
     @Query("""
         MATCH (job:DiscoveryJob { id: $jobId })
@@ -28,7 +30,7 @@ public interface JobResultRepository extends Neo4jRepository<JobResultNode, Stri
         MATCH (:Workflow { id: $workflowId })-[:HAS_JOB]->(:DiscoveryJob { iteration: $iteration })-[:HAS_RESULT]->(result:JobResult)
         RETURN result
         """)
-    public JobResultNode findByWorkflowIdAndIteration(@Param("workflowId") String workflowId, @Param("iteration") int iteration);
+    public JobResultNode findByWorkflowIdAndIteration(@Param("workflowId") UUID workflowId, @Param("iteration") int iteration);
 
     @Query("""
         MATCH (result:JobResult { id: $resultId }), (class:Class { id: $classId })

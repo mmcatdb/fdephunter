@@ -13,13 +13,6 @@ import de.uni.passau.core.approach.AbstractApproach.ApproachName;
 @Node("DiscoveryJob")
 public class DiscoveryJobNode {
 
-    public enum DiscoveryJobState {
-        WAITING,
-        RUNNING,
-        PENDING,
-        FINISHED,
-    }
-
     @Id @GeneratedValue(UUIDStringGenerator.class)
     private String id;
 
@@ -53,17 +46,11 @@ public class DiscoveryJobNode {
         return job;
     }
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("DiscoveryJobNode{");
-        sb.append("id=").append(id);
-        sb.append(", description=").append(description);
-        sb.append(", state=").append(state);
-        sb.append(", iteration=").append(iteration);
-        sb.append(", startedAt=").append(startedAt);
-        sb.append('}');
-        return sb.toString();
+    public enum DiscoveryJobState {
+        WAITING,
+        RUNNING,
+        FINISHED,
+        FAILED,
     }
 
 }

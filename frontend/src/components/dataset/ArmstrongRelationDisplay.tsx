@@ -1,5 +1,5 @@
-import { type Dispatch, useMemo, useState } from 'react';
-import { type ExampleRelation, type ArmstrongRelation, type ExampleRow, ExampleState } from '@/types/armstrongRelation';
+import { type Dispatch, useState } from 'react';
+import { type ExampleRelation, DecisionColumnStatus, type ExampleDecision, DecisionStatus } from '@/types/armstrongRelation';
 import { Button } from '@heroui/react';
 import { ColumnNameBadge } from './FdListDisplay';
 import clsx, { type ClassValue } from 'clsx';
@@ -7,7 +7,7 @@ import { BiCollapseHorizontal, BiExpandHorizontal } from 'react-icons/bi';
 import { IoCheckmark, IoClose, IoHelp, IoCheckmarkCircleOutline, IoCloseCircleOutline, IoReloadCircleOutline } from 'react-icons/io5';
 import { useDecisionContext } from '@/context/DecisionProvider';
 import { type IconType } from 'react-icons';
-import { DecisionColumnStatus, type AssignmentInfo } from '@/types/assignment';
+import { type Assignment } from '@/types/assignment';
 import { Link } from 'react-router';
 import { routes } from '@/router';
 
@@ -17,17 +17,18 @@ type GridState = {
 };
 
 type ArmstrongRelationDisplayProps = {
-    relation: ArmstrongRelation;
-    assignments?: AssignmentInfo[];
+    assignments: Assignment[];
 };
 
-export function ArmstrongRelationDisplay({ relation, assignments }: ArmstrongRelationDisplayProps) {
+export function ArmstrongRelationDisplay({ assignments }: ArmstrongRelationDisplayProps) {
     const [ state, setState ] = useState<GridState>({});
+
+    const columns = assignments[0].relation.columns;
 
     return (
         <div
             className='grid overflow-x-auto pb-4 leading-5'
-            style={{ gridTemplateColumns: `repeat(${relation.columns.length + 2}, max-content)` }}
+            style={{ gridTemplateColumns: `repeat(${columns.length + 2}, max-content)` }}
         >
             <div className='sticky left-0 p-1 flex items-center gap-2 bg-content1 border-r border-foreground-500'>
                 <Button
@@ -52,7 +53,7 @@ export function ArmstrongRelationDisplay({ relation, assignments }: ArmstrongRel
                 )}
             </div>
 
-            {relation.columns.map((col, colIndex) => (
+            {columns.map((col, colIndex) => (
                 <div key={col} title={col} className={clsx('p-2 max-w-xl flex items-center overflow-hidden', colIndex !== 0 && 'border-l border-foreground-500')}>
                     <ColumnNameBadge name={col} />
                 </div>
@@ -82,16 +83,14 @@ export function ArmstrongRelationDisplay({ relation, assignments }: ArmstrongRel
             </div>
 
 
-            <ReferenceRowDisplay rowValues={relation.referenceRow} />
+            <ReferenceRowDisplay rowValues={assignments[0].relation.referenceRow} />
 
-            {relation.exampleRows.map((row, rowIndex) => (
+            {assignments.map((assignment, rowIndex) => (
                 <ExampleRowDisplay
-                    key={rowIndex}
-                    relation={relation}
-                    row={row}
-                    rowIndex={rowIndex}
-                    assignments={assignments}
+                    key={assignment.id}
+                    assignment={assignment}
                     gridState={state}
+                    rowIndex={rowIndex}
                 />
             ))}
         </div>
@@ -139,33 +138,33 @@ function ReferenceRowDisplay({ rowValues }: ReferenceRowDisplayProps) {
 }
 
 type ExampleRowDisplayProps = {
-    relation: ArmstrongRelation;
-    row: ExampleRow;
-    rowIndex: number;
-    assignments?: AssignmentInfo[];
+    assignment: Assignment;
     gridState: GridState;
+    rowIndex: number;
 };
 
-function ExampleRowDisplay({ relation, row, rowIndex, assignments, gridState }: ExampleRowDisplayProps) {
-    const maxSetCols = row.maxSetElement.map(index => relation.columns[index]);
+function ExampleRowDisplay({ assignment, gridState, rowIndex }: ExampleRowDisplayProps) {
+    const row = assignment.relation.exampleRow;
+
+    const maxSetCols = row.maxSetElement.columns.map(index => assignment.relation.columns[index]);
     const exampleBgClass = row.isPositive ? 'bg-danger-400' : 'bg-warning-400';
     const { leftClass, rightClass } = getSpecialCellClasses(rowIndex);
 
-    const isEvaluationAllowed = row.isPositive === relation.isEvaluatingPositives;
-
-    const assignment = useMemo(() => assignments?.find(a => a.rowIndex === rowIndex), [ assignments, rowIndex ]);
+    // TODO Get this information somewhere.
+    // const isEvaluationAllowed = row.isPositive === relation.isEvaluatingPositives;
+    const isEvaluationAllowed = true;
 
     return (<>
         <div className={leftClass}>
-            {(isEvaluationAllowed || row.state !== ExampleState.New) && (
-                <ExampleStateIcon state={row.state} size={20} />
+            {(isEvaluationAllowed || row.decision) && (
+                <ExampleDecisionIcon decision={row.decision} size={20} />
             )}
 
             {isEvaluationAllowed && !gridState.isProgressCollapsed && (<>
                 {assignment ? (
                     <Link to={routes.assignment.root.resolve({ assignmentId: assignment.id })}>
                         <Button size='sm' className='h-6' disableAnimation>
-                            {row.state === ExampleState.New ? 'Evaluate' : 'Re-evaluate'}
+                            {!row.decision ? 'Evaluate' : 'Re-evaluate'}
                         </Button>
                     </Link>
                 ) : (
@@ -178,7 +177,7 @@ function ExampleRowDisplay({ relation, row, rowIndex, assignments, gridState }: 
         </div>
 
         {row.values.map((value, colIndex) => (
-            <div key={colIndex} className={getCellClass(rowIndex, colIndex, row.maxSetElement.includes(colIndex))}>
+            <div key={colIndex} className={getCellClass(rowIndex, colIndex, row.maxSetElement.columns.includes(colIndex))}>
                 {value}
             </div>
         ))}
@@ -197,27 +196,26 @@ function ExampleRowDisplay({ relation, row, rowIndex, assignments, gridState }: 
     </>);
 }
 
-type ExampleStateIconProps = {
-    state: ExampleState;
+type ExampleDecisionIconProps = {
+    decision: ExampleDecision | undefined;
     size?: number;
 };
 
-export function ExampleStateIcon({ state, size = 24 }: ExampleStateIconProps) {
-    const data = exampleStateData[state];
+function ExampleDecisionIcon({ decision, size = 24 }: ExampleDecisionIconProps) {
+    const data = decision ? decisionStatusData[decision.status] : { color: 'text-primary', icon: IoReloadCircleOutline };
 
     return (
         <data.icon size={size} className={data.color} />
     );
 }
 
-const exampleStateData: Record<ExampleState, {
+const decisionStatusData: Record<DecisionStatus, {
     color: string;
     icon: IconType;
 }> = {
-    [ExampleState.New]: { color: 'text-primary', icon: IoReloadCircleOutline },
-    [ExampleState.Rejected]: { color: 'text-danger', icon: IoCloseCircleOutline },
-    [ExampleState.Accepted]: { color: 'text-success', icon: IoCheckmarkCircleOutline },
-    [ExampleState.Undecided]: { color: 'text-warning', icon: IoReloadCircleOutline },
+    [DecisionStatus.Accepted]: { color: 'text-success', icon: IoCheckmarkCircleOutline },
+    [DecisionStatus.Rejected]: { color: 'text-danger', icon: IoCloseCircleOutline },
+    [DecisionStatus.Unanswered]: { color: 'text-warning', icon: IoReloadCircleOutline },
 };
 
 type ExampleRelationDisplayProps = {

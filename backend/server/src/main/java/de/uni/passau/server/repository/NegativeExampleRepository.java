@@ -1,6 +1,7 @@
 package de.uni.passau.server.repository;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
@@ -30,16 +31,6 @@ public interface NegativeExampleRepository extends Neo4jRepository<NegativeExamp
         NegativeExampleNode example,
         @Nullable String lastExampleId
     ) {}
-
-    @Query("""
-        MATCH (:Workflow { id: $workflowId })-[:HAS_JOB]->(:DiscoveryJob)-[:HAS_RESULT]->(:JobResult)-[:HAS_CLASS]->(:Class)-[:HAS_NEGATIVE_EXAMPLE]->(example:NegativeExample)
-        WHERE NOT EXISTS (
-            (:Assignment)-[:BELONGS_TO_EXAMPLE]->(example)
-        )
-        OPTIONAL MATCH (example)-[:HAS_PREVIOUS_ITERATION]->(lastExample:NegativeExample)
-        RETURN example, lastExample.id as lastExampleId
-        """)
-    public List<NegativeExampleNodeGroup> findUnassignedExamplesForWorkflow(@Param("workflowId") String workflowId);
 
     @Query("""
         MATCH (nex:NegativeExample { id: $exampleId })

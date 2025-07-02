@@ -1,3 +1,5 @@
+import { type ColumnSet } from './ColumnSet';
+
 export type ArmstrongRelation = {
     /** Names of the columns. They are expected to be unique. */
     columns: string[];
@@ -29,17 +31,40 @@ export type ExampleRelation = {
 export type ExampleRow = {
     values: string[];
     /** The indexes of the columns that form the max set element. */
-    maxSetElement: number[];
+    maxSetElement: ColumnSet;
     /** Whether it is a negative or positive example. */
     isPositive: boolean;
-    state: ExampleState;
+
+    /** If undefined, the row is still undecided. */
+    decision: ExampleDecision | undefined;
 };
 
-export enum ExampleState {
-    New = 'NEW',
-    Rejected = 'REJECTED',
+export type ExampleDecision = {
+    status: DecisionStatus;
+    columns: {
+        /** If undefined, the column isn't a part of the max set (so it should be ignored). */
+        status: DecisionColumnStatus | undefined;
+        reasons: string[];
+    }[];
+};
+
+export enum DecisionStatus {
     Accepted = 'ACCEPTED',
+    Rejected = 'REJECTED',
+    Unanswered = 'UNANSWERED',
+}
+
+export type DecisionColumn = {
+    /** If undefined, the column isn't a part of the max set (so it should be ignored). */
+    status: DecisionColumnStatus | undefined;
+    /** User provided strings. Probably not important right now. */
+    reasons: string[];
+};
+
+export enum DecisionColumnStatus {
     Undecided = 'UNDECIDED',
+    Valid = 'VALID',
+    Invalid = 'INVALID',
 }
 
 /**

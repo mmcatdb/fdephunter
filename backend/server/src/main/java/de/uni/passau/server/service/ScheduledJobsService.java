@@ -4,14 +4,13 @@ import de.uni.passau.core.approach.AbstractApproach.ApproachName;
 import de.uni.passau.core.approach.FDGraphBuilder;
 import de.uni.passau.core.approach.FDInit;
 import de.uni.passau.core.dataset.Dataset;
-import de.uni.passau.core.graph.Vertex;
 import de.uni.passau.core.graph.WeightedGraph;
 import de.uni.passau.server.approach.HyFDAlgorithm;
 import de.uni.passau.server.approach.OurApproachAlgorithm;
 import de.uni.passau.server.model.DiscoveryJobNode;
-import de.uni.passau.server.model.WorkflowNode;
+import de.uni.passau.server.model.WorkflowEntity;
 import de.uni.passau.server.model.DiscoveryJobNode.DiscoveryJobState;
-import de.uni.passau.server.model.WorkflowNode.WorkflowState;
+import de.uni.passau.server.model.WorkflowEntity.WorkflowState;
 import de.uni.passau.server.repository.DiscoveryJobRepository;
 import de.uni.passau.server.repository.WorkflowRepository;
 
@@ -58,20 +57,18 @@ public class ScheduledJobsService {
 
             LOGGER.info("Job result: {}", jobResult);
 
-            List<Vertex> dependencyClasses = graph.__getRankedVertices();
-            LOGGER.info("RANKED VERTICES: " + graph.__getRankedVertices());
-
             // TODO create examples
 
 
             DiscoveryJobNode updatedJob = discoveryJobRepository.setState(group.job().getId(), DiscoveryJobState.FINISHED);
             LOGGER.info("Job {} has finished.", updatedJob.getId());
 
-            WorkflowNode updatedWorkflow = workflowRepository.setState(group.workflow().getId(), WorkflowState.NEGATIVE_EXAMPLES);
-            LOGGER.info("Workflow uuid={} state was updated to {}", updatedWorkflow.getId(), updatedWorkflow.state);
+            WorkflowEntity workflow = group.workflow();
 
-            WorkflowNode updatedWorkflow2 = workflowRepository.setIteration(group.workflow().getId(), group.job().iteration);
-            LOGGER.info("Workflow uuid={} iteration was updated to {}", updatedWorkflow2.getId(), updatedWorkflow2.iteration);
+            workflow.state = WorkflowState.NEGATIVE_EXAMPLES;
+            workflow.iteration = group.job().iteration;
+
+            workflow = workflowRepository.save(workflow);
         }
 
         LOGGER.info("(RE)DISCOVERY JOB FINISHED");

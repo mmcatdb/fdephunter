@@ -1,3 +1,5 @@
+import { type Id } from './id';
+
 export enum WorkflowState {
     /**
      * Initial screen. The user is selecting dataset and algorithm.
@@ -24,19 +26,19 @@ export enum WorkflowState {
 }
 
 export type WorkflowResponse = {
-    id: string;
+    id: Id;
     state: WorkflowState;
     iteration: number;
     /** Is set after the dataset is uploaded so it's not known from the start. */
-    datasetName: string | undefined;
+    datasetId: Id | null;
 };
 
 export class Workflow {
     private constructor(
-        readonly id: string,
+        readonly id: Id,
         readonly state: WorkflowState,
         readonly iteration: number,
-        readonly datasetName: string | undefined,
+        readonly datasetId: Id | undefined,
     ) {}
 
     static fromResponse(input: WorkflowResponse): Workflow {
@@ -44,7 +46,7 @@ export class Workflow {
             input.id,
             input.state,
             input.iteration,
-            input.datasetName,
+            input.datasetId ?? undefined,
         );
     }
 }

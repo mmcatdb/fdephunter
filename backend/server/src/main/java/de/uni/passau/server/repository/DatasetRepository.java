@@ -1,14 +1,11 @@
 package de.uni.passau.server.repository;
 
-import org.springframework.data.neo4j.repository.Neo4jRepository;
-import org.springframework.data.neo4j.repository.query.Query;
-import org.springframework.data.repository.query.Param;
+import java.util.UUID;
 
-import de.uni.passau.server.model.DatasetNode;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
-public interface DatasetRepository extends Neo4jRepository<DatasetNode, String> {
+import de.uni.passau.server.model.DatasetEntity;
 
-    @Query("MATCH(d:Dataset {name: $name}) RETURN d")
-    public DatasetNode getDatasetByName(@Param("name") String name);
+public interface DatasetRepository extends MongoRepository<DatasetEntity, UUID> {
 
 }

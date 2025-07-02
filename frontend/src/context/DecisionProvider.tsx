@@ -1,13 +1,5 @@
 import { createContext, type Dispatch, type ReactNode, type SetStateAction, useContext, useState } from 'react';
-import { type ExampleRelation } from '@/types/armstrongRelation';
-import { type ExampleDecision, DecisionColumnStatus } from '@/types/assignment';
-
-export type DecisionColumn = {
-    colIndex: number;
-    name: string;
-    status: DecisionColumnStatus | undefined;
-    reasons: string[];
-};
+import { type DecisionColumn, DecisionColumnStatus, type ExampleDecision, type ExampleRelation } from '@/types/armstrongRelation';
 
 export enum DecisionPhase {
     Evaluation = 'EVALUATION',
@@ -53,16 +45,12 @@ export function useDecisionContext(): DecisionContext {
 
 function createDefaultDecision(relation: ExampleRelation, inputDecision: ExampleDecision | undefined): DecisionState {
     const columns = inputDecision
-        ? relation.columns.map((name, colIndex) => ({
-            colIndex,
-            name,
+        ? relation.columns.map((_, colIndex) => ({
             status: inputDecision.columns[colIndex].status,
             reasons: inputDecision.columns[colIndex].reasons,
         }))
-        : relation.columns.map((name, colIndex) => ({
-            colIndex,
-            name,
-            status: relation.exampleRow.maxSetElement.includes(colIndex) ? undefined : DecisionColumnStatus.Undecided,
+        : relation.columns.map((_, colIndex) => ({
+            status: relation.exampleRow.maxSetElement.columns.includes(colIndex) ? undefined : DecisionColumnStatus.Undecided,
             reasons: [],
         }));
 

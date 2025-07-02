@@ -2,12 +2,11 @@ package de.uni.passau.server.controller;
 
 import de.uni.passau.core.example.ExampleDecision;
 import de.uni.passau.server.controller.response.AssignmentResponse;
-import de.uni.passau.server.controller.response.DatasetData;
 import de.uni.passau.server.repository.AssignmentRepository;
 import de.uni.passau.server.service.AssignmentService;
-import de.uni.passau.server.service.DatasetService;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,21 +29,16 @@ public class AssignmentController {
     @Autowired
     private AssignmentService assignmentService;
 
-    @Autowired
-    private DatasetService datasetService;
-
     @GetMapping("/assignments/{assignmentId}")
     public AssignmentResponse getAssignment(@PathVariable String assignmentId) {
         final var assignmentGroup = assignmentRepository.findGroupById(assignmentId);
-        final var datasetName = assignmentRepository.getDatasetName(assignmentId);
-        final var dataset = datasetService.getLoadedDatasetByName(datasetName);
 
         // return AssignmentResponse.fromNodes(assignmentGroup, datasetData);
         throw new UnsupportedOperationException("Not implemented yet.");
     }
 
     @GetMapping("/workflows/{workflowId}/assignments")
-    public List<AssignmentResponse> getAssignments(@PathVariable String workflowId) {
+    public List<AssignmentResponse> getAssignments(@PathVariable UUID workflowId) {
         throw new UnsupportedOperationException("Not implemented yet.");
     }
 

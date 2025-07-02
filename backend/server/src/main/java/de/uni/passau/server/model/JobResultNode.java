@@ -19,14 +19,4 @@ public class JobResultNode {
     @Property
     public String payload;
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("JobResultNode{");
-        sb.append("id=").append(id);
-        sb.append(", payload=").append(payload);
-        sb.append('}');
-        return sb.toString();
-    }
-
 }

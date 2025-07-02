@@ -1,3 +1,5 @@
+import { type Id } from './id';
+
 export enum DatasetType {
     Csv = 'CSV',
     Json = 'JSON',
@@ -9,10 +11,11 @@ export enum DatasetType {
 }
 
 export type DatasetResponse = {
+    id: Id;
     name: string;
     type: DatasetType;
+    source: string;
     // NICE_TO_HAVE not important now
-    // source: string;
     // kindName: string;
     // columns: number;
     // rows: number;

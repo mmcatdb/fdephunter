@@ -22,11 +22,11 @@ public class ExampleRowController {
 
     @GetMapping("/example-row")
     public ExampleRowEntity testExampleRow() {
-        final var row = new ExampleRowEntity("aaa", "value");
+        final var row = ExampleRowEntity.create("value");
 
         exampleRowRepository.save(row);
 
-        final var foundRow = exampleRowRepository.findById("aaa");
+        final var foundRow = exampleRowRepository.findById(row.getId());
         if (!foundRow.isPresent())
             return null;
 

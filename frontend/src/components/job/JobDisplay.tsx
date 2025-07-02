@@ -27,9 +27,16 @@ export function JobDisplay({ job }: JobDisplayProps) {
                 <div>
                     State: <span className={data.color}>{data.label}</span>
                 </div>
-                <div>
-                    Started: {job.startedAt.toJSDate().toLocaleString()}
-                </div>
+                {job.startedAt && (
+                    <div>
+                        Started: {job.startedAt.toJSDate().toLocaleString()}
+                    </div>
+                )}
+                {job.finishedAt && (
+                    <div>
+                        Finished: {job.finishedAt.toJSDate().toLocaleString()}
+                    </div>
+                )}
                 <div>
                     Progress: {displayPercent(job.progress)}
                 </div>
@@ -47,6 +54,6 @@ const jobStateData: {
 } = {
     [JobState.Waiting]: { color: 'text-warning', icon: IoStopCircleOutline, label: 'Waiting' },
     [JobState.Running]: { color: 'text-primary', icon: IoReloadCircleOutline, label: 'Running' },
-    [JobState.Pending]: { color: 'text-danger', icon: IoCloseCircleOutline, label: 'Pending' },
     [JobState.Finished]: { color: 'text-success', icon: IoCheckmarkCircleOutline, label: 'Finished' },
+    [JobState.Failed]: { color: 'text-danger', icon: IoCloseCircleOutline, label: 'Failed' },
 };

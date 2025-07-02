@@ -1,6 +1,6 @@
 package de.uni.passau.server.service;
 
-import de.uni.passau.server.model.WorkflowNode;
+import de.uni.passau.server.model.WorkflowEntity;
 import de.uni.passau.server.repository.WorkflowRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,8 +12,8 @@ public class WorkflowService {
     @Autowired
     private WorkflowRepository workflowRepository;
 
-    public WorkflowNode createWorkflow() {
-        return workflowRepository.save(WorkflowNode.createNew());
+    public WorkflowEntity createWorkflow() {
+        return workflowRepository.save(WorkflowEntity.create());
     }
 
 }
