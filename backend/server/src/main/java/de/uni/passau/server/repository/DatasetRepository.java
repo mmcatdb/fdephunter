@@ -6,7 +6,7 @@ import org.springframework.data.repository.query.Param;
 
 import de.uni.passau.server.model.DatasetNode;
 
-public interface DatasetRepository extends Neo4jRepository<DatasetNode, Long> {
+public interface DatasetRepository extends Neo4jRepository<DatasetNode, String> {
 
     @Query("MATCH(d:Dataset {name: $name}) RETURN d")
     public DatasetNode getDatasetByName(@Param("name") String name);

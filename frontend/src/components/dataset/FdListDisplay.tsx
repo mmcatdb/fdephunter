@@ -1,27 +1,27 @@
-import type { FDEdge } from '@/types/FD';
+import type { FdEdge } from '@/types/functionalDependency';
 import { cn } from '@heroui/react';
 import { FaArrowRight } from 'react-icons/fa';
 import { Fragment } from 'react/jsx-runtime';
 
-type FDListDisplayProps = {
-    edges: FDEdge[];
+type FdListDisplayProps = {
+    edges: FdEdge[];
 };
 
-export function FDListDisplay({ edges }: FDListDisplayProps) {
+export function FdListDisplay({ edges }: FdListDisplayProps) {
     return (
         <div>
             {edges.map(edge => (
-                <FDRow key={edge.id} edge={edge} />
+                <FdRow key={edge.id} edge={edge} />
             ))}
         </div>
     );
 }
 
-type FDRowProps = {
-    edge: FDEdge;
+type FdRowProps = {
+    edge: FdEdge;
 };
 
-function FDRow({ edge }: FDRowProps) {
+function FdRow({ edge }: FdRowProps) {
     return (
         <div className='py-1 grid grid-cols-12 gap-4'>
             {/* <div className='col-span-1'>{edge.id}</div> */}
@@ -54,7 +54,7 @@ export function ColumnNameBadge({ name, className }: ColumnNameBadgeProps) {
     );
 }
 
-export function FDListDisplayBalanced({ edges }: FDListDisplayProps) {
+export function FdListDisplayBalanced({ edges }: FdListDisplayProps) {
     return (
         <div className='grid grid-cols-[min-content,80px,min-content] justify-center gap-2'>
             {edges.map(edge => (

@@ -12,7 +12,7 @@ export function LandingPage() {
 
     async function continueToWorkflow() {
         setIsFetching(true);
-        const response = await mockAPI.workflows.create();
+        const response = await mockAPI.workflow.createWorkflow();
         if (!response.status) {
             setIsFetching(false);
             return;

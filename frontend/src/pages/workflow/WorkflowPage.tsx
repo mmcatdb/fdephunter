@@ -6,8 +6,8 @@ import { Sidebar } from '@/components/layout';
 import { mockAPI } from '@/utils/api/mockAPI';
 import { type Lattice } from '@/types/armstrongRelation';
 import { type DatasetData } from '@/types/dataset';
-import { type MockFDClass } from '@/utils/mockData';
 import { JobResult } from '@/types/job';
+import { type FdSet } from '@/types/functionalDependency';
 
 export function WorkflowPage() {
     const { workflow } = useLoaderData<WorkflowLoaded>();
@@ -25,7 +25,7 @@ export type WorkflowLoaded = {
     workflow: Workflow;
     lattices: Lattice[];
     dataset: DatasetData;
-    fdClasses: MockFDClass[];
+    fdSet: FdSet;
     jobResult: JobResult | undefined;
 };
 
@@ -34,11 +34,11 @@ WorkflowPage.loader = async ({ params: { workflowId } }: { params: Params<'workf
         throw new Error('Missing workflow ID');
 
     const responses = await Promise.all([
-        mockAPI.workflows.get(workflowId),
-        mockAPI.assignments.getLattices(workflowId),
-        mockAPI.workflows.getDatasetData(workflowId),
-        mockAPI.workflows.getFdClasses(workflowId),
-        mockAPI.workflows.getLastJobResult(workflowId),
+        mockAPI.workflow.getWorkflow(workflowId),
+        mockAPI.view.getLattices(workflowId),
+        mockAPI.dataset.getDatasetData(workflowId),
+        mockAPI.view.getFds(workflowId),
+        mockAPI.workflow.getLastJobResult(workflowId),
     ]);
     if (!responses[0].status)
         throw new Error('Failed to load workflow');
@@ -55,7 +55,7 @@ WorkflowPage.loader = async ({ params: { workflowId } }: { params: Params<'workf
         workflow: Workflow.fromResponse(responses[0].data),
         lattices: responses[1].data,
         dataset: responses[2].data,
-        fdClasses: responses[3].data,
+        fdSet: responses[3].data,
         jobResult,
     };
 };

@@ -10,7 +10,7 @@ import { TbPointFilled } from 'react-icons/tb';
 import { Button, Card, CardBody, CardFooter, CardHeader, Checkbox, Input, Switch } from '@heroui/react';
 import { ExampleRelationDisplay } from './dataset/ArmstrongRelationDisplay';
 import { type ExampleRelation } from '@/types/armstrongRelation';
-import { ColumnNameBadge } from './dataset/FDListDisplay';
+import { ColumnNameBadge } from './dataset/FdListDisplay';
 import { FaArrowRight } from 'react-icons/fa';
 import { mockAPI } from '@/utils/api/mockAPI';
 
@@ -21,7 +21,7 @@ type AssignmentEvaluationProps = {
 
 export function AssignmentEvaluation({ assignment, onEvaluated }: AssignmentEvaluationProps) {
     const { decision } = useDecisionContext();
-    const [ selectedFDIndex, setSelectedFDIndex ] = useState<number>();
+    const [ selectedFdIndex, setSelectedFdIndex ] = useState<number>();
 
     return (
         <div className='flex flex-col items-start gap-4'>
@@ -31,13 +31,13 @@ export function AssignmentEvaluation({ assignment, onEvaluated }: AssignmentEval
                 <Card className='p-4 max-w-full'>
                     <ExampleRelationDisplay
                         relation={assignment.relation}
-                        selectedColIndex={selectedFDIndex}
-                        setSelectedColIndex={setSelectedFDIndex}
+                        selectedColIndex={selectedFdIndex}
+                        setSelectedColIndex={setSelectedFdIndex}
                     />
                 </Card>
 
-                {selectedFDIndex !== undefined && (
-                    <DecisionCard relation={assignment.relation} selectedFDIndex={selectedFDIndex} />
+                {selectedFdIndex !== undefined && (
+                    <DecisionCard relation={assignment.relation} selectedFdIndex={selectedFdIndex} />
                 )}
             </>)}
         </div>
@@ -72,7 +72,7 @@ function ControlCard({ assignment, onEvaluated }: ControlCardProps) {
 
         setFetching(fid);
         // const response = await API.assignments.evaluate({ assignmentId: assignment.id }, {
-        const response = await mockAPI.assignments.evaluate(assignment.id, {
+        const response = await mockAPI.assignment.evaluateAssignment(assignment.id, {
             status,
             columns,
         });
@@ -86,7 +86,7 @@ function ControlCard({ assignment, onEvaluated }: ControlCardProps) {
 
     async function reevaluate(fid: string) {
         setFetching(fid);
-        const response = await mockAPI.assignments.reset(assignment.id);
+        const response = await mockAPI.assignment.resetAssignment(assignment.id);
         if (!response.status) {
             setFetching(undefined);
             return;
@@ -186,38 +186,38 @@ const bodies: { [key in DecisionPhase]: ReactNode } = {
 
 type DecisionCardProps = {
     relation: ExampleRelation;
-    selectedFDIndex: number;
+    selectedFdIndex: number;
 };
 
-function DecisionCard({ relation, selectedFDIndex }: DecisionCardProps) {
+function DecisionCard({ relation, selectedFdIndex }: DecisionCardProps) {
     const { decision } = useDecisionContext();
 
     return decision.phase === DecisionPhase.Evaluation
-        ? (<EditableDecisionCard relation={relation} selectedFDIndex={selectedFDIndex} />)
-        : (<FinalDecisionCard relation={relation} selectedFDIndex={selectedFDIndex} />);
+        ? (<EditableDecisionCard relation={relation} selectedFdIndex={selectedFdIndex} />)
+        : (<FinalDecisionCard relation={relation} selectedFdIndex={selectedFdIndex} />);
 }
 
-function EditableDecisionCard({ relation, selectedFDIndex }: DecisionCardProps) {
+function EditableDecisionCard({ relation, selectedFdIndex }: DecisionCardProps) {
     const { exampleRow, columns } = relation;
     const { decision, setDecision } = useDecisionContext();
-    const selected = decision.columns[selectedFDIndex];
+    const selected = decision.columns[selectedFdIndex];
     const isValid = selected.status === DecisionColumnStatus.Valid;
 
     const updateColumn = useCallback((nextCol: Partial<DecisionColumn>) => {
         setDecision(prev => ({
             ...prev,
-            columns: prev.columns.map((col, i) => i === selectedFDIndex ? { ...col, ...nextCol } : col),
+            columns: prev.columns.map((col, i) => i === selectedFdIndex ? { ...col, ...nextCol } : col),
         }));
-    }, [ selectedFDIndex, setDecision ]);
+    }, [ selectedFdIndex, setDecision ]);
 
     return (
         <Card>
             <CardHeader>
                 <h3 className='font-semibold'>
                     Is the value
-                    {' '}<span className='font-bold text-primary'>{exampleRow.values[selectedFDIndex]}</span>{' '}
+                    {' '}<span className='font-bold text-primary'>{exampleRow.values[selectedFdIndex]}</span>{' '}
                     in the column
-                    {' '}<ColumnNameBadge name={columns[selectedFDIndex]} className='inline' />{' '}
+                    {' '}<ColumnNameBadge name={columns[selectedFdIndex]} className='inline' />{' '}
                     possible?
                 </h3>
             </CardHeader>
@@ -227,7 +227,7 @@ function EditableDecisionCard({ relation, selectedFDIndex }: DecisionCardProps) 
                     If the value is possible, the following functional dependency must be fake:
                 </p>
 
-                <FdDisplay relation={relation} selectedFDIndex={selectedFDIndex} />
+                <FdDisplay relation={relation} selectedFdIndex={selectedFdIndex} />
 
                 {selected.status === DecisionColumnStatus.Undecided ? (
                     <div className='mt-6 flex gap-3'>
@@ -258,7 +258,7 @@ function EditableDecisionCard({ relation, selectedFDIndex }: DecisionCardProps) 
                         {!isValid && (<>
                             <p className='mt-6 mb-3'>
                                 Please provide us with one or more reasons why the value
-                                {' '}<span className='font-bold text-primary'>{exampleRow.values[selectedFDIndex]}</span>{' '}
+                                {' '}<span className='font-bold text-primary'>{exampleRow.values[selectedFdIndex]}</span>{' '}
                                 is not possible. You can select from the predefined reasons or you can type your own.
                             </p>
 
@@ -272,10 +272,10 @@ function EditableDecisionCard({ relation, selectedFDIndex }: DecisionCardProps) 
     );
 }
 
-function FinalDecisionCard({ relation, selectedFDIndex }: DecisionCardProps) {
+function FinalDecisionCard({ relation, selectedFdIndex: selectedFdIndex }: DecisionCardProps) {
     const { exampleRow, columns } = relation;
     const { decision } = useDecisionContext();
-    const selected = decision.columns[selectedFDIndex];
+    const selected = decision.columns[selectedFdIndex];
     const isValid = selected.status === DecisionColumnStatus.Valid;
 
     return (
@@ -283,7 +283,7 @@ function FinalDecisionCard({ relation, selectedFDIndex }: DecisionCardProps) {
             <CardHeader>
                 <h3 className='font-semibold'>
                     The value
-                    {' '}<span className='font-bold text-primary'>{exampleRow.values[selectedFDIndex]}</span>{' '}
+                    {' '}<span className='font-bold text-primary'>{exampleRow.values[selectedFdIndex]}</span>{' '}
                     is
                     {' '}{isValid ? (
                         <span className='text-success'>possible</span>
@@ -291,7 +291,7 @@ function FinalDecisionCard({ relation, selectedFDIndex }: DecisionCardProps) {
                         <span className='text-danger'>not possible</span>
                     )}{' '}
                     in the column
-                    {' '}<ColumnNameBadge name={columns[selectedFDIndex]} className='inline' />
+                    {' '}<ColumnNameBadge name={columns[selectedFdIndex]} className='inline' />
                     .
                 </h3>
             </CardHeader>
@@ -310,13 +310,13 @@ function FinalDecisionCard({ relation, selectedFDIndex }: DecisionCardProps) {
                     </>)}
                 </p>
 
-                <FdDisplay relation={relation} selectedFDIndex={selectedFDIndex} />
+                <FdDisplay relation={relation} selectedFdIndex={selectedFdIndex} />
             </CardBody>
         </Card>
     );
 }
 
-function FdDisplay({ relation: { exampleRow, columns }, selectedFDIndex }: DecisionCardProps) {
+function FdDisplay({ relation: { exampleRow, columns }, selectedFdIndex: selectedFdIndex }: DecisionCardProps) {
     const maxSetCols = exampleRow.maxSetElement.map(index => columns[index]);
 
     return (
@@ -329,7 +329,7 @@ function FdDisplay({ relation: { exampleRow, columns }, selectedFDIndex }: Decis
 
             <FaArrowRight size={20} className='shrink-0' />
 
-            <ColumnNameBadge name={columns[selectedFDIndex]} className='mt-[2px] shrink-0' />
+            <ColumnNameBadge name={columns[selectedFdIndex]} className='mt-[2px] shrink-0' />
         </div>
     );
 }

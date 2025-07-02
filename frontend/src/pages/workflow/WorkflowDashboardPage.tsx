@@ -1,13 +1,13 @@
 import { DatasetTable } from '@/components/dataset/DatasetTableDisplay';
-import { FDListDisplayBalanced } from '@/components/dataset/FDListDisplay';
-import { LatticeDisplay } from '@/components/dataset/FDGraphDisplay';
+import { FdListDisplayBalanced } from '@/components/dataset/FdListDisplay';
+import { LatticeDisplay } from '@/components/dataset/FdGraphDisplay';
 import { Button, Card, CardBody, CardFooter, CardHeader, Tab, Tabs } from '@heroui/react';
 import { Page, TopbarContent } from '@/components/layout';
 import { ArmstrongRelationDisplay } from '@/components/dataset/ArmstrongRelationDisplay';
 import { Link, matchPath, Outlet, type Params, useLocation, useNavigate, useRevalidator, useRouteLoaderData } from 'react-router';
 import { type WorkflowLoaded } from './WorkflowPage';
 import { routes } from '@/router';
-import { useCallback, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ExampleState } from '@/types/armstrongRelation';
 import clsx from 'clsx';
 import { mockAPI } from '@/utils/api/mockAPI';
@@ -41,8 +41,8 @@ WorkflowDashboardPage.loader = async ({ params: { workflowId } }: { params: Para
         throw new Error('Missing workflow ID');
 
     const [ jobResponse, assignmentsResponse ] = await Promise.all([
-        mockAPI.workflows.getLastJobResult(workflowId),
-        mockAPI.assignments.getAllAssignments(workflowId),
+        mockAPI.workflow.getLastJobResult(workflowId),
+        mockAPI.assignment.getAssignments(workflowId),
     ]);
 
     if (!jobResponse.status)
@@ -77,31 +77,10 @@ export function WorkflowOverviewPage() {
     const navigate = useNavigate();
     const [ fetching, setFetching ] = useState<string>();
 
-    // FIXME Synchronize with backend.
-    const assignRow = useCallback(async (rowIndex: number) => {
-        const assignment = await mockAPI.assignments.create({
-            workflowId: workflow.id,
-            rowIndex,
-        });
-        if (!assignment.status)
-            return;
-
-        void navigate(routes.assignment.root.resolve({ assignmentId: assignment.data.id }));
-
-        // TODO Is this needed?
-        // setRelation(prev => ({
-        //     ...prev,
-        //     exampleRows: prev.exampleRows.map((row, i) => i === rowIndex ? { ...row, workerId } : row),
-        // }));
-    }, []);
-
     async function runRediscovery() {
         setFetching(FID_CONTINUE);
-        // const response = await API.workflows.executeRediscovery({ workflowId: workflow.id }, {
-        const response = await mockAPI.workflows.executeRediscovery(workflow.id, {
-            // approach,
-            approach: 'HyFD',
-        });
+        const description = workflow.iteration === 1 ? 'Wait for negative example generation ...' : 'Applying approved examples ...';
+        const response = await mockAPI.workflow.continueWorkflow(workflow.id, { description });
         if (!response.status) {
             setFetching(undefined);
             return;
@@ -120,7 +99,7 @@ export function WorkflowOverviewPage() {
 
     async function acceptAll() {
         setFetching(FID_ACCEPT_ALL);
-        const response = await mockAPI.workflows.acceptAllExamples(workflow.id);
+        const response = await mockAPI.workflow.acceptAllExamples(workflow.id);
         if (!response.status) {
             setFetching(undefined);
             return;
@@ -157,9 +136,9 @@ export function WorkflowOverviewPage() {
 
                     <div className='col-span-2 flex items-center'>Dataset:<div className='truncate px-2 text-primary font-semibold'>{workflow.datasetName}</div></div>
 
-                    <div>Minimal FDs:<span className='px-2 text-primary font-semibold'>{relation.minimalFDs}</span></div>
+                    <div>Minimal FDs:<span className='px-2 text-primary font-semibold'>{relation.minimalFds}</span></div>
 
-                    <div>All FDs:<span className='px-2 text-primary font-semibold'>{relation.minimalFDs + relation.otherFDs}</span></div>
+                    <div>All FDs:<span className='px-2 text-primary font-semibold'>{relation.minimalFds + relation.otherFds}</span></div>
 
                     <div>LHS size:<span className='px-2 text-primary font-semibold'>{relation.lhsSize}</span></div>
 
@@ -181,7 +160,7 @@ export function WorkflowOverviewPage() {
             </Card>
 
             <Card className='max-w-full p-4 items-center'>
-                <ArmstrongRelationDisplay relation={relation} assignRow={assignRow} assignments={assignments} />
+                <ArmstrongRelationDisplay relation={relation} assignments={assignments} />
             </Card>
         </div>
     );
@@ -199,15 +178,15 @@ export function WorkflowDatasetPage() {
 }
 
 export function WorkflowListPage() {
-    const { workflow, fdClasses, jobResult } = useRouteLoaderData<WorkflowLoaded>(routes.workflow.$id)!;
+    const { workflow, fdSet } = useRouteLoaderData<WorkflowLoaded>(routes.workflow.$id)!;
 
     const index = workflow.iteration === 0 ? 0 : 1;
-    const fds = useMemo(() => createFdEdges(fdClasses, jobResult!.relation.columns), [ index ]);
+    const fds = useMemo(() => createFdEdges(fdSet), [ index ]);
 
     return (
         <Card className='mx-auto w-fit'>
             <CardBody>
-                <FDListDisplayBalanced edges={fds} />
+                <FdListDisplayBalanced edges={fds} />
             </CardBody>
         </Card>
     );

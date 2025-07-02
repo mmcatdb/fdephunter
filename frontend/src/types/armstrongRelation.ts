@@ -11,9 +11,9 @@ export type ArmstrongRelation = {
     isEvaluatingPositives: boolean;
 
     /** @deprecated This probably shouldn't be here, but we need it now for the stats. */
-    minimalFDs: number;
+    minimalFds: number;
     /** @deprecated This probably shouldn't be here, but we need it now for the stats. */
-    otherFDs: number;
+    otherFds: number;
     /** @deprecated This probably shouldn't be here, but we need it now for the stats. */
     lhsSize: number;
 };

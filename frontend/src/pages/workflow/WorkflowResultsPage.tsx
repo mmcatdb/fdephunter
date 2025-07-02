@@ -6,10 +6,9 @@ import { Page, TopbarContent } from '@/components/layout';
 import { useMemo, useState } from 'react';
 import { mockAPI } from '@/utils/api/mockAPI';
 import { Workflow } from '@/types/workflow';
-import { type FDEdge } from '@/types/FD';
+import { type FdSet, type FdEdge } from '@/types/functionalDependency';
 import { compareStringsAscii } from '@/utils/common';
-import { FDListDisplay } from '@/components/dataset/FDListDisplay';
-import { type MockFDClass } from '@/utils/mockData';
+import { FdListDisplay } from '@/components/dataset/FdListDisplay';
 
 export function WorkflowResultsPage() {
     const { workflow } = useRouteLoaderData<WorkflowLoaded>(routes.workflow.$id)!;
@@ -40,13 +39,13 @@ function WorkflowResultsTabs({ workflowId }: { workflowId: string }) {
 }
 
 export function WorkflowFinalPage() {
-    const { workflow, fdClasses, jobResult } = useRouteLoaderData<WorkflowLoaded>(routes.workflow.$id)!;
+    const { workflow, fdSet: fdClasses } = useRouteLoaderData<WorkflowLoaded>(routes.workflow.$id)!;
 
     const [ isFetching, setIsFetching ] = useState(false);
 
     async function continueToWorkflow() {
         setIsFetching(true);
-        const response = await mockAPI.workflows.create();
+        const response = await mockAPI.workflow.createWorkflow();
         setIsFetching(false);
         if (!response.status)
             return;
@@ -54,7 +53,7 @@ export function WorkflowFinalPage() {
         window.open(routes.workflow.settings.resolve({ workflowId: Workflow.fromResponse(response.data).id }), '_blank');
     }
 
-    const fds = useMemo(() => createFdEdges(fdClasses, jobResult!.relation.columns), []);
+    const fds = useMemo(() => createFdEdges(fdClasses), []);
 
     return (
         <div className='mx-auto w-fit flex flex-col gap-8'>
@@ -90,7 +89,7 @@ export function WorkflowFinalPage() {
                 <CardBody className='space-y-4'>
                     <p>Here you can see the list of all genuine functional dependencies you discovered:</p>
 
-                    <FDListDisplay edges={fds} />
+                    <FdListDisplay edges={fds} />
                 </CardBody>
             </Card>
 
@@ -114,41 +113,48 @@ export function WorkflowFinalPage() {
     );
 }
 
-export function createFdEdges(classes: MockFDClass[], columns: string[]): FDEdge[] {
-    return classes.flatMap(({ colIndex, minimalFds }) => minimalFds.map(minimalFd => ({
-        id: minimalFd.join(',') + '->' + colIndex,
-        source: { columns: minimalFd.map(i => columns[i]), label: minimalFd.join(','), id: minimalFd.join(',') },
-        target: { columns: [ columns[colIndex] ], label: columns[colIndex], id: colIndex.toString() },
+export function createFdEdges(fdSet: FdSet): FdEdge[] {
+    return fdSet.fdClasses.flatMap((minimalFds, colIndex) => minimalFds.map(minimalFd => ({
+        id: minimalFd.columns.join(',') + '->' + colIndex,
+        source: {
+            columns: minimalFd.columns.map(i => fdSet.columns[i]),
+            label: minimalFd.columns.join(','), id: minimalFd.columns.join(','),
+        },
+        target: {
+            columns: [ fdSet.columns[colIndex] ],
+            label: fdSet.columns[colIndex],
+            id: colIndex.toString(),
+        },
     })));
 }
 
 // NICE_TO_HAVE Not used now - we don't want to group the FDs by LHS for displaying. Maybe we will use it if there are too many FDs.
-function groupFdsByLhs(classes: MockFDClass[], columns: string[]): FDEdge[] {
+function groupFdsByLhs(fdSet: FdSet): FdEdge[] {
     const fdsByLhs = new Map<string, { lhs: number[], rhs: number[] }>();
 
-    for (const { colIndex, minimalFds } of classes) {
+    fdSet.fdClasses.forEach((minimalFds, colIndex) => {
         for (const minimalFd of minimalFds) {
-            const key = minimalFd.join(',');
+            const key = minimalFd.columns.join(',');
 
             let existing = fdsByLhs.get(key);
             if (!existing) {
-                existing = { lhs: minimalFd, rhs: [] };
+                existing = { lhs: minimalFd.columns, rhs: [] };
                 fdsByLhs.set(key, existing);
             }
 
             existing.rhs.push(colIndex);
         }
-    }
+    });
 
-    const fds: FDEdge[] = [];
+    const fds: FdEdge[] = [];
     for (const { lhs, rhs } of fdsByLhs.values()) {
         const lhsKey = lhs.join(',');
         const rhsKey = rhs.join(',');
 
         fds.push({
             id: lhsKey + '->' + rhsKey,
-            source: { columns: lhs.map(i => columns[i]), label: lhsKey, id: lhsKey },
-            target: { columns: rhs.map(i => columns[i]), label: rhsKey, id: rhsKey },
+            source: { columns: lhs.map(i => fdSet.columns[i]), label: lhsKey, id: lhsKey },
+            target: { columns: rhs.map(i => fdSet.columns[i]), label: rhsKey, id: rhsKey },
         });
     }
 

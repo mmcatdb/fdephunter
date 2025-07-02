@@ -1,6 +1,7 @@
-import { assignments } from './routes/assignments';
-import { datasets } from './routes/datasets';
-import { workflows } from './routes/workflows';
+import { assignment } from './routes/assignment';
+import { dataset } from './routes/dataset';
+import { view } from './routes/view';
+import { workflow } from './routes/workflow';
 
 function prepareAbort(): [ AbortSignal, () => void ] {
     const controller = new AbortController();
@@ -14,8 +15,9 @@ function prepareAbort(): [ AbortSignal, () => void ] {
 }
 
 export const API = {
-    // assignments,
-    // datasets,
-    // workflows,
+    assignment,
+    dataset,
+    view,
+    workflow,
     prepareAbort,
 };

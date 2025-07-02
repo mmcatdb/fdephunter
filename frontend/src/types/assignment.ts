@@ -40,11 +40,6 @@ export class Assignment {
     }
 }
 
-export type AssignmentInit = {
-    workflowId: string;
-    rowIndex: number;
-};
-
 export type ExampleDecision = {
     status: DecisionStatus;
     columns: {

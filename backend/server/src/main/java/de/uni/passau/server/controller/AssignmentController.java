@@ -7,20 +7,18 @@ import de.uni.passau.server.repository.AssignmentRepository;
 import de.uni.passau.server.service.AssignmentService;
 import de.uni.passau.server.service.DatasetService;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 public class AssignmentController {
 
     @SuppressWarnings({ "java:s1068", "unused" })
@@ -36,25 +34,29 @@ public class AssignmentController {
     private DatasetService datasetService;
 
     @GetMapping("/assignments/{assignmentId}")
-    public AssignmentResponse getAssignment(@PathVariable String assignmentId, @RequestParam(required = false, defaultValue = "5") String limit) {
-        final int numberLimit = DatasetController.tryParseLimit(limit);
-
+    public AssignmentResponse getAssignment(@PathVariable String assignmentId) {
         final var assignmentGroup = assignmentRepository.findGroupById(assignmentId);
         final var datasetName = assignmentRepository.getDatasetName(assignmentId);
         final var dataset = datasetService.getLoadedDatasetByName(datasetName);
-        final var datasetData = DatasetData.fromNodes(dataset, numberLimit);
 
-        return AssignmentResponse.fromNodes(assignmentGroup, datasetData);
+        // return AssignmentResponse.fromNodes(assignmentGroup, datasetData);
+        throw new UnsupportedOperationException("Not implemented yet.");
+    }
+
+    @GetMapping("/workflows/{workflowId}/assignments")
+    public List<AssignmentResponse> getAssignments(@PathVariable String workflowId) {
+        throw new UnsupportedOperationException("Not implemented yet.");
     }
 
     @PostMapping("/assignments/{assignmentId}/evaluate")
-    public AssignmentResponse evaluateAssignment(
-        @PathVariable String assignmentId,
-        @RequestBody ExampleDecision decision,
-        @RequestParam(required = false, defaultValue = "5") String limit
-    ) {
+    public AssignmentResponse evaluateAssignment(@PathVariable String assignmentId, @RequestBody ExampleDecision decision) {
         assignmentService.evaluateAssignment(assignmentId, decision);
-        return getAssignment(assignmentId, limit);
+        return getAssignment(assignmentId);
+    }
+
+    @PostMapping("/assignments/{assignmentId}/reset")
+    public AssignmentResponse resetAssignment(@PathVariable String assignmentId, @RequestBody ExampleDecision decision) {
+        throw new UnsupportedOperationException("Not implemented yet.");
     }
 
 }

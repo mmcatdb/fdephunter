@@ -20,8 +20,8 @@ export function WorkflowSettingsPage() {
 
     async function runInitialDiscovery(settings: DiscoverySettings) {
         setFetching(true);
-        // const response = await API.workflows.executeDiscovery({ workflowId: workflow.id }, {
-        const response = await mockAPI.workflows.executeDiscovery(workflow.id, {
+        const response = await mockAPI.workflow.startWorkflow(workflow.id, {
+            description: `Initial discovery for ${settings.datasetName}`,
             approach: settings.approach,
             datasetName: settings.datasetName,
         });
@@ -68,7 +68,7 @@ type WorkflowSettingsLoaded = {
 
 WorkflowSettingsPage.loader = async (): Promise<WorkflowSettingsLoaded> => {
     // const [ datasetsResponse ] = await Promise.all([
-    //     API.datasets.getAll(undefined, {}),
+    //     API.datasets.getDatasets(undefined, {}),
     // ]);
     // if (!datasetsResponse.status)
     //     throw new Error('Failed to load datasets');
@@ -77,7 +77,7 @@ WorkflowSettingsPage.loader = async (): Promise<WorkflowSettingsLoaded> => {
     //     datasets: datasetsResponse.data.map(Dataset.fromResponse),
     // };
 
-    const datasetsResponse = await mockAPI.datasets.getAll();
+    const datasetsResponse = await mockAPI.dataset.getDatasets();
     if (!datasetsResponse.status)
         throw new Error('Failed to load datasets');
 

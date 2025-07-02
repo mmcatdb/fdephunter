@@ -2,7 +2,6 @@ package de.uni.passau.server.controller.response;
 
 import de.uni.passau.core.example.ExampleDecision;
 import de.uni.passau.core.example.ExampleRow;
-import de.uni.passau.server.repository.AssignmentRepository.AssignmentNodeGroup;
 
 import java.io.Serializable;
 
@@ -26,13 +25,6 @@ public record AssignmentResponse(
     //         dataset
     //     );
     // }
-
-    /** @deprecated */
-    public static AssignmentResponse fromNodes(AssignmentNodeGroup group, DatasetData dataset) {
-        // return AssignmentResponse.fromNodes(group.assignment(), group.example(), group.result(), dataset);
-        // FIXME
-        return null;
-    }
 
     /**
      * An example consists of a reference row and an example row. The two rows form a "relation".

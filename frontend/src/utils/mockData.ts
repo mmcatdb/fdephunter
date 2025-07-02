@@ -1,5 +1,6 @@
 import { type ArmstrongRelation, ExampleState, type Lattice, McType } from '@/types/armstrongRelation';
 import { type DatasetResponse, DatasetType, type DatasetData } from '@/types/dataset';
+import { type FdSet } from '@/types/functionalDependency';
 
 export const MOCK_ARMSTRONG_RELATIONS: ArmstrongRelation[] = [ {
     columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
@@ -12,8 +13,8 @@ export const MOCK_ARMSTRONG_RELATIONS: ArmstrongRelation[] = [ {
     ],
     isEvaluatingPositives: false,
 
-    minimalFDs: 12,
-    otherFDs: 40,
+    minimalFds: 12,
+    otherFds: 40,
     lhsSize: 0,
 }, {
     columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
@@ -29,8 +30,8 @@ export const MOCK_ARMSTRONG_RELATIONS: ArmstrongRelation[] = [ {
     ],
     isEvaluatingPositives: false,
 
-    minimalFDs: 9,
-    otherFDs: 37,
+    minimalFds: 9,
+    otherFds: 37,
     lhsSize: 1,
 }, {
     columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
@@ -45,8 +46,8 @@ export const MOCK_ARMSTRONG_RELATIONS: ArmstrongRelation[] = [ {
     ],
     isEvaluatingPositives: false,
 
-    minimalFDs: 12,
-    otherFDs: 29,
+    minimalFds: 12,
+    otherFds: 29,
     lhsSize: 2,
 }, {
     columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
@@ -59,8 +60,8 @@ export const MOCK_ARMSTRONG_RELATIONS: ArmstrongRelation[] = [ {
     ],
     isEvaluatingPositives: false,
 
-    minimalFDs: 4,
-    otherFDs: 29,
+    minimalFds: 4,
+    otherFds: 29,
     lhsSize: 3,
 }, {
     columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
@@ -76,8 +77,8 @@ export const MOCK_ARMSTRONG_RELATIONS: ArmstrongRelation[] = [ {
     ],
     isEvaluatingPositives: false,
 
-    minimalFDs: 4,
-    otherFDs: 28,
+    minimalFds: 4,
+    otherFds: 28,
     lhsSize: 4,
 }, {
     columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
@@ -93,8 +94,8 @@ export const MOCK_ARMSTRONG_RELATIONS: ArmstrongRelation[] = [ {
     ],
     isEvaluatingPositives: true,
 
-    minimalFDs: 4,
-    otherFDs: 28,
+    minimalFds: 4,
+    otherFds: 28,
     lhsSize: 2,
 } ];
 
@@ -253,65 +254,36 @@ export const MOCK_DATASETS: DatasetResponse[] = [
     type: DatasetType.Csv,
 }));
 
-export type MockFDClass = {
-    /** Indexes in the relations's columns. */
-    colIndex: number;
-    minimalFds: number[][];
-};
-
-export const MOCK_FDS: MockFDClass[][] = [
-    [ {
-        colIndex: 0,
-        minimalFds: [
-            [ 2, 3 ],
-            [ 2, 4 ],
-            [ 3, 4 ],
-        ],
-    }, {
-        colIndex: 1,
-        minimalFds: [
-            [ 0 ],
-            [ 2 ],
-            [ 4 ],
-        ],
-    }, {
-        colIndex: 2,
-        minimalFds: [
-            [ 0 ],
-            [ 3, 4 ],
-        ],
-    }, {
-        colIndex: 3,
-        minimalFds: [
-            [ 0 ],
-            [ 2, 4 ],
-        ],
-    }, {
-        colIndex: 4,
-        minimalFds: [
-            [ 0 ],
-            [ 2, 3 ],
-        ],
-    } ],
-    [ {
-        colIndex: 1,
-        minimalFds: [
-            [ 0 ],
-        ],
-    }, {
-        colIndex: 2,
-        minimalFds: [
-            [ 0 ],
-        ],
-    }, {
-        colIndex: 3,
-        minimalFds: [
-            [ 0 ],
-        ],
-    }, {
-        colIndex: 4,
-        minimalFds: [
-            [ 1, 2, 3 ],
-        ],
-    } ],
-];
+export const MOCK_FD_SETS: FdSet[] = [ {
+    columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
+    fdClasses: [ [
+        { columns: [ 2, 3 ] },
+        { columns: [ 2, 4 ] },
+        { columns: [ 3, 4 ] },
+    ], [
+        { columns: [ 0 ] },
+        { columns: [ 2 ] },
+        { columns: [ 4 ] },
+    ], [
+        { columns: [ 0 ] },
+        { columns: [ 3, 4 ] },
+    ], [
+        { columns: [ 0 ] },
+        { columns: [ 2, 4 ] },
+    ], [
+        { columns: [ 0 ] },
+        { columns: [ 2, 3 ] },
+    ] ],
+}, {
+    columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
+    fdClasses: [ [
+        { columns: [ 0 ] },
+    ], [
+        { columns: [ 0 ] },
+    ], [
+        { columns: [ 0 ] },
+    ], [
+        { columns: [ 1, 2, 3 ] },
+    ],
+    ],
+} ];

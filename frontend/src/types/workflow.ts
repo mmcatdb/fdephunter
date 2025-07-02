@@ -20,7 +20,7 @@ export enum WorkflowState {
     /**
      * Yes! We have finally made it. The algorithm drops the final set of genuine FDs and we level up.
      */
-    DisplayFinalFDs = 'FINAL',
+    DisplayFinalFds = 'FINAL',
 }
 
 export type WorkflowResponse = {
@@ -50,8 +50,8 @@ export class Workflow {
 }
 
 export type WorkflowStats = {
-    FDsInitial: number;
-    FDsRemaining: number;
+    FdsInitial: number;
+    FdsRemaining: number;
     examplesPositive: number;
     examplesNegative: number;
     // examplesTotal = examplesPositive + examplesNegative

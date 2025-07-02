@@ -4,9 +4,7 @@ import de.uni.passau.core.approach.AbstractApproach.ApproachName;
 import de.uni.passau.core.graph.WeightedGraph;
 import de.uni.passau.server.model.DiscoveryJobNode;
 import de.uni.passau.server.model.JobResultNode;
-import de.uni.passau.server.model.NegativeExampleNode.NegativeExampleState;
 import de.uni.passau.server.model.WorkflowNode.WorkflowState;
-import de.uni.passau.server.repository.ClassRepository;
 import de.uni.passau.server.repository.DiscoveryJobRepository;
 import de.uni.passau.server.repository.JobResultRepository;
 import de.uni.passau.server.repository.WorkflowRepository;
@@ -33,9 +31,6 @@ public class DiscoveryJobService {
 
     @Autowired
     private WorkflowRepository workflowRepository;
-
-    @Autowired
-    private ClassRepository classRepository;
 
     @Autowired
     private ObjectMapper objectMapperJSON;
@@ -77,18 +72,6 @@ public class DiscoveryJobService {
         workflow = workflowRepository.save(workflow);
 
         return job;
-    }
-
-    public boolean canCreateRediscoveryJob(String workflowId) {
-        final var workflow = workflowRepository.findById(workflowId).get();
-
-        // If the workflow isn't in the correct state ...
-        if (workflow.state != WorkflowState.NEGATIVE_EXAMPLES)
-            return false;
-
-        // If there still are unresolved classes ...
-        final var classGroups = classRepository.findAllGroupsByWorkflowId(workflowId);
-        return classGroups.stream().allMatch(c -> c.lastExample() != null && c.lastExample().state == NegativeExampleState.ACCEPTED);
     }
 
 }

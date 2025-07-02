@@ -1,7 +1,7 @@
 import { type Dispatch, useMemo, useState } from 'react';
 import { type ExampleRelation, type ArmstrongRelation, type ExampleRow, ExampleState } from '@/types/armstrongRelation';
 import { Button } from '@heroui/react';
-import { ColumnNameBadge } from './FDListDisplay';
+import { ColumnNameBadge } from './FdListDisplay';
 import clsx, { type ClassValue } from 'clsx';
 import { BiCollapseHorizontal, BiExpandHorizontal } from 'react-icons/bi';
 import { IoCheckmark, IoClose, IoHelp, IoCheckmarkCircleOutline, IoCloseCircleOutline, IoReloadCircleOutline } from 'react-icons/io5';
@@ -18,11 +18,10 @@ type GridState = {
 
 type ArmstrongRelationDisplayProps = {
     relation: ArmstrongRelation;
-    assignRow: (rowIndex: number) => void;
     assignments?: AssignmentInfo[];
 };
 
-export function ArmstrongRelationDisplay({ relation, assignRow, assignments }: ArmstrongRelationDisplayProps) {
+export function ArmstrongRelationDisplay({ relation, assignments }: ArmstrongRelationDisplayProps) {
     const [ state, setState ] = useState<GridState>({});
 
     return (
@@ -91,7 +90,6 @@ export function ArmstrongRelationDisplay({ relation, assignRow, assignments }: A
                     relation={relation}
                     row={row}
                     rowIndex={rowIndex}
-                    assignRow={assignRow}
                     assignments={assignments}
                     gridState={state}
                 />
@@ -144,12 +142,11 @@ type ExampleRowDisplayProps = {
     relation: ArmstrongRelation;
     row: ExampleRow;
     rowIndex: number;
-    assignRow: (rowIndex: number) => void;
     assignments?: AssignmentInfo[];
     gridState: GridState;
 };
 
-function ExampleRowDisplay({ relation, row, rowIndex, assignRow, assignments, gridState }: ExampleRowDisplayProps) {
+function ExampleRowDisplay({ relation, row, rowIndex, assignments, gridState }: ExampleRowDisplayProps) {
     const maxSetCols = row.maxSetElement.map(index => relation.columns[index]);
     const exampleBgClass = row.isPositive ? 'bg-danger-400' : 'bg-warning-400';
     const { leftClass, rightClass } = getSpecialCellClasses(rowIndex);
@@ -172,9 +169,10 @@ function ExampleRowDisplay({ relation, row, rowIndex, assignRow, assignments, gr
                         </Button>
                     </Link>
                 ) : (
-                    <Button size='sm' className='h-6' disableAnimation onPress={() => assignRow(rowIndex)}>
-                        Evaluate
-                    </Button>
+                    <div>
+                        {/* TODO */}
+                        TODO GENERATE THE ASSIGNMENTS
+                    </div>
                 )}
             </>)}
         </div>

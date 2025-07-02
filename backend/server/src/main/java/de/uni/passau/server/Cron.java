@@ -17,12 +17,12 @@ public class Cron {
     @Scheduled(cron = "*/30 * * * * *")
     // @Scheduled(cron = "0 * * * * *")
     public void scheduledJobEveryMinute() {
-        scheduledJobsService.executeDiscoveryJobs();
+        // scheduledJobsService.executeDiscoveryJobs();
     }
 
     @Scheduled(cron = "0 0 * * * *")
     public void scheduledJobEveryHour() {
-        System.out.println("HOUR:" + System.currentTimeMillis());
+        // System.out.println("HOUR:" + System.currentTimeMillis());
     }
 
 }

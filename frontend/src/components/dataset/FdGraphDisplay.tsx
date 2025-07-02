@@ -1,5 +1,5 @@
 import { memo, type ReactNode, useMemo, useState } from 'react';
-import { NODE_OPTIONS, type RFGraph, type RFNode, type RFEdge } from '@/types/FD';
+import { NODE_OPTIONS, type RFGraph, type RfNode, type RfEdge } from '@/types/functionalDependency';
 import { Handle, type NodeProps, Position, ReactFlow } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { computeColumnIndexesForLatticeRow, computeEdgesForLatticeCell, type Lattice, McType } from '@/types/armstrongRelation';
@@ -128,8 +128,8 @@ function createLatticeGraph(lattice: Lattice, rowIndex: number | undefined): RFG
     const widestRow = Math.floor((lattice.columns.length - 1) / 2);
     const maxWidth = getRowWidth(widestRow, lattice.columns.length);
 
-    const nodes: RFNode[] = [];
-    const edges: RFEdge[] = [];
+    const nodes: RfNode[] = [];
+    const edges: RfEdge[] = [];
 
     let yOffset = 0;
     for (let i = lattice.rows.length - 1; i >= 0; i--) {
@@ -149,7 +149,7 @@ function createLatticeGraph(lattice: Lattice, rowIndex: number | undefined): RFG
     };
 }
 
-function createRowNodes(lattice: Lattice, rowIndex: number, columnIndexes: number[][], xOffset: number, yOffset: number): RFNode[] {
+function createRowNodes(lattice: Lattice, rowIndex: number, columnIndexes: number[][], xOffset: number, yOffset: number): RfNode[] {
     const types = lattice.rows[rowIndex];
 
     return columnIndexes.map((columnIndexes, cellIndex) => {
@@ -173,7 +173,7 @@ function createRowNodes(lattice: Lattice, rowIndex: number, columnIndexes: numbe
                 '!w-[120px] !px-1 !py-0 !border-4 !text-black text-center rounded text-sm',
                 getMcTypeClassName(type),
             ),
-        } satisfies RFNode;
+        } satisfies RfNode;
     });
 }
 
@@ -181,7 +181,7 @@ function computeNodeId(cell: number[]): string {
     return cell.join('-');
 }
 
-function createRowEdges(lattice: Lattice, columnIndexes: number[][]): RFEdge[] {
+function createRowEdges(lattice: Lattice, columnIndexes: number[][]): RfEdge[] {
     return columnIndexes.flatMap(cell => {
         const source = computeNodeId(cell);
         const edgesForCells = computeEdgesForLatticeCell(cell, lattice.columns.length);
@@ -263,7 +263,7 @@ const nodeTypes = {
     NodeComponent,
 };
 
-function CustomNodeComponent({ data }: NodeProps<RFNode>) {
+function CustomNodeComponent({ data }: NodeProps<RfNode>) {
     return (<>
         <div>
             {data.label}

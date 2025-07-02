@@ -1,15 +1,6 @@
 import { DateTime } from 'luxon';
 import { type ArmstrongRelation } from './armstrongRelation';
 
-export type ExecuteRediscoveryParams = {
-    approach: string;
-};
-
-export type ExecuteDiscoveryParams = ExecuteRediscoveryParams & {
-    approach: string;
-    datasetName: string;
-};
-
 export enum JobState {
     Waiting = 'WAITING',
     Running = 'RUNNING',

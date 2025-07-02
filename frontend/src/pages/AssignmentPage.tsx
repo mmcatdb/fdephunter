@@ -1,6 +1,6 @@
 import { AssignmentEvaluation } from '@/components/AssignmentEvaluation';
-import { LatticeDisplay } from '@/components/dataset/FDGraphDisplay';
-import { FDListDisplay } from '@/components/dataset/FDListDisplay';
+import { LatticeDisplay } from '@/components/dataset/FdGraphDisplay';
+import { FdListDisplay } from '@/components/dataset/FdListDisplay';
 import { DecisionProvider } from '@/context/DecisionProvider';
 import { routes } from '@/router';
 import { Assignment } from '@/types/assignment';
@@ -59,15 +59,15 @@ AssignmentPage.loader = async ({ params: { assignmentId } }: { params: Params<'a
         throw new Error('Missing assignment ID');
 
     // const response = await API.assignments.get(undefined, { assignmentId });
-    const response = await mockAPI.assignments.get(assignmentId);
+    const response = await mockAPI.assignment.getAssignment(assignmentId);
     if (!response.status)
         throw new Error('Failed to load assignment');
 
-    const workflowResponse = await mockAPI.workflows.get(response.data.workflowId);
+    const workflowResponse = await mockAPI.workflow.getWorkflow(response.data.workflowId);
     if (!workflowResponse.status)
         throw new Error('Failed to load workflow');
 
-    const latticesResponse = await mockAPI.assignments.getLattices(response.data.workflowId);
+    const latticesResponse = await mockAPI.assignment.getLattices(response.data.workflowId);
     if (!latticesResponse.status)
         throw new Error('Failed to load lattices');
 
@@ -106,7 +106,7 @@ export function AssignmentListPage() {
     // const { assignment } = useRouteLoaderData<AssignmentLoaded>(routes.assignment.$id)!;
 
     // return (
-    //     <FDListDisplay graph={assignment.jobResult.fdGraph.edges} />
+    //     <FdListDisplay graph={assignment.jobResult.fdGraph.edges} />
     // );
 
     return (

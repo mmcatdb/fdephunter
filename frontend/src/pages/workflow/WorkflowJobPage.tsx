@@ -29,7 +29,7 @@ export function WorkflowJobPage() {
     const navigate = useNavigate();
 
     function handleNextStep() {
-        const route = workflow.state === WorkflowState.DisplayFinalFDs
+        const route = workflow.state === WorkflowState.DisplayFinalFds
             ? routes.workflow.results.root
             : routes.workflow.dashboard.root;
         void navigate(route.resolve({ workflowId: workflow.id }));
@@ -57,7 +57,7 @@ WorkflowJobPage.loader = async ({ params: { workflowId } }: { params: Params<'wo
         throw new Error('Missing workflow ID');
 
     // const response = await API.workflows.getLastJob(undefined, { workflowId });
-    const response = await mockAPI.workflows.getLastJob(workflowId);
+    const response = await mockAPI.workflow.getLastJob(workflowId);
     if (!response.status)
         throw new Error('Failed to load job');
 

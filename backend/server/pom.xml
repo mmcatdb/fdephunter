@@ -30,22 +30,33 @@
             <type>jar</type>
         </dependency>
         <dependency>
+        <!-- TODO Is this needed? -->
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-autoconfigure</artifactId>
             <version>${spring.version}</version>
             <!--<type>jar</type>-->
         </dependency>
+
         <dependency>
+            <!-- deprecated -->
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-neo4j</artifactId>
             <version>${spring.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
             <version>${spring.version}</version>
         </dependency>
         <dependency>
+            <!-- TODO Is this needed? -->
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
             <version>6.2.2</version>

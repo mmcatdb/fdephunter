@@ -18,6 +18,11 @@ docker run -d -e NEO4J_AUTH=neo4j/password -p 7474:7474 -p 7687:7687 --name=neo4
 echo "MATCH (n) DETACH DELETE n" | docker exec -i neo4j cypher-shell -u neo4j -p password
 ```
 
+- Create MongoDB container:
+```bash
+docker run -d -e MONGO_INITDB_ROOT_USERNAME=user -e MONGO_INITDB_ROOT_PASSWORD=password -p 5602:27017 --name=mongodb mongo
+```
+
 - Start development server (with hot reload):
 ```bash
 ./dev.sh

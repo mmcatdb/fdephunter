@@ -1,7 +1,6 @@
 package de.uni.passau.server.controller;
 
-import de.uni.passau.server.controller.request.DiscoveryJobRequest;
-import de.uni.passau.server.controller.request.RediscoveryJobRequest;
+import de.uni.passau.core.approach.AbstractApproach.ApproachName;
 import de.uni.passau.server.controller.response.DiscoveryJobResponse;
 import de.uni.passau.server.controller.response.WorkflowResponse;
 import de.uni.passau.server.model.DiscoveryJobNode;
@@ -16,16 +15,13 @@ import de.uni.passau.server.service.WorkflowService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 public class WorkflowController {
 
     @SuppressWarnings({ "java:s1068", "unused" })
@@ -67,20 +63,27 @@ public class WorkflowController {
         }
     }
 
-    @PostMapping("/workflows/{workflowId}/execute-discovery")
-    public CreateJobResponse createDiscoveryJob(@RequestBody DiscoveryJobRequest init, @PathVariable String workflowId) {
+    private record StartWorkflowRequest(
+        String description,
+        ApproachName approach,
+        String dataset
+    ) {}
+
+    @PostMapping("/workflows/{workflowId}/start")
+    public CreateJobResponse startWorkflow(@RequestBody StartWorkflowRequest init, @PathVariable String workflowId) {
         final var job = discoveryJobService.createDiscoveryJob(workflowId, init.approach(), init.description(), init.dataset());
         final var workflow = workflowRepository.findById(workflowId).get();
 
         return CreateJobResponse.fromNodes(workflow, job);
     }
 
-    @PostMapping("/workflows/{workflowId}/execute-rediscovery")
-    public CreateJobResponse createRediscoveryJob(@RequestBody RediscoveryJobRequest init, @PathVariable String workflowId) {
-        if (!discoveryJobService.canCreateRediscoveryJob(workflowId))
-            throw new RuntimeException("cannot create new rediscovery job");
+    private record ContinueWorkflowRequest(
+        String description
+    ) {}
 
-        final var job = discoveryJobService.createRediscoveryJob(workflowId, init.approach(), init.description());
+    @PostMapping("/workflows/{workflowId}/continue")
+    public CreateJobResponse continueWorkflow(@RequestBody ContinueWorkflowRequest init, @PathVariable String workflowId) {
+        final var job = discoveryJobService.createDiscoveryJob(workflowId, init.approach(), init.description(), init.dataset());
         final var workflow = workflowRepository.findById(workflowId).get();
 
         return CreateJobResponse.fromNodes(workflow, job);
