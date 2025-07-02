@@ -31,7 +31,7 @@ public class CSVDataset implements Dataset {
         final var file = new File(fileName);
         if (!file.isFile()) {
             LOGGER.error("CSV dataset file '{}' not found.", file.getAbsolutePath());
-            this.inputFile = null;
+            throw new IllegalArgumentException("CSV dataset file '" + file.getAbsolutePath() + "' not found.");
         }
         else {
             this.inputFile = file;
@@ -78,7 +78,7 @@ public class CSVDataset implements Dataset {
             throw new IllegalStateException("Data not loaded");
 
         if (metadata == null)
-            metadata = new CSVDatasetMetadata(inputFile.getAbsolutePath(), inputFile.getName(), hasHeader, inputFile.length(), rows.size(), rows.get(0).length);
+            metadata = new CSVDatasetMetadata(inputFile.getAbsolutePath(), inputFile.getName(), hasHeader, inputFile.length(), rows.get(0).length, rows.size());
 
         return metadata;
     }
