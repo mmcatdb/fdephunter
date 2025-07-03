@@ -141,7 +141,7 @@ public class JobService {
         for (final var exampleRow : armstrongRelation.exampleRows) {
             // We don't need to create examples for each row.
             // TODO Optimize this in the algorithm itself.
-            if (exampleRow.maxSetElement.size() != columnSetSize)
+            if (exampleRow.lhsSet.size() != columnSetSize)
                 continue;
 
             final var assignment = AssignmentEntity.create(job.workflowId, armstrongRelation.columns, armstrongRelation.referenceRow, exampleRow);

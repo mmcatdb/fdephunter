@@ -24,15 +24,15 @@ public class AssignmentService {
         final var openAssignments = assignmentRepository.findAllByWorkflowId(workflow.getId()).stream()
             .filter(assignment -> assignment.exampleRow.decision == null || assignment.exampleRow.isPositive == isEvaluatingPositives)
             // TODO something like which assignments are active in the workflow
-            .filter(assignment -> assignment.exampleRow.maxSetElement.size() == workflow.iteration)
+            .filter(assignment -> assignment.exampleRow.lhsSet.size() == workflow.iteration)
             .toList();
 
         for (final var assignment : openAssignments) {
             final var columns = new ArrayList<DecisionColumn>();
 
             for (int i = 0; i < assignment.columns.length; i++) {
-                final var isEvaluated = !assignment.exampleRow.maxSetElement.get(i);
-                columns.add(new DecisionColumn(isEvaluated ? DecisionColumnStatus.VALID : null, new ArrayList<String>()));
+                final var isEvaluating = assignment.exampleRow.rhsSet.get(i);
+                columns.add(new DecisionColumn(isEvaluating ? DecisionColumnStatus.VALID : null, new ArrayList<String>()));
             }
 
             assignment.exampleRow.decision = new ExampleDecision(DecisionStatus.ACCEPTED, columns.toArray(DecisionColumn[]::new));
