@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ComputeFDTest {
     
     @Test
-    void testComputeFDEndToEnd() {
+    public void testComputeFDEndToEnd() {
         Path path = Paths.get("src", "test", "resources", "iris.csv");
         Dataset dataset = new CSVDataset(path.toString(), false);
         dataset.load();
