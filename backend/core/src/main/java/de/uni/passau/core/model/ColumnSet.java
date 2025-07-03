@@ -122,16 +122,12 @@ public class ColumnSet implements Comparable<ColumnSet> {
         return this.columns.get(columnIndex);
     }
 
-    public ColumnSet or(ColumnSet other) {
-        BitSet result = (BitSet) this.columns.clone();
-        result.or(other.columns);
-        return new ColumnSet(result);
+    public void or(ColumnSet other) {
+        this.columns.or(other.columns);
     }
 
-    public ColumnSet xor(ColumnSet other) {
-        BitSet result = (BitSet) this.columns.clone();
-        result.xor(other.columns);
-        return new ColumnSet(result);
+    public void xor(ColumnSet other) {
+        this.columns.xor(other.columns);
     }
 
     public void flip(int columnIndex) {
@@ -164,7 +160,9 @@ public class ColumnSet implements Comparable<ColumnSet> {
     }
 
     @Override public int hashCode() {
-        return columns.hashCode();
+            int result = 17;
+            result = 31 * result + columns.hashCode();
+            return result;
     }
 
     /**

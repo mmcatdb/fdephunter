@@ -168,11 +168,11 @@ public class LeftHandSideGenerator {
 
 	private boolean checkJoinCondition(ColumnSet p, ColumnSet q) {
 
-		if (p.prevSetBit(p.length()) >= q.prevSetBit(p.length())) {
+		if (p.prevSetBit(p.length()) >= q.prevSetBit(q.length())) {
 			return false;
 		}
 		for (int i = 0; i < p.prevSetBit(p.length()); i++) {
-			if (p.getBit(i) != q.getBit(i)) {
+			if (p.get(i) != q.get(i)) {
 				return false;
 			}
 		}
