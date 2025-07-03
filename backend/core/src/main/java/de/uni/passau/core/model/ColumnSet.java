@@ -77,6 +77,12 @@ public class ColumnSet implements Comparable<ColumnSet> {
         this.columns.and(other.columns);
     }
 
+    public boolean intersects(ColumnSet other) {
+        BitSet copy = (BitSet) this.columns.clone();
+        copy.and(other.columns);
+        return !copy.isEmpty();
+    }
+
     public void andNot(ColumnSet other) {
         this.columns.andNot(other.columns);
     }
