@@ -121,10 +121,24 @@ public class ColumnSet implements Comparable<ColumnSet> {
         return this.columns.get(columnIndex);
     }
 
+    public ColumnSet or(ColumnSet other) {
+        BitSet result = (BitSet) this.columns.clone();
+        result.or(other.columns);
+        return new ColumnSet(result);
+    }
+
     public ColumnSet xor(ColumnSet other) {
         BitSet result = (BitSet) this.columns.clone();
         result.xor(other.columns);
         return new ColumnSet(result);
+    }
+
+    public void flip(int columnIndex) {
+        this.columns.flip(columnIndex);
+    }
+
+    public int length() {
+        return this.columns.length();
     }
 
     @Override public int compareTo(ColumnSet other) {
@@ -176,6 +190,22 @@ public class ColumnSet implements Comparable<ColumnSet> {
             }
         };
     }
+
+    public int nextSetBit(int fromIndex) {
+        return columns.nextSetBit(fromIndex);
+    }
+
+    public int prevSetBit(int fromIndex) {
+        return columns.previousSetBit(fromIndex);
+    }
+
+    public int getBit(int index) {
+        if (index < 0 || index >= columns.length()) {
+            throw new IndexOutOfBoundsException("Index: " + index + ", Length: " + columns.length());
+        }
+        return columns.get(index) ? 1 : 0;
+    }
+
 
     // region Serialization
 

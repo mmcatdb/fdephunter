@@ -46,6 +46,9 @@ public class AdjustMaxSet {
             }
 
             if (row.decision.columns()[forClass].status() == DecisionColumnStatus.VALID) {
+                /* If the column C is marked as VALID, the FD lhsSet -> C does not hold.
+                 * This means lhsSet (or a superset of it) is part of the max set.
+                */
                 newMaxSet.addCombination(row.lhsSet);
             } else {
                 // ignore INVALID and UNANSWERED columns for now

@@ -11,14 +11,14 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ComputeMaxSetTest {
+class ComputeFDTest {
     
     @Test
-    void testComputeMaxSetEndToEnd() {
+    void testComputeFDEndToEnd() {
         Path path = Paths.get("src", "test", "resources", "iris.csv");
         Dataset dataset = new CSVDataset(path.toString(), false);
         dataset.load();
-        List<MaxSet> result = ComputeMaxSet.run(dataset);
+        List<MaxSet> result = ComputeFD.run(dataset);
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertTrue(result.stream().allMatch(maxSet -> maxSet.getCombinations().size() > 0));

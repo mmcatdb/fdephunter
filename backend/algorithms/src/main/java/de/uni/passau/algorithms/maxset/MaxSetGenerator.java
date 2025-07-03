@@ -23,8 +23,8 @@ public class MaxSetGenerator {
 	public MaxSetGenerator(List<AgreeSet> agreeSets, int numberOfAttributes) {
 		this.agreeSets = agreeSets;
 		this.numberOfAttributes = numberOfAttributes;
-
 	}
+
 
 	public void targetFD(int columnIndex, int... bits) {
 		var _maxSet = maxSet.get(columnIndex);
@@ -63,7 +63,6 @@ public class MaxSetGenerator {
 	}
 
 	public List<ComplementMaxSet> generateCMAX_SETs() throws Exception {
-
 		this.cmaxSet = new LinkedList<>();
 		for (int i = 0; i < this.numberOfAttributes; ++i) {
 			executeCMAX_SET_Task(i);
@@ -93,7 +92,12 @@ public class MaxSetGenerator {
 
 		result.finalize_RENAME_THIS();
 		this.cmaxSet.add(result);
+	}
 
+	public static List<ComplementMaxSet> generateCMAX_SETs(List<MaxSet> maxSets, int numberOfAttributes) throws Exception {
+		MaxSetGenerator setGenerator = new MaxSetGenerator(new LinkedList<>(), numberOfAttributes);
+		setGenerator.maxSet = maxSets;
+		return setGenerator.generateCMAX_SETs();
 	}
 
 }
