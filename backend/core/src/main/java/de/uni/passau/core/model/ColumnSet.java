@@ -25,7 +25,7 @@ public class ColumnSet implements Comparable<ColumnSet> {
         this.columns = new BitSet();
     }
 
-    public static ColumnSet fromIndexes(int[] columns) {
+    public static ColumnSet fromIndexes(int ...columns) {
         if (columns.length == 0)
             throw new IllegalArgumentException("ColumnSet must contain at least one column.");
 

@@ -34,75 +34,75 @@ class ComputeARTest {
         Boolean hasHeader = true; // Assuming the CSV has a header
         dataset = new CSVDataset(csvFilePath, hasHeader);
         dataset.load();
-       
+
         maxSets = new java.util.ArrayList<>();
 
-        // Initialize the maxSets 
+        // Initialize the maxSets
         // CD -> A
         // CE -> A
         // DE -> A
-        maxSets.add( 
+        maxSets.add(
             new MaxSet(
-                0, 
+                0,
                 List.of(
-                    ColumnSet.fromIndexes(new int[]{2, 3}), // CD
-                    ColumnSet.fromIndexes(new int[]{1, 4}), // CE
-                    ColumnSet.fromIndexes(new int[]{3, 4})  // DE
+                    ColumnSet.fromIndexes(2, 3), // CD
+                    ColumnSet.fromIndexes(1, 4), // CE
+                    ColumnSet.fromIndexes(3, 4)  // DE
                 )
             )
-        ); 
+        );
 
         // A -> B
         // C -> B
         // E -> B
-        maxSets.add( 
+        maxSets.add(
             new MaxSet(
-                1, 
+                1,
                 List.of(
-                    ColumnSet.fromIndexes(new int[]{0}), // A
-                    ColumnSet.fromIndexes(new int[]{2}), // C
-                    ColumnSet.fromIndexes(new int[]{4})  // E
+                    ColumnSet.fromIndexes(0), // A
+                    ColumnSet.fromIndexes(2), // C
+                    ColumnSet.fromIndexes(4)  // E
                 )
             )
         );
 
         // A -> C
         // DE -> C
-        maxSets.add( 
+        maxSets.add(
             new MaxSet(
-                2, 
+                2,
                 List.of(
-                    ColumnSet.fromIndexes(new int[]{0}), // A
-                    ColumnSet.fromIndexes(new int[]{3, 4}) // DE
+                    ColumnSet.fromIndexes(0), // A
+                    ColumnSet.fromIndexes(3, 4) // DE
                 )
             )
         );
 
         // A -> D
         // CE -> D
-        maxSets.add( 
+        maxSets.add(
             new MaxSet(
-                3, 
+                3,
                 List.of(
-                    ColumnSet.fromIndexes(new int[]{0}), // A
-                    ColumnSet.fromIndexes(new int[]{2, 3}) // CE
+                    ColumnSet.fromIndexes(0), // A
+                    ColumnSet.fromIndexes(2, 3) // CE
                 )
             )
         );
 
         // A -> E
         // CD -> E
-        maxSets.add( 
+        maxSets.add(
             new MaxSet(
-                4, 
+                4,
                 List.of(
-                    ColumnSet.fromIndexes(new int[]{0}), // A
-                    ColumnSet.fromIndexes(new int[]{2, 3}) // CD
+                    ColumnSet.fromIndexes(0), // A
+                    ColumnSet.fromIndexes(2, 3) // CD
                 )
             )
         );
 
-        
+
 }
 
     // @AfterEach
@@ -117,7 +117,7 @@ class ComputeARTest {
 
         // Run the ComputeAR algorithm
         ArmstrongRelation ar = ComputeAR.run(maxSets, dataset);
-        
+
 
     }
 
