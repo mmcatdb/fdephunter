@@ -37,67 +37,63 @@ class ComputeARTest {
 
         maxSets = new java.util.ArrayList<>();
 
-        // Initialize the maxSets
-        // CD -> A
-        // CE -> A
-        // DE -> A
-        maxSets.add(
+        // Initialize the maxSets 
+        // BE -> A
+        // BD -> A
+        // BC -> A
+        maxSets.add( 
             new MaxSet(
                 0,
                 List.of(
-                    ColumnSet.fromIndexes(2, 3), // CD
-                    ColumnSet.fromIndexes(1, 4), // CE
-                    ColumnSet.fromIndexes(3, 4)  // DE
+                    ColumnSet.fromIndexes(new int[]{1, 4}), // BE
+                    ColumnSet.fromIndexes(new int[]{1, 3}), // BD
+                    ColumnSet.fromIndexes(new int[]{1, 2})  // BC
                 )
             )
         );
 
-        // A -> B
-        // C -> B
-        // E -> B
-        maxSets.add(
+        // D -> B
+        maxSets.add( 
             new MaxSet(
                 1,
                 List.of(
-                    ColumnSet.fromIndexes(0), // A
-                    ColumnSet.fromIndexes(2), // C
-                    ColumnSet.fromIndexes(4)  // E
+                    ColumnSet.fromIndexes(new int[]{3}) // D
                 )
             )
         );
 
-        // A -> C
-        // DE -> C
-        maxSets.add(
+        // BE -> C
+        // BD -> C
+        maxSets.add( 
             new MaxSet(
                 2,
                 List.of(
-                    ColumnSet.fromIndexes(0), // A
-                    ColumnSet.fromIndexes(3, 4) // DE
+                    ColumnSet.fromIndexes(new int[]{1, 4}), // BE
+                    ColumnSet.fromIndexes(new int[]{1, 3})  // BD
                 )
             )
         );
 
-        // A -> D
-        // CE -> D
-        maxSets.add(
+        // BE -> D
+        // BC -> D
+        maxSets.add( 
             new MaxSet(
                 3,
                 List.of(
-                    ColumnSet.fromIndexes(0), // A
-                    ColumnSet.fromIndexes(2, 3) // CE
+                    ColumnSet.fromIndexes(new int[]{1, 4}), // BE
+                    ColumnSet.fromIndexes(new int[]{1, 2})  // BD
                 )
             )
         );
 
-        // A -> E
-        // CD -> E
-        maxSets.add(
+        // BD -> E
+        // BC -> E
+        maxSets.add( 
             new MaxSet(
                 4,
                 List.of(
-                    ColumnSet.fromIndexes(0), // A
-                    ColumnSet.fromIndexes(2, 3) // CD
+                    ColumnSet.fromIndexes(new int[]{1, 3}), // BD
+                    ColumnSet.fromIndexes(new int[]{1, 2})  // BC
                 )
             )
         );
