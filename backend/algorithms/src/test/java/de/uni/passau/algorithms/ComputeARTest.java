@@ -114,7 +114,6 @@ class ComputeARTest {
         // Run the ComputeAR algorithm
         ArmstrongRelation ar = ComputeAR.run(maxSets, dataset);
 
-
     }
 
 }
