@@ -35,7 +35,6 @@ public class ComplementMaxSet {
 	}
 
 	public List<ColumnSet> getCombinations() {
-
 		return this.elements;
 	}
 

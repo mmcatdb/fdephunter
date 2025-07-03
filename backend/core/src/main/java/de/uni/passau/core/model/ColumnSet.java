@@ -69,6 +69,10 @@ public class ColumnSet implements Comparable<ColumnSet> {
         return new ColumnSet((BitSet) this.columns.clone());
     }
 
+    public BitSet getColumns() {
+        return (BitSet) this.columns.clone();
+    }
+
     public void and(ColumnSet other) {
         this.columns.and(other.columns);
     }
