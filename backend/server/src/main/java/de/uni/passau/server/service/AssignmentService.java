@@ -5,6 +5,7 @@ import de.uni.passau.core.example.ExampleDecision.DecisionColumn;
 import de.uni.passau.core.example.ExampleDecision.DecisionColumnStatus;
 import de.uni.passau.core.example.ExampleDecision.DecisionStatus;
 import de.uni.passau.server.model.WorkflowEntity;
+import de.uni.passau.server.model.WorkflowEntity.WorkflowState;
 import de.uni.passau.server.repository.AssignmentRepository;
 
 import java.util.ArrayList;
@@ -19,8 +20,9 @@ public class AssignmentService {
     private AssignmentRepository assignmentRepository;
 
     public void acceptAllAssignments(WorkflowEntity workflow) {
+        final var isEvaluatingPositives = workflow.state == WorkflowState.POSITIVE_EXAMPLES;
         final var openAssignments = assignmentRepository.findAllByWorkflowId(workflow.getId()).stream()
-            .filter(assignment -> assignment.exampleRow.decision == null || assignment.exampleRow.isPositive == workflow.isEvaluatingPositives)
+            .filter(assignment -> assignment.exampleRow.decision == null || assignment.exampleRow.isPositive == isEvaluatingPositives)
             // TODO something like which assignments are active in the workflow
             .filter(assignment -> assignment.exampleRow.maxSetElement.size() == workflow.iteration)
             .toList();

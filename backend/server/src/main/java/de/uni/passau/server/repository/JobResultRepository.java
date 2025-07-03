@@ -24,19 +24,6 @@ public interface JobResultRepository extends Neo4jRepository<JobResultNode, Stri
         SET result.id = $resultId, result.payload = $payload
         RETURN result
         """)
-    public JobResultNode createResult(@Param("jobId") String jobId, @Param("resultId") String resultId, @Param("payload") String payload);
-
-    @Query("""
-        MATCH (:Workflow { id: $workflowId })-[:HAS_JOB]->(:DiscoveryJob { iteration: $iteration })-[:HAS_RESULT]->(result:JobResult)
-        RETURN result
-        """)
-    public JobResultNode findByWorkflowIdAndIteration(@Param("workflowId") UUID workflowId, @Param("iteration") int iteration);
-
-    @Query("""
-        MATCH (result:JobResult { id: $resultId }), (class:Class { id: $classId })
-        CREATE (result)-[:HAS_CLASS]->(class)
-        RETURN result
-        """)
-    public JobResultNode saveHasClass(@Param("resultId") String resultId, @Param("classId") String classId);
+    public JobResultNode createResult(@Param("jobId") UUID jobId, @Param("resultId") UUID resultId, @Param("payload") String payload);
 
 }

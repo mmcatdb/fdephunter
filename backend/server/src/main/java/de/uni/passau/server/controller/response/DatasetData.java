@@ -10,7 +10,7 @@ public record DatasetData(
     List<String[]> rows
 ) implements Serializable {
 
-    public static DatasetData fromNodes(Dataset dataset, int limit) {
+    public static DatasetData fromEntities(Dataset dataset, int limit) {
         return new DatasetData(dataset.getHeader(), dataset.getRows().stream().limit(limit).toList());
     }
 

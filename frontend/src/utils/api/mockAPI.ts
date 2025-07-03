@@ -442,7 +442,8 @@ async function getFds(workflowId: Id): Promise<Result<FdSet>> {
 // Utils
 
 async function wait() {
-    // return new Promise(resolve => setTimeout(resolve, (1 + Math.random()) * 10));
+    console.warn('Using mock API');
+    return new Promise(resolve => setTimeout(resolve, (1 + Math.random()) * 10));
 }
 
 function get<T>(key: string): T | undefined {

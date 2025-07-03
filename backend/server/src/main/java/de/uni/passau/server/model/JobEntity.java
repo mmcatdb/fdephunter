@@ -1,0 +1,77 @@
+package de.uni.passau.server.model;
+
+import java.io.Serializable;
+import java.util.Date;
+import java.util.UUID;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
+import de.uni.passau.core.approach.AbstractApproach.ApproachName;
+
+@Document("job")
+public class JobEntity {
+
+    @Id
+    private UUID id;
+
+    public UUID getId() {
+        return id;
+    }
+
+    public UUID workflowId;
+
+    /** For ordering jobs in the workflow. */
+    public Integer index;
+
+    public String description;
+
+    public JobState state;
+
+    public @Nullable Date startedAt;
+
+    public @Nullable Date finishedAt;
+
+    public JobPayload payload;
+
+    public static JobEntity create(UUID workflowId, int index, String description, JobPayload payload) {
+        final var job = new JobEntity();
+
+        job.id = UUID.randomUUID();
+        job.workflowId = workflowId;
+        job.index = index;
+        job.description = description;
+        job.state = JobState.WAITING;
+        job.startedAt = null;
+        job.finishedAt = null;
+        job.payload = payload;
+
+        return job;
+    }
+
+    public enum JobState {
+        WAITING,
+        RUNNING,
+        FINISHED,
+        FAILED,
+    }
+
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+    @JsonSubTypes({
+        @JsonSubTypes.Type(value = DiscoveryJobPayload.class, name = "discovery"),
+        @JsonSubTypes.Type(value = AdjustJobPayload.class, name = "adjust"),
+    })
+    public interface JobPayload extends Serializable {}
+
+    public record DiscoveryJobPayload(
+        UUID datasetId,
+        ApproachName approach
+    ) implements JobPayload {}
+
+    public record AdjustJobPayload() implements JobPayload {}
+
+}

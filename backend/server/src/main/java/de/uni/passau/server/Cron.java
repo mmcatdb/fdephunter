@@ -1,28 +1,35 @@
 package de.uni.passau.server;
 
-import de.uni.passau.server.service.ScheduledJobsService;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 @Configuration
 @EnableScheduling
 public class Cron {
 
-    @Autowired
-    private ScheduledJobsService scheduledJobsService;
-
     @Scheduled(cron = "*/30 * * * * *")
     // @Scheduled(cron = "0 * * * * *")
     public void scheduledJobEveryMinute() {
-        // scheduledJobsService.executeDiscoveryJobs();
+        // scheduledJobsService.executeJobs();
     }
 
     @Scheduled(cron = "0 0 * * * *")
     public void scheduledJobEveryHour() {
         // System.out.println("HOUR:" + System.currentTimeMillis());
+    }
+
+    @Bean
+    public TaskExecutor threadPoolTaskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(5);
+        executor.setMaxPoolSize(10);
+        executor.setQueueCapacity(25);
+        executor.initialize();
+        return executor;
     }
 
 }

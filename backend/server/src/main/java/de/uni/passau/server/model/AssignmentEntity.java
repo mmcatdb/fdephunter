@@ -26,22 +26,16 @@ public class AssignmentEntity {
     /** The example relation contains exactly one example row. */
     public ExampleRow exampleRow;
 
-    public AssignmentEntity(UUID id, UUID workflowId, String[] columns, String[] referenceRow, ExampleRow exampleRow) {
-        this.id = id;
-        this.workflowId = workflowId;
-        this.columns = columns;
-        this.referenceRow = referenceRow;
-        this.exampleRow = exampleRow;
-    }
-
     public static AssignmentEntity create(UUID workflowId, String[] columns, String[] referenceRow, ExampleRow exampleRow) {
-        return new AssignmentEntity(
-            UUID.randomUUID(),
-            workflowId,
-            columns,
-            referenceRow,
-            exampleRow
-        );
+        final var assignment = new AssignmentEntity();
+
+        assignment.id = UUID.randomUUID();
+        assignment.workflowId = workflowId;
+        assignment.columns = columns;
+        assignment.referenceRow = referenceRow;
+        assignment.exampleRow = exampleRow;
+
+        return assignment;
     }
 
 }

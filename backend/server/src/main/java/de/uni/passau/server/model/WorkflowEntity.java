@@ -22,24 +22,15 @@ public class WorkflowEntity {
 
     public Integer iteration;
 
-    public boolean isEvaluatingPositives;
-
-    public WorkflowEntity(UUID id, UUID datasetId, WorkflowState state, Integer iteration, boolean isEvaluatingPositives) {
-        this.id = id;
-        this.datasetId = datasetId;
-        this.state = state;
-        this.iteration = iteration;
-        this.isEvaluatingPositives = isEvaluatingPositives;
-    }
-
     public static WorkflowEntity create() {
-        return new WorkflowEntity(
-            UUID.randomUUID(),
-            null,
-            WorkflowState.INITIAL_SETTINGS,
-            1,
-            false
-        );
+        final var workflow = new WorkflowEntity();
+
+        workflow.id = UUID.randomUUID();
+        workflow.datasetId = null; // No dataset selected yet.
+        workflow.state = WorkflowState.INITIAL_SETTINGS;
+        workflow.iteration = 0;
+
+        return workflow;
     }
 
     public static enum WorkflowState {
@@ -49,8 +40,8 @@ public class WorkflowEntity {
         INITIAL_FD_DISCOVERY,
         /** The initial discovery job is finished, now we wait for the user to distribute the negative examples and to finish their evaluation. */
         NEGATIVE_EXAMPLES,
-        /** Wait for the rediscovery job. */
-        JOB_WAITING,
+        /** Wait for adjusting max set and generating examples. */
+        POSITIVE_EXAMPLES,
         /** We have the results. */
         FINAL;
     }

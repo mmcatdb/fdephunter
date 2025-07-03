@@ -11,11 +11,12 @@ import java.util.List;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvException;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CSVDataset implements Dataset {
 
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(CSVDataset.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CSVDataset.class);
 
     private @Nullable String[] header = null;
     private @Nullable List<String[]> rows = null;

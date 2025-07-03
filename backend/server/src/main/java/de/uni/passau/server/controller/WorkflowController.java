@@ -1,13 +1,13 @@
 package de.uni.passau.server.controller;
 
 import de.uni.passau.core.approach.AbstractApproach.ApproachName;
-import de.uni.passau.server.controller.response.DiscoveryJobResponse;
-import de.uni.passau.server.model.DiscoveryJobNode;
+import de.uni.passau.server.model.JobEntity;
 import de.uni.passau.server.model.WorkflowEntity;
-import de.uni.passau.server.repository.DiscoveryJobRepository;
+import de.uni.passau.server.model.WorkflowEntity.WorkflowState;
+import de.uni.passau.server.repository.JobRepository;
 import de.uni.passau.server.repository.WorkflowRepository;
 import de.uni.passau.server.service.AssignmentService;
-import de.uni.passau.server.service.DiscoveryJobService;
+import de.uni.passau.server.service.JobService;
 
 import java.util.UUID;
 
@@ -33,10 +33,10 @@ public class WorkflowController {
     private AssignmentService assignmentService;
 
     @Autowired
-    private DiscoveryJobRepository discoveryJobRepository;
+    private JobRepository jobRepository;
 
     @Autowired
-    private DiscoveryJobService discoveryJobService;
+    private JobService jobService;
 
     @GetMapping("/workflows/{workflowId}")
     public WorkflowEntity getWorkflowById(@PathVariable UUID workflowId) {
@@ -50,10 +50,10 @@ public class WorkflowController {
 
     private record CreateJobResponse(
         WorkflowEntity workflow,
-        DiscoveryJobResponse job
+        JobEntity job
     ) {
-        static CreateJobResponse fromNodes(WorkflowEntity workflow, DiscoveryJobNode jobNode) {
-            return new CreateJobResponse(workflow, DiscoveryJobResponse.fromNodes(jobNode));
+        static CreateJobResponse fromEntities(WorkflowEntity workflow, JobEntity job) {
+            return new CreateJobResponse(workflow, job);
         }
     }
 
@@ -65,10 +65,15 @@ public class WorkflowController {
 
     @PostMapping("/workflows/{workflowId}/start")
     public CreateJobResponse startWorkflow(@PathVariable UUID workflowId, @RequestBody StartWorkflowRequest init) {
-        final var job = discoveryJobService.createDiscoveryJob(workflowId, init.approach(), init.description(), init.datasetId());
-        final var workflow = workflowRepository.findById(workflowId).get();
+        var workflow = workflowRepository.findById(workflowId).get();
+        workflow.datasetId = init.datasetId;
+        workflow.state = WorkflowState.INITIAL_FD_DISCOVERY;
+        workflow = workflowRepository.save(workflow);
 
-        return CreateJobResponse.fromNodes(workflow, job);
+        final var job = jobService.createDiscoveryJob(workflow, init.description(), init.approach());
+        jobService.executeJobAsync(job.getId());
+
+        return CreateJobResponse.fromEntities(workflow, job);
     }
 
     private record ContinueWorkflowRequest(
@@ -77,18 +82,17 @@ public class WorkflowController {
 
     @PostMapping("/workflows/{workflowId}/continue")
     public CreateJobResponse continueWorkflow(@PathVariable UUID workflowId, @RequestBody ContinueWorkflowRequest init) {
-        // final var job = discoveryJobService.createDiscoveryJob(workflowId, init.approach(), init.description(), init.dataset());
-        // final var workflow = workflowRepository.findById(workflowId).get();
+        final var workflow = workflowRepository.findById(workflowId).get();
 
-        // return CreateJobResponse.fromNodes(workflow, job);
+        final var job = jobService.createAdjustJob(workflow, init.description());
+        jobService.executeJobAsync(job.getId());
 
-        throw new UnsupportedOperationException("Not implemented yet.");
+        return CreateJobResponse.fromEntities(workflow, job);
     }
 
     @GetMapping("/workflows/{workflowId}/last-discovery")
-    public DiscoveryJobResponse getLastJobByWorkflowId(@PathVariable UUID workflowId) {
-        final var job = discoveryJobRepository.getLastDiscoveryByWorkflowId(workflowId);
-        return DiscoveryJobResponse.fromNodes(job);
+    public JobEntity getLastJobByWorkflowId(@PathVariable UUID workflowId) {
+        return jobRepository.findLastByWorkflowId(workflowId);
     }
 
     @PostMapping("/workflows/{workflowId}/accept-all")

@@ -22,20 +22,15 @@ public class DatasetEntity {
     /** Connection string, filename, etc. */
     public String source;
 
-    public DatasetEntity(UUID id, String name, DatasetType type, String source) {
-        this.id = id;
-        this.name = name;
-        this.type = type;
-        this.source = source;
-    }
-
     public static DatasetEntity create(String name, DatasetType type, String source) {
-        return new DatasetEntity(
-            UUID.randomUUID(),
-            name,
-            type,
-            source
-        );
+        final var dataset = new DatasetEntity();
+
+        dataset.id = UUID.randomUUID();
+        dataset.name = name;
+        dataset.type = type;
+        dataset.source = source;
+
+        return dataset;
     }
 
     public static enum DatasetType {
