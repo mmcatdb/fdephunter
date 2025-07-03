@@ -8,6 +8,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
@@ -16,11 +17,11 @@ import de.uni.passau.core.approach.AbstractApproach.ApproachName;
 @Document("job")
 public class JobEntity {
 
-    @Id
-    private UUID id;
+    @Id @JsonProperty("id")
+    private UUID _id;
 
-    public UUID getId() {
-        return id;
+    public UUID id() {
+        return _id;
     }
 
     public UUID workflowId;
@@ -41,7 +42,7 @@ public class JobEntity {
     public static JobEntity create(UUID workflowId, int index, String description, JobPayload payload) {
         final var job = new JobEntity();
 
-        job.id = UUID.randomUUID();
+        job._id = UUID.randomUUID();
         job.workflowId = workflowId;
         job.index = index;
         job.description = description;

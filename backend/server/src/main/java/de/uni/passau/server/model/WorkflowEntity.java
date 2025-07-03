@@ -6,14 +6,16 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 @Document("workflow")
 public class WorkflowEntity {
 
-    @Id
-    private UUID id;
+    @Id @JsonProperty("id")
+    private UUID _id;
 
-    public UUID getId() {
-        return id;
+    public UUID id() {
+        return _id;
     }
 
     public @Nullable UUID datasetId;
@@ -25,7 +27,7 @@ public class WorkflowEntity {
     public static WorkflowEntity create() {
         final var workflow = new WorkflowEntity();
 
-        workflow.id = UUID.randomUUID();
+        workflow._id = UUID.randomUUID();
         workflow.datasetId = null; // No dataset selected yet.
         workflow.state = WorkflowState.INITIAL_SETTINGS;
         workflow.iteration = 0;
@@ -45,5 +47,15 @@ public class WorkflowEntity {
         /** We have the results. */
         FINAL;
     }
+
+
+    public static String maxSetsId(UUID id) { return "maxsets-" + id.toString(); }
+    public String maxSetsId() { return WorkflowEntity.maxSetsId(_id); }
+
+    public static String arId(UUID id) { return "ar-" + id.toString(); }
+    public String arId() { return WorkflowEntity.arId(_id);}
+
+    public static String latticesId(UUID id) { return "lattices-" + id.toString(); }
+    public String latticesId() { return WorkflowEntity.latticesId(_id); }
 
 }

@@ -5,16 +5,18 @@ import java.util.UUID;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import de.uni.passau.core.example.ExampleRow;
 
 @Document("assignment")
 public class AssignmentEntity {
 
-    @Id
-    private UUID id;
+    @Id @JsonProperty("id")
+    private UUID _id;
 
-    public UUID getId() {
-        return id;
+    public UUID id() {
+        return _id;
     }
 
     public UUID workflowId;
@@ -29,7 +31,7 @@ public class AssignmentEntity {
     public static AssignmentEntity create(UUID workflowId, String[] columns, String[] referenceRow, ExampleRow exampleRow) {
         final var assignment = new AssignmentEntity();
 
-        assignment.id = UUID.randomUUID();
+        assignment._id = UUID.randomUUID();
         assignment.workflowId = workflowId;
         assignment.columns = columns;
         assignment.referenceRow = referenceRow;

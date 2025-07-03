@@ -5,14 +5,16 @@ import java.util.UUID;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 @Document("dataset")
 public class DatasetEntity {
 
-    @Id
-    private UUID id;
+    @Id @JsonProperty("id")
+    private UUID _id;
 
-    public UUID getId() {
-        return id;
+    public UUID id() {
+        return _id;
     }
 
     public String name;
@@ -25,7 +27,7 @@ public class DatasetEntity {
     public static DatasetEntity create(String name, DatasetType type, String source) {
         final var dataset = new DatasetEntity();
 
-        dataset.id = UUID.randomUUID();
+        dataset._id = UUID.randomUUID();
         dataset.name = name;
         dataset.type = type;
         dataset.source = source;

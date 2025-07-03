@@ -1,7 +1,5 @@
 package de.uni.passau.core.example;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import de.uni.passau.core.model.ColumnSet;
@@ -9,7 +7,7 @@ import de.uni.passau.core.model.ColumnSet;
 public class ExampleRow {
 
     public String[] values;
-    /** The indexes of the columns that form the left/right hand side of FDs that are violated by the example. 
+    /** The indexes of the columns that form the left/right hand side of FDs that are violated by the example.
      * lhsSet and rhsSet are disjoint
      * lhsSet is not a subset of any set in the max set of any of the columns in rhsSet.
      * A column X is neither in lhsSet nor in rhsSet, if lhsSet is a subset of at least one set in the max set of X.
@@ -55,6 +53,6 @@ public class ExampleRow {
 
         this.decision = decision;
     }
-    
+
 
 }

@@ -41,23 +41,26 @@ public class JobService {
     private AssignmentRepository assignmentRepository;
 
     @Autowired
+    private StorageService storageService;
+
+    @Autowired
     private TaskExecutor asyncExecutor;
 
     public JobEntity createDiscoveryJob(WorkflowEntity workflow, String description, ApproachName approachName) {
         // This is supposed to be the first job in the workflow, so index is 0.
-        final var prevJobsCount = jobRepository.countByWorkflowId(workflow.getId());
+        final var prevJobsCount = jobRepository.countByWorkflowId(workflow.id());
         if (prevJobsCount != 0)
             throw new IllegalStateException("Cannot create a discovery job when there are already jobs in the workflow.");
 
         final var payload = new DiscoveryJobPayload(workflow.datasetId, approachName);
-        final var job = JobEntity.create(workflow.getId(), 0, description, payload);
+        final var job = JobEntity.create(workflow.id(), 0, description, payload);
         return jobRepository.save(job);
     }
 
     public JobEntity createAdjustJob(WorkflowEntity workflow, String description) {
-        final var prevJobsCount = jobRepository.countByWorkflowId(workflow.getId());
+        final var prevJobsCount = jobRepository.countByWorkflowId(workflow.id());
         final var payload = new AdjustJobPayload();
-        final var job = JobEntity.create(workflow.getId(), prevJobsCount, description, payload);
+        final var job = JobEntity.create(workflow.id(), prevJobsCount, description, payload);
         return jobRepository.save(job);
     }
 
@@ -90,24 +93,24 @@ public class JobService {
         job.state = JobState.RUNNING;
         job.startedAt = new java.util.Date();
         job = jobRepository.save(job);
-        LOGGER.info("Job {} has started at {}.", job.getId(), job.startedAt);
+        LOGGER.info("Job {} has started at {}.", job.id(), job.startedAt);
 
         try {
             executeJobPayload(job);
         }
         catch (Exception e) {
-            LOGGER.error("Error while executing job {}: {}", job.getId(), e.getMessage(), e);
+            LOGGER.error("Error while executing job {}: {}", job.id(), e.getMessage(), e);
             job.state = JobState.FAILED;
             job.finishedAt = new java.util.Date();
             job = jobRepository.save(job);
-            LOGGER.info("Job {} has failed at {}.", job.getId(), job.finishedAt);
+            LOGGER.info("Job {} has failed at {}.", job.id(), job.finishedAt);
             return;
         }
 
         job.state = JobState.FINISHED;
         job.finishedAt = new java.util.Date();
         job = jobRepository.save(job);
-        LOGGER.info("Job {} has finished at {}.", job.getId(), job.finishedAt);
+        LOGGER.info("Job {} has finished at {}.", job.id(), job.finishedAt);
     }
 
     private void executeJobPayload(JobEntity job) {
@@ -124,6 +127,9 @@ public class JobService {
         final var dataset = datasetService.getLoadedDatasetById(payload.datasetId());
 
         final var maxSets = ComputeMaxSet.run(dataset);
+
+        storageService.set(workflow.maxSetsId(), maxSets);
+
 
         // TODO Save max set.
 
@@ -160,7 +166,7 @@ public class JobService {
     private void executeAdjustJob(JobEntity job) {
         // TODO Implement the logic for adjusting the max set and generating examples.
         // This is a placeholder for the actual implementation.
-        LOGGER.info("Executing adjust job with ID: {}", job.getId());
+        LOGGER.info("Executing adjust job with ID: {}", job.id());
 
         // If we are done with negative examples, change state to POSITIVE_EXAMPLES.
         // If we are done with positive examples, change state to FINAL.

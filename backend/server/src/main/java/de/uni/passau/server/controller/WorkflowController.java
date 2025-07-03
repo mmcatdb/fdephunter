@@ -71,7 +71,7 @@ public class WorkflowController {
         workflow = workflowRepository.save(workflow);
 
         final var job = jobService.createDiscoveryJob(workflow, init.description(), init.approach());
-        jobService.executeJobAsync(job.getId());
+        jobService.executeJobAsync(job.id());
 
         return CreateJobResponse.fromEntities(workflow, job);
     }
@@ -85,7 +85,7 @@ public class WorkflowController {
         final var workflow = workflowRepository.findById(workflowId).get();
 
         final var job = jobService.createAdjustJob(workflow, init.description());
-        jobService.executeJobAsync(job.getId());
+        jobService.executeJobAsync(job.id());
 
         return CreateJobResponse.fromEntities(workflow, job);
     }

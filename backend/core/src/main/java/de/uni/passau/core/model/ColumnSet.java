@@ -245,6 +245,7 @@ public class ColumnSet implements Comparable<ColumnSet> {
         public Serializer(Class<ColumnSet> t) { super(t); }
 
         @Override public void serialize(ColumnSet set, JsonGenerator generator, SerializerProvider provider) throws IOException {
+            System.out.println("SERIALIZING: " + set);
             generator.writeString(set.toSerializedString());
         }
     }
@@ -255,7 +256,9 @@ public class ColumnSet implements Comparable<ColumnSet> {
 
         @Override public ColumnSet deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
-            return ColumnSet.fromSerializedString(node.asText());
+            final var set = ColumnSet.fromSerializedString(node.asText());
+            System.out.println("DESERIALIZING: " + set);
+            return set;
         }
     }
 

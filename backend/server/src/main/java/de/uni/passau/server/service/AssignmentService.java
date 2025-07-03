@@ -21,7 +21,7 @@ public class AssignmentService {
 
     public void acceptAllAssignments(WorkflowEntity workflow) {
         final var isEvaluatingPositives = workflow.state == WorkflowState.POSITIVE_EXAMPLES;
-        final var openAssignments = assignmentRepository.findAllByWorkflowId(workflow.getId()).stream()
+        final var openAssignments = assignmentRepository.findAllByWorkflowId(workflow.id()).stream()
             .filter(assignment -> assignment.exampleRow.decision == null || assignment.exampleRow.isPositive == isEvaluatingPositives)
             // TODO something like which assignments are active in the workflow
             .filter(assignment -> assignment.exampleRow.lhsSet.size() == workflow.iteration)
