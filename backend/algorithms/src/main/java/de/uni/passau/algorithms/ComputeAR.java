@@ -72,10 +72,10 @@ public class ComputeAR {
         // Iterate over each MaxSet 
         for (MaxSet maxSet : maxSets) {
             // Iterate over each functional dependency in the MaxSet
-			for (int index = 0; index < maxSet.elements.size(); ++index) {
+			for (int index = 0; index < maxSet.getCombinations().size(); ++index) {
 
                 // Get the BitSet (LHS) of the current functional dependency
-                BitSet bitSet = maxSet.elements.get(index).columns;
+                BitSet bitSet = maxSet.getCombinations().get(index).getColumns();
 
                 // Convert BitSet to a list of indices
                 List<Integer> columnIndexList = new ArrayList();
