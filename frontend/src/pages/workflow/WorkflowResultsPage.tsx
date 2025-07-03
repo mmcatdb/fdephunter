@@ -134,10 +134,11 @@ WorkflowFinalPage.loader = async ({ params: { workflowId } }: { params: Params<'
 
 export function createFdEdges(fdSet: FdSet): FdEdge[] {
     return fdSet.fdClasses.flatMap((minimalFds, colIndex) => minimalFds.map(minimalFd => ({
-        id: minimalFd.columns.join(',') + '->' + colIndex,
+        id: minimalFd.id + '->' + colIndex,
         source: {
-            columns: minimalFd.columns.map(i => fdSet.columns[i]),
-            label: minimalFd.columns.join(','), id: minimalFd.columns.join(','),
+            columns: minimalFd.map(fdSet.columns),
+            label: minimalFd.toString(fdSet.columns),
+            id: minimalFd.id,
         },
         target: {
             columns: [ fdSet.columns[colIndex] ],
@@ -153,12 +154,10 @@ function groupFdsByLhs(fdSet: FdSet): FdEdge[] {
 
     fdSet.fdClasses.forEach((minimalFds, colIndex) => {
         for (const minimalFd of minimalFds) {
-            const key = minimalFd.columns.join(',');
-
-            let existing = fdsByLhs.get(key);
+            let existing = fdsByLhs.get(minimalFd.id);
             if (!existing) {
                 existing = { lhs: minimalFd.columns, rhs: [] };
-                fdsByLhs.set(key, existing);
+                fdsByLhs.set(minimalFd.id, existing);
             }
 
             existing.rhs.push(colIndex);

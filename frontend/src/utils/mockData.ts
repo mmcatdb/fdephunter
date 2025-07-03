@@ -1,4 +1,5 @@
 import { type Lattice, McType } from '@/types/armstrongRelation';
+import { ColumnSet } from '@/types/ColumnSet';
 import { type DatasetResponse, DatasetType, type DatasetData } from '@/types/dataset';
 import { type FdSet } from '@/types/functionalDependency';
 import { v4 } from 'uuid';
@@ -262,33 +263,33 @@ export const MOCK_DATASETS: DatasetResponse[] = [
 export const MOCK_FD_SETS: FdSet[] = [ {
     columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
     fdClasses: [ [
-        { columns: [ 2, 3 ] },
-        { columns: [ 2, 4 ] },
-        { columns: [ 3, 4 ] },
+        ColumnSet.fromIndexes([ 2, 3 ]),
+        ColumnSet.fromIndexes([ 2, 4 ]),
+        ColumnSet.fromIndexes([ 3, 4 ]),
     ], [
-        { columns: [ 0 ] },
-        { columns: [ 2 ] },
-        { columns: [ 4 ] },
+        ColumnSet.fromIndexes([ 0 ]),
+        ColumnSet.fromIndexes([ 2 ]),
+        ColumnSet.fromIndexes([ 4 ]),
     ], [
-        { columns: [ 0 ] },
-        { columns: [ 3, 4 ] },
+        ColumnSet.fromIndexes([ 0 ]),
+        ColumnSet.fromIndexes([ 3, 4 ]),
     ], [
-        { columns: [ 0 ] },
-        { columns: [ 2, 4 ] },
+        ColumnSet.fromIndexes([ 0 ]),
+        ColumnSet.fromIndexes([ 2, 4 ]),
     ], [
-        { columns: [ 0 ] },
-        { columns: [ 2, 3 ] },
+        ColumnSet.fromIndexes([ 0 ]),
+        ColumnSet.fromIndexes([ 2, 3 ]),
     ] ],
 }, {
     columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
     fdClasses: [ [
-        { columns: [ 0 ] },
+        ColumnSet.fromIndexes([ 0 ]),
     ], [
-        { columns: [ 0 ] },
+        ColumnSet.fromIndexes([ 0 ]),
     ], [
-        { columns: [ 0 ] },
+        ColumnSet.fromIndexes([ 0 ]),
     ], [
-        { columns: [ 1, 2, 3 ] },
+        ColumnSet.fromIndexes([ 1, 2, 3 ]),
     ],
     ],
 } ];

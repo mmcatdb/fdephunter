@@ -338,7 +338,7 @@ function FinalDecisionCard({ relation, selectedFdIndex: selectedFdIndex }: Decis
 }
 
 function FdDisplay({ relation: { exampleRow, columns }, selectedFdIndex: selectedFdIndex }: DecisionCardProps) {
-    const maxSetCols = exampleRow.maxSetElement.columns.map(index => columns[index]);
+    const maxSetCols = exampleRow.maxSetElement.map(columns);
 
     return (
         <div className='flex gap-4'>
