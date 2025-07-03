@@ -33,7 +33,6 @@ public class MaxSet extends ComplementMaxSet {
 
 	@Override
 	public void finalize_RENAME_THIS() {
-
 		if (!this.finalized) {
 			this.checkContentForOnlySuperSets();
 		}
@@ -66,5 +65,12 @@ public class MaxSet extends ComplementMaxSet {
 		}
 
 		this.elements = superSets;
+	}
+
+	@Override
+	public MaxSet clone() {
+		MaxSet cloned = new MaxSet(this.forClass, new LinkedList<>(this.elements));
+		cloned.finalized = this.finalized;
+		return cloned;
 	}
 }

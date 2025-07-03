@@ -8,6 +8,7 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongList;
+import java.util.Iterator;
 
 /**
  * Represents a non-empty set of columns.
@@ -141,4 +142,28 @@ public class ColumnSet implements Comparable<ColumnSet> {
         return columns.hashCode();
     }
 
+    /**
+     * Returns an iterator over the column indices in this set.
+     * The indices are returned in ascending order.
+     */
+    public Iterator<Integer> iterator() {
+        return new Iterator<Integer>() {
+            private int nextIndex = columns.nextSetBit(0);
+            
+            @Override
+            public boolean hasNext() {
+                return nextIndex != -1;
+            }
+            
+            @Override
+            public Integer next() {
+                if (nextIndex == -1) {
+                    throw new java.util.NoSuchElementException();
+                }
+                int current = nextIndex;
+                nextIndex = columns.nextSetBit(nextIndex + 1);
+                return current;
+            }
+        };
+    }
 }

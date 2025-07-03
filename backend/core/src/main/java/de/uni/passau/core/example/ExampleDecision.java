@@ -22,7 +22,6 @@ public record ExampleDecision(
     }
 
     public record DecisionColumn(
-        int columnIndex,
         // TODO In that case, the whole decision column should be null, right?
         /** If null, the column isn't a part of the max set (so it should be ignored). */
         @Nullable DecisionColumnStatus status,

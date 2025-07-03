@@ -1,6 +1,7 @@
 package de.uni.passau.core.example;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import de.uni.passau.core.model.ColumnSet;
@@ -45,10 +46,10 @@ public class ExampleRow {
             return;
         }
         // Every column in rhsSet needs to have a decision (and no other column).
-        int[] decisionColumns = Arrays.stream(decision.columns())
-            .mapToInt(ExampleDecision.DecisionColumn::columnIndex)
+        int[] decisionColumnsArray = java.util.stream.IntStream.range(0, decision.columns().length)
+            .filter(i -> decision.columns()[i].status() != null)
             .toArray();
-        if (!rhsSet.equals(ColumnSet.fromIndexes(decisionColumns))){
+        if (!rhsSet.equals(ColumnSet.fromIndexes(decisionColumnsArray))){
             throw new IllegalArgumentException("Decision columns must match the rhsSet.");
         }
 
