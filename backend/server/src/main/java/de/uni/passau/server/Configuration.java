@@ -15,7 +15,8 @@ public class Configuration {
         String host,
         String port,
         String username,
-        String password
+        String password,
+        String database
     ) {}
 
 }

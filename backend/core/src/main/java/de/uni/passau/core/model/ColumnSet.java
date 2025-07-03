@@ -1,8 +1,17 @@
 package de.uni.passau.core.model;
 
+import java.io.IOException;
 import java.util.BitSet;
 
-import org.apache.commons.lang3.StringUtils;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
@@ -12,6 +21,8 @@ import it.unimi.dsi.fastutil.longs.LongList;
 /**
  * Represents a non-empty set of columns.
  */
+@JsonSerialize(using = ColumnSet.Serializer.class)
+@JsonDeserialize(using = ColumnSet.Deserializer.class)
 public class ColumnSet implements Comparable<ColumnSet> {
 
     /** Indexes of the columns. */
@@ -37,7 +48,7 @@ public class ColumnSet implements Comparable<ColumnSet> {
     }
 
     @Override public String toString() {
-        return "(" + StringUtils.join(columns, ',') + ")";
+        return columns.toString();
     }
 
     public LongList convertToLongList() {
@@ -130,9 +141,62 @@ public class ColumnSet implements Comparable<ColumnSet> {
         return columns.equals(other.columns);
     }
 
-    @Override
-    public int hashCode() {
+    @Override public int hashCode() {
         return columns.hashCode();
     }
+
+    // region Serialization
+
+    public String toSerializedString() {
+        // This transforms the BitSet into a hexadecimal string representation.
+        // It's not the most efficient way, but it's human-readable and easy to debug.
+        // TODO Do something like Base64 instead.
+        StringBuilder sb = new StringBuilder();
+        final byte[] bytes = columns.toByteArray();
+
+        // We do this in reverse so that the first byte is the most significant one.
+        // So, when translated from hex to binary, output 1000 0000 will correspond to a set { 7 }.
+        for (int i = bytes.length - 1; i >= 0; i--) {
+            sb.append(Character.forDigit((bytes[i] >> 4) & 0xF, 16));
+            sb.append(Character.forDigit(bytes[i] & 0xF, 16));
+        }
+
+        return sb.toString();
+    }
+
+    public static ColumnSet fromSerializedString(String serialized) {
+        final int length = serialized.length() / 2;
+        final byte[] bytes = new byte[length];
+
+        for (int i = 0; i < length; i++) {
+            int firstDigit = Character.digit(serialized.charAt(2 * i), 16);
+            int secondDigit = Character.digit(serialized.charAt(2 * i + 1), 16);
+            // Again, reading in reverse order.
+            bytes[length - i - 1] = (byte) ((firstDigit << 4) | secondDigit);
+        }
+
+        return new ColumnSet(BitSet.valueOf(bytes));
+    }
+
+    public static class Serializer extends StdSerializer<ColumnSet> {
+        public Serializer() { this(null); }
+        public Serializer(Class<ColumnSet> t) { super(t); }
+
+        @Override public void serialize(ColumnSet set, JsonGenerator generator, SerializerProvider provider) throws IOException {
+            generator.writeString(set.toSerializedString());
+        }
+    }
+
+    public static class Deserializer extends StdDeserializer<ColumnSet> {
+        public Deserializer() { this(null); }
+        public Deserializer(Class<?> vc) { super(vc); }
+
+        @Override public ColumnSet deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+            final JsonNode node = parser.getCodec().readTree(parser);
+            return ColumnSet.fromSerializedString(node.asText());
+        }
+    }
+
+    // endregion
 
 }

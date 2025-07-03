@@ -12,7 +12,6 @@ import de.uni.passau.server.model.WorkflowEntity;
 import de.uni.passau.server.model.WorkflowEntity.WorkflowState;
 import de.uni.passau.server.repository.AssignmentRepository;
 import de.uni.passau.server.repository.JobRepository;
-import de.uni.passau.server.repository.JobResultRepository;
 import de.uni.passau.server.repository.WorkflowRepository;
 
 import java.util.ArrayList;
@@ -33,9 +32,6 @@ public class JobService {
     private JobRepository jobRepository;
 
     @Autowired
-    private JobResultRepository jobResultRepository;
-
-    @Autowired
     private WorkflowRepository workflowRepository;
 
     @Autowired
@@ -45,7 +41,7 @@ public class JobService {
     private AssignmentRepository assignmentRepository;
 
     @Autowired
-    private TaskExecutor taskExecutor;
+    private TaskExecutor asyncExecutor;
 
     public JobEntity createDiscoveryJob(WorkflowEntity workflow, String description, ApproachName approachName) {
         // This is supposed to be the first job in the workflow, so index is 0.
@@ -67,7 +63,7 @@ public class JobService {
 
     public void executeJobAsync(UUID jobId) {
         final var jobTask = new JobTask(jobId);
-        taskExecutor.execute(jobTask);
+        asyncExecutor.execute(jobTask);
     }
 
     private class JobTask implements Runnable {

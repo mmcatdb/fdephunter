@@ -1,13 +1,13 @@
 services:
-    neo4j:
-        container_name: "fdephunter-neo4j"
+    mongodb:
+        container_name: "fdephunter-mongodb"
         restart: always
-        image: neo4j
+        image: mongo
         environment:
-            NEO4J_AUTH: neo4j/password
-        expose:
-            - 7474
-            - 7687
+            MONGO_INITDB_ROOT_USERNAME: user
+            MONGO_INITDB_ROOT_PASSWORD: password
+        ports:
+            - 5602:27017
 
     backend:
         container_name: "fdephunter-backend"

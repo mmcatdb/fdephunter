@@ -1,5 +1,6 @@
 package de.uni.passau.server;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
@@ -18,12 +19,14 @@ public class Cron {
     }
 
     @Scheduled(cron = "0 0 * * * *")
+    // @Scheduled(cron = "* * * * * *")
     public void scheduledJobEveryHour() {
-        // System.out.println("HOUR:" + System.currentTimeMillis());
+        System.out.println("HOUR:" + System.currentTimeMillis());
     }
 
     @Bean
-    public TaskExecutor threadPoolTaskExecutor() {
+	@Qualifier("asyncExecutor")
+    public TaskExecutor asyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(5);
         executor.setMaxPoolSize(10);
