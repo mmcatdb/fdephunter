@@ -51,7 +51,7 @@ public class MongoConfiguration extends AbstractMongoClientConfiguration {
     public class ColumnSetWriteConverter implements Converter<ColumnSet, String> {
         @Override
         public String convert(@NonNull ColumnSet source) {
-            return source.toSerializedString();
+            return source.toBase64String();
         }
     }
 
@@ -59,7 +59,7 @@ public class MongoConfiguration extends AbstractMongoClientConfiguration {
     public class ColumnSetReadConverter implements Converter<String, ColumnSet> {
         @Override
         public ColumnSet convert(@NonNull String source) {
-            return ColumnSet.fromSerializedString(source);
+            return ColumnSet.fromBase64String(source);
         }
     }
 

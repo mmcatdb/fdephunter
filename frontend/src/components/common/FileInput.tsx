@@ -28,7 +28,7 @@ export function FileInput({ id, value, onChange }: FileInputProps) {
 
         setIsFetching(true);
         // TODO This is not implemented yet on the backend!
-        // const response = await API.datasets.uploadFile({}, formData);
+        // const response = await API.dataset.uploadFile({}, formData);
         await new Promise(resolve => setTimeout(resolve, (1 + Math.random()) / 2 * 1000));
         setIsFetching(false);
 

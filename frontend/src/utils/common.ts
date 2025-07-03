@@ -5,12 +5,8 @@ export function getStringEnumValues<E extends EnumObject<string>>(enumObject: E)
     return Object.keys(enumObject).map(key => enumObject[key] as Enum<string, E>);
 }
 
-const percentFormatter = Intl.NumberFormat(undefined, {
-    style: 'percent',
-});
-
 export function displayPercent(value: number) {
-    return percentFormatter.format(value);
+    return value * 100 + ' %';
 }
 
 /** Comparison of only ascii-like strings. */

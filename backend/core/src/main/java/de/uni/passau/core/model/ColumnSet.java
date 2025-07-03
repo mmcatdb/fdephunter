@@ -1,6 +1,7 @@
 package de.uni.passau.core.model;
 
 import java.io.IOException;
+import java.util.Base64;
 import java.util.BitSet;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -209,34 +210,13 @@ public class ColumnSet implements Comparable<ColumnSet> {
 
     // region Serialization
 
-    public String toSerializedString() {
-        // This transforms the BitSet into a hexadecimal string representation.
-        // It's not the most efficient way, but it's human-readable and easy to debug.
-        // TODO Do something like Base64 instead.
-        StringBuilder sb = new StringBuilder();
+    public String toBase64String() {
         final byte[] bytes = columns.toByteArray();
-
-        // We do this in reverse so that the first byte is the most significant one.
-        // So, when translated from hex to binary, output 1000 0000 will correspond to a set { 7 }.
-        for (int i = bytes.length - 1; i >= 0; i--) {
-            sb.append(Character.forDigit((bytes[i] >> 4) & 0xF, 16));
-            sb.append(Character.forDigit(bytes[i] & 0xF, 16));
-        }
-
-        return sb.toString();
+        return Base64.getEncoder().encodeToString(bytes);
     }
 
-    public static ColumnSet fromSerializedString(String serialized) {
-        final int length = serialized.length() / 2;
-        final byte[] bytes = new byte[length];
-
-        for (int i = 0; i < length; i++) {
-            int firstDigit = Character.digit(serialized.charAt(2 * i), 16);
-            int secondDigit = Character.digit(serialized.charAt(2 * i + 1), 16);
-            // Again, reading in reverse order.
-            bytes[length - i - 1] = (byte) ((firstDigit << 4) | secondDigit);
-        }
-
+    public static ColumnSet fromBase64String(String string) {
+        final byte[] bytes = Base64.getDecoder().decode(string.getBytes());
         return new ColumnSet(BitSet.valueOf(bytes));
     }
 
@@ -245,8 +225,7 @@ public class ColumnSet implements Comparable<ColumnSet> {
         public Serializer(Class<ColumnSet> t) { super(t); }
 
         @Override public void serialize(ColumnSet set, JsonGenerator generator, SerializerProvider provider) throws IOException {
-            System.out.println("SERIALIZING: " + set);
-            generator.writeString(set.toSerializedString());
+            generator.writeString(set.toBase64String());
         }
     }
 
@@ -256,9 +235,7 @@ public class ColumnSet implements Comparable<ColumnSet> {
 
         @Override public ColumnSet deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
-            final var set = ColumnSet.fromSerializedString(node.asText());
-            System.out.println("DESERIALIZING: " + set);
-            return set;
+            return ColumnSet.fromBase64String(node.asText());
         }
     }
 

@@ -7,7 +7,6 @@ import { routes } from '@/router';
 import { type WorkflowLoaded } from './WorkflowPage';
 import { WorkflowState } from '@/types/workflow';
 import { FileInput, type FileInputValue } from '@/components/common/FileInput';
-import { mockAPI } from '@/utils/api/mockAPI';
 import { type DatasetResponse } from '@/types/dataset';
 import { getStringEnumValues } from '@/utils/common';
 
@@ -20,7 +19,7 @@ export function WorkflowSettingsPage() {
 
     async function runInitialDiscovery(settings: DiscoverySettings) {
         setFetching(true);
-        const response = await mockAPI.workflow.startWorkflow(workflow.id, {
+        const response = await API.workflow.startWorkflow({ workflowId: workflow.id }, {
             description: `Initial discovery for ${settings.dataset.name}`,
             approach: settings.approach,
             datasetId: settings.dataset.id,
@@ -67,16 +66,6 @@ type WorkflowSettingsLoaded = {
 };
 
 WorkflowSettingsPage.loader = async (): Promise<WorkflowSettingsLoaded> => {
-    // const [ datasetsResponse ] = await Promise.all([
-    //     API.datasets.getDatasets(undefined, {}),
-    // ]);
-    // if (!datasetsResponse.status)
-    //     throw new Error('Failed to load datasets');
-
-    // return {
-    //     datasets: datasetsResponse.data.map(Dataset.fromResponse),
-    // };
-
     const datasetsResponse = await API.dataset.getDatasets(undefined, {});
     if (!datasetsResponse.status)
         throw new Error('Failed to load datasets');

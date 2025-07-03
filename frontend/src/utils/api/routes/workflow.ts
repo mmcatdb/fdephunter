@@ -21,7 +21,7 @@ export const workflow = {
         u => `/workflows/${u.workflowId}/accept-all`,
     ),
     getLastJob: GET<{ workflowId: Id }, JobResponse>(
-        u => `/workflows/${u.workflowId}/last-discovery`,
+        u => `/workflows/${u.workflowId}/last-job`,
     ),
 };
 

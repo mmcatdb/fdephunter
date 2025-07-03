@@ -1,11 +1,7 @@
 import { type DataResult, type Result } from '@/types/api/result';
-import { WorkflowState, type WorkflowResponse } from '@/types/workflow';
-import { type StartWorkflowRequest, type CreateJobResponse, type ContinueWorkflowRequest } from './routes/workflow';
-import { JobState, type JobResponse } from '@/types/job';
-import { v4 } from 'uuid';
-import { DateTime } from 'luxon';
+import { type WorkflowResponse } from '@/types/workflow';
 import { type Lattice } from '@/types/armstrongRelation';
-import { MOCK_ARMSTRONG_RELATIONS, MOCK_DATASET_DATA, MOCK_FD_SETS, MOCK_LATTICES } from '../mockData';
+import { MOCK_DATASET_DATA, MOCK_FD_SETS, MOCK_LATTICES } from '../mockData';
 import { type DatasetData } from '@/types/dataset';
 import { type FdSet } from '@/types/functionalDependency';
 import { type Id } from '@/types/id';
@@ -22,10 +18,10 @@ export const mockAPI = {
         // resetAssignment,
     },
     workflow: {
-        startWorkflow,
-        continueWorkflow,
+        // startWorkflow,
+        // continueWorkflow,
         // acceptAllAssignments,
-        getLastJob,
+        // getLastJob,
     },
     view: {
         getFds,
@@ -207,61 +203,61 @@ type WorkflowDB = WorkflowResponse & {
 //     return workflow ? success(workflow) : error();
 // }
 
-async function startWorkflow(workflowId: Id, request: StartWorkflowRequest): Promise<Result<CreateJobResponse>> {
-    await wait();
+// async function startWorkflow(workflowId: Id, request: StartWorkflowRequest): Promise<Result<CreateJobResponse>> {
+//     await wait();
 
-    const workflow = get<WorkflowDB>(workflowId);
-    if (!workflow)
-        return error();
+//     const workflow = get<WorkflowDB>(workflowId);
+//     if (!workflow)
+//         return error();
 
-    const job: JobResponse = {
-        id: v4(),
-        state: JobState.Waiting,
-        description: 'Wait for FD discovery ...',
-        iteration: workflow.iteration,
-        startedAt: DateTime.now().toUTC().toISO(),
-    };
+//     const job: JobResponse = {
+//         id: v4(),
+//         state: JobState.Waiting,
+//         description: 'Wait for FD discovery ...',
+//         iteration: workflow.iteration,
+//         startedAt: DateTime.now().toUTC().toISO(),
+//     };
 
-    workflow.state = WorkflowState.InitialFdDiscovery;
-    workflow.datasetId = request.datasetId;
-    workflow.jobId = job.id;
+//     workflow.state = WorkflowState.InitialFdDiscovery;
+//     workflow.datasetId = request.datasetId;
+//     workflow.jobId = job.id;
 
-    set(workflow);
-    set(job);
+//     set(workflow);
+//     set(job);
 
-    return success({
-        workflow,
-        job,
-    });
-}
+//     return success({
+//         workflow,
+//         job,
+//     });
+// }
 
-async function continueWorkflow(workflowId: Id, request: ContinueWorkflowRequest): Promise<Result<CreateJobResponse>> {
-    await wait();
+// async function continueWorkflow(workflowId: Id, request: ContinueWorkflowRequest): Promise<Result<CreateJobResponse>> {
+//     await wait();
 
-    const workflow = get<WorkflowDB>(workflowId);
-    if (!workflow)
-        return error();
+//     const workflow = get<WorkflowDB>(workflowId);
+//     if (!workflow)
+//         return error();
 
-    workflow.iteration++;
+//     workflow.iteration++;
 
-    const job: JobResponse = {
-        id: v4(),
-        state: JobState.Waiting,
-        description: request.description,
-        iteration: workflow.iteration,
-        startedAt: DateTime.now().toUTC().toISO(),
-    };
+//     const job: JobResponse = {
+//         id: v4(),
+//         state: JobState.Waiting,
+//         description: request.description,
+//         iteration: workflow.iteration,
+//         startedAt: DateTime.now().toUTC().toISO(),
+//     };
 
-    workflow.jobId = job.id;
+//     workflow.jobId = job.id;
 
-    set(workflow);
-    set(job);
+//     set(workflow);
+//     set(job);
 
-    return success({
-        workflow,
-        job,
-    });
-}
+//     return success({
+//         workflow,
+//         job,
+//     });
+// }
 
 // async function acceptAllAssignments(workflowId: Id): Promise<Result<WorkflowResponse>> {
 //     await wait();
@@ -321,55 +317,55 @@ async function continueWorkflow(workflowId: Id, request: ContinueWorkflowRequest
 //     return success(workflow);
 // }
 
-async function getLastJob(workflowId: Id): Promise<Result<JobResponse>> {
-    await wait();
+// async function getLastJob(workflowId: Id): Promise<Result<JobResponse>> {
+//     await wait();
 
-    const workflow = get<WorkflowDB>(workflowId);
-    if (!workflow || !workflow.jobId)
-        return error();
+//     const workflow = get<WorkflowDB>(workflowId);
+//     if (!workflow || !workflow.jobId)
+//         return error();
 
-    const job = get<JobResponse>(workflow.jobId);
-    if (!job)
-        return error();
+//     const job = get<JobResponse>(workflow.jobId);
+//     if (!job)
+//         return error();
 
-    const createdAt = DateTime.fromISO(job.startedAt!);
-    const now = DateTime.now();
+//     const createdAt = DateTime.fromISO(job.startedAt!);
+//     const now = DateTime.now();
 
-    switch (job.state) {
-    case JobState.Waiting: {
-        // const delay = (1 + Math.random()) * 2000;
-        const delay = 0;
-        if (+createdAt + delay < +now) {
-            job.state = JobState.Running;
-            set(job);
-        }
-        break;
-    }
-    case JobState.Running: {
-        // const delay = (1 + Math.random()) * 6000;
-        const delay = 0;
-        if (+createdAt + delay < +now) {
-            finishJob(job, workflow);
+//     switch (job.state) {
+//     case JobState.Waiting: {
+//         // const delay = (1 + Math.random()) * 2000;
+//         const delay = 0;
+//         if (+createdAt + delay < +now) {
+//             job.state = JobState.Running;
+//             set(job);
+//         }
+//         break;
+//     }
+//     case JobState.Running: {
+//         // const delay = (1 + Math.random()) * 6000;
+//         const delay = 0;
+//         if (+createdAt + delay < +now) {
+//             finishJob(job, workflow);
 
-            set(job);
-            set(workflow);
-        }
-        break;
-    }
-    }
+//             set(job);
+//             set(workflow);
+//         }
+//         break;
+//     }
+//     }
 
-    return success(job);
-}
+//     return success(job);
+// }
 
-function finishJob(job: JobResponse, workflow: WorkflowDB) {
-    job.state = JobState.Finished;
-    job.finishedAt = DateTime.now().toUTC().toISO();
-    workflow.state = workflow.iteration < MOCK_ARMSTRONG_RELATIONS.length
-        ? MOCK_ARMSTRONG_RELATIONS[workflow.iteration].isEvaluatingPositives
-            ? WorkflowState.PositiveExamples
-            : WorkflowState.NegativeExamples
-        : WorkflowState.DisplayFinalFds;
-}
+// function finishJob(job: JobResponse, workflow: WorkflowDB) {
+//     job.state = JobState.Finished;
+//     job.finishedAt = DateTime.now().toUTC().toISO();
+//     workflow.state = workflow.iteration < MOCK_ARMSTRONG_RELATIONS.length
+//         ? MOCK_ARMSTRONG_RELATIONS[workflow.iteration].isEvaluatingPositives
+//             ? WorkflowState.PositiveExamples
+//             : WorkflowState.NegativeExamples
+//         : WorkflowState.DisplayFinalFds;
+// }
 
 // async function getLastJobResult(workflowId: Id): Promise<Result<JobResultResponse>> {
 //     const jobResponse = await getLastJob(workflowId);
@@ -451,9 +447,9 @@ function get<T>(key: string): T | undefined {
     return value === null ? undefined : JSON.parse(value) as T;
 }
 
-function set<T extends { id: Id }>(value: T) {
-    window.localStorage.setItem(value.id, JSON.stringify(value));
-}
+// function set<T extends { id: Id }>(value: T) {
+//     window.localStorage.setItem(value.id, JSON.stringify(value));
+// }
 
 function success<T>(data: T): DataResult<T> {
     return { status: true, data };

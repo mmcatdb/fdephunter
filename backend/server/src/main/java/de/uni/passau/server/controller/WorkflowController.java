@@ -1,6 +1,8 @@
 package de.uni.passau.server.controller;
 
 import de.uni.passau.core.approach.AbstractApproach.ApproachName;
+import de.uni.passau.core.model.ColumnSet;
+import de.uni.passau.core.model.MaxSet;
 import de.uni.passau.server.model.JobEntity;
 import de.uni.passau.server.model.WorkflowEntity;
 import de.uni.passau.server.model.WorkflowEntity.WorkflowState;
@@ -8,7 +10,10 @@ import de.uni.passau.server.repository.JobRepository;
 import de.uni.passau.server.repository.WorkflowRepository;
 import de.uni.passau.server.service.AssignmentService;
 import de.uni.passau.server.service.JobService;
+import de.uni.passau.server.service.StorageService;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -38,6 +43,9 @@ public class WorkflowController {
     @Autowired
     private JobService jobService;
 
+    @Autowired
+    private StorageService storageService;
+
     @GetMapping("/workflows/{workflowId}")
     public WorkflowEntity getWorkflowById(@PathVariable UUID workflowId) {
         return workflowRepository.findById(workflowId).get();
@@ -45,8 +53,26 @@ public class WorkflowController {
 
     @PostMapping("/workflows/create")
     public WorkflowEntity createWorkflow() {
-        return workflowRepository.save(WorkflowEntity.create());
+        // TODO The object can't be a list.
+
+        final var workflow = WorkflowEntity.create();
+
+        final var list = new ArrayList<ColumnSet>();
+
+        list.add(ColumnSet.fromIndexes(0, 1, 3, 77));
+        list.add(ColumnSet.fromIndexes(5, 6, 7));
+        list.add(ColumnSet.fromIndexes(2, 4, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21));
+
+        final var sets = new MaxSets(list);
+
+        storageService.set(workflow.arId(), sets);
+
+        return workflowRepository.save(workflow);
     }
+
+    private record MaxSets(
+        List<ColumnSet> sets
+    ) {}
 
     private record CreateJobResponse(
         WorkflowEntity workflow,
@@ -90,7 +116,7 @@ public class WorkflowController {
         return CreateJobResponse.fromEntities(workflow, job);
     }
 
-    @GetMapping("/workflows/{workflowId}/last-discovery")
+    @GetMapping("/workflows/{workflowId}/last-job")
     public JobEntity getLastJobByWorkflowId(@PathVariable UUID workflowId) {
         return jobRepository.findLastByWorkflowId(workflowId);
     }

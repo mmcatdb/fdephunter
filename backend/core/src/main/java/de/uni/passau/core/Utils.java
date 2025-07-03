@@ -26,4 +26,32 @@ public class Utils {
         return result;
     }
 
+    public static String bytesToHexString(byte[] bytes) {
+        final StringBuilder sb = new StringBuilder();
+
+        // We do this in reverse so that the first byte is the most significant one.
+        // So, when translated from hex to binary, output 1000 0000 will correspond to a set { 7 }.
+        for (int i = bytes.length - 1; i >= 0; i--) {
+            sb.append(Character.forDigit((bytes[i] >> 4) & 0xF, 16));
+            sb.append(Character.forDigit(bytes[i] & 0xF, 16));
+        }
+
+        return sb.toString();
+    }
+
+    public static byte[] hexStringToBytes(String string) {
+        // The string array is expected to be of even length, so we can divide it by 2.
+        final int length = string.length() / 2;
+        final byte[] bytes = new byte[length];
+
+        for (int i = 0; i < length; i++) {
+            int firstDigit = Character.digit(string.charAt(2 * i), 16);
+            int secondDigit = Character.digit(string.charAt(2 * i + 1), 16);
+            // Again, reading in reverse order.
+            bytes[length - i - 1] = (byte) ((firstDigit << 4) | secondDigit);
+        }
+
+        return bytes;
+    }
+
 }

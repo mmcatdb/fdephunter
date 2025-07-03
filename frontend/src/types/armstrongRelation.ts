@@ -1,25 +1,5 @@
 import { type ColumnSet } from './ColumnSet';
 
-export type ArmstrongRelation = {
-    /** Names of the columns. They are expected to be unique. */
-    columns: string[];
-    /** Values of the reference row. */
-    referenceRow: string[];
-    exampleRows: ExampleRow[];
-    /**
-     * Whether we are evaluating the positive examples or the negative ones.
-     * Should be true if and only if all negative examples are already evaluated.
-     */
-    isEvaluatingPositives: boolean;
-
-    /** @deprecated This probably shouldn't be here, but we need it now for the stats. */
-    minimalFds: number;
-    /** @deprecated This probably shouldn't be here, but we need it now for the stats. */
-    otherFds: number;
-    /** @deprecated This probably shouldn't be here, but we need it now for the stats. */
-    lhsSize: number;
-};
-
 export type ExampleRelation = {
     /** Names of the columns. They are expected to be unique. */
     columns: string[];
@@ -28,7 +8,7 @@ export type ExampleRelation = {
     exampleRow: ExampleRow;
 };
 
-export type ExampleRow = {
+type ExampleRow = {
     values: string[];
     /** The indexes of the columns that form the max set element. */
     maxSetElement: ColumnSet;

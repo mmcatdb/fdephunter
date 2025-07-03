@@ -7,7 +7,6 @@ import { type Params, useLoaderData, useNavigate, useRevalidator, useRouteLoader
 import { type WorkflowLoaded } from './WorkflowPage';
 import { API } from '@/utils/api/api';
 import { useEffect } from 'react';
-import { mockAPI } from '@/utils/api/mockAPI';
 import { WorkflowState } from '@/types/workflow';
 
 const REFRESH_TIMEOUT = 2000; // in ms
@@ -56,8 +55,7 @@ WorkflowJobPage.loader = async ({ params: { workflowId } }: { params: Params<'wo
     if (!workflowId)
         throw new Error('Missing workflow ID');
 
-    // const response = await API.workflows.getLastJob(undefined, { workflowId });
-    const response = await mockAPI.workflow.getLastJob(workflowId);
+    const response = await API.workflow.getLastJob(undefined, { workflowId });
     if (!response.status)
         throw new Error('Failed to load job');
 

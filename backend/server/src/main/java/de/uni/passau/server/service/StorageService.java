@@ -29,6 +29,9 @@ public class StorageService {
         return document.toResponse();
     }
 
+    /**
+     * Important note: the data object has to be like a normal object. It can't be list, array, or generally anything that would be serialized as JSON array.
+     */
     public void set(String id, Object data) {
         final var document = DocumentEntity.create(id, data, objectMapper);
         documentRepository.save(document);

@@ -1,69 +1,69 @@
-import { type ArmstrongRelation, type Lattice, McType } from '@/types/armstrongRelation';
+import { type Lattice, McType } from '@/types/armstrongRelation';
 import { type DatasetResponse, DatasetType, type DatasetData } from '@/types/dataset';
 import { type FdSet } from '@/types/functionalDependency';
 import { v4 } from 'uuid';
 
-export const MOCK_ARMSTRONG_RELATIONS: ArmstrongRelation[] = [ {
-    columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
-    referenceRow: [ 'tt0036443', 'Titanic', '1943', '85', 'Action+Drama+History' ],
-    exampleRows: [
-        { maxSetElement: { columns: [ 1, 2 ] }, isPositive: true, decision: undefined, values: [ 'tt0079836', 'Titanic', '1943', '194', 'Drama+History' ] },
-        { maxSetElement: { columns: [ 1, 3 ] }, isPositive: true, decision: undefined, values: [ 'tt0115392', 'Titanic', '1979', '85', 'Drama+Romance' ] },
-        { maxSetElement: { columns: [ 1, 4 ] }, isPositive: true, decision: undefined, values: [ 'tt0120338', 'Titanic', '1996', '87', 'Action+Drama+History' ] },
-        { maxSetElement: { columns: [ 3 ] }, isPositive: true, decision: undefined, values: [ 'tt0143942', 'S.O.S. Titanic', '1997', '85', 'History' ] },
-    ],
-    isEvaluatingPositives: false,
+// export const MOCK_ARMSTRONG_RELATIONS: ArmstrongRelation[] = [ {
+//     columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
+//     referenceRow: [ 'tt0036443', 'Titanic', '1943', '85', 'Action+Drama+History' ],
+//     exampleRows: [
+//         { maxSetElement: { columns: [ 1, 2 ] }, isPositive: true, decision: undefined, values: [ 'tt0079836', 'Titanic', '1943', '194', 'Drama+History' ] },
+//         { maxSetElement: { columns: [ 1, 3 ] }, isPositive: true, decision: undefined, values: [ 'tt0115392', 'Titanic', '1979', '85', 'Drama+Romance' ] },
+//         { maxSetElement: { columns: [ 1, 4 ] }, isPositive: true, decision: undefined, values: [ 'tt0120338', 'Titanic', '1996', '87', 'Action+Drama+History' ] },
+//         { maxSetElement: { columns: [ 3 ] }, isPositive: true, decision: undefined, values: [ 'tt0143942', 'S.O.S. Titanic', '1997', '85', 'History' ] },
+//     ],
+//     isEvaluatingPositives: false,
 
-    minimalFds: 12,
-    otherFds: 40,
-    lhsSize: 0,
-}, {
-    columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
-    referenceRow: [ 'tt0036443', 'Titanic', '1943', '85', 'Action+Drama+History' ],
-    exampleRows: [
-        { maxSetElement: { columns: [ 0 ] }, isPositive: false, decision: undefined, values: [ 'tt0036443', 'S.O.S. Titanic', '1979', '194', 'Drama+History' ] },
-        { maxSetElement: { columns: [ 1, 2 ] }, isPositive: true, decision: undefined, values: [ 'tt0079836', 'Titanic', '1943', '87', 'Drama+Romance' ] },
-        { maxSetElement: { columns: [ 1, 3 ] }, isPositive: true, decision: undefined, values: [ 'tt0115392', 'Titanic', '1996', '85', 'History' ] },
-        { maxSetElement: { columns: [ 1, 4 ] }, isPositive: true, decision: undefined, values: [ 'tt0120338', 'Titanic', '1997', 'null', 'Action+Drama+History' ] },
-        { maxSetElement: { columns: [ 2 ] }, isPositive: false, decision: undefined, values: [ 'tt0155274', 'The Titanic', '1943', '51', 'Documentary+Short' ] },
-        { maxSetElement: { columns: [ 3 ] }, isPositive: true, decision: undefined, values: [ 'tt0594950', 'Titanic Tech', '1915', '85', 'Documentary' ] },
-        { maxSetElement: { columns: [ 4 ] }, isPositive: false, decision: undefined, values: [ 'tt0771984', 'Titanic\'s Ghosts', '2006', '46', 'Action+Drama+History' ] },
-    ],
-    isEvaluatingPositives: false,
+//     minimalFds: 12,
+//     otherFds: 40,
+//     lhsSize: 0,
+// }, {
+//     columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
+//     referenceRow: [ 'tt0036443', 'Titanic', '1943', '85', 'Action+Drama+History' ],
+//     exampleRows: [
+//         { maxSetElement: { columns: [ 0 ] }, isPositive: false, decision: undefined, values: [ 'tt0036443', 'S.O.S. Titanic', '1979', '194', 'Drama+History' ] },
+//         { maxSetElement: { columns: [ 1, 2 ] }, isPositive: true, decision: undefined, values: [ 'tt0079836', 'Titanic', '1943', '87', 'Drama+Romance' ] },
+//         { maxSetElement: { columns: [ 1, 3 ] }, isPositive: true, decision: undefined, values: [ 'tt0115392', 'Titanic', '1996', '85', 'History' ] },
+//         { maxSetElement: { columns: [ 1, 4 ] }, isPositive: true, decision: undefined, values: [ 'tt0120338', 'Titanic', '1997', 'null', 'Action+Drama+History' ] },
+//         { maxSetElement: { columns: [ 2 ] }, isPositive: false, decision: undefined, values: [ 'tt0155274', 'The Titanic', '1943', '51', 'Documentary+Short' ] },
+//         { maxSetElement: { columns: [ 3 ] }, isPositive: true, decision: undefined, values: [ 'tt0594950', 'Titanic Tech', '1915', '85', 'Documentary' ] },
+//         { maxSetElement: { columns: [ 4 ] }, isPositive: false, decision: undefined, values: [ 'tt0771984', 'Titanic\'s Ghosts', '2006', '46', 'Action+Drama+History' ] },
+//     ],
+//     isEvaluatingPositives: false,
 
-    minimalFds: 9,
-    otherFds: 37,
-    lhsSize: 1,
-}, {
-    columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
-    referenceRow: [ 'tt0036443', 'Titanic', '1943', '85', 'Action+Drama+History' ],
-    exampleRows: [
-        { maxSetElement: { columns: [ 1, 2 ] }, isPositive: true, decision: undefined, values: [ 'tt0079836', 'Titanic', '1943', '194', 'Drama+History' ] },
-        { maxSetElement: { columns: [ 1, 3 ] }, isPositive: true, decision: undefined, values: [ 'tt0115392', 'Titanic', '1979', '85', 'Drama+Romance' ] },
-        { maxSetElement: { columns: [ 1, 4 ] }, isPositive: true, decision: undefined, values: [ 'tt0120338', 'Titanic', '1996', '87', 'Action+Drama+History' ] },
-        { maxSetElement: { columns: [ 2, 3 ] }, isPositive: false, decision: undefined, values: [ 'tt0155274', 'S.O.S. Titanic', '1943', '85', 'History' ] },
-        { maxSetElement: { columns: [ 2, 4 ] }, isPositive: false, decision: undefined, values: [ 'tt0594950', 'Titanic Tech', '1943', 'null', 'Action+Drama+History' ] },
-        { maxSetElement: { columns: [ 3, 4 ] }, isPositive: false, decision: undefined, values: [ 'tt0650185', 'The Titanic', '1997', '85', 'Action+Drama+History' ] },
-    ],
-    isEvaluatingPositives: false,
+//     minimalFds: 9,
+//     otherFds: 37,
+//     lhsSize: 1,
+// }, {
+//     columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
+//     referenceRow: [ 'tt0036443', 'Titanic', '1943', '85', 'Action+Drama+History' ],
+//     exampleRows: [
+//         { maxSetElement: { columns: [ 1, 2 ] }, isPositive: true, decision: undefined, values: [ 'tt0079836', 'Titanic', '1943', '194', 'Drama+History' ] },
+//         { maxSetElement: { columns: [ 1, 3 ] }, isPositive: true, decision: undefined, values: [ 'tt0115392', 'Titanic', '1979', '85', 'Drama+Romance' ] },
+//         { maxSetElement: { columns: [ 1, 4 ] }, isPositive: true, decision: undefined, values: [ 'tt0120338', 'Titanic', '1996', '87', 'Action+Drama+History' ] },
+//         { maxSetElement: { columns: [ 2, 3 ] }, isPositive: false, decision: undefined, values: [ 'tt0155274', 'S.O.S. Titanic', '1943', '85', 'History' ] },
+//         { maxSetElement: { columns: [ 2, 4 ] }, isPositive: false, decision: undefined, values: [ 'tt0594950', 'Titanic Tech', '1943', 'null', 'Action+Drama+History' ] },
+//         { maxSetElement: { columns: [ 3, 4 ] }, isPositive: false, decision: undefined, values: [ 'tt0650185', 'The Titanic', '1997', '85', 'Action+Drama+History' ] },
+//     ],
+//     isEvaluatingPositives: false,
 
-    minimalFds: 12,
-    otherFds: 29,
-    lhsSize: 2,
-}, {
-    columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
-    referenceRow: [ 'tt0036443', 'Titanic', '1943', '85', 'Action+Drama+History' ],
-    exampleRows: [
-        { maxSetElement: { columns: [ 1, 2, 3 ] }, isPositive: false, decision: undefined, values: [ 'tt0079836', 'Titanic', '1943', '85', 'Drama+History' ] },
-        { maxSetElement: { columns: [ 1, 2, 4 ] }, isPositive: false, decision: undefined, values: [ 'tt0115392', 'Titanic', '1943', '194', 'Action+Drama+History' ] },
-        { maxSetElement: { columns: [ 1, 3, 4 ] }, isPositive: false, decision: undefined, values: [ 'tt0120338', 'Titanic', '1979', '85', 'Action+Drama+History' ] },
-        { maxSetElement: { columns: [ 2, 3, 4 ] }, isPositive: false, decision: undefined, values: [ 'tt0155274', 'S.O.S. Titanic', '1943', '85', 'Action+Drama+History' ] },
-    ],
-    isEvaluatingPositives: false,
+//     minimalFds: 12,
+//     otherFds: 29,
+//     lhsSize: 2,
+// }, {
+//     columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
+//     referenceRow: [ 'tt0036443', 'Titanic', '1943', '85', 'Action+Drama+History' ],
+//     exampleRows: [
+//         { maxSetElement: { columns: [ 1, 2, 3 ] }, isPositive: false, decision: undefined, values: [ 'tt0079836', 'Titanic', '1943', '85', 'Drama+History' ] },
+//         { maxSetElement: { columns: [ 1, 2, 4 ] }, isPositive: false, decision: undefined, values: [ 'tt0115392', 'Titanic', '1943', '194', 'Action+Drama+History' ] },
+//         { maxSetElement: { columns: [ 1, 3, 4 ] }, isPositive: false, decision: undefined, values: [ 'tt0120338', 'Titanic', '1979', '85', 'Action+Drama+History' ] },
+//         { maxSetElement: { columns: [ 2, 3, 4 ] }, isPositive: false, decision: undefined, values: [ 'tt0155274', 'S.O.S. Titanic', '1943', '85', 'Action+Drama+History' ] },
+//     ],
+//     isEvaluatingPositives: false,
 
-    minimalFds: 4,
-    otherFds: 29,
-    lhsSize: 3,
+//     minimalFds: 4,
+//     otherFds: 29,
+//     lhsSize: 3,
 /*
 }, {
     columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
@@ -100,7 +100,7 @@ export const MOCK_ARMSTRONG_RELATIONS: ArmstrongRelation[] = [ {
     otherFds: 28,
     lhsSize: 2,
 */
-} ];
+// } ];
 
 export const MOCK_LATTICES: Lattice[][] = [
     [ {

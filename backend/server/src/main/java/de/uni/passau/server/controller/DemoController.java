@@ -48,24 +48,25 @@ public class DemoController {
 
         List<DatasetEntity> datasets = new ArrayList<>();
 
-        datasets.add(DatasetEntity.create("iris", DatasetType.CSV, "data/iris.csv"));
-        datasets.add(DatasetEntity.create("balance-scale", DatasetType.CSV, "data/balance-scale.csv"));
-        datasets.add(DatasetEntity.create("chess", DatasetType.CSV, "data/chess.csv"));
-        datasets.add(DatasetEntity.create("abalone", DatasetType.CSV, "data/abalone.csv"));
-        datasets.add(DatasetEntity.create("nursery", DatasetType.CSV, "data/nursery.csv"));
-        datasets.add(DatasetEntity.create("breast-cancer-wisconsin", DatasetType.CSV, "data/breast-cancer-wisconsin.csv"));
-        datasets.add(DatasetEntity.create("bridges", DatasetType.CSV, "data/bridges.csv"));
-        datasets.add(DatasetEntity.create("echocardiogram", DatasetType.CSV, "data/echocardiogram.csv"));
-        datasets.add(DatasetEntity.create("adult", DatasetType.CSV, "data/adult.csv"));
-        datasets.add(DatasetEntity.create("letter", DatasetType.CSV, "data/letter.csv"));
-        datasets.add(DatasetEntity.create("ncvoter", DatasetType.CSV, "data/ncvoter.csv"));
-        datasets.add(DatasetEntity.create("hepatitis", DatasetType.CSV, "data/hepatitis.csv"));
-        datasets.add(DatasetEntity.create("horse", DatasetType.CSV, "data/horse.csv"));
-        datasets.add(DatasetEntity.create("fd-reduced-30", DatasetType.CSV, "data/fd-reduced-30.csv"));
-        datasets.add(DatasetEntity.create("plista", DatasetType.CSV, "data/plista.csv"));
-        datasets.add(DatasetEntity.create("flight", DatasetType.CSV, "data/flight.csv"));
-        datasets.add(DatasetEntity.create("uniprot", DatasetType.CSV, "data/uniprot.csv"));
-        datasets.add(DatasetEntity.create("lineitem", DatasetType.CSV, "data/lineitem.csv"));
+        datasets.add(DatasetEntity.create("iris", DatasetType.CSV, "../data/iris.csv"));
+        datasets.add(DatasetEntity.create("imdb sample", DatasetType.CSV, "../data/imdb-title-sample.csv"));
+        // datasets.add(DatasetEntity.create("balance-scale", DatasetType.CSV, "data/balance-scale.csv"));
+        // datasets.add(DatasetEntity.create("chess", DatasetType.CSV, "data/chess.csv"));
+        // datasets.add(DatasetEntity.create("abalone", DatasetType.CSV, "data/abalone.csv"));
+        // datasets.add(DatasetEntity.create("nursery", DatasetType.CSV, "data/nursery.csv"));
+        // datasets.add(DatasetEntity.create("breast-cancer-wisconsin", DatasetType.CSV, "data/breast-cancer-wisconsin.csv"));
+        // datasets.add(DatasetEntity.create("bridges", DatasetType.CSV, "data/bridges.csv"));
+        // datasets.add(DatasetEntity.create("echocardiogram", DatasetType.CSV, "data/echocardiogram.csv"));
+        // datasets.add(DatasetEntity.create("adult", DatasetType.CSV, "data/adult.csv"));
+        // datasets.add(DatasetEntity.create("letter", DatasetType.CSV, "data/letter.csv"));
+        // datasets.add(DatasetEntity.create("ncvoter", DatasetType.CSV, "data/ncvoter.csv"));
+        // datasets.add(DatasetEntity.create("hepatitis", DatasetType.CSV, "data/hepatitis.csv"));
+        // datasets.add(DatasetEntity.create("horse", DatasetType.CSV, "data/horse.csv"));
+        // datasets.add(DatasetEntity.create("fd-reduced-30", DatasetType.CSV, "data/fd-reduced-30.csv"));
+        // datasets.add(DatasetEntity.create("plista", DatasetType.CSV, "data/plista.csv"));
+        // datasets.add(DatasetEntity.create("flight", DatasetType.CSV, "data/flight.csv"));
+        // datasets.add(DatasetEntity.create("uniprot", DatasetType.CSV, "data/uniprot.csv"));
+        // datasets.add(DatasetEntity.create("lineitem", DatasetType.CSV, "data/lineitem.csv"));
 
         datasetRepository.saveAll(datasets);
 
