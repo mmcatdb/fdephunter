@@ -25,9 +25,8 @@ public class MaxSet extends ComplementMaxSet {
 	public String toString() {
 
 		String s = "max(" + this.forClass + ": ";
-		for (ColumnSet set : this.elements) {
-			s += set.convertToLongList();
-		}
+		for (ColumnSet set : this.elements)
+			s += set.toIntList();
 		return s + ")";
 	}
 

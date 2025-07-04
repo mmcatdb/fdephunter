@@ -51,9 +51,8 @@ public class ComplementMaxSet {
 	public String toString() {
 
 		String s = "cmax(" + this.forClass + ": ";
-		for (ColumnSet set : this.elements) {
-			s += set.convertToLongList();
-		}
+		for (ColumnSet set : this.elements)
+			s += set.toIntList();
 		return s + ")";
 	}
 

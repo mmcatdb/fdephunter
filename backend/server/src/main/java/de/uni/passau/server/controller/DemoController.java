@@ -3,7 +3,6 @@ package de.uni.passau.server.controller;
 import de.uni.passau.server.model.DatasetEntity;
 import de.uni.passau.server.model.DatasetEntity.DatasetType;
 import de.uni.passau.server.repository.DatasetRepository;
-import de.uni.passau.server.repository.WorkflowRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +10,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,10 +20,10 @@ public class DemoController {
     private static final Logger LOGGER = LoggerFactory.getLogger(DemoController.class);
 
     @Autowired
-    private WorkflowRepository workflowRepository;
+    private DatasetRepository datasetRepository;
 
     @Autowired
-    private DatasetRepository datasetRepository;
+    private MongoTemplate mongoTemplate;
 
     @PostMapping("/demo/reset-database")
     public String resetDatabase() {
@@ -36,9 +36,10 @@ public class DemoController {
     private void purgeDatabase() {
         LOGGER.info("Purging database.");
 
-        // TODO Add all repositories.
-        datasetRepository.deleteAll();
-        workflowRepository.deleteAll();
+        for (final var collectionName : mongoTemplate.getCollectionNames()) {
+            LOGGER.info("Dropping collection: {}", collectionName);
+            mongoTemplate.dropCollection(collectionName);
+        }
 
         LOGGER.info("Database purged.");
     }
@@ -50,6 +51,7 @@ public class DemoController {
 
         datasets.add(DatasetEntity.create("iris", DatasetType.CSV, "../data/iris.csv"));
         datasets.add(DatasetEntity.create("imdb sample", DatasetType.CSV, "../data/imdb-title-sample.csv"));
+        // NICE_TO_HAVE: Add more datasets here.
         // datasets.add(DatasetEntity.create("balance-scale", DatasetType.CSV, "data/balance-scale.csv"));
         // datasets.add(DatasetEntity.create("chess", DatasetType.CSV, "data/chess.csv"));
         // datasets.add(DatasetEntity.create("abalone", DatasetType.CSV, "data/abalone.csv"));

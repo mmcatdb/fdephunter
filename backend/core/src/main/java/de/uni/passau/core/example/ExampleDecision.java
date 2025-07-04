@@ -22,8 +22,8 @@ public record ExampleDecision(
     }
 
     public record DecisionColumn(
-        // TODO In that case, the whole decision column should be null, right?
-        /** If null, the column isn't a part of the max set (so it should be ignored). */
+        // NICE_TO_HAVE In that case, the whole decision column should be null, right?
+        /** If null, the column isn't a part of the example row's rhsSet (so it should be ignored). */
         @Nullable DecisionColumnStatus status,
         /** User provided strings. Probably not important right now. */
         List<String> reasons

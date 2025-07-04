@@ -42,7 +42,7 @@ public class AdjustMaxSet {
 
         final MaxSets newMaxSets = new MaxSets(newSets);
         for (ExampleRow row : exampleRows) {
-            for (int forClass : row.rhsSet.convertToIntList()) {
+            for (int forClass : row.rhsSet.toIntList()) {
                 final MaxSet newMaxSet = newMaxSets.sets().get(forClass);
 
                 if (row.decision.columns()[forClass].status() == DecisionColumnStatus.VALID) {

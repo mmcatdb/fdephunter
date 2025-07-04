@@ -125,7 +125,7 @@ public class ComputeFD {
 	// 			if (lhs.get(attribute)) {
 	// 				continue;
 	// 			}
-	// 			IntList bits = lhs.convertToIntList();
+	// 			IntList bits = lhs.toIntList();
 
 	// 			FunctionalDependencyGroup fdg = new FunctionalDependencyGroup(attribute, bits);
 	// 			result.add(fdg);

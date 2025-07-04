@@ -120,7 +120,7 @@ public class JobService {
     }
 
     private void executeJobPayload(JobEntity job) {
-        // TODO Change this to switch once we are on a better java version.
+        // NICE_TO_HAVE Change this to switch once we are on a better java version.
         if (job.payload instanceof DiscoveryJobPayload)
             executeDiscoveryJob(job);
         else if (job.payload instanceof IterationJobPayload)

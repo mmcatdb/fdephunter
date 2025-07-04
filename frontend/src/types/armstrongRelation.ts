@@ -35,9 +35,16 @@ type ExampleRowResponse = {
 class ExampleRow {
     private constructor(
         readonly values: string[],
-        // TODO names
-        /** The indexes of the columns that form the max set element. */
+        /**
+         * The indexes of the columns that form the lhs of FDs that are violated by the example.
+         * It's a candidate element of all max sets for the columns in rhsSet).
+         * It's an element (or a subset of one) of all max sets for the other columns (not in lhs nor rhs).
+         */
         readonly lhsSet: ColumnSet,
+        /**
+         * The indexes of the columns that form the rhs of FDs that are violated by the example.
+         * It's disjoint with lhsSet.
+         */
         readonly rhsSet: ColumnSet,
         /** Whether it is a negative or positive example. */
         readonly isPositive: boolean,
@@ -58,9 +65,11 @@ class ExampleRow {
 
 export type ExampleDecision = {
     status: DecisionStatus;
+    /** The columns are in the same order as in the original relation. */
     columns: {
-        /** If undefined, the column isn't a part of the max set (so it should be ignored). */
+        /** If null, the column isn't a part of the example row's rhsSet (so it should be ignored). */
         status: DecisionColumnStatus | undefined;
+        /** User provided strings. Probably not important right now. */
         reasons: string[];
     }[];
 };

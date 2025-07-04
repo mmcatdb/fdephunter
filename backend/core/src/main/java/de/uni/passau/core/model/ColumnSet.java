@@ -16,8 +16,6 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import it.unimi.dsi.fastutil.longs.LongArrayList;
-import it.unimi.dsi.fastutil.longs.LongList;
 import java.util.Iterator;
 
 /**
@@ -53,18 +51,7 @@ public class ColumnSet implements Comparable<ColumnSet> {
         return columns.toString();
     }
 
-    public LongList convertToLongList() {
-		LongList bits = new LongArrayList();
-		long lastIndex = columns.nextSetBit(0);
-		while (lastIndex != -1) {
-			bits.add(lastIndex);
-            // TODO: This defeats the purpose of the LongList. Do we really need it or are ints enough?
-			lastIndex = columns.nextSetBit((int) (lastIndex + 1));
-		}
-		return bits;
-	}
-
-	public IntList convertToIntList() {
+	public IntList toIntList() {
 		IntList bits = new IntArrayList();
 		int lastIndex = columns.nextSetBit(0);
 		while (lastIndex != -1) {

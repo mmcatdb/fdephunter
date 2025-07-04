@@ -20,7 +20,7 @@ public class AgreeSet {
 	@Override
 	public String toString() {
 
-		return "ag(" + this.attributes.convertToIntList().toString() + ")";
+		return "ag(" + this.attributes.toIntList().toString() + ")";
 	}
 
 	@Override

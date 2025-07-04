@@ -1,7 +1,5 @@
 package de.uni.passau.core.model;
 
-import java.util.BitSet;
-
 import it.unimi.dsi.fastutil.longs.LongList;
 import java.util.LinkedList;
 import java.util.List;
@@ -43,20 +41,6 @@ public class StrippedPartition {
 
 		return this.value;
 
-	}
-
-	public List<BitSet> getValuesAsBitSet() {
-
-		List<BitSet> result = new LinkedList<>();
-		for (LongList list : this.value) {
-			BitSet set = new BitSet();
-			for (long i : list) {
-				// TODO: BitSet does not support long indexes, so we need to cast to int. May that (realistically) cause problems?
-				set.set((int) i);
-			}
-			result.add(set);
-		}
-		return result;
 	}
 
 	@Override

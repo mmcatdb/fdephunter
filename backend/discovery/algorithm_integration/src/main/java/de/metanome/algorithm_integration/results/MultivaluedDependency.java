@@ -36,7 +36,6 @@ public class MultivaluedDependency implements Result {
 
   public static final String MVD_SEPARATOR = "->>";
 
-  //TODO
   private static final long serialVersionUID = 7625471410289776655L;
 
   protected ColumnCombination determinant;
@@ -109,8 +108,7 @@ public class MultivaluedDependency implements Result {
     String[] parts = str.split(MVD_SEPARATOR);
     ColumnCombination determinant = ColumnCombination.fromString(tableMapping, columnMapping, parts[0]);
     ColumnCombination dependant = ColumnCombination.fromString(tableMapping, columnMapping, parts[1]);
-    
-    //TODO
+
     System.out.println("\n" + determinant.toString() + "->>" + dependant.toString() + "\n");
 
     return new MultivaluedDependency(determinant, dependant);

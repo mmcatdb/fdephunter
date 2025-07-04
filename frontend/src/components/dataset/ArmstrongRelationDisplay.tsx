@@ -146,7 +146,7 @@ type ExampleRowDisplayProps = {
 function ExampleRowDisplay({ assignment, gridState, rowIndex }: ExampleRowDisplayProps) {
     const row = assignment.relation.exampleRow;
 
-    const maxSetCols = row.lhsSet.map(assignment.relation.columns);
+    const lhsSetCols = row.lhsSet.map(assignment.relation.columns);
     const exampleBgClass = row.isPositive ? 'bg-danger-400' : 'bg-warning-400';
     const { leftClass, rightClass } = getSpecialCellClasses(rowIndex);
 
@@ -182,12 +182,12 @@ function ExampleRowDisplay({ assignment, gridState, rowIndex }: ExampleRowDispla
             </div>
         ))}
 
-        <div title={maxSetCols.join(', ')} className={rightClass}>
+        <div title={lhsSetCols.join(', ')} className={rightClass}>
             {gridState.isMaxSetCollapsed ? (
                 <div className={clsx('size-4 rounded-full', exampleBgClass)} />
             ) : (
                 <div className='max-w-80 flex flex-wrap gap-x-2 gap-y-1'>
-                    {maxSetCols.map(col => (
+                    {lhsSetCols.map(col => (
                         <ColumnNameBadge key={col} name={col} className={exampleBgClass} />
                     ))}
                 </div>
@@ -247,7 +247,7 @@ export function ExampleRelationDisplay({ relation: { columns, referenceRow, exam
             {exampleRow.values.map((value, colIndex) => {
                 const status = decision.columns[colIndex].status;
 
-                // If the selection function isn't provided, the cells aren't interactive. Also, if the status isn't defined, the cell is in the max set.
+                // If the selection function isn't provided, the cells aren't interactive. Also, if the status isn't defined, the cell isn't in the rhs set so it can't be selected either.
                 if (!setSelectedColIndex || !status) {
                     return (
                         <div key={colIndex} className={getCellClass(0, colIndex, !status)}>

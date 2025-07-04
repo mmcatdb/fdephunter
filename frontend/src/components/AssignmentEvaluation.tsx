@@ -17,7 +17,7 @@ type AssignmentEvaluationProps = {
 
 export function AssignmentEvaluation({ assignment, onEvaluated }: AssignmentEvaluationProps) {
     const { decision } = useDecisionContext();
-    const [ selectedFdIndex, setSelectedFdIndex ] = useState<number>();
+    const [ selectedColIndex, setSelectedColIndex ] = useState<number>();
 
     return (
         <div className='flex flex-col items-start gap-4'>
@@ -27,13 +27,13 @@ export function AssignmentEvaluation({ assignment, onEvaluated }: AssignmentEval
                 <Card className='p-4 max-w-full'>
                     <ExampleRelationDisplay
                         relation={assignment.relation}
-                        selectedColIndex={selectedFdIndex}
-                        setSelectedColIndex={setSelectedFdIndex}
+                        selectedColIndex={selectedColIndex}
+                        setSelectedColIndex={setSelectedColIndex}
                     />
                 </Card>
 
-                {selectedFdIndex !== undefined && (
-                    <DecisionCard relation={assignment.relation} selectedFdIndex={selectedFdIndex} />
+                {selectedColIndex !== undefined && (
+                    <DecisionCard relation={assignment.relation} selectedColIndex={selectedColIndex} />
                 )}
             </>)}
         </div>
@@ -207,38 +207,38 @@ const bodies: { [key in DecisionPhase]: ReactNode } = {
 
 type DecisionCardProps = {
     relation: ExampleRelation;
-    selectedFdIndex: number;
+    selectedColIndex: number;
 };
 
-function DecisionCard({ relation, selectedFdIndex }: DecisionCardProps) {
+function DecisionCard({ relation, selectedColIndex }: DecisionCardProps) {
     const { decision } = useDecisionContext();
 
     return decision.phase === DecisionPhase.Evaluation
-        ? (<EditableDecisionCard relation={relation} selectedFdIndex={selectedFdIndex} />)
-        : (<FinalDecisionCard relation={relation} selectedFdIndex={selectedFdIndex} />);
+        ? (<EditableDecisionCard relation={relation} selectedColIndex={selectedColIndex} />)
+        : (<FinalDecisionCard relation={relation} selectedColIndex={selectedColIndex} />);
 }
 
-function EditableDecisionCard({ relation, selectedFdIndex }: DecisionCardProps) {
+function EditableDecisionCard({ relation, selectedColIndex }: DecisionCardProps) {
     const { exampleRow, columns } = relation;
     const { decision, setDecision } = useDecisionContext();
-    const selected = decision.columns[selectedFdIndex];
+    const selected = decision.columns[selectedColIndex];
     const isValid = selected.status === DecisionColumnStatus.Valid;
 
     const updateColumn = useCallback((nextCol: Partial<DecisionColumn>) => {
         setDecision(prev => ({
             ...prev,
-            columns: prev.columns.map((col, i) => i === selectedFdIndex ? { ...col, ...nextCol } : col),
+            columns: prev.columns.map((col, i) => i === selectedColIndex ? { ...col, ...nextCol } : col),
         }));
-    }, [ selectedFdIndex, setDecision ]);
+    }, [ selectedColIndex, setDecision ]);
 
     return (
         <Card>
             <CardHeader>
                 <h3 className='font-semibold'>
                     Is the value
-                    {' '}<span className='font-bold text-primary'>{exampleRow.values[selectedFdIndex]}</span>{' '}
+                    {' '}<span className='font-bold text-primary'>{exampleRow.values[selectedColIndex]}</span>{' '}
                     in the column
-                    {' '}<ColumnNameBadge name={columns[selectedFdIndex]} className='inline' />{' '}
+                    {' '}<ColumnNameBadge name={columns[selectedColIndex]} className='inline' />{' '}
                     possible?
                 </h3>
             </CardHeader>
@@ -248,7 +248,7 @@ function EditableDecisionCard({ relation, selectedFdIndex }: DecisionCardProps) 
                     If the value is possible, the following functional dependency must be fake:
                 </p>
 
-                <FdDisplay relation={relation} selectedFdIndex={selectedFdIndex} />
+                <FdDisplay relation={relation} selectedColIndex={selectedColIndex} />
 
                 {selected.status === DecisionColumnStatus.Undecided ? (
                     <div className='mt-6 flex gap-3'>
@@ -279,7 +279,7 @@ function EditableDecisionCard({ relation, selectedFdIndex }: DecisionCardProps) 
                         {!isValid && (<>
                             <p className='mt-6 mb-3'>
                                 Please provide us with one or more reasons why the value
-                                {' '}<span className='font-bold text-primary'>{exampleRow.values[selectedFdIndex]}</span>{' '}
+                                {' '}<span className='font-bold text-primary'>{exampleRow.values[selectedColIndex]}</span>{' '}
                                 is not possible. You can select from the predefined reasons or you can type your own.
                             </p>
 
@@ -293,10 +293,10 @@ function EditableDecisionCard({ relation, selectedFdIndex }: DecisionCardProps) 
     );
 }
 
-function FinalDecisionCard({ relation, selectedFdIndex: selectedFdIndex }: DecisionCardProps) {
+function FinalDecisionCard({ relation, selectedColIndex }: DecisionCardProps) {
     const { exampleRow, columns } = relation;
     const { decision } = useDecisionContext();
-    const selected = decision.columns[selectedFdIndex];
+    const selected = decision.columns[selectedColIndex];
     const isValid = selected.status === DecisionColumnStatus.Valid;
 
     return (
@@ -304,7 +304,7 @@ function FinalDecisionCard({ relation, selectedFdIndex: selectedFdIndex }: Decis
             <CardHeader>
                 <h3 className='font-semibold'>
                     The value
-                    {' '}<span className='font-bold text-primary'>{exampleRow.values[selectedFdIndex]}</span>{' '}
+                    {' '}<span className='font-bold text-primary'>{exampleRow.values[selectedColIndex]}</span>{' '}
                     is
                     {' '}{isValid ? (
                         <span className='text-success'>possible</span>
@@ -312,7 +312,7 @@ function FinalDecisionCard({ relation, selectedFdIndex: selectedFdIndex }: Decis
                         <span className='text-danger'>not possible</span>
                     )}{' '}
                     in the column
-                    {' '}<ColumnNameBadge name={columns[selectedFdIndex]} className='inline' />
+                    {' '}<ColumnNameBadge name={columns[selectedColIndex]} className='inline' />
                     .
                 </h3>
             </CardHeader>
@@ -331,26 +331,26 @@ function FinalDecisionCard({ relation, selectedFdIndex: selectedFdIndex }: Decis
                     </>)}
                 </p>
 
-                <FdDisplay relation={relation} selectedFdIndex={selectedFdIndex} />
+                <FdDisplay relation={relation} selectedColIndex={selectedColIndex} />
             </CardBody>
         </Card>
     );
 }
 
-function FdDisplay({ relation: { exampleRow, columns }, selectedFdIndex: selectedFdIndex }: DecisionCardProps) {
-    const maxSetCols = exampleRow.lhsSet.map(columns);
+function FdDisplay({ relation: { exampleRow, columns }, selectedColIndex: selectedColIndex }: DecisionCardProps) {
+    const lhsSetCols = exampleRow.lhsSet.map(columns);
 
     return (
         <div className='flex gap-4'>
             <div className='py-[2px] flex flex-wrap gap-x-2 gap-y-1'>
-                {maxSetCols.map(col => (
+                {lhsSetCols.map(col => (
                     <ColumnNameBadge key={col} name={col} className={exampleRow.isPositive ? 'bg-danger-400' : 'bg-warning-400'} />
                 ))}
             </div>
 
             <FaArrowRight size={20} className='shrink-0' />
 
-            <ColumnNameBadge name={columns[selectedFdIndex]} className='mt-[2px] shrink-0' />
+            <ColumnNameBadge name={columns[selectedColIndex]} className='mt-[2px] shrink-0' />
         </div>
     );
 }
