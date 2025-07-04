@@ -83,7 +83,7 @@ public class ComputeAR {
         // Iterate over each MaxSet
         for (MaxSet maxSet : maxSets.sets()) {
             // Iterate over the list of LHS columns of the functional dependecies in this MaxSet (class)
-			maxSet.getAllColumnSets().forEach(lhsBitSet -> {
+			maxSet.allColumnSets().forEach(lhsBitSet -> {
 
                 // Get the BitSet (LHS) of the current functional dependency. The bitset represents the columns of the LHS.
 

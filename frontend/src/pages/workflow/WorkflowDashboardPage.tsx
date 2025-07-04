@@ -10,7 +10,6 @@ import { routes } from '@/router';
 import { useMemo, useState } from 'react';
 import { type Lattice } from '@/types/armstrongRelation';
 import clsx from 'clsx';
-import { mockAPI } from '@/utils/api/mockAPI';
 import { Assignment } from '@/types/assignment';
 import { createFdEdges } from './WorkflowResultsPage';
 import { type Id } from '@/types/id';
@@ -192,7 +191,7 @@ WorkflowDatasetPage.loader = async ({ params: { workflowId } }: { params: Params
     if (!workflowId)
         throw new Error('Missing workflow ID');
 
-    const response = await mockAPI.dataset.getDatasetData(workflowId);
+    const response = await API.dataset.getDatasetData(undefined, { workflowId });
     if (!response.status)
         throw new Error('Failed to load dataset data');
 
@@ -223,7 +222,7 @@ WorkflowListPage.loader = async ({ params: { workflowId } }: { params: Params<'w
     if (!workflowId)
         throw new Error('Missing workflow ID');
 
-    const response = await mockAPI.view.getFds(workflowId);
+    const response = await API.view.getFds(undefined, { workflowId });
     if (!response.status)
         throw new Error('Failed to load functional dependencies');
 
@@ -246,7 +245,7 @@ WorkflowGraphPage.loader = async ({ params: { workflowId } }: { params: Params<'
     if (!workflowId)
         throw new Error('Missing workflow ID');
 
-    const response = await mockAPI.view.getLattices(workflowId);
+    const response = await API.view.getLattices(undefined, { workflowId });
     if (!response.status)
         throw new Error('Failed to load lattices');
 

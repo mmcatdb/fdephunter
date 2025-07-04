@@ -1,11 +1,11 @@
 package de.uni.passau.server.controller;
 
-import de.uni.passau.server.controller.response.DatasetData;
 import de.uni.passau.server.model.DatasetEntity;
 import de.uni.passau.server.repository.DatasetRepository;
 import de.uni.passau.server.repository.WorkflowRepository;
 import de.uni.passau.server.service.DatasetService;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,14 +37,24 @@ public class DatasetController {
         return datasetRepository.findAll();
     }
 
-    @GetMapping("/datasets/workflows/{workflowId}/data")
-    public DatasetData getDatasetData(@PathVariable UUID workflowId, @RequestParam(required = false, defaultValue = "10") String limit) {
+    public record DatasetData(String[] header, List<String[]> rows) implements Serializable {}
+
+    @GetMapping("/workflows/{workflowId}/data")
+    public DatasetData getDatasetData(
+        @PathVariable UUID workflowId,
+        @RequestParam(required = false, defaultValue = "0") String offset,
+        @RequestParam(required = false, defaultValue = "100") String limit
+    ) {
+        final int numberOffset = Integer.parseInt(offset);
         final int numberLimit = Integer.parseInt(limit);
 
         final var workflow = workflowRepository.findById(workflowId).get();
         final var dataset = datasetService.getLoadedDatasetById(workflow.datasetId);
 
-        return new DatasetData(dataset.getHeader(), dataset.getRows().stream().limit(numberLimit).toList());
+        System.out.println(numberOffset + "-" + numberLimit);
+        System.out.println("size: " + dataset.getRows().size());
+
+        return new DatasetData(dataset.getHeader(), dataset.getRows().stream().skip(numberOffset).limit(numberLimit).toList());
     }
 
     // TODO

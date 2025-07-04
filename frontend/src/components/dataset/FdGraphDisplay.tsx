@@ -2,7 +2,7 @@ import { memo, type ReactNode, useMemo, useState } from 'react';
 import { NODE_OPTIONS, type RFGraph, type RfNode, type RfEdge } from '@/types/functionalDependency';
 import { Handle, type NodeProps, Position, ReactFlow } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { computeColumnIndexesForLatticeRow, computeEdgesForLatticeCell, type Lattice, McType } from '@/types/armstrongRelation';
+import { computeColumnIndexesForLatticeRow, computeEdgesForLatticeCell, type Lattice, CellType } from '@/types/armstrongRelation';
 import { Button, cn, Divider, Popover, PopoverContent, PopoverTrigger, Select, SelectItem, type SharedSelection, Switch } from '@heroui/react';
 import clsx from 'clsx';
 
@@ -83,17 +83,17 @@ export function LatticeDisplay({ lattices }: { lattices: Lattice[] }) {
 function Legend() {
     return (
         <div className='grid grid-cols-[repeat(3,auto)] gap-x-8 gap-y-2'>
-            <LegendItem type={McType.Final} text={<>Final <McCharacter /> element (initial)</>} />
-            <LegendItem type={McType.Genuine} text='Genuine FD' />
-            <LegendItem type={McType.Eliminated} text={<>Final <McCharacter /> element (eliminated FD)</>} />
+            <LegendItem type={CellType.Final} text={<>Final <McCharacter /> element (initial)</>} />
+            <LegendItem type={CellType.Genuine} text='Genuine FD' />
+            <LegendItem type={CellType.Eliminated} text={<>Final <McCharacter /> element (eliminated FD)</>} />
 
-            <LegendItem type={McType.Initial} text={<>Initial <McCharacter /> element</>} />
-            <LegendItem type={McType.Candidate} text='Candidate for genuine FD' />
-            <LegendItem type={McType.Targeted} text='Targeted FD' />
+            <LegendItem type={CellType.Initial} text={<>Initial <McCharacter /> element</>} />
+            <LegendItem type={CellType.Candidate} text='Candidate for genuine FD' />
+            <LegendItem type={CellType.Targeted} text='Targeted FD' />
 
-            <LegendItem type={McType.Subset} text={<>Subset of <McCharacter /> element</>} />
-            <LegendItem type={McType.Derived} text='Derived FD' />
-            <LegendItem type={McType.Coincidental} text={<>Subset of <McCharacter /> element (eliminated FD)</>} />
+            <LegendItem type={CellType.Subset} text={<>Subset of <McCharacter /> element</>} />
+            <LegendItem type={CellType.Derived} text='Derived FD' />
+            <LegendItem type={CellType.Coincidental} text={<>Subset of <McCharacter /> element (eliminated FD)</>} />
         </div>
     );
 }
@@ -104,10 +104,10 @@ function McCharacter() {
     );
 }
 
-function LegendItem({ type, text }: { type: McType, text: ReactNode }) {
+function LegendItem({ type, text }: { type: CellType, text: ReactNode }) {
     return (
         <div className='flex items-center gap-2'>
-            <div className={clsx('w-10 flex items-center justify-center border-2 text-black', getMcTypeClassName(type))}>
+            <div className={clsx('w-10 flex items-center justify-center border-2 text-black', getCellTypeClassName(type))}>
                 abc
             </div>
             <div>{text}</div>
@@ -171,7 +171,7 @@ function createRowNodes(lattice: Lattice, rowIndex: number, columnIndexes: numbe
             className: cn(
                 NODE_OPTIONS.className,
                 '!w-[120px] !px-1 !py-0 !border-4 !text-black text-center rounded text-sm',
-                getMcTypeClassName(type),
+                getCellTypeClassName(type),
             ),
         } satisfies RfNode;
     });
@@ -203,14 +203,14 @@ function createRowEdges(lattice: Lattice, columnIndexes: number[][]): RfEdge[] {
     });
 }
 
-const bold = [ McType.Final, McType.Genuine, McType.Eliminated ];
-const white = [ McType.Subset, McType.Derived, McType.Coincidental ];
+const bold = [ CellType.Final, CellType.Genuine, CellType.Eliminated ];
+const white = [ CellType.Subset, CellType.Derived, CellType.Coincidental ];
 
-const red = [ McType.Final, McType.Initial, McType.Subset ];
-const blue = [ McType.Genuine, McType.Candidate, McType.Derived ];
-const yellow = [ McType.Eliminated, McType.Targeted, McType.Coincidental ];
+const red = [ CellType.Final, CellType.Initial, CellType.Subset ];
+const blue = [ CellType.Genuine, CellType.Candidate, CellType.Derived ];
+const yellow = [ CellType.Eliminated, CellType.Targeted, CellType.Coincidental ];
 
-function getMcTypeClassName(type: McType): string {
+function getCellTypeClassName(type: CellType): string {
     return cn(
         bold.includes(type) && 'font-bold',
         red.includes(type) && '!border-red-600 !bg-red-300',

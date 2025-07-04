@@ -75,7 +75,7 @@ public class MaxSetGenerator {
 
 		MaxSet maxSet = null;
 		for (MaxSet m : this.maxSet) {
-			if (m.getForClass() == currentJob) {
+			if (m.forClass == currentJob) {
 				maxSet = m;
 				break;
 			}
@@ -83,7 +83,7 @@ public class MaxSetGenerator {
 
 		ComplementMaxSet result = new ComplementMaxSet(currentJob);
 
-		for (ColumnSet il : maxSet.getCombinations()) {
+		for (ColumnSet il : maxSet.combinations()) {
 			ColumnSet inverse = new ColumnSet();
 			inverse.set(0, this.numberOfAttributes);
 			inverse.xor(il);

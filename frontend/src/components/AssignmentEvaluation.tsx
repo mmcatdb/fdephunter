@@ -275,7 +275,7 @@ function EditableDecisionCard({ relation, selectedFdIndex }: DecisionCardProps) 
                         </Switch>
 
                         {/*
-                        TODO Backlogged.
+                        NICE_TO_HAVE Backlogged.
                         {!isValid && (<>
                             <p className='mt-6 mb-3'>
                                 Please provide us with one or more reasons why the value
@@ -319,7 +319,7 @@ function FinalDecisionCard({ relation, selectedFdIndex: selectedFdIndex }: Decis
 
             <CardBody>
                 {/*
-                    TODO Backlogged.
+                    NICE_TO_HAVE Backlogged.
                     <DecisionReasonsOverview key={selected.colIndex} reasons={selected.reasons} />
                     */}
 

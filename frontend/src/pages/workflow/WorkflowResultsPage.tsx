@@ -9,7 +9,6 @@ import { type FdSet, type FdEdge } from '@/types/functionalDependency';
 import { FdListDisplay } from '@/components/dataset/FdListDisplay';
 import { type Id } from '@/types/id';
 import { API } from '@/utils/api/api';
-import { mockAPI } from '@/utils/api/mockAPI';
 
 export function WorkflowResultsPage() {
     const { workflow } = useRouteLoaderData<WorkflowLoaded>(routes.workflow.$id)!;
@@ -124,7 +123,7 @@ WorkflowFinalPage.loader = async ({ params: { workflowId } }: { params: Params<'
     if (!workflowId)
         throw new Error('Missing workflow ID');
 
-    const response = await mockAPI.view.getFds(workflowId);
+    const response = await API.view.getFds(undefined, { workflowId });
     if (!response.status)
         throw new Error('Failed to load functional dependencies');
 

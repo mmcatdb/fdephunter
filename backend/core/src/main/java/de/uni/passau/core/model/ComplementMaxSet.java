@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 public class ComplementMaxSet {
 
     /** Index of the RHS column. */
-	protected int forClass;
+	public final int forClass;
     /** Max set elements in ascending order. */
 	protected List<ColumnSet> elements;
     protected List<ColumnSet> candidates;
@@ -23,7 +23,6 @@ public class ComplementMaxSet {
         this.candidates = new LinkedList<ColumnSet>();
 		this.finalized = false;
 	}
-
 
     public ComplementMaxSet(int forClass, List<ColumnSet> elements) {
         this.forClass = forClass;
@@ -37,21 +36,16 @@ public class ComplementMaxSet {
 		this.elements.add(combination);
 	}
 
-	public List<ColumnSet> getCombinations() {
+	public List<ColumnSet> combinations() {
 		return this.elements;
 	}
 
-    public Stream<ColumnSet> getAllColumnSets() {
+    public Stream<ColumnSet> allColumnSets() {
         return Stream.concat(
             elements.stream(),
             candidates.stream()
         );
     }
-
-	public int getForClass() {
-
-		return this.forClass;
-	}
 
 	@Override
 	public String toString() {

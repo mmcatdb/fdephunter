@@ -1,15 +1,13 @@
 import { type DataResult, type Result } from '@/types/api/result';
 import { type WorkflowResponse } from '@/types/workflow';
 import { type Lattice } from '@/types/armstrongRelation';
-import { MOCK_DATASET_DATA, MOCK_FD_SETS, MOCK_LATTICES } from '../mockData';
-import { type DatasetData } from '@/types/dataset';
-import { type FdSet } from '@/types/functionalDependency';
+import { MOCK_LATTICES } from '../mockData';
 import { type Id } from '@/types/id';
 
 export const mockAPI = {
     dataset: {
         // getDatasets,
-        getDatasetData,
+        // getDatasetData,
     },
     assignment: {
         // getAssignment,
@@ -24,7 +22,7 @@ export const mockAPI = {
         // getLastJob,
     },
     view: {
-        getFds,
+        // getFds,
         getLattices,
     },
 };
@@ -413,27 +411,27 @@ async function getLattices(workflowId: Id): Promise<Result<Lattice[]>> {
     return success(MOCK_LATTICES[index]);
 }
 
-async function getDatasetData(workflowId: Id): Promise<Result<DatasetData>> {
-    await wait();
+// async function getDatasetData(workflowId: Id): Promise<Result<DatasetData>> {
+//     await wait();
 
-    const workflow = get<WorkflowDB>(workflowId);
-    if (!workflow)
-        return error();
+//     const workflow = get<WorkflowDB>(workflowId);
+//     if (!workflow)
+//         return error();
 
-    return success(MOCK_DATASET_DATA);
-}
+//     return success(MOCK_DATASET_DATA);
+// }
 
-async function getFds(workflowId: Id): Promise<Result<FdSet>> {
-    await wait();
+// async function getFds(workflowId: Id): Promise<Result<FdSet>> {
+//     await wait();
 
-    const workflow = get<WorkflowDB>(workflowId);
-    if (!workflow)
-        return error();
+//     const workflow = get<WorkflowDB>(workflowId);
+//     if (!workflow)
+//         return error();
 
-    const index = workflow.iteration === 0 ? 0 : 1;
+//     const index = workflow.iteration === 0 ? 0 : 1;
 
-    return success(MOCK_FD_SETS[index]);
-}
+//     return success(MOCK_FD_SETS[index]);
+// }
 
 // Utils
 

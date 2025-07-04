@@ -8,7 +8,7 @@ export const dataset = {
     getDatasets: GET<Empty, DatasetResponse[]>(
         () => `/datasets`,
     ),
-    getDatasetData: GET<{ workflowId: Id }, DatasetData, { limit?: number }>(
+    getDatasetData: GET<{ workflowId: Id }, DatasetData, { offset?: number, limit?: number }>(
         u => `/workflows/${u.workflowId}/data`,
     ),
     // FIXME Not implemented yet on the backend!

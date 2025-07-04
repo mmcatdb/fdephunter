@@ -1,8 +1,4 @@
-import { type Lattice, McType } from '@/types/armstrongRelation';
-import { ColumnSet } from '@/types/ColumnSet';
-import { type DatasetResponse, DatasetType, type DatasetData } from '@/types/dataset';
-import { type FdSet } from '@/types/functionalDependency';
-import { v4 } from 'uuid';
+import { type Lattice, CellType } from '@/types/armstrongRelation';
 
 // export const MOCK_ARMSTRONG_RELATIONS: ArmstrongRelation[] = [ {
 //     columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
@@ -108,188 +104,188 @@ export const MOCK_LATTICES: Lattice[][] = [
         classColumn: 'tconst',
         columns: [ 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
         rows: [
-            [ McType.Subset, McType.Subset, McType.Subset, McType.Subset ],
-            [ McType.Initial, McType.Initial, McType.Initial, McType.Candidate, McType.Candidate, McType.Candidate ],
-            [ McType.Derived, McType.Derived, McType.Derived, McType.Derived ],
-            [ McType.Derived ],
+            [ CellType.Subset, CellType.Subset, CellType.Subset, CellType.Subset ],
+            [ CellType.Initial, CellType.Initial, CellType.Initial, CellType.Candidate, CellType.Candidate, CellType.Candidate ],
+            [ CellType.Derived, CellType.Derived, CellType.Derived, CellType.Derived ],
+            [ CellType.Derived ],
         ],
     }, {
         classColumn: 'primaryTitle',
         columns: [ 'tconst', 'startYear', 'runtimeMinutes', 'genres' ],
         rows: [
-            [ McType.Candidate, McType.Candidate, McType.Initial, McType.Candidate ],
-            [ McType.Derived, McType.Derived, McType.Derived, McType.Derived, McType.Derived, McType.Derived ],
-            [ McType.Derived, McType.Derived, McType.Derived, McType.Derived ],
-            [ McType.Derived ],
+            [ CellType.Candidate, CellType.Candidate, CellType.Initial, CellType.Candidate ],
+            [ CellType.Derived, CellType.Derived, CellType.Derived, CellType.Derived, CellType.Derived, CellType.Derived ],
+            [ CellType.Derived, CellType.Derived, CellType.Derived, CellType.Derived ],
+            [ CellType.Derived ],
         ],
     }, {
         classColumn: 'startYear',
         columns: [ 'tconst', 'primaryTitle', 'runtimeMinutes', 'genres' ],
         rows: [
-            [ McType.Candidate, McType.Subset, McType.Subset, McType.Subset ],
-            [ McType.Derived, McType.Derived, McType.Derived, McType.Initial, McType.Initial, McType.Candidate ],
-            [ McType.Derived, McType.Derived, McType.Derived, McType.Derived ],
-            [ McType.Derived ],
+            [ CellType.Candidate, CellType.Subset, CellType.Subset, CellType.Subset ],
+            [ CellType.Derived, CellType.Derived, CellType.Derived, CellType.Initial, CellType.Initial, CellType.Candidate ],
+            [ CellType.Derived, CellType.Derived, CellType.Derived, CellType.Derived ],
+            [ CellType.Derived ],
         ],
     }, {
         classColumn: 'runtimeMinutes',
         columns: [ 'tconst', 'primaryTitle', 'startYear', 'genres' ],
         rows: [
-            [ McType.Candidate, McType.Subset, McType.Subset, McType.Subset ],
-            [ McType.Derived, McType.Derived, McType.Derived, McType.Initial, McType.Initial, McType.Candidate ],
-            [ McType.Derived, McType.Derived, McType.Derived, McType.Derived ],
-            [ McType.Derived ],
+            [ CellType.Candidate, CellType.Subset, CellType.Subset, CellType.Subset ],
+            [ CellType.Derived, CellType.Derived, CellType.Derived, CellType.Initial, CellType.Initial, CellType.Candidate ],
+            [ CellType.Derived, CellType.Derived, CellType.Derived, CellType.Derived ],
+            [ CellType.Derived ],
         ],
     }, {
         classColumn: 'genres',
         columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes' ],
         rows: [
-            [ McType.Candidate, McType.Subset, McType.Subset, McType.Subset ],
-            [ McType.Derived, McType.Derived, McType.Derived, McType.Initial, McType.Initial, McType.Candidate ],
-            [ McType.Derived, McType.Derived, McType.Derived, McType.Derived ],
-            [ McType.Derived ],
+            [ CellType.Candidate, CellType.Subset, CellType.Subset, CellType.Subset ],
+            [ CellType.Derived, CellType.Derived, CellType.Derived, CellType.Initial, CellType.Initial, CellType.Candidate ],
+            [ CellType.Derived, CellType.Derived, CellType.Derived, CellType.Derived ],
+            [ CellType.Derived ],
         ],
     } ],
     [ {
         classColumn: 'tconst',
         columns: [ 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
         rows: [
-            [ McType.Subset, McType.Subset, McType.Subset, McType.Subset ],
-            [ McType.Subset, McType.Subset, McType.Subset, McType.Coincidental, McType.Coincidental, McType.Coincidental ],
-            [ McType.Coincidental, McType.Coincidental, McType.Coincidental, McType.Coincidental ],
-            [ McType.Eliminated ],
+            [ CellType.Subset, CellType.Subset, CellType.Subset, CellType.Subset ],
+            [ CellType.Subset, CellType.Subset, CellType.Subset, CellType.Coincidental, CellType.Coincidental, CellType.Coincidental ],
+            [ CellType.Coincidental, CellType.Coincidental, CellType.Coincidental, CellType.Coincidental ],
+            [ CellType.Eliminated ],
         ],
     }, {
         classColumn: 'primaryTitle',
         columns: [ 'tconst', 'startYear', 'runtimeMinutes', 'genres' ],
         rows: [
-            [ McType.Genuine, McType.Coincidental, McType.Subset, McType.Coincidental ],
-            [ McType.Derived, McType.Derived, McType.Derived, McType.Coincidental, McType.Coincidental, McType.Coincidental ],
-            [ McType.Derived, McType.Derived, McType.Derived, McType.Eliminated ],
-            [ McType.Derived ],
+            [ CellType.Genuine, CellType.Coincidental, CellType.Subset, CellType.Coincidental ],
+            [ CellType.Derived, CellType.Derived, CellType.Derived, CellType.Coincidental, CellType.Coincidental, CellType.Coincidental ],
+            [ CellType.Derived, CellType.Derived, CellType.Derived, CellType.Eliminated ],
+            [ CellType.Derived ],
         ],
     }, {
         classColumn: 'startYear',
         columns: [ 'tconst', 'primaryTitle', 'runtimeMinutes', 'genres' ],
         rows: [
-            [ McType.Genuine, McType.Subset, McType.Subset, McType.Subset ],
-            [ McType.Derived, McType.Derived, McType.Derived, McType.Subset, McType.Subset, McType.Coincidental ],
-            [ McType.Derived, McType.Derived, McType.Derived, McType.Eliminated ],
-            [ McType.Derived ],
+            [ CellType.Genuine, CellType.Subset, CellType.Subset, CellType.Subset ],
+            [ CellType.Derived, CellType.Derived, CellType.Derived, CellType.Subset, CellType.Subset, CellType.Coincidental ],
+            [ CellType.Derived, CellType.Derived, CellType.Derived, CellType.Eliminated ],
+            [ CellType.Derived ],
         ],
     }, {
         classColumn: 'runtimeMinutes',
         columns: [ 'tconst', 'primaryTitle', 'startYear', 'genres' ],
         rows: [
-            [ McType.Genuine, McType.Subset, McType.Subset, McType.Subset ],
-            [ McType.Derived, McType.Derived, McType.Derived, McType.Subset, McType.Subset, McType.Coincidental ],
-            [ McType.Derived, McType.Derived, McType.Derived, McType.Eliminated ],
-            [ McType.Derived ],
+            [ CellType.Genuine, CellType.Subset, CellType.Subset, CellType.Subset ],
+            [ CellType.Derived, CellType.Derived, CellType.Derived, CellType.Subset, CellType.Subset, CellType.Coincidental ],
+            [ CellType.Derived, CellType.Derived, CellType.Derived, CellType.Eliminated ],
+            [ CellType.Derived ],
         ],
     }, {
         classColumn: 'genres',
         columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes' ],
         rows: [
-            [ McType.Genuine, McType.Subset, McType.Subset, McType.Subset ],
-            [ McType.Derived, McType.Derived, McType.Derived, McType.Final, McType.Final, McType.Eliminated ],
-            [ McType.Derived, McType.Derived, McType.Derived, McType.Genuine ],
-            [ McType.Derived ],
+            [ CellType.Genuine, CellType.Subset, CellType.Subset, CellType.Subset ],
+            [ CellType.Derived, CellType.Derived, CellType.Derived, CellType.Final, CellType.Final, CellType.Eliminated ],
+            [ CellType.Derived, CellType.Derived, CellType.Derived, CellType.Genuine ],
+            [ CellType.Derived ],
         ],
     } ],
 ];
 
-export const MOCK_DATASET_DATA: DatasetData = {
-    header: [ 'tconst','primaryTitle','startYear','runtimeMin.','genres' ],
-    rows: [
-        [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMin.', 'genres' ],
-        [ 'tt0036443', 'Titanic', '1943', '85', 'Action+Drama+History' ],
-        [ 'tt0079836', 'S.O.S. Titanic', '1979', '194', 'Drama+History' ],
-        [ 'tt0115392', 'Titanic', '1996', '87', 'Action+Drama+History' ],
-        [ 'tt0120338', 'Titanic', '1997', '194', 'Drama+Romance' ],
-        [ 'tt0155274', 'Titanic', '1915', '', 'History' ],
-        [ 'tt0594950', 'Titanic', '1997', '', 'Documentary+Short' ],
-        [ 'tt0771984', 'Titanic', '2006', '51', 'Documentary' ],
-        [ 'tt0902058', 'The Titanic', '1981', '', 'Documentary+Drama+Fantasy' ],
-        [ 'tt0650185', 'Titanic Tech', '2003', '46', 'Documentary+History' ],
-        [ 'tt0929378', 'Titanic\'s Ghosts', '2002', '57', 'Documentary+History+War' ],
-    ],
-};
+// export const MOCK_DATASET_DATA: DatasetData = {
+//     header: [ 'tconst','primaryTitle','startYear','runtimeMin.','genres' ],
+//     rows: [
+//         [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMin.', 'genres' ],
+//         [ 'tt0036443', 'Titanic', '1943', '85', 'Action+Drama+History' ],
+//         [ 'tt0079836', 'S.O.S. Titanic', '1979', '194', 'Drama+History' ],
+//         [ 'tt0115392', 'Titanic', '1996', '87', 'Action+Drama+History' ],
+//         [ 'tt0120338', 'Titanic', '1997', '194', 'Drama+Romance' ],
+//         [ 'tt0155274', 'Titanic', '1915', '', 'History' ],
+//         [ 'tt0594950', 'Titanic', '1997', '', 'Documentary+Short' ],
+//         [ 'tt0771984', 'Titanic', '2006', '51', 'Documentary' ],
+//         [ 'tt0902058', 'The Titanic', '1981', '', 'Documentary+Drama+Fantasy' ],
+//         [ 'tt0650185', 'Titanic Tech', '2003', '46', 'Documentary+History' ],
+//         [ 'tt0929378', 'Titanic\'s Ghosts', '2002', '57', 'Documentary+History+War' ],
+//     ],
+// };
 
-export const MOCK_DATASETS: DatasetResponse[] = [
-    'iris',
-    'balance-scale',
-    'chess',
-    'abalone',
-    'nursery',
-    'breast-cancer-wisconsin',
-    'bridges',
-    'echocardiogram',
-    'adult',
-    'letter',
-    'ncvoter',
-    'ncvoter',
-    'hepatitis',
-    'horse',
-    'fd-reduced-30',
-    'plista',
-    'flight',
-    'flight',
-    'uniprot',
-    'TPC H lineitem',
-    'School results',
-    'Adult',
-    'Classification',
-    'Reflns',
-    'Atom sites',
-    'DB status',
-    'Entity source',
-    'Bio entry',
-    'Voter',
-    'FDR-15',
-    'FDR-30',
-    'Atom',
-    'Census',
-    'Wiki image',
-    'Spots',
-    'Struct sheet',
-    'Ditag feature',
-].map(name => ({
-    id: v4(),
-    name,
-    type: DatasetType.Csv,
-    source: 'TODO source',
-}));
+// export const MOCK_DATASETS: DatasetResponse[] = [
+//     'iris',
+//     'balance-scale',
+//     'chess',
+//     'abalone',
+//     'nursery',
+//     'breast-cancer-wisconsin',
+//     'bridges',
+//     'echocardiogram',
+//     'adult',
+//     'letter',
+//     'ncvoter',
+//     'ncvoter',
+//     'hepatitis',
+//     'horse',
+//     'fd-reduced-30',
+//     'plista',
+//     'flight',
+//     'flight',
+//     'uniprot',
+//     'TPC H lineitem',
+//     'School results',
+//     'Adult',
+//     'Classification',
+//     'Reflns',
+//     'Atom sites',
+//     'DB status',
+//     'Entity source',
+//     'Bio entry',
+//     'Voter',
+//     'FDR-15',
+//     'FDR-30',
+//     'Atom',
+//     'Census',
+//     'Wiki image',
+//     'Spots',
+//     'Struct sheet',
+//     'Ditag feature',
+// ].map(name => ({
+//     id: v4(),
+//     name,
+//     type: DatasetType.Csv,
+//     source: 'TODO source',
+// }));
 
-export const MOCK_FD_SETS: FdSet[] = [ {
-    columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
-    fdClasses: [ [
-        ColumnSet.fromIndexes([ 2, 3 ]),
-        ColumnSet.fromIndexes([ 2, 4 ]),
-        ColumnSet.fromIndexes([ 3, 4 ]),
-    ], [
-        ColumnSet.fromIndexes([ 0 ]),
-        ColumnSet.fromIndexes([ 2 ]),
-        ColumnSet.fromIndexes([ 4 ]),
-    ], [
-        ColumnSet.fromIndexes([ 0 ]),
-        ColumnSet.fromIndexes([ 3, 4 ]),
-    ], [
-        ColumnSet.fromIndexes([ 0 ]),
-        ColumnSet.fromIndexes([ 2, 4 ]),
-    ], [
-        ColumnSet.fromIndexes([ 0 ]),
-        ColumnSet.fromIndexes([ 2, 3 ]),
-    ] ],
-}, {
-    columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
-    fdClasses: [ [
-        ColumnSet.fromIndexes([ 0 ]),
-    ], [
-        ColumnSet.fromIndexes([ 0 ]),
-    ], [
-        ColumnSet.fromIndexes([ 0 ]),
-    ], [
-        ColumnSet.fromIndexes([ 1, 2, 3 ]),
-    ],
-    ],
-} ];
+// export const MOCK_FD_SETS: FdSet[] = [ {
+//     columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
+//     fdClasses: [ [
+//         ColumnSet.fromIndexes([ 2, 3 ]),
+//         ColumnSet.fromIndexes([ 2, 4 ]),
+//         ColumnSet.fromIndexes([ 3, 4 ]),
+//     ], [
+//         ColumnSet.fromIndexes([ 0 ]),
+//         ColumnSet.fromIndexes([ 2 ]),
+//         ColumnSet.fromIndexes([ 4 ]),
+//     ], [
+//         ColumnSet.fromIndexes([ 0 ]),
+//         ColumnSet.fromIndexes([ 3, 4 ]),
+//     ], [
+//         ColumnSet.fromIndexes([ 0 ]),
+//         ColumnSet.fromIndexes([ 2, 4 ]),
+//     ], [
+//         ColumnSet.fromIndexes([ 0 ]),
+//         ColumnSet.fromIndexes([ 2, 3 ]),
+//     ] ],
+// }, {
+//     columns: [ 'tconst', 'primaryTitle', 'startYear', 'runtimeMinutes', 'genres' ],
+//     fdClasses: [ [
+//         ColumnSet.fromIndexes([ 0 ]),
+//     ], [
+//         ColumnSet.fromIndexes([ 0 ]),
+//     ], [
+//         ColumnSet.fromIndexes([ 0 ]),
+//     ], [
+//         ColumnSet.fromIndexes([ 1, 2, 3 ]),
+//     ],
+//     ],
+// } ];

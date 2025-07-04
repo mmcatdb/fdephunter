@@ -93,11 +93,11 @@ export type Lattice = {
     /** Names of the columns. They are expected to be unique. */
     columns: string[];
     /** States of the cells in the rows. Each cell max set should be computable form its cell and row index. */
-    rows: McType[][];
+    rows: CellType[][];
 };
 
 /** A type of an element from the max set for a class. */
-export enum McType {
+export enum CellType {
     Final = 'FINAL',
     Initial = 'INITIAL',
     Subset = 'SUBSET',

@@ -6,7 +6,6 @@ import { Assignment } from '@/types/assignment';
 import { Link, matchPath, Outlet, type Params, useLoaderData, useLocation, useRevalidator, useRouteLoaderData } from 'react-router';
 import { Button, Tab, Tabs } from '@heroui/react';
 import { Page, Sidebar, TopbarContent } from '@/components/layout';
-import { mockAPI } from '@/utils/api/mockAPI';
 import { WorkflowProgressDisplay } from '@/components/worklow/WorkflowProgressDisplay';
 import { Workflow } from '@/types/workflow';
 import { type Lattice } from '@/types/armstrongRelation';
@@ -66,7 +65,7 @@ AssignmentPage.loader = async ({ params: { assignmentId } }: { params: Params<'a
     if (!workflowResponse.status)
         throw new Error('Failed to load workflow');
 
-    const latticesResponse = await mockAPI.view.getLattices(response.data.workflowId);
+    const latticesResponse = await API.view.getLattices(undefined, { workflowId: response.data.workflowId });
     if (!latticesResponse.status)
         throw new Error('Failed to load lattices');
 

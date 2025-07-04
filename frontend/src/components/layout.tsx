@@ -23,7 +23,7 @@ const windowThemeMatcher = window.matchMedia('(prefers-color-scheme: dark)');
 const defaultLayoutState: LayoutState = {
     isCollapsed: window.innerWidth < 924,
     isOSThemeDark: windowThemeMatcher.matches,
-    // TODO use local storage
+    // NICE_TO_HAVE use local storage
     isLocalThemeDark: undefined,
 };
 

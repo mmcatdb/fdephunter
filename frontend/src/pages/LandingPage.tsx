@@ -49,7 +49,7 @@ export function LandingPage() {
                 </Button>
             </div>
 
-            {/* TODO Remove this once finished. */}
+            {/* FIXME Remove this once finished. */}
             <div>
                 <Button color='danger' onPress={resetDatabase}>
                     Reset DB

@@ -27,7 +27,7 @@ public class Lattice {
     }
 
     /** A type of an element from the max set for a class. */
-    enum CellType {
+    public enum CellType {
         FINAL,
         INITIAL,
         SUBSET,

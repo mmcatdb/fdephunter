@@ -14,9 +14,8 @@ export class ColumnSet {
     ) {}
 
     static fromResponse(input: ColumnSetResponse): ColumnSet {
-        // TODO use this once fully supported:
+        // NICE_TO_HAVE use this once fully supported:
         // Uint8Array.fromBase64
-
         const bytes = Uint8Array.from(atob(input), c => c.charCodeAt(0));
         const columns: number[] = [];
 

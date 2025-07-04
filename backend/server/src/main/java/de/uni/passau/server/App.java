@@ -13,7 +13,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -47,21 +46,9 @@ public class App {
 
     @Bean
     public ObjectMapper objectMapper() {
-        final var mapper = new ObjectMapper()
+        return new ObjectMapper()
             .findAndRegisterModules()
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-
-        System.out.println(mapper.getVisibilityChecker());
-
-        mapper.setVisibility(mapper.getSerializationConfig().getDefaultVisibilityChecker()
-            // Fields are PUBLIC_ONLY by default. Not sure whether we should change it.
-            // We don't care about others.
-            .withGetterVisibility(Visibility.NONE)
-            .withSetterVisibility(Visibility.NONE)
-            .withIsGetterVisibility(Visibility.NONE)
-        );
-
-        return mapper;
     }
 
 }

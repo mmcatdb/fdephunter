@@ -89,7 +89,7 @@ public class LeftHandSideGenerator {
 		List<ColumnSet> lhs_i = new LinkedList<>();
 		for (ColumnSet l : Li) {
 			boolean isLHS = true;
-			for (ColumnSet x : correctSet.getCombinations()) {
+			for (ColumnSet x : correctSet.combinations()) {
 				if (!l.intersects(x)) {
 					isLHS = false;
 					break;
@@ -106,11 +106,11 @@ public class LeftHandSideGenerator {
 
 		ComplementMaxSet correctSet = null;
 		for (ComplementMaxSet set : maximalSets) {
-			if (!(set.getForClass() == attribute)) {
+			if (!(set.forClass == attribute)) {
 				continue;
 			}
 			correctSet = set;
-			for (ColumnSet list : correctSet.getCombinations()) {
+			for (ColumnSet list : correctSet.combinations()) {
 
 				ColumnSet combination;
 				int lastIndex = list.nextSetBit(0);

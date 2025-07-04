@@ -21,7 +21,7 @@ class ComputeMaxSetTest {
         List<MaxSet> result = ComputeMaxSet.run(dataset).sets();
         assertNotNull(result);
         assertFalse(result.isEmpty());
-        assertTrue(result.stream().allMatch(maxSet -> maxSet.getCombinations().size() > 0));
+        assertTrue(result.stream().allMatch(maxSet -> maxSet.combinations().size() > 0));
         // TODO: Test more precise properties of the result
     }
 
