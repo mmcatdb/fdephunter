@@ -8,7 +8,6 @@ import { type WorkflowLoaded } from './WorkflowPage';
 import { WorkflowState } from '@/types/workflow';
 import { FileInput, type FileInputValue } from '@/components/common/FileInput';
 import { type DatasetResponse } from '@/types/dataset';
-import { getStringEnumValues } from '@/utils/common';
 
 export function WorkflowSettingsPage() {
     const { workflow } = useRouteLoaderData<WorkflowLoaded>(routes.workflow.$id)!;
@@ -21,7 +20,6 @@ export function WorkflowSettingsPage() {
         setFetching(true);
         const response = await API.workflow.startWorkflow({ workflowId: workflow.id }, {
             description: `Initial discovery for ${settings.dataset.name}`,
-            approach: settings.approach,
             datasetId: settings.dataset.id,
         });
         if (!response.status) {
@@ -76,7 +74,6 @@ WorkflowSettingsPage.loader = async (): Promise<WorkflowSettingsLoaded> => {
 };
 
 type DiscoverySettings = {
-    approach: string;
     dataset: DatasetResponse;
 };
 
@@ -93,18 +90,14 @@ function InitialSettingsForm({ datasets, onSubmit, fetching }: InitialSettingsFo
     });
     const datasetOptions = useMemo(() => datasets.map(datasetToOption), []);
 
-    // const [ selectedApproach, setSelectedApproach ] = useState(new Set<string>());
-    // const approachOptions = useMemo(() => approaches.map(a => nameToOption(a.name)), [ approaches ]);
-
     function submit() {
         if (!selected.dataset.size && !selected.file)
             return;
         // const finalDatasets = [ ...selectedDatasets.values() ]
         //     .map(dataset => datasets.find(d => d.name === dataset))
         //     .filter((d): d is Dataset => !!d);
-        const approach = approaches[0];
 
-        // if (finalDatasets.length === 0 || !approach)
+        // if (finalDatasets.length === 0)
         //     return;
 
         // FIXME Use file as dataset.
@@ -112,7 +105,6 @@ function InitialSettingsForm({ datasets, onSubmit, fetching }: InitialSettingsFo
         const dataset = datasets.find(d => d.id === datasetId)!;
 
         onSubmit({
-            approach,
             // FIXME Use file as dataset.
             // datasetName: selected.file?.originalName ?? selected.dataset.values().next().value!,
             dataset,
@@ -161,13 +153,6 @@ function InitialSettingsForm({ datasets, onSubmit, fetching }: InitialSettingsFo
         </Button>
     </>);
 }
-
-enum ApproachName {
-    HyFD = 'HyFD',
-    DepMiner = 'DepMiner',
-}
-
-const approaches = getStringEnumValues(ApproachName);
 
 type Option = {
     key: string;

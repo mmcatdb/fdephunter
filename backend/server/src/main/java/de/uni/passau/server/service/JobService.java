@@ -1,6 +1,5 @@
 package de.uni.passau.server.service;
 
-import de.uni.passau.core.approach.AbstractApproach.ApproachName;
 import de.uni.passau.core.dataset.Dataset;
 import de.uni.passau.core.model.MaxSets;
 import de.uni.passau.algorithms.AdjustMaxSet;
@@ -52,13 +51,13 @@ public class JobService {
     @Autowired
     private TaskExecutor asyncExecutor;
 
-    public JobEntity createDiscoveryJob(WorkflowEntity workflow, String description, ApproachName approachName) {
+    public JobEntity createDiscoveryJob(WorkflowEntity workflow, String description) {
         // This is supposed to be the first job in the workflow, so index is 0.
         final var prevJobsCount = jobRepository.countByWorkflowId(workflow.id());
         if (prevJobsCount != 0)
             throw new IllegalStateException("Cannot create a discovery job when there are already jobs in the workflow.");
 
-        final var payload = new DiscoveryJobPayload(workflow.datasetId, approachName);
+        final var payload = new DiscoveryJobPayload(workflow.datasetId);
         final var job = JobEntity.create(workflow.id(), 0, description, payload);
         return jobRepository.save(job);
     }

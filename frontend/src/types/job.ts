@@ -8,11 +8,6 @@ export enum JobState {
     Failed = 'FAILED',
 }
 
-export enum ApproachName {
-    HyFD = 'HyFD',
-    DepMiner = 'DepMiner',
-}
-
 export type JobResponse = {
     id: Id;
     state: JobState;

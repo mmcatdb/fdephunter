@@ -1,6 +1,5 @@
 package de.uni.passau.server.controller;
 
-import de.uni.passau.core.approach.AbstractApproach.ApproachName;
 import de.uni.passau.server.model.JobEntity;
 import de.uni.passau.server.model.WorkflowEntity;
 import de.uni.passau.server.model.WorkflowEntity.WorkflowState;
@@ -59,7 +58,6 @@ public class WorkflowController {
 
     private record StartWorkflowRequest(
         String description,
-        ApproachName approach,
         UUID datasetId
     ) {}
 
@@ -70,7 +68,7 @@ public class WorkflowController {
         workflow.state = WorkflowState.INITIAL_FD_DISCOVERY;
         workflow = workflowRepository.save(workflow);
 
-        final var job = jobService.createDiscoveryJob(workflow, init.description(), init.approach());
+        final var job = jobService.createDiscoveryJob(workflow, init.description());
         jobService.executeJobAsync(job.id());
 
         return CreateJobResponse.fromEntities(workflow, job);

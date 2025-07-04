@@ -36,7 +36,7 @@ public class WorkflowEntity {
     }
 
     public static enum WorkflowState {
-        /** Workflow is created, now we wait for the user to select dataset(s) and approach. */
+        /** Workflow is created, now we wait for the user to select the dataset. */
         INITIAL_SETTINGS,
         /** Wait for the initial discovery job. */
         INITIAL_FD_DISCOVERY,

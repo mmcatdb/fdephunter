@@ -12,8 +12,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-import de.uni.passau.core.approach.AbstractApproach.ApproachName;
-
 @Document("job")
 public class JobEntity {
 
@@ -69,8 +67,7 @@ public class JobEntity {
     public interface JobPayload extends Serializable {}
 
     public record DiscoveryJobPayload(
-        UUID datasetId,
-        ApproachName approach
+        UUID datasetId
     ) implements JobPayload {}
 
     public record IterationJobPayload() implements JobPayload {}

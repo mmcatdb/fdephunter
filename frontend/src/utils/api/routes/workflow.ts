@@ -27,7 +27,6 @@ export const workflow = {
 
 export type StartWorkflowRequest = {
     description: string;
-    approach: string;
     datasetId: Id;
 };
 

@@ -48,7 +48,6 @@ export function AssignmentPage() {
 
 type AssignmentLoaded = {
     assignment: Assignment;
-    /** @deprecated Workflow shouldn't be available from the assignment. */
     workflow: Workflow;
     lattices: Lattice[];
 };

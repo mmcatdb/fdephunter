@@ -98,7 +98,7 @@ export function WorkflowFinalPage() {
             <h2 className='mt-4'>Next steps</h2>
 
             <p>
-                The functional dependency discovery process has finished. You can try again with a different dataset or approach!<br />
+                The functional dependency discovery process has finished. You can try again with a different dataset!<br />
                 We would also greatly appreciate your feedback on the results and the tool itself.
             </p>
 
