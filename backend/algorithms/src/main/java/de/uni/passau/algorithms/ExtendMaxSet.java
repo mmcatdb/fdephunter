@@ -57,10 +57,15 @@ public class ExtendMaxSet {
             /* If there are no max sets for the class with size lhsSize - 1, continue
              * In this case, all minimal FDs with size lhsSize - 1 are already confirmed
              * and all LHSs with size >= lhsSize are already in the max set.
+             * 
+             * TODO: Check whether we are completely done with this class,
+             *  i.e., whether there is any element in maxSet with size >= (or >?) lhsSize
             */
             if (maxSetsToCheck.combinations().isEmpty()) {
                 continue;
             }
+
+            // TODO: if maxSetsToCheck.size() < lhsSize, we can skip the rest
 
             /* Count for each ColumnSet wiht size lhsSize, from how many columns it can be generated
              * by adding one column to a column in maxSetsToCheck (i.e., to elements of the Max Set with size lhsSize - 1).

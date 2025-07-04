@@ -73,9 +73,11 @@ public class AdjustMaxSet {
                         // TODO: We may be smarter and not add elements that we will just remove later.
                         newMaxSet.addCombination(subset);
                     }
-                } else
+                } else {
                     // ignore UNANSWERED columns (for now)
                     continue;
+                }
+                newMaxSet.finalize_RENAME_THIS();
             }
         }
 
