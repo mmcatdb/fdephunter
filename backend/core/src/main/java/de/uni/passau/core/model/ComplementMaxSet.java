@@ -47,9 +47,16 @@ public class ComplementMaxSet {
 		this.candidates.add(candidate);
 	}
 
+	public void removeCandidate(ColumnSet candidate) {
+		if (candidates == null || !candidates.contains(candidate)) {
+			throw new IllegalArgumentException("Candidate does not exist: " + candidate);
+		}
+		this.candidates.remove(candidate);
+	}
+
 	public void moveToTrueMaxSet(ColumnSet candidate) {
 		if (candidates == null || !candidates.contains(candidate)) {
-			throw new IllegalArgumentException("Candidate does not exist in candidates: " + candidate);
+			throw new IllegalArgumentException("Candidate does not exist: " + candidate);
 		}
 		this.elements.add(candidate);
 		this.candidates.remove(candidate);

@@ -136,6 +136,10 @@ public class ColumnSet implements Comparable<ColumnSet> {
         return this.columns.length();
     }
 
+    public void clear(int columnIndex) {
+        this.columns.clear(columnIndex);
+    }
+
     @Override public int compareTo(ColumnSet other) {
         if (this.columns.size() != other.columns.size())
             return this.columns.size() - other.columns.size();

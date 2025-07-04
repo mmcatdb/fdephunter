@@ -4,6 +4,7 @@ import java.util.List;
 
 import de.uni.passau.algorithms.exception.AdjustMaxSetException;
 import de.uni.passau.core.example.ExampleRow;
+import de.uni.passau.core.model.ColumnSet;
 import de.uni.passau.core.model.MaxSet;
 import de.uni.passau.core.model.MaxSets;
 import de.uni.passau.core.example.ExampleDecision.DecisionColumnStatus;
@@ -46,20 +47,37 @@ public class AdjustMaxSet {
                 final MaxSet newMaxSet = newMaxSets.sets().get(forClass);
 
                 if (row.decision.columns()[forClass].status() == DecisionColumnStatus.VALID) {
-                    /* If the column C is marked as VALID, the FD lhsSet -> C does not hold.
+                    /*
+                     * If the column C is marked as VALID, the FD lhsSet -> C does not hold.
                      * This means lhsSet (or a superset of it) is part of the max set.
-                    */
-                    newMaxSet.addCombination(row.lhsSet);
-                } else {
-                    // ignore INVALID and UNANSWERED columns for now
+                     * 
+                     * lhsSet should be a candidate in the previous max set and we move it to the
+                     * true max set.
+                     */
+                    newMaxSet.moveToTrueMaxSet(row.lhsSet);
+                } else if (row.decision.columns()[forClass].status() == DecisionColumnStatus.INVALID) {
+                    /*
+                     * If the column C is marked as INVALID, the FD lhsSet -> C holds.
+                     * This means lhsSet (or a superset of it) is not part of the max set.
+                     * 
+                     * lhsSet should be a candidate in the previous max set and we remove it.
+                     */
+                    newMaxSet.removeCandidate(row.lhsSet);
+
+                    // Reconstruct the "child" max sets, i.e., any subset of lhsSet that has exactly
+                    // one column less than lhsSet
+                    for (int i = 0; i < row.lhsSet.size(); i++) {
+                        ColumnSet subset = row.lhsSet.clone();
+                        subset.clear(i);
+                        // Simply add the subset to the new max set; it will be checked later
+                        // TODO: We may be smarter and not add elements that we will just remove later.
+                        newMaxSet.addCombination(subset);
+                    }
+                } else
+                    // ignore UNANSWERED columns (for now)
                     continue;
-                }
             }
         }
-
-        // Remove combinations that are subsets of any other combination
-        for (final var newMaxSet : newMaxSets.sets())
-            newMaxSet.finalize_RENAME_THIS();
 
         return newMaxSets;
     }
