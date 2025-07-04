@@ -30,9 +30,37 @@ public class ComplementMaxSet {
 		this.finalized = false;
     }
 
+	public ComplementMaxSet(int forClass, List<ColumnSet> elements, List<ColumnSet> candidates) {
+		this.forClass = forClass;
+		this.elements = elements;
+		this.candidates = candidates;
+		this.finalized = false;
+	}
+
+	public void addCandidate(ColumnSet candidate) {
+		if (elements.contains(candidate)) {
+			throw new IllegalArgumentException("Candidate already exists in elements: " + candidate);
+		}
+		if (this.candidates == null) {
+			this.candidates = new LinkedList<ColumnSet>();
+		}
+		this.candidates.add(candidate);
+	}
+
+	public void moveToTrueMaxSet(ColumnSet candidate) {
+		if (candidates == null || !candidates.contains(candidate)) {
+			throw new IllegalArgumentException("Candidate does not exist in candidates: " + candidate);
+		}
+		this.elements.add(candidate);
+		this.candidates.remove(candidate);
+	}
+
 
 	public void addCombination(ColumnSet combination) {
-
+		if (candidates != null && candidates.contains(combination)) {
+			throw new IllegalArgumentException("Combination already exists in candidates: " + combination + 
+											". \nUse moveToTrueMaxSet() to move it to the true max set.");
+		}
 		this.elements.add(combination);
 	}
 

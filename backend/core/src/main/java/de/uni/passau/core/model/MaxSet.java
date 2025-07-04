@@ -21,6 +21,11 @@ public class MaxSet extends ComplementMaxSet {
 		this.finalized = false;
     }
 
+	public MaxSet(int forClass, List<ColumnSet> elements, List<ColumnSet> candidates) {
+		super(forClass, elements, candidates);
+		this.finalized = false;
+	}
+
 	@Override
 	public String toString() {
 
@@ -46,16 +51,22 @@ public class MaxSet extends ComplementMaxSet {
 		List<ColumnSet> toDelete = new LinkedList<ColumnSet>();
 		boolean toAdd = true;
 
-		for (ColumnSet set : this.elements) {
+		// Process both, elements and candidates
+		List<ColumnSet> allSets = new LinkedList<>();
+		allSets.addAll(this.elements);
+		allSets.addAll(this.candidates);
+		
+		for (ColumnSet set : allSets) {
 			for (ColumnSet superSet : superSets) {
 				if (set.isSuperSetOf(superSet)) {
 					toDelete.add(superSet);
-				}
-				if (toAdd) {
-					toAdd = !superSet.isSuperSetOf(set);
-				}
+				} else if (superSet.isSuperSetOf(set)) {
+					toDelete.add(set);
+					toAdd = false;
+				} 
 			}
-			superSets.removeAll(toDelete);
+			this.elements.removeAll(toDelete);
+			this.candidates.removeAll(toDelete);
 			if (toAdd) {
 				superSets.add(set);
 			} else {
@@ -63,13 +74,11 @@ public class MaxSet extends ComplementMaxSet {
 			}
 			toDelete.clear();
 		}
-
-		this.elements = superSets;
 	}
 
 	@Override
 	public MaxSet clone() {
-		MaxSet cloned = new MaxSet(this.forClass, new LinkedList<>(this.elements));
+		MaxSet cloned = new MaxSet(this.forClass, new LinkedList<>(this.elements), new LinkedList<>(this.candidates));
 		cloned.finalized = this.finalized;
 		return cloned;
 	}
