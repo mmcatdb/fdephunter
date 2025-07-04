@@ -12,17 +12,17 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ComputeMaxSetTest {
-    
+
     @Test
     void testComputeMaxSetEndToEnd() {
         Path path = Paths.get("src", "test", "resources", "iris.csv");
         Dataset dataset = new CSVDataset(path.toString(), false);
         dataset.load();
-        List<MaxSet> result = ComputeMaxSet.run(dataset);
+        List<MaxSet> result = ComputeMaxSet.run(dataset).sets();
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertTrue(result.stream().allMatch(maxSet -> maxSet.getCombinations().size() > 0));
         // TODO: Test more precise properties of the result
     }
-   
+
 }

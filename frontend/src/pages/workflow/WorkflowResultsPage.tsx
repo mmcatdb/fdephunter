@@ -146,36 +146,3 @@ export function createFdEdges(fdSet: FdSet): FdEdge[] {
         },
     })));
 }
-
-// NICE_TO_HAVE Not used now - we don't want to group the FDs by LHS for displaying. Maybe we will use it if there are too many FDs.
-/*
-function groupFdsByLhs(fdSet: FdSet): FdEdge[] {
-    const fdsByLhs = new Map<string, { lhs: number[], rhs: number[] }>();
-
-    fdSet.fdClasses.forEach((minimalFds, colIndex) => {
-        for (const minimalFd of minimalFds) {
-            let existing = fdsByLhs.get(minimalFd.id);
-            if (!existing) {
-                existing = { lhs: minimalFd.columns, rhs: [] };
-                fdsByLhs.set(minimalFd.id, existing);
-            }
-
-            existing.rhs.push(colIndex);
-        }
-    });
-
-    const fds: FdEdge[] = [];
-    for (const { lhs, rhs } of fdsByLhs.values()) {
-        const lhsKey = lhs.join(',');
-        const rhsKey = rhs.join(',');
-
-        fds.push({
-            id: lhsKey + '->' + rhsKey,
-            source: { columns: lhs.map(i => fdSet.columns[i]), label: lhsKey, id: lhsKey },
-            target: { columns: rhs.map(i => fdSet.columns[i]), label: rhsKey, id: rhsKey },
-        });
-    }
-
-    return fds.toSorted((a, b) => compareStringsAscii(a.source.id, b.source.id));
-}
-*/

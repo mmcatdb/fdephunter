@@ -1,19 +1,17 @@
 package de.uni.passau.algorithms;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 import de.uni.passau.algorithms.exception.ComputeFDException;
 import de.uni.passau.algorithms.fd.LeftHandSideGenerator;
-import de.uni.passau.algorithms.fd.FunctionalDependencyGroup;
-import de.uni.passau.algorithms.fd.FunctionalDependencyGenerator;
 import de.uni.passau.algorithms.maxset.MaxSetGenerator;
-import de.uni.passau.core.dataset.Dataset;
 import de.uni.passau.core.model.ComplementMaxSet;
-import de.uni.passau.core.model.MaxSet;
+import de.uni.passau.core.model.FdSet;
+import de.uni.passau.core.model.MaxSets;
+import de.uni.passau.core.model.FdSet.Fd;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
@@ -21,10 +19,9 @@ import de.uni.passau.core.model.ColumnSet;
 
 public class ComputeFD {
 
-    public static Map<Integer, List<FunctionalDependencyGroup>> run(Dataset dataset) {
+    public static FdSet run(MaxSets maxSets, String[] columns) {
         try {
-			List<MaxSet> maxSets = ComputeMaxSet.run(dataset);
-            final var algorithm = new ComputeFD(dataset, maxSets);
+            final var algorithm = new ComputeFD(maxSets, columns);
             return algorithm.innerRun();
         }
         catch (final Exception e) {
@@ -32,28 +29,18 @@ public class ComputeFD {
         }
     }
 
-	public static Map<Integer, List<FunctionalDependencyGroup>> run(Dataset dataset, List<MaxSet> maxSets) {
-        try {
-            final var algorithm = new ComputeFD(dataset, maxSets);
-            return algorithm.innerRun();
-        }
-        catch (final Exception e) {
-            throw ComputeFDException.inner(e);
-        }
-    }
+	private final MaxSets maxSets;
+    private final String[] columns;
 
-    private final Dataset dataset;
-	private final List<MaxSet> maxSets;
-
-    private ComputeFD(Dataset dataset, List<MaxSet> maxSets) throws Exception {
-        this.dataset = dataset;
+    private ComputeFD(MaxSets maxSets, String[] columns) throws Exception {
 		this.maxSets = maxSets;
+        this.columns = columns;
     }
 
-    private Map<Integer, List<FunctionalDependencyGroup>> innerRun() throws Exception {
-		int numberOfAttributes = dataset.getMetadata().getNumberOfColumns();
+    private FdSet innerRun() throws Exception {
+		final int numberOfAttributes = maxSets.sets().size();
 
-		List<ComplementMaxSet> cmaxSets = MaxSetGenerator.generateCMAX_SETs(maxSets, numberOfAttributes);
+		List<ComplementMaxSet> cmaxSets = MaxSetGenerator.generateCMAX_SETs(maxSets.sets(), numberOfAttributes);
 		System.out.println("----- COMPLEMENTS OF MAXIMAL SETS -----");
 		System.out.println("size: " + cmaxSets.size());
 		for (int index = 0; index < cmaxSets.size(); ++index) {
@@ -63,7 +50,7 @@ public class ComputeFD {
         Int2ObjectMap<List<ColumnSet>> lhss = new LeftHandSideGenerator().execute(cmaxSets, numberOfAttributes);
         System.out.println("----- LEFT HAND SIDES -----");
 		System.out.println("size: " + lhss.size());
-		for (int index = 0; index < numberOfAttributes; ++index) {	
+		for (int index = 0; index < numberOfAttributes; ++index) {
 			List<ColumnSet> list = lhss.get(index);
 			if (list == null) {
 				continue;
@@ -85,35 +72,84 @@ public class ComputeFD {
 		}
         System.out.println("");
 
-        // get column names if available, otherwise use indices as names
-        List<String> columnNames = dataset.getMetadata().hasHeader() 
-            ? Arrays.asList(dataset.getHeader())
-            : java.util.stream.IntStream.range(0, numberOfAttributes)
-                .mapToObj(String::valueOf)
-                .collect(java.util.stream.Collectors.toList());
+		// List<FunctionalDependencyGroup> result = generateFds(lhss);
+		// System.out.println("----- FUNCTIONAL DEPENDENCIES -----");
+		// System.out.println("size: " + result.size());
 
-        FunctionalDependencyGenerator xxx = new FunctionalDependencyGenerator(dataset, dataset.getMetadata().getFilename(), columnNames, lhss);
-		List<FunctionalDependencyGroup> result = xxx.execute();
-		System.out.println("----- FUNCTIONAL DEPENDENCIES -----");
-		System.out.println("size: " + result.size());
-		Map<Integer, List<FunctionalDependencyGroup>> fds = new TreeMap<>();
-		for (int index = 0; index < numberOfAttributes; ++index) {
-			List<FunctionalDependencyGroup> list = new ArrayList<>();
-			fds.put(index, list);
-		}
-		for (int index = 0; index < result.size(); ++index) {
-			FunctionalDependencyGroup fd = result.get(index);
-			var list = fds.get(fd.getAttributeID());
-			list.add(fd);
-		}
+		// List<List<FunctionalDependencyGroup>> fdsForClasses = new ArrayList<>();
+		// for (int index = 0; index < numberOfAttributes; ++index) {
+		// 	List<FunctionalDependencyGroup> list = new ArrayList<>();
+		// 	fdsForClasses.add(list);
+		// }
 
-		fds.forEach((key, list) -> {
-			System.out.println("Attribute: " + key + " Size: " + list.size());
-			for (int index = 0; index < list.size(); ++index) {
-				System.out.println(list.get(index));
-			}
-		});
-		System.out.println("");
-		return fds;
+		// for (int index = 0; index < result.size(); ++index) {
+		// 	FunctionalDependencyGroup fd = result.get(index);
+		// 	var list = fdsForClasses.get(fd.getAttributeID());
+		// 	list.add(fd);
+		// }
+
+        // for (int index = 0; index < fdsForClasses.size(); ++index) {
+        //     final var list = fdsForClasses.get(index);
+        //     System.out.println("Attribute: " + index + " Size: " + list.size());
+
+        //     for (final var fd : list)
+        //         System.out.println(fd);
+        // }
+		// System.out.println("");
+
+        final var groupedFds = groupFdsByLhs(lhss);
+
+        final var fdsList = new ArrayList<Fd>();
+        for (final var entry : groupedFds.entrySet()) {
+            final var lhs = entry.getKey();
+            final var rhs = entry.getValue();
+            fdsList.add(new Fd(lhs, rhs));
+        }
+
+		return new FdSet(
+            this.columns,
+            fdsList
+        );
+    }
+
+    // private static List<FunctionalDependencyGroup> generateFds(Int2ObjectMap<List<ColumnSet>> lhss) {
+	// 	final var result = new ArrayList<FunctionalDependencyGroup>();
+
+	// 	for (int attribute : lhss.keySet()) {
+	// 		for (ColumnSet lhs : lhss.get(attribute)) {
+	// 			if (lhs.get(attribute)) {
+	// 				continue;
+	// 			}
+	// 			IntList bits = lhs.convertToIntList();
+
+	// 			FunctionalDependencyGroup fdg = new FunctionalDependencyGroup(attribute, bits);
+	// 			result.add(fdg);
+	// 		}
+	// 	}
+
+	// 	return result;
+	// }
+
+    private static Map<ColumnSet, ColumnSet> groupFdsByLhs(Int2ObjectMap<List<ColumnSet>> lhss) {
+        /** Map of lhs to rhs so that lhs -> rhs is a functional dependency. */
+        final var fdsByLhs = new TreeMap<ColumnSet, ColumnSet>();
+
+        for (final int classIndex : lhss.keySet()) {
+            final List<ColumnSet> lhssforClass = lhss.get(classIndex);
+
+            for (final ColumnSet lhs : lhssforClass) {
+                final var rhs = fdsByLhs.get(lhs);
+                if (rhs == null) {
+                    // If there is no rhs for this lhs, we create a new one.
+                    fdsByLhs.put(lhs, ColumnSet.fromIndexes(classIndex));
+                }
+                else {
+                    // If there is already a rhs for this lhs, we add the class index to it.
+                    rhs.set(classIndex);
+                }
+            }
+        }
+
+        return fdsByLhs;
     }
 }
