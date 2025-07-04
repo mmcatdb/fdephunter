@@ -48,14 +48,19 @@ public class WorkflowEntity {
         FINAL;
     }
 
+    public static String initialMaxSetsId(UUID id) { return id.toString() + "/initial-maxsets"; }
+    public String initialMaxSetsId() { return WorkflowEntity.initialMaxSetsId(_id); }
 
-    public static String maxSetsId(UUID id) { return "maxsets-" + id.toString(); }
+    public static String maxSetsId(UUID id) { return id.toString() + "/maxsets"; }
     public String maxSetsId() { return WorkflowEntity.maxSetsId(_id); }
 
-    public static String arId(UUID id) { return "ar-" + id.toString(); }
+    public static String arId(UUID id) { return id.toString() + "/ar"; }
     public String arId() { return WorkflowEntity.arId(_id);}
 
-    public static String latticesId(UUID id) { return "lattices-" + id.toString(); }
+    public static String latticesId(UUID id) { return id.toString() + "/lattices"; }
     public String latticesId() { return WorkflowEntity.latticesId(_id); }
+
+    public static String fdsId(UUID id) { return id.toString() + "/fds"; }
+    public String fdsId() { return WorkflowEntity.fdsId(_id); }
 
 }

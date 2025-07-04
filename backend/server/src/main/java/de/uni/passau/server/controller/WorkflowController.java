@@ -63,7 +63,7 @@ public class WorkflowController {
         list.add(ColumnSet.fromIndexes(5, 6, 7));
         list.add(ColumnSet.fromIndexes(2, 4, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21));
 
-        final var sets = new MaxSets(list);
+        final var sets = new MaxSets(list, null);
 
         storageService.set(workflow.arId(), sets);
 
@@ -71,7 +71,8 @@ public class WorkflowController {
     }
 
     private record MaxSets(
-        List<ColumnSet> sets
+        List<ColumnSet> sets,
+        List<ColumnSet> candidates
     ) {}
 
     private record CreateJobResponse(

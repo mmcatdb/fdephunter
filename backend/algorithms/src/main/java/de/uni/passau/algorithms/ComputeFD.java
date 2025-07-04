@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.uni.passau.algorithms.exception.ComputeFDException;
 import de.uni.passau.algorithms.fd.LeftHandSideGenerator;
 import de.uni.passau.algorithms.maxset.MaxSetGenerator;
@@ -18,6 +21,8 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import de.uni.passau.core.model.ColumnSet;
 
 public class ComputeFD {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ComputeFD.class);
 
     public static FdSet run(MaxSets maxSets, String[] columns) {
         try {
@@ -41,22 +46,22 @@ public class ComputeFD {
 		final int numberOfAttributes = maxSets.sets().size();
 
 		List<ComplementMaxSet> cmaxSets = MaxSetGenerator.generateCMAX_SETs(maxSets.sets(), numberOfAttributes);
-		System.out.println("----- COMPLEMENTS OF MAXIMAL SETS -----");
-		System.out.println("size: " + cmaxSets.size());
+		LOGGER.debug("----- COMPLEMENTS OF MAXIMAL SETS -----");
+		LOGGER.debug("size: " + cmaxSets.size());
 		for (int index = 0; index < cmaxSets.size(); ++index) {
-			System.out.println(cmaxSets.get(index));
+			LOGGER.debug("{}", cmaxSets.get(index));
 		}
-		System.out.println("");
+		LOGGER.debug("");
         Int2ObjectMap<List<ColumnSet>> lhss = new LeftHandSideGenerator().execute(cmaxSets, numberOfAttributes);
-        System.out.println("----- LEFT HAND SIDES -----");
-		System.out.println("size: " + lhss.size());
+        LOGGER.debug("----- LEFT HAND SIDES -----");
+		LOGGER.debug("size: " + lhss.size());
 		for (int index = 0; index < numberOfAttributes; ++index) {
 			List<ColumnSet> list = lhss.get(index);
 			if (list == null) {
 				continue;
 			}
 			List<IntList> columnList = new ArrayList<>();
-			System.out.println("Attribute: " + index + " Size: " + list.size());
+			LOGGER.debug("Attribute: " + index + " Size: " + list.size());
 			for (int i = 0; i < list.size(); ++i) {
 				ColumnSet bitSet = list.get(i);
 				IntList columns = new IntArrayList();
@@ -66,15 +71,15 @@ public class ComputeFD {
 					lastIndex = bitSet.nextSetBit(lastIndex + 1);
 				}
 				columnList.add(columns);
-				System.out.println(columns);
+				LOGGER.debug("{}", columns);
 			}
-			// System.out.println(columnList);
+			// LOGGER.debug(columnList);
 		}
-        System.out.println("");
+        LOGGER.debug("");
 
 		// List<FunctionalDependencyGroup> result = generateFds(lhss);
-		// System.out.println("----- FUNCTIONAL DEPENDENCIES -----");
-		// System.out.println("size: " + result.size());
+		// LOGGER.debug("----- FUNCTIONAL DEPENDENCIES -----");
+		// LOGGER.debug("size: " + result.size());
 
 		// List<List<FunctionalDependencyGroup>> fdsForClasses = new ArrayList<>();
 		// for (int index = 0; index < numberOfAttributes; ++index) {
@@ -90,12 +95,12 @@ public class ComputeFD {
 
         // for (int index = 0; index < fdsForClasses.size(); ++index) {
         //     final var list = fdsForClasses.get(index);
-        //     System.out.println("Attribute: " + index + " Size: " + list.size());
+        //     LOGGER.debug("Attribute: " + index + " Size: " + list.size());
 
         //     for (final var fd : list)
-        //         System.out.println(fd);
+        //         LOGGER.debug(fd);
         // }
-		// System.out.println("");
+		// LOGGER.debug("");
 
         final var groupedFds = groupFdsByLhs(lhss);
 

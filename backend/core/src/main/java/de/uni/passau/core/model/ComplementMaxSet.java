@@ -20,6 +20,7 @@ public class ComplementMaxSet {
 	public ComplementMaxSet(int forClass) {
 		this.forClass = forClass;
 		this.elements = new LinkedList<ColumnSet>();
+        this.candidates = new LinkedList<ColumnSet>();
 		this.finalized = false;
 	}
 

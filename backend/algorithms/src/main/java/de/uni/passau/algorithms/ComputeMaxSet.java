@@ -2,6 +2,9 @@ package de.uni.passau.algorithms;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.uni.passau.algorithms.exception.ComputeMaxSetException;
 import de.uni.passau.algorithms.maxset.AgreeSetGenerator;
 import de.uni.passau.algorithms.maxset.MaxSetGenerator;
@@ -13,6 +16,8 @@ import de.uni.passau.core.model.MaxSets;
 import de.uni.passau.core.model.StrippedPartition;
 
 public class ComputeMaxSet {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ComputeMaxSet.class);
 
     public static MaxSets run(Dataset dataset) {
         try {
@@ -34,29 +39,29 @@ public class ComputeMaxSet {
         StrippedPartitionGenerator spg = new StrippedPartitionGenerator();
 		List<StrippedPartition> strippedPartitions = spg.execute(dataset);
 
-		System.out.println("----- STRIPPED PARTITIONS -----");
-		System.out.println("size: " + strippedPartitions.size());
+		LOGGER.debug("----- STRIPPED PARTITIONS -----");
+		LOGGER.debug("size: " + strippedPartitions.size());
 		for (int index = 0; index < strippedPartitions.size(); ++index) {
-			System.out.println(strippedPartitions.get(index));
+			LOGGER.debug("{}", strippedPartitions.get(index));
 		}
-		System.out.println("");
+		LOGGER.debug("");
 
 		int length = dataset.getMetadata().getNumberOfColumns();
 
 		List<AgreeSet> agreeSets = new AgreeSetGenerator().execute(strippedPartitions);
-		System.out.println("----- AGREE SET -----");
-		System.out.println("size: " + agreeSets.size());
+		LOGGER.debug("----- AGREE SET -----");
+		LOGGER.debug("size: " + agreeSets.size());
 		for (int index = 0; index < agreeSets.size(); ++index) {
-			System.out.println(agreeSets.get(index));
+			LOGGER.debug("{}", agreeSets.get(index));
 		}
-		System.out.println("");
+		LOGGER.debug("");
 
 		MaxSetGenerator setGenerator = new MaxSetGenerator(agreeSets, length);
 		List<MaxSet> maxSets = setGenerator.generateMaxSet();
-		System.out.println("----- MAXIMAL SETS -----");
-		System.out.println("size: " + maxSets.size());
+		LOGGER.debug("----- MAXIMAL SETS -----");
+		LOGGER.debug("size: " + maxSets.size());
 		for (int index = 0; index < maxSets.size(); ++index) {
-			System.out.println(maxSets.get(index));
+			LOGGER.debug("{}", maxSets.get(index));
 		}
 
         return new MaxSets(maxSets);

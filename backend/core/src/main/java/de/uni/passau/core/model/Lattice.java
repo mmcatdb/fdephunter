@@ -11,14 +11,20 @@ import java.util.stream.IntStream;
 public class Lattice {
 
     /** Name of the class column. */
-    String classColumn;
+    public String classColumn;
     /** Names of the columns. They are expected to be unique. */
-    String[] columns;
+    public String[] columns;
     /**
      * For each row, contains a list of states (each corresponding to one {@link ColumnSet} from the row).
      * The column sets are in ascending order, computable by {@link #computeColumnSetsForRow(int)}.
      */
-    List<List<CellType>> rows;
+    public List<List<CellType>> rows;
+
+    public Lattice(String classColumn, String[] columns, List<List<CellType>> rows) {
+        this.classColumn = classColumn;
+        this.columns = columns;
+        this.rows = rows;
+    }
 
     /** A type of an element from the max set for a class. */
     enum CellType {

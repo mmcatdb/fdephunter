@@ -1,10 +1,14 @@
 package de.uni.passau.server.service;
 
 import de.uni.passau.core.approach.AbstractApproach.ApproachName;
+import de.uni.passau.core.dataset.Dataset;
 import de.uni.passau.core.model.MaxSets;
 import de.uni.passau.algorithms.AdjustMaxSet;
 import de.uni.passau.algorithms.ComputeAR;
+import de.uni.passau.algorithms.ComputeFD;
+import de.uni.passau.algorithms.ComputeLattice;
 import de.uni.passau.algorithms.ComputeMaxSet;
+import de.uni.passau.algorithms.ExtendMaxSet;
 import de.uni.passau.server.model.AssignmentEntity;
 import de.uni.passau.server.model.JobEntity;
 import de.uni.passau.server.model.JobEntity.IterationJobPayload;
@@ -129,28 +133,16 @@ public class JobService {
         final var dataset = datasetService.getLoadedDatasetById(payload.datasetId());
 
         final var maxSets = ComputeMaxSet.run(dataset);
-
         storageService.set(workflow.maxSetsId(), maxSets);
 
-        // TODO Save max set.
-
-        // TODO compute lattice
-
-        // TODO compute fds
+        workflow.state = WorkflowState.NEGATIVE_EXAMPLES;
 
         final var armstrongRelation = ComputeAR.run(maxSets, dataset);
 
         final var assignments = new ArrayList<AssignmentEntity>();
 
-        // TODO This should be the minimal size of columnSets in the examples.
-        final int columnSetSize = 1;
-
+        // TODO These are not assignments, just the example rows.
         for (final var exampleRow : armstrongRelation.exampleRows) {
-            // We don't need to create examples for each row.
-            // TODO Optimize this in the algorithm itself.
-            if (exampleRow.lhsSet.size() != columnSetSize)
-                continue;
-
             final var assignment = AssignmentEntity.create(job.workflowId, armstrongRelation.columns, armstrongRelation.referenceRow, exampleRow);
             assignments.add(assignment);
         }
@@ -159,25 +151,82 @@ public class JobService {
 
         assignmentRepository.saveAll(assignments);
 
-        workflow.iteration = workflow.iteration + 1;
-        workflow.state = WorkflowState.NEGATIVE_EXAMPLES;
         workflowRepository.save(workflow);
+
+        computeViews(workflow, maxSets, dataset);
     }
 
     private void executeIterationJob(JobEntity job) {
+        final var workflow = workflowRepository.findById(job.workflowId).get();
+        final var dataset = datasetService.getLoadedDatasetById(workflow.datasetId);
+
         // If there are any evaluated assignments, we have to adjust the max set. This should be the case for all iterations except the first one.
+        final var maxSets = storageService.get(workflow.maxSetsId(), MaxSets.class);
 
-        final var maxSets = storageService.get(WorkflowEntity.maxSetsId(job.workflowId), MaxSets.class);
+        final var assignments = assignmentRepository.findAllByWorkflowId(job.workflowId);
 
-        // TODO
-        AdjustMaxSet.run(maxSets, null);
+        final var evaluatedRows = assignments.stream()
+        // TODO Filter only the new ones.
+            .filter(assignment -> assignment.exampleRow.decision != null)
+            .map(assignment -> assignment.exampleRow)
+            .toList();
 
-        // TODO Implement the logic for adjusting the max set and generating examples.
-        // This is a placeholder for the actual implementation.
-        LOGGER.info("Executing iteration job with ID: {}", job.id());
+        final var adjustedMaxSets = AdjustMaxSet.run(maxSets, evaluatedRows);
 
+        // TODO Check if we can continue the workflow.
+        // Also check if we have any assignments left to evaluate.
+        // And whether we should switch to positive examples or finish the workflow.
         // If we are done with negative examples, change state to POSITIVE_EXAMPLES.
         // If we are done with positive examples, change state to FINAL.
+        workflow.iteration = workflow.iteration + 1;
+        final int lhsSize = workflow.iteration;
+
+        final var extendedMaxSets = ExtendMaxSet.run(adjustedMaxSets, lhsSize);
+        storageService.set(workflow.maxSetsId(), extendedMaxSets);
+
+        final var armstrongRelation = ComputeAR.run(maxSets, dataset);
+
+        final var newAssigmnets = new ArrayList<AssignmentEntity>();
+        for (final var exampleRow : armstrongRelation.exampleRows) {
+            // We don't need to create examples for each row.
+            // TODO Optimize this in the algorithm itself.
+            if (exampleRow.lhsSet.size() != lhsSize)
+                continue;
+
+            final var assignment = AssignmentEntity.create(job.workflowId, armstrongRelation.columns, armstrongRelation.referenceRow, exampleRow);
+            newAssigmnets.add(assignment);
+        }
+
+
+        // TODO compute lattice
+
+        // TODO compute fds
+
+
+        workflowRepository.save(workflow);
+
+        computeViews(workflow, maxSets, dataset);
+    }
+
+    private void computeViews(WorkflowEntity workflow, MaxSets maxSets, Dataset dataset) {
+        MaxSets initialMaxSets;
+        if (workflow.iteration == 0) {
+            initialMaxSets = maxSets;
+            storageService.set(workflow.initialMaxSetsId(), initialMaxSets);
+        }
+        else {
+            initialMaxSets = storageService.get(workflow.initialMaxSetsId(), MaxSets.class);
+        }
+
+        // TODO
+        // for (int classIndex = 0; classIndex < maxSets.sets().size(); classIndex++) {
+        //     final var lattice = ComputeLattice.run(maxSets.sets().get(classIndex), initialMaxSets.sets().get(classIndex));
+        //     // TODO save all lattices ... or save them by class, so that the use can load them one by one?
+        //     storageService.set(workflow.latticesId(), lattice);
+        // }
+
+        final var fds = ComputeFD.run(maxSets, dataset.getHeader());
+        storageService.set(workflow.fdsId(), fds);
     }
 
 }

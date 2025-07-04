@@ -14,6 +14,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.uni.passau.core.model.AgreeSet;
 import de.uni.passau.core.model.StrippedPartition;
 import de.uni.passau.core.model.TupleEquivalenceClassRelation;
@@ -23,6 +26,8 @@ import de.uni.passau.core.model.TupleEquivalenceClassRelation;
  * @author pavel.koupil
  */
 public class AgreeSetGenerator {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AgreeSetGenerator.class);
 
 	private static class ListComparator2 implements Comparator<LongList> {
 
@@ -43,25 +48,20 @@ public class AgreeSetGenerator {
 
 	}
 
-	private static final Boolean DEBUG = Boolean.FALSE;
-
-	public AgreeSetGenerator() {
-	}
+	public AgreeSetGenerator() {}
 
 	public List<AgreeSet> execute(List<StrippedPartition> partitions) throws Exception {
 
-		if (AgreeSetGenerator.DEBUG) {
-			long sum = 0;
-			for (StrippedPartition p : partitions) {
-				System.out.println("-----");
-				System.out.println("Atribut: " + p.getAttributeID());
-				System.out.println("Pocet oddilu: " + p.getValues().size());
-				sum += p.getValues().size();
-			}
-			System.out.println("-----");
-			System.out.println("Celkem: " + sum);
-			System.out.println("-----");
-		}
+        long sum = 0;
+        for (StrippedPartition p : partitions) {
+            LOGGER.debug("-----");
+            LOGGER.debug("Attribute: " + p.getAttributeID());
+            LOGGER.debug("Number of partitions: " + p.getValues().size());
+            sum += p.getValues().size();
+        }
+        LOGGER.debug("-----");
+        LOGGER.debug("Total: " + sum);
+        LOGGER.debug("-----");
 
 		Set<LongList> maxSets;
 //        if (this.chooseAlternative1) {
@@ -82,22 +82,16 @@ public class AgreeSetGenerator {
 
 	public Set<LongList> computeMaximumSetsAlternative2(List<StrippedPartition> partitions) throws Exception {
 
-		if (AgreeSetGenerator.DEBUG) {
-			System.out.println("\tvýpočet maximálních oddílů");
-		}
+        LOGGER.debug("\tComputation of maximal partitions");
 		long start = System.currentTimeMillis();
 
 		Set<LongList> sortedPartitions = this.sortPartitions(partitions, new ListComparator2());
 
-		if (AgreeSetGenerator.DEBUG) {
-			System.out.println("\tTime to sort: " + (System.currentTimeMillis() - start));
-		}
+        LOGGER.debug("\tTime to sort: " + (System.currentTimeMillis() - start));
 
 		Iterator<LongList> it = sortedPartitions.iterator();
 		long remainingPartitions = sortedPartitions.size();
-		if (AgreeSetGenerator.DEBUG) {
-			System.out.println("\tNumber of Partitions: " + remainingPartitions);
-		}
+        LOGGER.debug("\tNumber of Partitions: " + remainingPartitions);
 
 		Long2ObjectMap<LongSet> index = new Long2ObjectOpenHashMap<>();
 		Set<LongList> max = new HashSet<>();
@@ -112,9 +106,7 @@ public class AgreeSetGenerator {
 		}
 
 		long end = System.currentTimeMillis();
-		if (AgreeSetGenerator.DEBUG) {
-			System.out.println("\tTime needed: " + (end - start));
-		}
+        LOGGER.debug("\tTime needed: " + (end - start));
 
 		index.clear();
 		sortedPartitions.clear();
@@ -147,9 +139,7 @@ public class AgreeSetGenerator {
 
 	public Long2ObjectMap<TupleEquivalenceClassRelation> calculateRelationships(List<StrippedPartition> partitions) {
 
-		if (AgreeSetGenerator.DEBUG) {
-			System.out.println("\tstartet calculation of relationships");
-		}
+        LOGGER.debug("\tStarted calculation of relationships");
 		Long2ObjectMap<TupleEquivalenceClassRelation> relationships = new Long2ObjectOpenHashMap<>();
 		for (StrippedPartition p : partitions) {
 			this.calculateRelationship(p, relationships);
@@ -160,29 +150,23 @@ public class AgreeSetGenerator {
 
 	public Set<AgreeSet> computeAgreeSets(Long2ObjectMap<TupleEquivalenceClassRelation> relationships, Set<LongList> maxSets, List<StrippedPartition> partitions) throws Exception {
 
-		if (AgreeSetGenerator.DEBUG) {
-			System.out.println("\tstartet calculation of agree sets");
-			int bitsPerSet = (((int) (partitions.size() - 1) / 64) + 1) * 64;
-			long setsNeeded = 0;
-			for (LongList l : maxSets) {
-				setsNeeded += l.size() * (l.size() - 1) / 2;
-			}
-			System.out.println("Approx. RAM needed to store all agree sets: " + bitsPerSet * setsNeeded / 8 / 1024 / 1024 + " MB");
-		}
+        LOGGER.debug("\tStarted calculation of agree sets");
+        int bitsPerSet = (((int) (partitions.size() - 1) / 64) + 1) * 64;
+        long setsNeeded = 0;
+        for (LongList l : maxSets) {
+            setsNeeded += l.size() * (l.size() - 1) / 2;
+        }
+        LOGGER.debug("Approx. RAM needed to store all agree sets: " + bitsPerSet * setsNeeded / 8 / 1024 / 1024 + " MB");
 
 		partitions.clear();
 
-		if (AgreeSetGenerator.DEBUG) {
-			System.out.println(maxSets.size());
-		}
+        LOGGER.debug("{}", maxSets.size());
 		int a = 0;
 
 		Set<AgreeSet> agreeSets = new HashSet<>();
 
 		for (LongList maxEquiClass : maxSets) {
-			if (AgreeSetGenerator.DEBUG) {
-				System.out.println(a++);
-			}
+            LOGGER.debug("{}", a++);
 			for (int i = 0; i < maxEquiClass.size() - 1; i++) {
 				for (int j = i + 1; j < maxEquiClass.size(); j++) {
 					relationships.get(maxEquiClass.getLong(i)).intersectWithAndAddToAgreeSet(relationships.get(maxEquiClass.getLong(j)), agreeSets);
@@ -198,9 +182,7 @@ public class AgreeSetGenerator {
 
 		int partitionNr = 0;
 		for (LongList partition : partitions.getValues()) {
-			if (AgreeSetGenerator.DEBUG) {
-				System.out.println(".");
-			}
+            LOGGER.debug(".");
 			for (long index : partition) {
 				if (!relationships.containsKey(index)) {
 					relationships.put(index, new TupleEquivalenceClassRelation());

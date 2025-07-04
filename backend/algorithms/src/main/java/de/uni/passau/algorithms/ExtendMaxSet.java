@@ -1,14 +1,12 @@
 package de.uni.passau.algorithms;
 
-import java.util.List;
-
 import de.uni.passau.algorithms.exception.ExtendMaxSetException;
-import de.uni.passau.core.model.MaxSet;
+import de.uni.passau.core.model.MaxSets;
 
 public class ExtendMaxSet {
 
-    public static List<MaxSet> run(
-        List<MaxSet> maxSets,
+    public static MaxSets run(
+        MaxSets maxSets,
         int lhsSize
     ) {
         try {
@@ -20,15 +18,15 @@ public class ExtendMaxSet {
         }
     }
 
-    private final List<MaxSet> maxSets;
+    private final MaxSets maxSets;
     private final int lhsSize;
 
-    private ExtendMaxSet(List<MaxSet> maxSets, int lhsSize) {
+    private ExtendMaxSet(MaxSets maxSets, int lhsSize) {
         this.maxSets = maxSets;
         this.lhsSize = lhsSize;
     }
 
-    private List<MaxSet> innerRun() throws Exception {
+    private MaxSets innerRun() throws Exception {
         throw new UnsupportedOperationException("ExtendMaxSet is not implemented yet.");
     }
 

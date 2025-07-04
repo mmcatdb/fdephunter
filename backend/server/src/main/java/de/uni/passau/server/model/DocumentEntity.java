@@ -1,6 +1,7 @@
 package de.uni.passau.server.model;
 
 import org.bson.Document;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 
@@ -33,12 +34,17 @@ public class DocumentEntity {
 
     // There is no need to update, the data is just replaced.
     private void setParsedData(Object data, ObjectMapper objectMapper) {
+        @Nullable String json = null;
         try {
             this.parsedData = data;
-            this.data = Document.parse(objectMapper.writeValueAsString(data));
+            json = objectMapper.writeValueAsString(data);
+            this.data = Document.parse(json);
         }
         catch (Exception e) {
-            throw new RuntimeException("Failed to serialize data to BSON Document", e);
+            if (json == null)
+                throw new RuntimeException("Failed to serialize data to JSON string:\n" + data + "\n", e);
+
+            throw new RuntimeException("Failed to serialize data to BSON Document:\n" + json + "\n", e);
         }
     }
 
