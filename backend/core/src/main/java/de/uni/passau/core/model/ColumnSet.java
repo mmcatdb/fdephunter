@@ -36,6 +36,17 @@ public class ColumnSet implements Comparable<ColumnSet> {
         this.columns = new BitSet();
     }
 
+    public static ColumnSet fromRange(int start, int end) {
+        if (start < 0 || end < start)
+            throw new IllegalArgumentException("Invalid range: [" + start + ", " + end + ")");
+
+        final BitSet bitSet = new BitSet();
+        for (int i = start; i < end; i++)
+            bitSet.set(i);
+
+        return new ColumnSet(bitSet);
+    }
+
     public static ColumnSet fromIndexes(int ...columns) {
         if (columns.length == 0)
             throw new IllegalArgumentException("ColumnSet must contain at least one column.");
