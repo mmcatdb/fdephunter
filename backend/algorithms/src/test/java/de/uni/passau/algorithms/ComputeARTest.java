@@ -111,7 +111,8 @@ class ComputeARTest {
         System.out.println("Computing AR...");
 
         // Run the ComputeAR algorithm
-        ArmstrongRelation ar = ComputeAR.run(maxSets, dataset);
+        Integer iteration = 1;
+        ArmstrongRelation ar = ComputeAR.run(maxSets, dataset, iteration);
 
     }
 
