@@ -16,4 +16,11 @@ public class ArmstrongRelation {
      */
     public boolean isEvaluatingPositives;
 
+    public ArmstrongRelation(String[] columns, String[] referenceRow, List<ExampleRow> exampleRows, boolean isEvaluatingPositives) {
+        this.columns = columns;
+        this.referenceRow = referenceRow;
+        this.exampleRows = exampleRows;
+        this.isEvaluatingPositives = isEvaluatingPositives;
+    }
+
 }

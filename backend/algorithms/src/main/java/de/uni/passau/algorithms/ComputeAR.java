@@ -3,13 +3,13 @@ package de.uni.passau.algorithms;
 import de.uni.passau.algorithms.exception.ComputeARException;
 import de.uni.passau.core.dataset.Dataset;
 import de.uni.passau.core.example.ArmstrongRelation;
+import de.uni.passau.core.example.ExampleRow;
 import de.uni.passau.core.model.MaxSet;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.BitSet;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
@@ -70,7 +70,7 @@ public class ComputeAR {
 
     private ArmstrongRelation innerRun() throws Exception {
 
-        // Get the number 
+        // Get the number
         int columnsCount = maxSets.size();
 
         // A Set of int[] arrays with a custom comparator
@@ -85,13 +85,12 @@ public class ComputeAR {
             return Integer.compare(a1.length, a2.length);
         });
 
-        // Iterate over each MaxSet 
+        // Iterate over each MaxSet
         for (MaxSet maxSet : maxSets) {
             // Iterate over the list of LHS columns of the functional dependecies in this MaxSet (class)
-			for (int index = 0; index < maxSet.getCombinations().size(); ++index) {
+			maxSet.getAllColumnSets().forEach(lhsBitSet -> {
 
                 // Get the BitSet (LHS) of the current functional dependency. The bitset represents the columns of the LHS.
-                BitSet lhsBitSet = maxSet.getCombinations().get(index).getColumns();
 
                 // Convert the BitSet to a list of indices of the columns
 				List<Integer> lhsColumnIndeces = new ArrayList<Integer>();
@@ -106,11 +105,11 @@ public class ComputeAR {
                 for (int i = 0; i < columnsCount; ++i) {
                     row[i] = 1;
                 }
-                // Set rows to 0 for the columns of the LHS 
+                // Set rows to 0 for the columns of the LHS
                 lhsColumnIndeces.forEach(element -> row[element] = 0);
                 // Add the row to the sorted set
 				sortetArmstrongRelationArraySet.add(row);
-			}
+			});
 		}
 
         // Convert the sorted set to a List
@@ -145,12 +144,30 @@ public class ComputeAR {
 
         // TODO: Create ArmstrongRelation object
 
-        return null;
+        final var referenceRow = mappedUniqueLists.get(0).toArray(String[]::new);
+
+        final var exampleRows = new ArrayList<ExampleRow>();
+        for (int i = 1; i < referenceRow.length; i++) {
+            final var values = mappedUniqueLists.get(i).toArray(String[]::new);
+            final var exampleRow = new ExampleRow(
+                values,
+                null, // TODO
+                null, // TODO
+                false // TODO: isEvaluatingPositives
+            );
+            exampleRows.add(exampleRow);
+        }
+
+        return new ArmstrongRelation(
+            dataset.getHeader(),
+            referenceRow,
+            exampleRows,
+            true // TODO: isEvaluatingPositives
+        );
     }
 
-
 	private List<List<String>> realworldAR(LinkedList<int[]> AR) throws Exception {
-		
+
         // The number of columns in the Armstrong Relation
 		int columnCount = AR.get(0).length;
 
@@ -170,7 +187,7 @@ public class ComputeAR {
 
 	private int[] calculateDistinctValues(List<int[]> AR, int columnCount) {
 
-        // Initialize list of {columnCount} sets. 
+        // Initialize list of {columnCount} sets.
 		List<Set<Integer>> uniqueValuesSet = new ArrayList<>(columnCount);
 		for (int i = 0; i < columnCount; i++) {
 			uniqueValuesSet.add(new TreeSet<>());

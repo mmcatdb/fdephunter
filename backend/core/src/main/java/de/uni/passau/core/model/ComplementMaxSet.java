@@ -2,6 +2,7 @@ package de.uni.passau.core.model;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  *
@@ -13,6 +14,7 @@ public class ComplementMaxSet {
 	protected int forClass;
     /** Max set elements in ascending order. */
 	protected List<ColumnSet> elements;
+    protected List<ColumnSet> candidates;
 	private boolean finalized;
 
 	public ComplementMaxSet(int forClass) {
@@ -37,6 +39,13 @@ public class ComplementMaxSet {
 	public List<ColumnSet> getCombinations() {
 		return this.elements;
 	}
+
+    public Stream<ColumnSet> getAllColumnSets() {
+        return Stream.concat(
+            elements.stream(),
+            candidates.stream()
+        );
+    }
 
 	public int getForClass() {
 

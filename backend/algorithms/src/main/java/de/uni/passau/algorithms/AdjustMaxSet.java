@@ -14,10 +14,11 @@ import de.uni.passau.core.model.ColumnSet;
 public class AdjustMaxSet {
 
     public static MaxSet run(
-            /** The previous version of the max set. */
-            MaxSet prev,
-            /** Example rows, preferably with the expert's decisions. */
-            List<ExampleRow> exampleRows) {
+        /** The previous version of the max set. */
+        MaxSet prev,
+        /** Example rows, preferably with the expert's decisions. */
+        List<ExampleRow> exampleRows
+    ) {
         try {
             final var algorithm = new AdjustMaxSet(prev, exampleRows);
             return algorithm.innerRun();
