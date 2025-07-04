@@ -6,7 +6,6 @@ import { Page, TopbarContent } from '@/components/layout';
 import { useMemo, useState } from 'react';
 import { Workflow } from '@/types/workflow';
 import { type FdSet, type FdEdge } from '@/types/functionalDependency';
-import { compareStringsAscii } from '@/utils/common';
 import { FdListDisplay } from '@/components/dataset/FdListDisplay';
 import { type Id } from '@/types/id';
 import { API } from '@/utils/api/api';
@@ -149,6 +148,7 @@ export function createFdEdges(fdSet: FdSet): FdEdge[] {
 }
 
 // NICE_TO_HAVE Not used now - we don't want to group the FDs by LHS for displaying. Maybe we will use it if there are too many FDs.
+/*
 function groupFdsByLhs(fdSet: FdSet): FdEdge[] {
     const fdsByLhs = new Map<string, { lhs: number[], rhs: number[] }>();
 
@@ -178,3 +178,4 @@ function groupFdsByLhs(fdSet: FdSet): FdEdge[] {
 
     return fds.toSorted((a, b) => compareStringsAscii(a.source.id, b.source.id));
 }
+*/

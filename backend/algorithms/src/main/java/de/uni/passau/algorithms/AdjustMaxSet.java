@@ -5,17 +5,17 @@ import java.util.List;
 import de.uni.passau.algorithms.exception.AdjustMaxSetException;
 import de.uni.passau.core.example.ExampleRow;
 import de.uni.passau.core.model.MaxSet;
+import de.uni.passau.core.model.MaxSets;
 import de.uni.passau.core.example.ExampleDecision.DecisionColumnStatus;
-import de.uni.passau.core.model.ColumnSet;
 
 /**
  * Compute new maximal set based on the previous one and expert's decisions.
  */
 public class AdjustMaxSet {
 
-    public static MaxSet run(
+    public static MaxSets run(
         /** The previous version of the max set. */
-        MaxSet prev,
+        MaxSets prev,
         /** Example rows, preferably with the expert's decisions. */
         List<ExampleRow> exampleRows
     ) {
@@ -27,38 +27,41 @@ public class AdjustMaxSet {
         }
     }
 
-    private final MaxSet prev;
+    private final MaxSets prev;
     private final List<ExampleRow> exampleRows;
 
-    private AdjustMaxSet(MaxSet prev, List<ExampleRow> exampleRows) {
+    private AdjustMaxSet(MaxSets prev, List<ExampleRow> exampleRows) {
         this.prev = prev;
         this.exampleRows = exampleRows;
     }
 
-    private MaxSet innerRun() {
-        MaxSet newMaxSet = prev.clone();
-        int forClass = prev.getForClass();
-        for (ExampleRow row : exampleRows) {
-            ColumnSet rhs = row.rhsSet;
-            if (!rhs.get(forClass)) {
-                // If the class is not in the rhsSet, we can skip the row
-                // TODO: should this be an error?
-                continue;
-            }
+    private MaxSets innerRun() {
+        final var newSets = prev.sets().stream()
+            .map(MaxSet::clone)
+            .toList();
 
-            if (row.decision.columns()[forClass].status() == DecisionColumnStatus.VALID) {
-                /* If the column C is marked as VALID, the FD lhsSet -> C does not hold.
-                 * This means lhsSet (or a superset of it) is part of the max set.
-                */
-                newMaxSet.addCombination(row.lhsSet);
-            } else {
-                // ignore INVALID and UNANSWERED columns for now
-                continue;
+        final MaxSets newMaxSets = new MaxSets(newSets);
+        for (ExampleRow row : exampleRows) {
+            for (int forClass : row.rhsSet.convertToIntList()) {
+                final MaxSet newMaxSet = newMaxSets.sets().get(forClass);
+
+                if (row.decision.columns()[forClass].status() == DecisionColumnStatus.VALID) {
+                    /* If the column C is marked as VALID, the FD lhsSet -> C does not hold.
+                     * This means lhsSet (or a superset of it) is part of the max set.
+                    */
+                    newMaxSet.addCombination(row.lhsSet);
+                } else {
+                    // ignore INVALID and UNANSWERED columns for now
+                    continue;
+                }
             }
         }
+
         // Remove combinations that are subsets of any other combination
-        newMaxSet.finalize_RENAME_THIS();
-        return newMaxSet;
+        for (final var newMaxSet : newMaxSets.sets())
+            newMaxSet.finalize_RENAME_THIS();
+
+        return newMaxSets;
     }
 
 }

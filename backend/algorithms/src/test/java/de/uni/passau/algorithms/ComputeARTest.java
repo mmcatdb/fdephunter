@@ -2,6 +2,7 @@ package de.uni.passau.algorithms;
 
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 //import org.junit.jupiter.api.AfterEach;
@@ -12,7 +13,7 @@ import de.uni.passau.core.dataset.Dataset;
 import de.uni.passau.core.dataset.csv.CSVDataset;
 import de.uni.passau.core.model.ColumnSet;
 import de.uni.passau.core.model.MaxSet;
-
+import de.uni.passau.core.model.MaxSets;
 import de.uni.passau.core.example.ArmstrongRelation;
 
 
@@ -22,7 +23,7 @@ class ComputeARTest {
      private Dataset dataset;
 
     /* Represents the actual functional dependencies. */
-    private List<MaxSet> maxSets;
+    private MaxSets maxSets;
 
 
     @BeforeEach
@@ -35,71 +36,69 @@ class ComputeARTest {
         dataset = new CSVDataset(csvFilePath, hasHeader);
         dataset.load();
 
-        maxSets = new java.util.ArrayList<>();
+        maxSets = new MaxSets(new ArrayList<>());
 
-        // Initialize the maxSets 
+        // Initialize the maxSets
         // BE -> A
         // BD -> A
         // BC -> A
-        maxSets.add( 
+        maxSets.sets().add(
             new MaxSet(
                 0,
                 List.of(
-                    ColumnSet.fromIndexes(new int[]{1, 4}), // BE
-                    ColumnSet.fromIndexes(new int[]{1, 3}), // BD
-                    ColumnSet.fromIndexes(new int[]{1, 2})  // BC
+                    ColumnSet.fromIndexes(1, 4), // BE
+                    ColumnSet.fromIndexes(1, 3), // BD
+                    ColumnSet.fromIndexes(1, 2)  // BC
                 )
             )
         );
 
         // D -> B
-        maxSets.add( 
+        maxSets.sets().add(
             new MaxSet(
                 1,
                 List.of(
-                    ColumnSet.fromIndexes(new int[]{3}) // D
+                    ColumnSet.fromIndexes(3) // D
                 )
             )
         );
 
         // BE -> C
         // BD -> C
-        maxSets.add( 
+        maxSets.sets().add(
             new MaxSet(
                 2,
                 List.of(
-                    ColumnSet.fromIndexes(new int[]{1, 4}), // BE
-                    ColumnSet.fromIndexes(new int[]{1, 3})  // BD
+                    ColumnSet.fromIndexes(1, 4), // BE
+                    ColumnSet.fromIndexes(1, 3)  // BD
                 )
             )
         );
 
         // BE -> D
         // BC -> D
-        maxSets.add( 
+        maxSets.sets().add(
             new MaxSet(
                 3,
                 List.of(
-                    ColumnSet.fromIndexes(new int[]{1, 4}), // BE
-                    ColumnSet.fromIndexes(new int[]{1, 2})  // BD
+                    ColumnSet.fromIndexes(1, 4), // BE
+                    ColumnSet.fromIndexes(1, 2)  // BD
                 )
             )
         );
 
         // BD -> E
         // BC -> E
-        maxSets.add( 
+        maxSets.sets().add(
             new MaxSet(
                 4,
                 List.of(
-                    ColumnSet.fromIndexes(new int[]{1, 3}), // BD
-                    ColumnSet.fromIndexes(new int[]{1, 2})  // BC
+                    ColumnSet.fromIndexes(1, 3), // BD
+                    ColumnSet.fromIndexes(1, 2)  // BC
                 )
             )
         );
-
-
-}
+    }
 
     // @AfterEach
     // public void tearDown() {

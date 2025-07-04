@@ -64,7 +64,7 @@ public class JobEntity {
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
     @JsonSubTypes({
         @JsonSubTypes.Type(value = DiscoveryJobPayload.class, name = "discovery"),
-        @JsonSubTypes.Type(value = AdjustJobPayload.class, name = "adjust"),
+        @JsonSubTypes.Type(value = IterationJobPayload.class, name = "iteration"),
     })
     public interface JobPayload extends Serializable {}
 
@@ -73,6 +73,6 @@ public class JobEntity {
         ApproachName approach
     ) implements JobPayload {}
 
-    public record AdjustJobPayload() implements JobPayload {}
+    public record IterationJobPayload() implements JobPayload {}
 
 }

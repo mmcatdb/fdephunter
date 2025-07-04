@@ -1,10 +1,10 @@
-import { type ExampleRelation } from './armstrongRelation';
+import { ExampleRelation, type ExampleRelationResponse } from './armstrongRelation';
 import { type Id } from './id';
 
 export type AssignmentResponse = {
     id: Id;
     workflowId: Id;
-    relation: ExampleRelation;
+    relation: ExampleRelationResponse;
 };
 
 // TODO Replace by a simple type (if possible).
@@ -19,7 +19,7 @@ export class Assignment {
         return new Assignment(
             input.id,
             input.workflowId,
-            input.relation,
+            ExampleRelation.fromResponse(input.relation),
         );
     }
 }

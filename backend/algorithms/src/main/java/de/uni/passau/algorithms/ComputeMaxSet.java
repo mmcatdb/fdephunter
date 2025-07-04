@@ -9,11 +9,12 @@ import de.uni.passau.algorithms.maxset.StrippedPartitionGenerator;
 import de.uni.passau.core.dataset.Dataset;
 import de.uni.passau.core.model.AgreeSet;
 import de.uni.passau.core.model.MaxSet;
+import de.uni.passau.core.model.MaxSets;
 import de.uni.passau.core.model.StrippedPartition;
 
 public class ComputeMaxSet {
 
-    public static List<MaxSet> run(Dataset dataset) {
+    public static MaxSets run(Dataset dataset) {
         try {
             final var algorithm = new ComputeMaxSet(dataset);
             return algorithm.innerRun();
@@ -29,7 +30,7 @@ public class ComputeMaxSet {
         this.dataset = dataset;
     }
 
-    private List<MaxSet> innerRun() throws Exception {
+    private MaxSets innerRun() throws Exception {
         StrippedPartitionGenerator spg = new StrippedPartitionGenerator();
 		List<StrippedPartition> strippedPartitions = spg.execute(dataset);
 
@@ -58,7 +59,7 @@ public class ComputeMaxSet {
 			System.out.println(maxSets.get(index));
 		}
 
-        return maxSets;
+        return new MaxSets(maxSets);
     }
 
 }

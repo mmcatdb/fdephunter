@@ -1,11 +1,13 @@
 package de.uni.passau.server.service;
 
 import de.uni.passau.core.approach.AbstractApproach.ApproachName;
+import de.uni.passau.core.model.MaxSets;
+import de.uni.passau.algorithms.AdjustMaxSet;
 import de.uni.passau.algorithms.ComputeAR;
 import de.uni.passau.algorithms.ComputeMaxSet;
 import de.uni.passau.server.model.AssignmentEntity;
 import de.uni.passau.server.model.JobEntity;
-import de.uni.passau.server.model.JobEntity.AdjustJobPayload;
+import de.uni.passau.server.model.JobEntity.IterationJobPayload;
 import de.uni.passau.server.model.JobEntity.DiscoveryJobPayload;
 import de.uni.passau.server.model.JobEntity.JobState;
 import de.uni.passau.server.model.WorkflowEntity;
@@ -57,9 +59,9 @@ public class JobService {
         return jobRepository.save(job);
     }
 
-    public JobEntity createAdjustJob(WorkflowEntity workflow, String description) {
+    public JobEntity createIterationJob(WorkflowEntity workflow, String description) {
         final var prevJobsCount = jobRepository.countByWorkflowId(workflow.id());
-        final var payload = new AdjustJobPayload();
+        final var payload = new IterationJobPayload();
         final var job = JobEntity.create(workflow.id(), prevJobsCount, description, payload);
         return jobRepository.save(job);
     }
@@ -117,8 +119,8 @@ public class JobService {
         // TODO Change this to switch once we are on a better java version.
         if (job.payload instanceof DiscoveryJobPayload)
             executeDiscoveryJob(job);
-        else if (job.payload instanceof AdjustJobPayload)
-            executeAdjustJob(job);
+        else if (job.payload instanceof IterationJobPayload)
+            executeIterationJob(job);
     }
 
     private void executeDiscoveryJob(JobEntity job) {
@@ -129,7 +131,6 @@ public class JobService {
         final var maxSets = ComputeMaxSet.run(dataset);
 
         storageService.set(workflow.maxSetsId(), maxSets);
-
 
         // TODO Save max set.
 
@@ -163,10 +164,17 @@ public class JobService {
         workflowRepository.save(workflow);
     }
 
-    private void executeAdjustJob(JobEntity job) {
+    private void executeIterationJob(JobEntity job) {
+        // If there are any evaluated assignments, we have to adjust the max set. This should be the case for all iterations except the first one.
+
+        final var maxSets = storageService.get(WorkflowEntity.maxSetsId(job.workflowId), MaxSets.class);
+
+        // TODO
+        AdjustMaxSet.run(maxSets, null);
+
         // TODO Implement the logic for adjusting the max set and generating examples.
         // This is a placeholder for the actual implementation.
-        LOGGER.info("Executing adjust job with ID: {}", job.id());
+        LOGGER.info("Executing iteration job with ID: {}", job.id());
 
         // If we are done with negative examples, change state to POSITIVE_EXAMPLES.
         // If we are done with positive examples, change state to FINAL.

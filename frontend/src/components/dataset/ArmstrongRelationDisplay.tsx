@@ -146,7 +146,7 @@ type ExampleRowDisplayProps = {
 function ExampleRowDisplay({ assignment, gridState, rowIndex }: ExampleRowDisplayProps) {
     const row = assignment.relation.exampleRow;
 
-    const maxSetCols = row.maxSetElement.map(assignment.relation.columns);
+    const maxSetCols = row.lhsSet.map(assignment.relation.columns);
     const exampleBgClass = row.isPositive ? 'bg-danger-400' : 'bg-warning-400';
     const { leftClass, rightClass } = getSpecialCellClasses(rowIndex);
 
@@ -177,7 +177,7 @@ function ExampleRowDisplay({ assignment, gridState, rowIndex }: ExampleRowDispla
         </div>
 
         {row.values.map((value, colIndex) => (
-            <div key={colIndex} className={getCellClass(rowIndex, colIndex, row.maxSetElement.has(colIndex))}>
+            <div key={colIndex} className={getCellClass(rowIndex, colIndex, row.lhsSet.has(colIndex))}>
                 {value}
             </div>
         ))}

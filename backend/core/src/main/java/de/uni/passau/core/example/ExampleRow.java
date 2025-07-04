@@ -7,6 +7,7 @@ import de.uni.passau.core.model.ColumnSet;
 public class ExampleRow {
 
     public String[] values;
+    // TODO - lhs is subset of a max set if it't the candidate.
     /** The indexes of the columns that form the left/right hand side of FDs that are violated by the example.
      * lhsSet and rhsSet are disjoint
      * lhsSet is not a subset of any set in the max set of any of the columns in rhsSet.

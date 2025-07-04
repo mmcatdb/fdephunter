@@ -5,6 +5,7 @@ import de.uni.passau.core.dataset.Dataset;
 import de.uni.passau.core.example.ArmstrongRelation;
 import de.uni.passau.core.example.ExampleRow;
 import de.uni.passau.core.model.MaxSet;
+import de.uni.passau.core.model.MaxSets;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -22,8 +23,7 @@ public class ComputeAR {
 
     public static ArmstrongRelation run(
         /** Represents the actual functional dependencies. */
-        //MaxSet maxSet,
-        List<MaxSet> maxSets,
+        MaxSets maxSets,
         /** The initial relation. */
         Dataset dataset
     ) {
@@ -55,15 +55,10 @@ public class ComputeAR {
 		}
 	}
 
-
-
-    //private final MaxSet maxSet;
-    private final List<MaxSet> maxSets;
+    private final MaxSets maxSets;
     private final Dataset dataset;
 
-    //private ComputeAR(MaxSet maxSet, Dataset dataset) {
-    private ComputeAR(List<MaxSet> maxSets, Dataset dataset) {
-        //this.maxSet = maxSet;
+    private ComputeAR(MaxSets maxSets, Dataset dataset) {
         this.maxSets = maxSets;
         this.dataset = dataset;
     }
@@ -71,7 +66,7 @@ public class ComputeAR {
     private ArmstrongRelation innerRun() throws Exception {
 
         // Get the number
-        int columnsCount = maxSets.size();
+        final int columnsCount = maxSets.sets().size();
 
         // A Set of int[] arrays with a custom comparator
 		Set<int[]> sortetArmstrongRelationArraySet = new TreeSet<int[]>((a1, a2) -> {
@@ -86,7 +81,7 @@ public class ComputeAR {
         });
 
         // Iterate over each MaxSet
-        for (MaxSet maxSet : maxSets) {
+        for (MaxSet maxSet : maxSets.sets()) {
             // Iterate over the list of LHS columns of the functional dependecies in this MaxSet (class)
 			maxSet.getAllColumnSets().forEach(lhsBitSet -> {
 

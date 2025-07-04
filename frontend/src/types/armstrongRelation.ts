@@ -1,23 +1,60 @@
-import { type ColumnSet } from './ColumnSet';
+import { ColumnSet, type ColumnSetResponse } from './ColumnSet';
 
-export type ExampleRelation = {
-    /** Names of the columns. They are expected to be unique. */
+export type ExampleRelationResponse = {
     columns: string[];
-    /** Values of the reference row. */
     referenceRow: string[];
-    exampleRow: ExampleRow;
-};
+    exampleRow: ExampleRowResponse;
+}
 
-type ExampleRow = {
+export class ExampleRelation {
+    private constructor(
+        /** Names of the columns. They are expected to be unique. */
+        readonly columns: string[],
+        /** Values of the reference row. */
+        readonly referenceRow: string[],
+        readonly exampleRow: ExampleRow,
+    ) {}
+
+    static fromResponse(input: ExampleRelationResponse): ExampleRelation {
+        return new ExampleRelation(
+            input.columns,
+            input.referenceRow,
+            ExampleRow.fromResponse(input.exampleRow),
+        );
+    }
+}
+
+type ExampleRowResponse = {
     values: string[];
-    /** The indexes of the columns that form the max set element. */
-    maxSetElement: ColumnSet;
-    /** Whether it is a negative or positive example. */
+    lhsSet: ColumnSetResponse;
+    rhsSet: ColumnSetResponse;
     isPositive: boolean;
-
-    /** If undefined, the row is still undecided. */
-    decision: ExampleDecision | undefined;
+    decision: ExampleDecision | null;
 };
+
+class ExampleRow {
+    private constructor(
+        readonly values: string[],
+        // TODO names
+        /** The indexes of the columns that form the max set element. */
+        readonly lhsSet: ColumnSet,
+        readonly rhsSet: ColumnSet,
+        /** Whether it is a negative or positive example. */
+        readonly isPositive: boolean,
+        /** If undefined, the row is still undecided. */
+        readonly decision: ExampleDecision | undefined,
+    ) {}
+
+    static fromResponse(input: ExampleRowResponse): ExampleRow {
+        return new ExampleRow(
+            input.values,
+            ColumnSet.fromResponse(input.lhsSet),
+            ColumnSet.fromResponse(input.rhsSet),
+            input.isPositive,
+            input.decision ?? undefined,
+        );
+    }
+}
 
 export type ExampleDecision = {
     status: DecisionStatus;
