@@ -21,7 +21,7 @@ import de.uni.passau.core.model.ColumnSet;
 
 public class ComputeFD {
 
-    public static List<MaxSet> run(Dataset dataset) {
+    public static Map<Integer, List<FunctionalDependencyGroup>> run(Dataset dataset) {
         try {
 			List<MaxSet> maxSets = ComputeMaxSet.run(dataset);
             final var algorithm = new ComputeFD(dataset, maxSets);
@@ -32,7 +32,7 @@ public class ComputeFD {
         }
     }
 
-	public static List<MaxSet> run(Dataset dataset, List<MaxSet> maxSets) {
+	public static Map<Integer, List<FunctionalDependencyGroup>> run(Dataset dataset, List<MaxSet> maxSets) {
         try {
             final var algorithm = new ComputeFD(dataset, maxSets);
             return algorithm.innerRun();
@@ -50,7 +50,7 @@ public class ComputeFD {
 		this.maxSets = maxSets;
     }
 
-    private List<MaxSet> innerRun() throws Exception {
+    private Map<Integer, List<FunctionalDependencyGroup>> innerRun() throws Exception {
 		int numberOfAttributes = dataset.getMetadata().getNumberOfColumns();
 
 		List<ComplementMaxSet> cmaxSets = MaxSetGenerator.generateCMAX_SETs(maxSets, numberOfAttributes);
@@ -114,6 +114,6 @@ public class ComputeFD {
 			}
 		});
 		System.out.println("");
-		return maxSets;
+		return fds;
     }
 }
