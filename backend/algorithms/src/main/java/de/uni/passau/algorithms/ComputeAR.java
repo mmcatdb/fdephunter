@@ -12,7 +12,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.stream.Collectors;
+
 
 
 /**
@@ -25,11 +27,13 @@ public class ComputeAR {
         /** Represents the actual functional dependencies. */
         MaxSets maxSets,
         /** The initial relation. */
-        Dataset dataset
+        Dataset dataset,
+		//** The iteration */
+		Integer iteration
     ) {
         try {
             //final var algorithm = new ComputeAR(maxSet, dataset);
-            final var algorithm = new ComputeAR(maxSets, dataset);
+            final var algorithm = new ComputeAR(maxSets, dataset, iteration);
             return algorithm.innerRun();
         }
         catch (final Exception e) {
@@ -38,29 +42,28 @@ public class ComputeAR {
     }
 
 
-
     private class RowObject implements Comparable<RowObject> {
-
 		public String value;
 		public int index;
-
 		private RowObject(String content, int size) {
 			this.value = content;
 			this.index = size;
 		}
-
 		@Override
 		public int compareTo(RowObject o) {
 			return value.compareTo(o.value);
 		}
 	}
 
+
     private final MaxSets maxSets;
     private final Dataset dataset;
+	private final Integer iteration;
 
-    private ComputeAR(MaxSets maxSets, Dataset dataset) {
+    private ComputeAR(MaxSets maxSets, Dataset dataset, Integer iteration) {
         this.maxSets = maxSets;
         this.dataset = dataset;
+		this.iteration = iteration;
     }
 
     private ArmstrongRelation innerRun() throws Exception {
@@ -139,27 +142,125 @@ public class ComputeAR {
 
         // TODO: Create ArmstrongRelation object
 
-        final var referenceRow = mappedUniqueLists.get(0).toArray(String[]::new);
 
-        final var exampleRows = new ArrayList<ExampleRow>();
-        for (int i = 1; i < referenceRow.length; i++) {
-            final var values = mappedUniqueLists.get(i).toArray(String[]::new);
-            final var exampleRow = new ExampleRow(
-                values,
-                null, // TODO
-                null, // TODO
-                false // TODO: isEvaluatingPositives
-            );
-            exampleRows.add(exampleRow);
-        }
 
-        return new ArmstrongRelation(
-            dataset.getHeader(),
-            referenceRow,
-            exampleRows,
-            true // TODO: isEvaluatingPositives
-        );
+		// -- Create the example for the current iteration -- //
+
+		// 1. Generate a List of arrays. The arrays have the same length as the number of columns in the original relation. Create all
+		//    combinations of bits (0 and 1) where the iteration is the number of bits set to 1.
+		List<int[]> bitCombinations = generateBitCombinations(columnsCount, iteration);
+
+		// 2. Iterate over each MaxSet. Compare eeach combination of bits with the LHS of the MaxSet with all combinations of bits. Ignore bitCombinations where the RHS of the MaxSet is set in the combination. If the combination is not part of the max set create an ExampleRow with the combination of bits.
+        for (MaxSet maxSet : maxSets.sets()) {
+
+			// RHS of the MaxSet
+			int rhs = maxSet.forClass;
+
+			// DEBUG: Print the current RHS
+			System.out.println("Current RHS: " + rhs);
+
+			// Iterate over each combination of bits
+			for (int[] bitCombination : bitCombinations) {
+
+				// Check if the bit at position rhs is set to 1
+				if (bitCombination[rhs] == 1) {
+					// Skip this combination, because the RHS is set
+					continue;
+				}
+
+				// DEBUG: Print the current bitCombination
+				System.out.println("Current BitCombination: " + Arrays.toString(bitCombination));
+
+				final boolean[] isSubset = {false};
+				// Iterate over each LHS of current MaxSet
+				maxSet.combinations().forEach(lhsBitSet -> {
+
+					// Convert the lhsBitSet with list of indices of the columns to a BitSet
+					int[] lhsBitSetArray = new int[columnsCount];
+					Arrays.fill(lhsBitSetArray, 0);
+					int lastIndex = lhsBitSet.nextSetBit(0);
+					while (lastIndex != -1) {
+						lhsBitSetArray[lastIndex] = 1;
+						lastIndex = lhsBitSet.nextSetBit(lastIndex + 1);
+					}
+
+					// DEBUG: Print the LHS
+					//System.out.println("  LHS BitSet: " + lhsBitSet);
+
+					// DEBUG: Print the LHS BitSetArray
+					//System.out.println("  Compare to LHS BitSetArray: " + Arrays.toString(lhsBitSetArray));
+
+					// Check if the bits of the combination are a subset of the LHS BitSetArray. If not print the bitCombination.
+
+					for (int i = 0; i < columnsCount; ++i) {
+						if (lhsBitSetArray[i] == 1 && bitCombination[i] == 1) {
+							isSubset[0] = true;
+							break;
+						}
+					}
+				});
+
+				// DEBUG: Print if the bitCombination is a subset of the LHS
+				if (!isSubset[0]) {
+					System.out.println("  Found a valid combination: " + Arrays.toString(bitCombination));
+				}
+
+			};
+		};
+
+
+
+
+		return null;
+
+
+        // final var referenceRow = mappedUniqueLists.get(0).toArray(String[]::new);
+
+
+        // final var exampleRows = new ArrayList<ExampleRow>();
+        // for (int i = 1; i < referenceRow.length; i++) {
+        //     final var values = mappedUniqueLists.get(i).toArray(String[]::new);
+        //     final var exampleRow = new ExampleRow(
+        //         values,
+        //         null, // TODO
+        //         null, // TODO
+        //         false // TODO: isEvaluatingPositives
+        //     );
+        //     exampleRows.add(exampleRow);
+        // }
+
+        // return new ArmstrongRelation(
+        //     dataset.getHeader(),
+        //     referenceRow,
+        //     exampleRows,
+        //     true // TODO: isEvaluatingPositives
+        // );
     }
+
+
+
+	//Generate a List of arrays. The arrays have the same length as the number of columns in the original relation. Create all combinations of bits (0 and 1) where the iteration is the number of bits set to 1.
+	private List<int[]> generateBitCombinations(int columnsCount, int iteration) {
+		List<int[]> combinations = new ArrayList<>();
+		int[] combination = new int[columnsCount];
+		generateCombinations(combination, 0, 0, iteration, combinations);
+		return combinations;
+	}
+
+	private void generateCombinations(int[] combination, int start, int depth, int maxDepth, List<int[]> combinations) {
+		if (depth == maxDepth) {
+			combinations.add(combination.clone());
+			return;
+		}
+		for (int i = start; i < combination.length; i++) {
+			combination[i] = 1;
+			generateCombinations(combination, i + 1, depth + 1, maxDepth, combinations);
+			combination[i] = 0;
+		}
+	}
+
+
+
 
 	private List<List<String>> realworldAR(LinkedList<int[]> AR) throws Exception {
 

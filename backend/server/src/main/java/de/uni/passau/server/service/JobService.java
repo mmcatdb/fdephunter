@@ -137,7 +137,7 @@ public class JobService {
 
         workflow.state = WorkflowState.NEGATIVE_EXAMPLES;
 
-        final var armstrongRelation = ComputeAR.run(maxSets, dataset);
+        final var armstrongRelation = ComputeAR.run(maxSets, dataset, 0);
 
         final var assignments = new ArrayList<AssignmentEntity>();
 
@@ -184,7 +184,7 @@ public class JobService {
         final var extendedMaxSets = ExtendMaxSet.run(adjustedMaxSets, lhsSize);
         storageService.set(workflow.maxSetsId(), extendedMaxSets);
 
-        final var armstrongRelation = ComputeAR.run(maxSets, dataset);
+        final var armstrongRelation = ComputeAR.run(maxSets, dataset, lhsSize);
 
         final var newAssigmnets = new ArrayList<AssignmentEntity>();
         for (final var exampleRow : armstrongRelation.exampleRows) {
