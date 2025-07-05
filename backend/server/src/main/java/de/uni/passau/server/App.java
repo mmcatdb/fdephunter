@@ -33,8 +33,7 @@ public class App {
     @Bean
     public WebMvcConfigurer corsConfigurer(ServerProperties server) {
         return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(@NonNull CorsRegistry registry) {
+            @Override public void addCorsMappings(@NonNull CorsRegistry registry) {
                 registry
                     .addMapping("/**")
                     .allowedMethods("GET", "POST", "OPTIONS")

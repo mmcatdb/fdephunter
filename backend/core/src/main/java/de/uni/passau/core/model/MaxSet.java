@@ -1,84 +1,126 @@
 package de.uni.passau.core.model;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Stream;
 
-/**
- *
- * @author pavel.koupil
- */
-public class MaxSet extends ComplementMaxSet {
+public class MaxSet implements Cloneable {
 
-	private boolean finalized;
+    /** Index of the RHS column. */
+    public final int forClass;
+    private final Set<ColumnSet> confirmeds = new HashSet<>();
+    private final Set<ColumnSet> candidates = new HashSet<>();
 
-	public MaxSet(int forClass) {
-		super(forClass);
-		this.finalized = false;
-	}
+    private MaxSet(int forClass, Iterable<ColumnSet> confirmeds, Iterable<ColumnSet> candidates) {
+        this.forClass = forClass;
 
-    public MaxSet(int forClass, List<ColumnSet> elements) {
-        super(forClass, elements);
-		this.finalized = false;
+        for (final ColumnSet confirmed : confirmeds)
+            this.confirmeds.add(confirmed);
+
+        for (final ColumnSet candidate : candidates)
+            this.candidates.add(candidate);
     }
 
-	public MaxSet(int forClass, List<ColumnSet> elements, List<ColumnSet> candidates) {
-		super(forClass, elements, candidates);
-		this.finalized = false;
-	}
+    public MaxSet(int forClass) {
+        this(forClass, List.of());
+    }
 
-	@Override
-	public String toString() {
+    /** Mostly for tests. */
+    public MaxSet(int forClass, Iterable<ColumnSet> confirmeds) {
+        this(forClass, confirmeds, List.of());
+    }
 
-		String s = "max(" + this.forClass + ": ";
-		for (ColumnSet set : this.elements)
-			s += set.toIntList();
-		return s + ")";
-	}
+    @Override public MaxSet clone() {
+        return new MaxSet(forClass, confirmeds, candidates);
+    }
 
-	@Override
-	public void finalize_RENAME_THIS() {
-		if (!this.finalized) {
-			this.checkContentForOnlySuperSets();
-		}
-		this.finalized = true;
+    public Iterable<ColumnSet> confirmedElements() {
+        return confirmeds;
+    }
 
-	}
+    public int confirmedCount() {
+        return confirmeds.size();
+    }
 
-	private void checkContentForOnlySuperSets() {
+    public Stream<ColumnSet> elements() {
+        return Stream.concat(
+            confirmeds.stream(),
+            candidates.stream()
+        );
+    }
 
-		List<ColumnSet> superSets = new LinkedList<ColumnSet>();
-		List<ColumnSet> toDelete = new LinkedList<ColumnSet>();
-		boolean toAdd = true;
+    public void addElement(ColumnSet element) {
+        if (candidates.contains(element))
+            throw new IllegalArgumentException("Confirmed element already exists in candidates: " + element + ". \nUse moveToTrueMaxSet() to move it to the true max set.");
 
-		// Process both, elements and candidates
-		List<ColumnSet> allSets = new LinkedList<>();
-		allSets.addAll(this.elements);
-		allSets.addAll(this.candidates);
-		
-		for (ColumnSet set : allSets) {
-			for (ColumnSet superSet : superSets) {
-				if (set.isSuperSetOf(superSet)) {
-					toDelete.add(superSet);
-				} else if (superSet.isSuperSetOf(set)) {
-					toDelete.add(set);
-					toAdd = false;
-				} 
-			}
-			this.elements.removeAll(toDelete);
-			this.candidates.removeAll(toDelete);
-			if (toAdd) {
-				superSets.add(set);
-			} else {
-				toAdd = true;
-			}
-			toDelete.clear();
-		}
-	}
+        confirmeds.add(element);
+    }
 
-	@Override
-	public MaxSet clone() {
-		MaxSet cloned = new MaxSet(this.forClass, new LinkedList<>(this.elements), new LinkedList<>(this.candidates));
-		cloned.finalized = this.finalized;
-		return cloned;
-	}
+    public void addCandidate(ColumnSet candidate) {
+        if (confirmeds.contains(candidate))
+            throw new IllegalArgumentException("Candidate element already exists in confirmed: " + candidate);
+
+        candidates.add(candidate);
+    }
+
+    public void removeCandidate(ColumnSet candidate) {
+        if (!candidates.remove(candidate))
+            throw new IllegalArgumentException("Candidate element does not exist: " + candidate);
+    }
+
+    public void moveToTrueMaxSet(ColumnSet candidate) {
+        removeCandidate(candidate);
+        confirmeds.add(candidate);
+    }
+
+    // We can't keep the information about calling this method because the set might be mofidied later.
+    public void pruneSubsets() {
+        final Set<ColumnSet> supersets = new HashSet<ColumnSet>();
+
+        // Process both confirmed and candidate elements.
+        // Create a list from the stream to avoid concurrent modification issues.
+        for (final ColumnSet set : elements().toList()) {
+            boolean isSubset = false;
+            List<ColumnSet> supersetsToDelete = new ArrayList<>();
+
+            for (final ColumnSet superset : supersets) {
+                if (set.isSupersetOf(superset)) {
+                    // All supersets that are subsets of the current set needs to be purged.
+                    supersetsToDelete.add(superset);
+                }
+                else if (superset.isSupersetOf(set)) {
+                    isSubset = true;
+                    // No need to check other supersets - if the set is a subset of one of them, it can't be a superset of another.
+                    break;
+                }
+            }
+
+            if (isSubset)
+                continue; // The set is a subset of some superset so we don't need it anymore.
+
+            // Remove all supersets that are subsets of the current set.
+            supersets.removeAll(supersetsToDelete);
+            supersets.add(set);
+        }
+
+        // Now we have all supersets, so we can filter the elements.
+        confirmeds.removeIf(set -> !supersets.contains(set));
+        candidates.removeIf(set -> !supersets.contains(set));
+    }
+
+    @Override public String toString() {
+        final StringBuilder sb = new StringBuilder();
+
+        sb.append("max(").append(forClass).append(": ");
+        for (final ColumnSet set : confirmeds)
+            sb.append(set).append(", ");
+        if (confirmeds.size() > 0)
+            sb.setLength(sb.length() - 2); // Remove last comma and space.
+        sb.append(")");
+
+        return sb.toString();
+    }
+
 }

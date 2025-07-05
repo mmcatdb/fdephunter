@@ -4,7 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import de.uni.passau.core.dataset.DatasetMetadata;
+import de.uni.passau.core.dataset.CSVDataset;
+import de.uni.passau.core.dataset.Dataset.DatasetMetadata;
+import de.uni.passau.core.dataset.CSVDataset.CSVDatasetMetadata;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,13 +27,14 @@ class CSVDatasetMetadataTest {
 
     @BeforeEach
     public void setUp() throws IOException {
-        Path testFilePath = Files.createTempFile(TEST_FILE_NAME, "");
-        File testFile = testFilePath.toFile();
+        final Path testFilePath = Files.createTempFile(TEST_FILE_NAME, "");
+        final File testFile = testFilePath.toFile();
         ACTUAL_FILE_NAME = testFile.getName();
         testFile.deleteOnExit();
         Files.write(testFilePath, (String.join(",", TEST_HEADER) + "\n").getBytes());
         for (String[] row : TEST_DATA)
             Files.write(testFilePath, (String.join(",", row) + "\n").getBytes(), java.nio.file.StandardOpenOption.APPEND);
+
         dataset = new CSVDataset(testFile.getAbsolutePath(), true);
     }
 
@@ -43,13 +46,13 @@ class CSVDatasetMetadataTest {
     @Test
     void testGetMetadata() {
         dataset.load();
-        DatasetMetadata metadata = dataset.getMetadata();
+        final DatasetMetadata metadata = dataset.getMetadata();
         assertNotNull(metadata);
         assertTrue(metadata instanceof CSVDatasetMetadata);
-        CSVDatasetMetadata csvMetadata = (CSVDatasetMetadata) metadata;
-        assertEquals(ACTUAL_FILE_NAME, csvMetadata.getFilename());
+        final CSVDatasetMetadata csvMetadata = (CSVDatasetMetadata) metadata;
+        assertEquals(ACTUAL_FILE_NAME, csvMetadata.filename());
         assertEquals(true, csvMetadata.hasHeader());
-        assertEquals(TEST_DATA.length, csvMetadata.getNumberOfRows());
-        assertEquals(TEST_DATA[0].length, csvMetadata.getNumberOfColumns());
+        assertEquals(TEST_DATA.length, csvMetadata.numberOfRows());
+        assertEquals(TEST_DATA[0].length, csvMetadata.numberOfColumns());
     }
 }

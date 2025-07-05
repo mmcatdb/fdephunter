@@ -12,6 +12,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import de.uni.passau.core.dataset.CSVDataset;
+
 class CSVDatasetHeaderTest {
     private static final String TEST_FILE_NAME = "test.csv";
     private static final String[] TEST_HEADER = { "column_1", "column_2", "column_3" };
@@ -21,12 +23,13 @@ class CSVDatasetHeaderTest {
 
     @BeforeEach
     public void setUp() throws IOException {
-        Path testFilePath = Files.createTempFile(TEST_FILE_NAME, "");
-        File testFile = testFilePath.toFile();
+        final Path testFilePath = Files.createTempFile(TEST_FILE_NAME, "");
+        final File testFile = testFilePath.toFile();
         testFile.deleteOnExit();
         Files.write(testFilePath, (String.join(",", TEST_HEADER) + "\n").getBytes());
         for (String[] row : TEST_DATA)
             Files.write(testFilePath, (String.join(",", row) + "\n").getBytes(), java.nio.file.StandardOpenOption.APPEND);
+
         dataset = new CSVDataset(testFile.getAbsolutePath(), true);
     }
 
@@ -38,7 +41,7 @@ class CSVDatasetHeaderTest {
     @Test
     void testGetRows() {
         dataset.load();
-        List<String[]> rows = dataset.getRows();
+        final List<String[]> rows = dataset.getRows();
         assertNotNull(rows);
         assertEquals(TEST_DATA.length, rows.size());
         for (int i = 0; i < TEST_DATA.length; i++) {
@@ -49,7 +52,7 @@ class CSVDatasetHeaderTest {
     @Test
     void testGetHeader() {
         dataset.load();
-        String[] header = dataset.getHeader();
+        final String[] header = dataset.getHeader();
         assertNotNull(header);
         assertEquals(TEST_HEADER.length, header.length);
         assertArrayEquals(TEST_HEADER, header);
@@ -58,13 +61,13 @@ class CSVDatasetHeaderTest {
     @Test
     void testLoad() {
         dataset.load();
-        List<String[]> rows = dataset.getRows();
+        final List<String[]> rows = dataset.getRows();
         assertNotNull(rows);
         assertEquals(TEST_DATA.length, rows.size());
         for (int i = 0; i < TEST_DATA.length; i++) {
             assertArrayEquals(TEST_DATA[i], rows.get(i));
         }
-        String[] header = dataset.getHeader();
+        final String[] header = dataset.getHeader();
         assertNotNull(header);
         assertEquals(TEST_HEADER.length, header.length);
         assertArrayEquals(TEST_HEADER, header);

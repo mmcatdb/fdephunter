@@ -1,7 +1,4 @@
-package de.uni.passau.core.dataset.csv;
-
-import de.uni.passau.core.dataset.Dataset;
-import de.uni.passau.core.dataset.DatasetMetadata;
+package de.uni.passau.core.dataset;
 
 import java.io.File;
 import java.io.FileReader;
@@ -29,28 +26,26 @@ public class CSVDataset implements Dataset {
     public CSVDataset(String fileName, boolean hasHeader) {
         this.hasHeader = hasHeader;
 
-        final var file = new File(fileName);
-        if (!file.isFile()) {
-            LOGGER.error("CSV dataset file '{}' not found.", file.getAbsolutePath());
-            throw new IllegalArgumentException("CSV dataset file '" + file.getAbsolutePath() + "' not found.");
-        }
-        else {
-            this.inputFile = file;
+        inputFile = new File(fileName);
+        if (!inputFile.isFile()) {
+            LOGGER.error("CSV dataset file '{}' not found.", inputFile.getAbsolutePath());
+            throw new IllegalArgumentException("CSV dataset file '" + inputFile.getAbsolutePath() + "' not found.");
         }
     }
 
-    @Override
-    public List<String[]> getRows() {
+    @Override public List<String[]> getRows() {
         return rows;
     }
 
-    @Override
-    public String[] getHeader() {
+    @Override public String[] getHeader() {
         return header;
     }
 
-    @Override
-    public void load() {
+    @Override public boolean isLoaded() {
+        return isLoaded;
+    }
+
+    @Override public void load() {
         try (final var filereader = new FileReader(inputFile)) {
             final var csvReader = new CSVReaderBuilder(filereader).build();
             if (hasHeader)
@@ -65,16 +60,14 @@ public class CSVDataset implements Dataset {
         }
     }
 
-    @Override
-    public void free() {
-        LOGGER.debug("Trying to free loaded CSV data");
+    @Override public void free() {
+        LOGGER.debug("Freeing loaded CSV data");
         rows = null;
         header = null;
         isLoaded = false;
     }
 
-    @Override
-    public DatasetMetadata getMetadata() {
+    @Override public DatasetMetadata getMetadata() {
         if (!isLoaded)
             throw new IllegalStateException("Data not loaded");
 
@@ -84,9 +77,13 @@ public class CSVDataset implements Dataset {
         return metadata;
     }
 
-    @Override
-    public boolean isLoaded() {
-        return isLoaded;
-    }
+    public record CSVDatasetMetadata(
+        String filepath,
+        String filename,
+        boolean hasHeader,
+        long size,
+        int numberOfColumns,
+        int numberOfRows
+    ) implements DatasetMetadata {}
 
 }

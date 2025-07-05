@@ -1,88 +1,55 @@
 package de.uni.passau.algorithms.maxset;
 
 import de.uni.passau.core.dataset.Dataset;
-import de.uni.passau.core.model.StrippedPartition;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongList;
+
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-/**
- *
- * @author pavel.koupil
- */
 public class StrippedPartitionGenerator {
 
-	public static String nullValue = "null#" + Math.random();
+    private static final String NULL_VALUE_PREFIX = "null#";
 
-	private List<StrippedPartition> returnValue;
+    public static List<StrippedPartition> run(Dataset input) {
+        /** List indexed by column indexes. */
+        final var translationMaps = new ArrayList<Map<String, LongList>>();
+        for (int i = 0; i < input.getMetadata().numberOfColumns(); i++)
+            translationMaps.add(new HashMap<>());
 
-	private Int2ObjectMap<Map<String, LongList>> translationMaps = new Int2ObjectOpenHashMap<>();
+        long lineNumber = 0;
 
-	public StrippedPartitionGenerator() {
-	}
+        for (final String[] row : input.getRows()) {
+            for (int columnIndex = 0; columnIndex < row.length; columnIndex++) {
+                String content = row[columnIndex];
+                if (content == null)
+                    content = NULL_VALUE_PREFIX + Math.random();
 
-	public List<StrippedPartition> execute(Dataset input) throws Exception {
+                final Map<String, LongList> translationMap = translationMaps.get(columnIndex);
+                final LongList element = translationMap.computeIfAbsent(content, x -> new LongArrayList());
+                element.add(lineNumber);
+            }
+            lineNumber++;
+        }
 
-		int lineNumber = 0;
-		List<String[]> rows = input.getRows();
+        // Loading lists and creating separated partitions
+        final var output = new ArrayList<StrippedPartition>();
+        for (int columnIndex = 0; columnIndex < translationMaps.size(); columnIndex++)
+            output.add(generateStrippedPartition(translationMaps.get(columnIndex), columnIndex));
 
-		for (String[] row : rows) {
-			for (int column = 0; column < row.length; ++column) {
-				String content = row[column];
-				if (null == content) {
-					content = StrippedPartitionGenerator.nullValue;
-				}
+        return output;
+    }
 
-				Map<String, LongList> translationMap;
-				if ((translationMap = this.translationMaps.get(column)) == null) {
-					translationMap = new HashMap<>();
-					this.translationMaps.put(column, translationMap);
-				}
-				LongList element;
-				if ((element = translationMap.get(content)) == null) {
-					element = new LongArrayList();
-					translationMap.put(content, element);
-				}
-				element.add(lineNumber);
-			}
-			lineNumber++;
-		}
+    private static StrippedPartition generateStrippedPartition(Map<String, LongList> translationMap, int forClass) {
+        final StrippedPartition sp = new StrippedPartition(forClass);
 
-		// Loading lists and creating separated partitions
-		this.returnValue = new LinkedList<>();
-		for (int i : this.translationMaps.keySet()) {
-			executeStrippedPartitionGenerationTask(i);
-		}
+        for (final LongList it : translationMap.values()) {
+            if (it.size() > 1)
+                sp.addElement(it);
+        }
 
-		// cleanup
-		this.translationMaps.clear();
-
-		return this.returnValue;
-
-	}
-
-	private void executeStrippedPartitionGenerationTask(int i) {
-
-		StrippedPartition sp = new StrippedPartition(i);
-		this.returnValue.add(sp);
-
-		Map<String, LongList> toItterate = this.translationMaps.get(i);
-
-		for (LongList it : toItterate.values()) {
-
-			if (it.size() > 1) {
-				sp.addElement(it);
-			}
-
-		}
-
-		// cleanup after work
-		this.translationMaps.get(i).clear();
-	}
-
+        return sp;
+    }
 }

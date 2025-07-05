@@ -12,6 +12,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import de.uni.passau.core.dataset.CSVDataset;
+
 class CSVDatasetNoHeaderTest {
     private static final String TEST_FILE_NAME = "test.csv";
     private static final String[][] TEST_DATA = { { "1", "2", "3" }, { "4", "5", "6" }, { "7", "8", "9" } };
@@ -20,11 +22,12 @@ class CSVDatasetNoHeaderTest {
 
     @BeforeEach
     public void setUp() throws IOException {
-        Path testFilePath = Files.createTempFile(TEST_FILE_NAME, "");
-        File testFile = testFilePath.toFile();
+        final Path testFilePath = Files.createTempFile(TEST_FILE_NAME, "");
+        final File testFile = testFilePath.toFile();
         testFile.deleteOnExit();
         for (String[] row : TEST_DATA)
             Files.write(testFilePath, (String.join(",", row) + "\n").getBytes(), java.nio.file.StandardOpenOption.APPEND);
+
         dataset = new CSVDataset(testFile.getAbsolutePath(), false);
     }
 
@@ -36,7 +39,7 @@ class CSVDatasetNoHeaderTest {
     @Test
     void testGetRows() {
         dataset.load();
-        List<String[]> rows = dataset.getRows();
+        final List<String[]> rows = dataset.getRows();
         assertNotNull(rows);
         assertEquals(TEST_DATA.length, rows.size());
         for (int i = 0; i < TEST_DATA.length; i++) {
@@ -53,7 +56,7 @@ class CSVDatasetNoHeaderTest {
     @Test
     void testLoad() {
         dataset.load();
-        List<String[]> rows = dataset.getRows();
+        final List<String[]> rows = dataset.getRows();
         assertNotNull(rows);
         assertEquals(TEST_DATA.length, rows.size());
         for (int i = 0; i < TEST_DATA.length; i++) {

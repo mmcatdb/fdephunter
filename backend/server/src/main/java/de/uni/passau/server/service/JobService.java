@@ -2,12 +2,12 @@ package de.uni.passau.server.service;
 
 import de.uni.passau.core.dataset.Dataset;
 import de.uni.passau.core.model.MaxSets;
-import de.uni.passau.algorithms.AdjustMaxSet;
+import de.uni.passau.algorithms.AdjustMaxSets;
 import de.uni.passau.algorithms.ComputeAR;
-import de.uni.passau.algorithms.ComputeFD;
+import de.uni.passau.algorithms.ComputeFdSet;
 import de.uni.passau.algorithms.ComputeLattice;
-import de.uni.passau.algorithms.ComputeMaxSet;
-import de.uni.passau.algorithms.ExtendMaxSet;
+import de.uni.passau.algorithms.ComputeMaxSets;
+import de.uni.passau.algorithms.ExtendMaxSets;
 import de.uni.passau.server.model.AssignmentEntity;
 import de.uni.passau.server.model.JobEntity;
 import de.uni.passau.server.model.JobEntity.IterationJobPayload;
@@ -82,8 +82,7 @@ public class JobService {
             this.jobId = jobId;
         }
 
-        @Override
-        public void run() {
+        @Override public void run() {
             executeJob(jobId);
         }
     }
@@ -131,7 +130,7 @@ public class JobService {
         final var workflow = workflowRepository.findById(job.workflowId).get();
         final var dataset = datasetService.getLoadedDatasetById(payload.datasetId());
 
-        final var maxSets = ComputeMaxSet.run(dataset);
+        final var maxSets = ComputeMaxSets.run(dataset);
         storageService.set(workflow.maxSetsId(), maxSets);
 
         workflow.state = WorkflowState.NEGATIVE_EXAMPLES;
@@ -170,7 +169,7 @@ public class JobService {
             .map(assignment -> assignment.exampleRow)
             .toList();
 
-        final var adjustedMaxSets = AdjustMaxSet.run(maxSets, evaluatedRows);
+        final var adjustedMaxSets = AdjustMaxSets.run(maxSets, evaluatedRows);
 
         // TODO Check if we can continue the workflow.
         // Also check if we have any assignments left to evaluate.
@@ -180,7 +179,7 @@ public class JobService {
         workflow.iteration = workflow.iteration + 1;
         final int lhsSize = workflow.iteration;
 
-        final var extendedMaxSets = ExtendMaxSet.run(adjustedMaxSets, lhsSize);
+        final var extendedMaxSets = ExtendMaxSets.run(adjustedMaxSets, lhsSize);
         storageService.set(workflow.maxSetsId(), extendedMaxSets);
 
         final var armstrongRelation = ComputeAR.run(maxSets, dataset, lhsSize);
@@ -224,7 +223,7 @@ public class JobService {
         //     storageService.set(workflow.latticesId(), lattice);
         // }
 
-        final var fds = ComputeFD.run(maxSets, dataset.getHeader());
+        final var fds = ComputeFdSet.run(maxSets, dataset.getHeader());
         storageService.set(workflow.fdsId(), fds);
     }
 

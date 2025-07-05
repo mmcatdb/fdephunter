@@ -1,103 +1,56 @@
 package de.uni.passau.algorithms.maxset;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
-import de.uni.passau.core.model.AgreeSet;
 import de.uni.passau.core.model.ColumnSet;
 import de.uni.passau.core.model.ComplementMaxSet;
 import de.uni.passau.core.model.MaxSet;
 
-/**
- *
- * @author pavel.koupil
- */
-public class MaxSetGenerator {
+public abstract class MaxSetGenerator {
 
-	private List<MaxSet> maxSet;
-	private List<ComplementMaxSet> cmaxSet;
+    /** Returns max sets ordered by their classes. */
+    public static List<MaxSet> generateMaxSets(Iterable<AgreeSet> agreeSets, int numberOfColumns) {
+        final var output = new ArrayList<MaxSet>();
+        for (int forClass = 0; forClass < numberOfColumns; forClass++)
+            output.add(generateMaxSet(agreeSets, forClass));
 
-	private List<AgreeSet> agreeSets;
-	private int numberOfAttributes;
+        return output;
+    }
 
-	public MaxSetGenerator(List<AgreeSet> agreeSets, int numberOfAttributes) {
-		this.agreeSets = agreeSets;
-		this.numberOfAttributes = numberOfAttributes;
-	}
+    private static MaxSet generateMaxSet(Iterable<AgreeSet> agreeSets, int forClass) {
+        final MaxSet result = new MaxSet(forClass);
+        for (final AgreeSet agreeSet : agreeSets) {
+            if (agreeSet.get(forClass))
+                continue;
 
+            result.addElement(agreeSet.cloneColumnSet());
+        }
 
-	public void targetFD(int columnIndex, int... bits) {
-		var _maxSet = maxSet.get(columnIndex);
-		AgreeSet s = new AgreeSet();
-		for (int index = 0; index < bits.length; ++index) {
-			s.add(bits[index]);
-		}
-		_maxSet.addCombination(s.getAttributes());
-	}
+        result.pruneSubsets();
 
+        return result;
+    }
 
-	public List<MaxSet> generateMaxSet() throws Exception {
+    /** Returns complement max sets ordered by their classes. */
+    public static List<ComplementMaxSet> generateComplementMaxSets(List<MaxSet> maxSets) {
+        final var output = new ArrayList<ComplementMaxSet>();
+        for (final MaxSet maxSet : maxSets)
+            output.add(generateComplementMaxSet(maxSet, maxSets.size()));
 
-		this.maxSet = new LinkedList<>();
+        return output;
+    }
 
-		for (int i = 0; i < this.numberOfAttributes; ++i) {
-			// System.out.println("A_index: " + i);
-			executeMax_Set_Task(i);
-		}
+    private static ComplementMaxSet generateComplementMaxSet(MaxSet maxSet, int numberOfColumns) {
+        final ComplementMaxSet result = new ComplementMaxSet(maxSet.forClass);
 
-		return maxSet;
-	}
+        for (final ColumnSet il : maxSet.confirmedElements()) {
+            final ColumnSet inverse = ColumnSet.fromRange(0, numberOfColumns);
+            inverse.xor(il);
+            result.addCombination(inverse);
+        }
 
-	private void executeMax_Set_Task(int currentJob) {
-
-		MaxSet result = new MaxSet(currentJob);
-		for (AgreeSet a : this.agreeSets) {
-			ColumnSet content = a.getAttributes();
-			if (content.get(currentJob)) {
-				continue;
-			}
-			result.addCombination(content);
-		}
-		result.finalize_RENAME_THIS();
-		this.maxSet.add(result);
-	}
-
-	public List<ComplementMaxSet> generateCMAX_SETs() throws Exception {
-		this.cmaxSet = new LinkedList<>();
-		for (int i = 0; i < this.numberOfAttributes; ++i) {
-			executeCMAX_SET_Task(i);
-		}
-
-		return cmaxSet;
-	}
-
-	private void executeCMAX_SET_Task(int currentJob) {
-
-		MaxSet maxSet = null;
-		for (MaxSet m : this.maxSet) {
-			if (m.forClass == currentJob) {
-				maxSet = m;
-				break;
-			}
-		}
-
-		ComplementMaxSet result = new ComplementMaxSet(currentJob);
-
-		for (ColumnSet il : maxSet.combinations()) {
-			ColumnSet inverse = new ColumnSet();
-			inverse.set(0, this.numberOfAttributes);
-			inverse.xor(il);
-			result.addCombination(inverse);
-		}
-
-		result.finalize_RENAME_THIS();
-		this.cmaxSet.add(result);
-	}
-
-	public static List<ComplementMaxSet> generateCMAX_SETs(List<MaxSet> maxSets, int numberOfAttributes) throws Exception {
-		MaxSetGenerator setGenerator = new MaxSetGenerator(new LinkedList<>(), numberOfAttributes);
-		setGenerator.maxSet = maxSets;
-		return setGenerator.generateCMAX_SETs();
-	}
+        return result;
+    }
 
 }

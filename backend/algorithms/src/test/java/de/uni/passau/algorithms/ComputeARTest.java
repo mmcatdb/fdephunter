@@ -9,22 +9,20 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import de.uni.passau.core.dataset.CSVDataset;
 import de.uni.passau.core.dataset.Dataset;
-import de.uni.passau.core.dataset.csv.CSVDataset;
 import de.uni.passau.core.model.ColumnSet;
 import de.uni.passau.core.model.MaxSet;
 import de.uni.passau.core.model.MaxSets;
 import de.uni.passau.core.example.ArmstrongRelation;
 
-
 class ComputeARTest {
 
-    /* The initial relation. */
-     private Dataset dataset;
+    /** The initial relation. */
+    private Dataset dataset;
 
-    /* Represents the actual functional dependencies. */
+    /** Represents the actual functional dependencies. */
     private MaxSets maxSets;
-
 
     @BeforeEach
     public void setUp() throws IOException {
@@ -107,13 +105,11 @@ class ComputeARTest {
 
     @Test
     void testComputeAR() {
-
         System.out.println("Computing AR...");
 
         // Run the ComputeAR algorithm
         Integer iteration = 1;
         ArmstrongRelation ar = ComputeAR.run(maxSets, dataset, iteration);
-
     }
 
 }

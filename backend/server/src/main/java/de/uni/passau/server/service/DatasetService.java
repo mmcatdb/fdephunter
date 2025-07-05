@@ -1,7 +1,7 @@
 package de.uni.passau.server.service;
 
+import de.uni.passau.core.dataset.CSVDataset;
 import de.uni.passau.core.dataset.Dataset;
-import de.uni.passau.core.dataset.csv.CSVDataset;
 import de.uni.passau.server.model.DatasetEntity;
 import de.uni.passau.server.model.DatasetEntity.DatasetType;
 import de.uni.passau.server.repository.DatasetRepository;

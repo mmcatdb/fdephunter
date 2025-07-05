@@ -1,5 +1,6 @@
 package de.uni.passau.server.controller;
 
+import de.uni.passau.core.model.ColumnSet;
 import de.uni.passau.server.model.JobEntity;
 import de.uni.passau.server.model.WorkflowEntity;
 import de.uni.passau.server.model.WorkflowEntity.WorkflowState;

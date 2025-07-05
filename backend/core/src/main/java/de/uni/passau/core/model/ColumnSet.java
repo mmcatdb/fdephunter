@@ -14,10 +14,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
-import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntList;
-import java.util.Iterator;
-
 /**
  * Represents a non-empty set of columns.
  */
@@ -28,32 +24,26 @@ public class ColumnSet implements Comparable<ColumnSet> {
     /** Indexes of the columns. */
     private final BitSet columns;
 
+    protected ColumnSet() {
+        this.columns = new BitSet();
+    }
+
     private ColumnSet(BitSet columns) {
         this.columns = columns;
     }
 
-    public ColumnSet() {
-        this.columns = new BitSet();
-    }
-
-    public static ColumnSet fromRange(int start, int end) {
-        if (start < 0 || end < start)
-            throw new IllegalArgumentException("Invalid range: [" + start + ", " + end + ")");
-
+    public static ColumnSet fromIndexes(int ...columns) {
         final BitSet bitSet = new BitSet();
-        for (int i = start; i < end; i++)
-            bitSet.set(i);
+        for (int column : columns)
+            bitSet.set(column);
 
         return new ColumnSet(bitSet);
     }
 
-    public static ColumnSet fromIndexes(int ...columns) {
-        if (columns.length == 0)
-            throw new IllegalArgumentException("ColumnSet must contain at least one column.");
-
+    public static ColumnSet fromRange(int start, int end) {
+        // No need to check the bounds, as BitSet will handle it for us.
         final BitSet bitSet = new BitSet();
-        for (int column : columns)
-            bitSet.set(column);
+        bitSet.set(start, end);
 
         return new ColumnSet(bitSet);
     }
@@ -62,151 +52,110 @@ public class ColumnSet implements Comparable<ColumnSet> {
         return columns.toString();
     }
 
-	public IntList toIntList() {
-		IntList bits = new IntArrayList();
-		int lastIndex = columns.nextSetBit(0);
-		while (lastIndex != -1) {
-			bits.add(lastIndex);
-			lastIndex = columns.nextSetBit(lastIndex + 1);
-		}
-		return bits;
-	}
+    /**
+     * Returns all indexes of the columns in this set in ascending order.
+     */
+    public int[] toIndexes() {
+        final int size = columns.cardinality();
+        final int[] output = new int[size];
+
+        int value = -1;
+        for (int i = 0; i < size; i++) {
+            value = columns.nextSetBit(value + 1);
+            output[i] = value;
+        }
+
+        return output;
+    }
 
     public int size() {
         return columns.cardinality();
     }
 
-    @Override public ColumnSet clone() {
-        return new ColumnSet((BitSet) this.columns.clone());
-    }
-
-    public BitSet getColumns() {
-        return (BitSet) this.columns.clone();
-    }
-
-    public void and(ColumnSet other) {
-        this.columns.and(other.columns);
+    public boolean isEmpty() {
+        return columns.isEmpty();
     }
 
     public boolean intersects(ColumnSet other) {
-        BitSet copy = (BitSet) this.columns.clone();
+        BitSet copy = (BitSet) columns.clone();
         copy.and(other.columns);
         return !copy.isEmpty();
     }
 
-    public void andNot(ColumnSet other) {
-        this.columns.andNot(other.columns);
-    }
-
-    public boolean isEmpty() {
-        return this.columns.isEmpty();
-    }
-
-    public boolean isSuperSetOf(ColumnSet other) {
+    public boolean isSupersetOf(ColumnSet other) {
         BitSet copy = (BitSet) other.columns.clone();
-        copy.andNot(this.columns);
+        copy.andNot(columns);
         return copy.isEmpty();
     }
 
-    public void set(int columnIndex) {
-        this.columns.set(columnIndex);
+    public int lastIndex() {
+        return columns.length() - 1;
     }
 
-    public void set(int columnIndex, int value) {
-        this.columns.set(columnIndex, value);
+    public boolean get(int index) {
+        return columns.get(index);
     }
 
-    public boolean get(int columnIndex) {
-        return this.columns.get(columnIndex);
+    public void set(int index) {
+        columns.set(index);
+    }
+
+    public void set(int fromIndex, int toIndex) {
+        columns.set(fromIndex, toIndex);
+    }
+
+    public void clear(int index) {
+        columns.clear(index);
+    }
+
+    public void flip(int index) {
+        columns.flip(index);
+    }
+
+    @Override public ColumnSet clone() {
+        return new ColumnSet((BitSet) columns.clone());
+    }
+
+    public void and(ColumnSet other) {
+        columns.and(other.columns);
+    }
+
+    public void andNot(ColumnSet other) {
+        columns.andNot(other.columns);
     }
 
     public void or(ColumnSet other) {
-        this.columns.or(other.columns);
+        columns.or(other.columns);
     }
 
     public void xor(ColumnSet other) {
-        this.columns.xor(other.columns);
-    }
-
-    public void flip(int columnIndex) {
-        this.columns.flip(columnIndex);
-    }
-
-    public int length() {
-        return this.columns.length();
-    }
-
-    public void clear(int columnIndex) {
-        this.columns.clear(columnIndex);
+        columns.xor(other.columns);
     }
 
     @Override public int compareTo(ColumnSet other) {
-        if (this.columns.size() != other.columns.size())
-            return this.columns.size() - other.columns.size();
+        if (columns.size() != other.columns.size())
+            return columns.size() - other.columns.size();
 
         final BitSet xor = (BitSet) columns.clone();
         xor.xor(other.columns);
 
         final int firstDifferent = xor.length() - 1;
-        if(firstDifferent == -1)
+        if (firstDifferent == -1)
             return 0;
 
         return other.columns.get(firstDifferent) ? 1 : -1;
     }
 
-    @Override public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        ColumnSet other = (ColumnSet) obj;
-        return columns.equals(other.columns);
+    @Override public boolean equals(Object other) {
+        if (this == other)
+            return true;
+
+        return other instanceof ColumnSet columnSet && columns.equals(columnSet.columns);
     }
 
     @Override public int hashCode() {
-            int result = 17;
-            result = 31 * result + columns.hashCode();
-            return result;
+        return columns.hashCode();
     }
-
-    /**
-     * Returns an iterator over the column indices in this set.
-     * The indices are returned in ascending order.
-     */
-    public Iterator<Integer> iterator() {
-        return new Iterator<Integer>() {
-            private int nextIndex = columns.nextSetBit(0);
-
-            @Override
-            public boolean hasNext() {
-                return nextIndex != -1;
-            }
-
-            @Override
-            public Integer next() {
-                if (nextIndex == -1) {
-                    throw new java.util.NoSuchElementException();
-                }
-                int current = nextIndex;
-                nextIndex = columns.nextSetBit(nextIndex + 1);
-                return current;
-            }
-        };
-    }
-
-    public int nextSetBit(int fromIndex) {
-        return columns.nextSetBit(fromIndex);
-    }
-
-    public int prevSetBit(int fromIndex) {
-        return columns.previousSetBit(fromIndex);
-    }
-
-    public int getBit(int index) {
-        if (index < 0 || index >= columns.length()) {
-            throw new IndexOutOfBoundsException("Index: " + index + ", Length: " + columns.length());
-        }
-        return columns.get(index) ? 1 : 0;
-    }
-
 
     // region Serialization
 

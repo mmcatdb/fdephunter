@@ -16,4 +16,20 @@ public interface Dataset {
 
     public boolean isLoaded();
 
+    public interface DatasetMetadata {
+
+        public String filepath();
+
+        public String filename();
+
+        public long size();
+
+        public boolean hasHeader();
+
+        public int numberOfColumns();
+
+        public int numberOfRows();
+
+    }
+
 }

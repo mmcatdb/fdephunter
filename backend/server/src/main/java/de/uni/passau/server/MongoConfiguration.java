@@ -49,23 +49,21 @@ public class MongoConfiguration extends AbstractMongoClientConfiguration {
 
     @WritingConverter
     public class ColumnSetWriteConverter implements Converter<ColumnSet, String> {
-        @Override
-        public String convert(@NonNull ColumnSet source) {
+        @Override public String convert(@NonNull ColumnSet source) {
             return source.toBase64String();
         }
     }
 
     @ReadingConverter
     public class ColumnSetReadConverter implements Converter<String, ColumnSet> {
-        @Override
-        public ColumnSet convert(@NonNull String source) {
+        @Override public ColumnSet convert(@NonNull String source) {
             return ColumnSet.fromBase64String(source);
         }
     }
 
-	@Override protected void configureConverters(@NonNull MongoConverterConfigurationAdapter adapter) {
-		adapter.registerConverter(new ColumnSetWriteConverter());
-		adapter.registerConverter(new ColumnSetReadConverter());
-	}
+    @Override protected void configureConverters(@NonNull MongoConverterConfigurationAdapter adapter) {
+        adapter.registerConverter(new ColumnSetWriteConverter());
+        adapter.registerConverter(new ColumnSetReadConverter());
+    }
 
 }

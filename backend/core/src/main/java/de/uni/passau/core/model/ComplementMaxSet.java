@@ -1,139 +1,34 @@
 package de.uni.passau.core.model;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
-/**
- *
- * @author pavel.koupil
- */
 public class ComplementMaxSet {
 
     /** Index of the RHS column. */
-	public final int forClass;
-    /** Max set elements in ascending order. */
-	protected List<ColumnSet> elements;
-    protected List<ColumnSet> candidates;
-	private boolean finalized;
+    public final int forClass;
+    /** Max set elements in a random order. */
+    public final List<ColumnSet> elements = new ArrayList<>();
 
-	public ComplementMaxSet(int forClass) {
-		this.forClass = forClass;
-		this.elements = new LinkedList<ColumnSet>();
-        this.candidates = new LinkedList<ColumnSet>();
-		this.finalized = false;
-	}
-
-    public ComplementMaxSet(int forClass, List<ColumnSet> elements) {
+    public ComplementMaxSet(int forClass) {
         this.forClass = forClass;
-        this.elements = elements;
-		this.finalized = false;
     }
 
-	public ComplementMaxSet(int forClass, List<ColumnSet> elements, List<ColumnSet> candidates) {
-		this.forClass = forClass;
-		this.elements = elements;
-		this.candidates = candidates;
-		this.finalized = false;
-	}
-
-	public void addCandidate(ColumnSet candidate) {
-		if (elements.contains(candidate)) {
-			throw new IllegalArgumentException("Candidate already exists in elements: " + candidate);
-		}
-		if (this.candidates == null) {
-			this.candidates = new LinkedList<ColumnSet>();
-		}
-		this.candidates.add(candidate);
-	}
-
-	public void removeCandidate(ColumnSet candidate) {
-		if (candidates == null || !candidates.contains(candidate)) {
-			throw new IllegalArgumentException("Candidate does not exist: " + candidate);
-		}
-		this.candidates.remove(candidate);
-	}
-
-	public void moveToTrueMaxSet(ColumnSet candidate) {
-		if (candidates == null || !candidates.contains(candidate)) {
-			throw new IllegalArgumentException("Candidate does not exist: " + candidate);
-		}
-		this.elements.add(candidate);
-		this.candidates.remove(candidate);
-	}
-
-
-	public void addCombination(ColumnSet combination) {
-		if (candidates != null && candidates.contains(combination)) {
-			throw new IllegalArgumentException("Combination already exists in candidates: " + combination + 
-											". \nUse moveToTrueMaxSet() to move it to the true max set.");
-		}
-		this.elements.add(combination);
-	}
-
-	public List<ColumnSet> combinations() {
-		return this.elements;
-	}
-
-    public Stream<ColumnSet> allColumnSets() {
-        return Stream.concat(
-            elements.stream(),
-            candidates.stream()
-        );
+    public void addCombination(ColumnSet combination) {
+        elements.add(combination);
     }
 
-	@Override
-	public String toString() {
+    @Override public String toString() {
+        final StringBuilder sb = new StringBuilder();
 
-		String s = "cmax(" + this.forClass + ": ";
-		for (ColumnSet set : this.elements)
-			s += set.toIntList();
-		return s + ")";
-	}
+        sb.append("cmax(").append(forClass).append(": ");
+        for (final ColumnSet set : elements)
+            sb.append(set).append(", ");
+        if (elements.size() > 0)
+            sb.setLength(sb.length() - 2); // Remove last comma and space.
+        sb.append(")");
 
-	public void finalize_RENAME_THIS() {
-
-		this.finalized = true;
-	}
-
-	@Override
-	public int hashCode() {
-
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + forClass;
-		result = prime * result + ((elements == null) ? 0 : elements.hashCode());
-		result = prime * result + (finalized ? 1231 : 1237);
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		ComplementMaxSet other = (ComplementMaxSet) obj;
-		if (forClass != other.forClass) {
-			return false;
-		}
-		if (elements == null) {
-			if (other.elements != null) {
-				return false;
-			}
-		} else if (!elements.equals(other.elements)) {
-			return false;
-		}
-		if (finalized != other.finalized) {
-			return false;
-		}
-		return true;
-	}
+        return sb.toString();
+    }
 
 }

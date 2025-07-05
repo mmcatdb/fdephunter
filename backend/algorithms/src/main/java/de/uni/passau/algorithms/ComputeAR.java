@@ -3,19 +3,15 @@ package de.uni.passau.algorithms;
 import de.uni.passau.algorithms.exception.ComputeARException;
 import de.uni.passau.core.dataset.Dataset;
 import de.uni.passau.core.example.ArmstrongRelation;
-import de.uni.passau.core.example.ExampleRow;
 import de.uni.passau.core.model.MaxSet;
 import de.uni.passau.core.model.MaxSets;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.Collectors;
-
-
 
 /**
  * Computes Armstrong relation for functional dependencies defined by a maximal set.
@@ -28,8 +24,8 @@ public class ComputeAR {
         MaxSets maxSets,
         /** The initial relation. */
         Dataset dataset,
-		//** The iteration */
-		Integer iteration
+        //** The iteration */
+        Integer iteration
     ) {
         try {
             //final var algorithm = new ComputeAR(maxSet, dataset);
@@ -41,38 +37,23 @@ public class ComputeAR {
         }
     }
 
-
-    private class RowObject implements Comparable<RowObject> {
-		public String value;
-		public int index;
-		private RowObject(String content, int size) {
-			this.value = content;
-			this.index = size;
-		}
-		@Override
-		public int compareTo(RowObject o) {
-			return value.compareTo(o.value);
-		}
-	}
-
-
     private final MaxSets maxSets;
     private final Dataset dataset;
-	private final Integer iteration;
+    private final Integer iteration;
 
     private ComputeAR(MaxSets maxSets, Dataset dataset, Integer iteration) {
         this.maxSets = maxSets;
         this.dataset = dataset;
-		this.iteration = iteration;
+        this.iteration = iteration;
     }
 
-    private ArmstrongRelation innerRun() throws Exception {
+    private ArmstrongRelation innerRun() {
 
         // Get the number
         final int columnsCount = maxSets.sets().size();
 
         // A Set of int[] arrays with a custom comparator
-		Set<int[]> sortetArmstrongRelationArraySet = new TreeSet<int[]>((a1, a2) -> {
+        Set<int[]> sortetArmstrongRelationArraySet = new TreeSet<int[]>((a1, a2) -> {
             int len = Math.min(a1.length, a2.length);
             for (int i = 0; i < len; i++) {
                 int cmp = Integer.compare(a1[i], a2[i]);
@@ -86,51 +67,46 @@ public class ComputeAR {
         // Iterate over each MaxSet
         for (MaxSet maxSet : maxSets.sets()) {
             // Iterate over the list of LHS columns of the functional dependecies in this MaxSet (class)
-			maxSet.allColumnSets().forEach(lhsBitSet -> {
+            maxSet.elements().forEach(lhsBitSet -> {
+                // Initialize a array with length of all classes of maxSet
+                int[] row = new int[columnsCount];
+                // Fill the array with 1s
+                for (int i = 0; i < columnsCount; i++)
+                    row[i] = 1;
 
                 // Get the BitSet (LHS) of the current functional dependency. The bitset represents the columns of the LHS.
-
-                // Convert the BitSet to a list of indices of the columns
-				List<Integer> lhsColumnIndeces = new ArrayList<Integer>();
-                int lastIndex = lhsBitSet.nextSetBit(0);
-                while (lastIndex != -1) {
-                    lhsColumnIndeces.add(lastIndex);
-                    lastIndex = lhsBitSet.nextSetBit(lastIndex + 1);
-                }
-                // Initialize a array with length of all classes of maxSet
-				int[] row = new int[columnsCount];
-                // Fill the array with 1
-                for (int i = 0; i < columnsCount; ++i) {
-                    row[i] = 1;
-                }
                 // Set rows to 0 for the columns of the LHS
-                lhsColumnIndeces.forEach(element -> row[element] = 0);
-                // Add the row to the sorted set
-				sortetArmstrongRelationArraySet.add(row);
-			});
-		}
+                for (final int i : lhsBitSet.toIndexes())
+                    row[i] = 0;
 
-        // Convert the sorted set to a List
-		LinkedList<int[]> armstrongRelationList = new LinkedList<>(sortetArmstrongRelationArraySet);
+                // Add the row to the sorted set
+                sortetArmstrongRelationArraySet.add(row);
+            });
+        }
+
+        final List<int[]> armstrongRelationList = new ArrayList<>();
 
         // Add the first row with all 0s
-		int[] row = new int[columnsCount];
-        armstrongRelationList.addFirst(row);
+        int[] row = new int[columnsCount];
+        armstrongRelationList.add(row);
 
-		int lineNumber = 1;
+        // Add all other rows from the sorted set
+        armstrongRelationList.addAll(sortetArmstrongRelationArraySet);
+
+        int lineNumber = 1;
         // Iterate over the LHS rows and replace the 1s with line numbers
-		for (int[] lhsRow : armstrongRelationList) {
-			boolean changed = false;
-			for (int index = 0; index < lhsRow.length; ++index) {
-				if (lhsRow[index] == 1) {
-					lhsRow[index] = lineNumber;
-					changed = true;
-				}
-			}
-			if (changed) {
-				++lineNumber;
-			}
-		}
+        for (int[] lhsRow : armstrongRelationList) {
+            boolean changed = false;
+            for (int index = 0; index < lhsRow.length; index++) {
+                if (lhsRow[index] == 1) {
+                    lhsRow[index] = lineNumber;
+                    changed = true;
+                }
+            }
+
+            if (changed)
+                lineNumber++;
+        }
 
         List<List<String>> mappedUniqueLists = realworldAR(armstrongRelationList);
 
@@ -144,74 +120,68 @@ public class ComputeAR {
 
 
 
-		// -- Create the example for the current iteration -- //
+        // -- Create the example for the current iteration -- //
 
-		// 1. Generate a List of arrays. The arrays have the same length as the number of columns in the original relation. Create all
-		//    combinations of bits (0 and 1) where the iteration is the number of bits set to 1.
-		List<int[]> bitCombinations = generateBitCombinations(columnsCount, iteration);
+        // 1. Generate a List of arrays. The arrays have the same length as the number of columns in the original relation. Create all
+        //    combinations of bits (0 and 1) where the iteration is the number of bits set to 1.
+        List<boolean[]> bitCombinations = generateBitCombinations(columnsCount, iteration);
 
-		// 2. Iterate over each MaxSet. Compare eeach combination of bits with the LHS of the MaxSet with all combinations of bits. Ignore bitCombinations where the RHS of the MaxSet is set in the combination. If the combination is not part of the max set create an ExampleRow with the combination of bits.
+        // 2. Iterate over each MaxSet. Compare eeach combination of bits with the LHS of the MaxSet with all combinations of bits. Ignore bitCombinations where the RHS of the MaxSet is set in the combination. If the combination is not part of the max set create an ExampleRow with the combination of bits.
         for (MaxSet maxSet : maxSets.sets()) {
 
-			// RHS of the MaxSet
-			int rhs = maxSet.forClass;
+            // RHS of the MaxSet
+            int rhs = maxSet.forClass;
 
-			// DEBUG: Print the current RHS
-			System.out.println("Current RHS: " + rhs);
+            // DEBUG: Print the current RHS
+            System.out.println("Current RHS: " + rhs);
 
-			// Iterate over each combination of bits
-			for (int[] bitCombination : bitCombinations) {
+            // Iterate over each combination of bits
+            for (boolean[] bitCombination : bitCombinations) {
 
-				// Check if the bit at position rhs is set to 1
-				if (bitCombination[rhs] == 1) {
-					// Skip this combination, because the RHS is set
-					continue;
-				}
+                // Check if the bit at position rhs is set to 1
+                if (bitCombination[rhs]) {
+                    // Skip this combination, because the RHS is set
+                    continue;
+                }
 
-				// DEBUG: Print the current bitCombination
-				System.out.println("Current BitCombination: " + Arrays.toString(bitCombination));
+                // DEBUG: Print the current bitCombination
+                System.out.println("Current BitCombination: " + Arrays.toString(bitCombination));
 
-				final boolean[] isSubset = {false};
-				// Iterate over each LHS of current MaxSet
-				maxSet.combinations().forEach(lhsBitSet -> {
+                final boolean[] isSubset = {false};
+                // Iterate over each LHS of current MaxSet
+                maxSet.elements().forEach(lhsBitSet -> {
 
-					// Convert the lhsBitSet with list of indices of the columns to a BitSet
-					int[] lhsBitSetArray = new int[columnsCount];
-					Arrays.fill(lhsBitSetArray, 0);
-					int lastIndex = lhsBitSet.nextSetBit(0);
-					while (lastIndex != -1) {
-						lhsBitSetArray[lastIndex] = 1;
-						lastIndex = lhsBitSet.nextSetBit(lastIndex + 1);
-					}
+                    // Convert the lhsBitSet with list of indices of the columns to a BitSet
+                    boolean[] lhsBitSetArray = new boolean[columnsCount];
+                    Arrays.fill(lhsBitSetArray, false);
+                    for (final var index : lhsBitSet.toIndexes())
+                        lhsBitSetArray[index] = true;
 
-					// DEBUG: Print the LHS
-					//System.out.println("  LHS BitSet: " + lhsBitSet);
+                    // DEBUG: Print the LHS
+                    //System.out.println("  LHS BitSet: " + lhsBitSet);
 
-					// DEBUG: Print the LHS BitSetArray
-					//System.out.println("  Compare to LHS BitSetArray: " + Arrays.toString(lhsBitSetArray));
+                    // DEBUG: Print the LHS BitSetArray
+                    //System.out.println("  Compare to LHS BitSetArray: " + Arrays.toString(lhsBitSetArray));
 
-					// Check if the bits of the combination are a subset of the LHS BitSetArray. If not print the bitCombination.
+                    // Check if the bits of the combination are a subset of the LHS BitSetArray. If not print the bitCombination.
 
-					for (int i = 0; i < columnsCount; ++i) {
-						if (lhsBitSetArray[i] == 1 && bitCombination[i] == 1) {
-							isSubset[0] = true;
-							break;
-						}
-					}
-				});
+                    for (int i = 0; i < columnsCount; i++) {
+                        if (lhsBitSetArray[i] && bitCombination[i]) {
+                            isSubset[0] = true;
+                            break;
+                        }
+                    }
+                });
 
-				// DEBUG: Print if the bitCombination is a subset of the LHS
-				if (!isSubset[0]) {
-					System.out.println("  Found a valid combination: " + Arrays.toString(bitCombination));
-				}
+                // DEBUG: Print if the bitCombination is a subset of the LHS
+                if (!isSubset[0]) {
+                    System.out.println("  Found a valid combination: " + Arrays.toString(bitCombination));
+                }
 
-			};
-		};
+            };
+        };
 
-
-
-
-		return null;
+        return null;
 
 
         // final var referenceRow = mappedUniqueLists.get(0).toArray(String[]::new);
@@ -239,166 +209,173 @@ public class ComputeAR {
 
 
 
-	//Generate a List of arrays. The arrays have the same length as the number of columns in the original relation. Create all combinations of bits (0 and 1) where the iteration is the number of bits set to 1.
-	private List<int[]> generateBitCombinations(int columnsCount, int iteration) {
-		List<int[]> combinations = new ArrayList<>();
-		int[] combination = new int[columnsCount];
-		generateCombinations(combination, 0, 0, iteration, combinations);
-		return combinations;
-	}
+    //Generate a List of arrays. The arrays have the same length as the number of columns in the original relation. Create all combinations of bits (`false` and `true`) where the iteration is the number of bits set to `true`.
+    private List<boolean[]> generateBitCombinations(int columnsCount, int iteration) {
+        List<boolean[]> combinations = new ArrayList<>();
+        boolean[] combination = new boolean[columnsCount];
+        generateCombinations(combination, 0, 0, iteration, combinations);
+        return combinations;
+    }
 
-	private void generateCombinations(int[] combination, int start, int depth, int maxDepth, List<int[]> combinations) {
-		if (depth == maxDepth) {
-			combinations.add(combination.clone());
-			return;
-		}
-		for (int i = start; i < combination.length; i++) {
-			combination[i] = 1;
-			generateCombinations(combination, i + 1, depth + 1, maxDepth, combinations);
-			combination[i] = 0;
-		}
-	}
+    private void generateCombinations(boolean[] combination, int start, int depth, int maxDepth, List<boolean[]> combinations) {
+        if (depth == maxDepth) {
+            combinations.add(combination.clone());
+            return;
+        }
+        for (int i = start; i < combination.length; i++) {
+            combination[i] = true;
+            generateCombinations(combination, i + 1, depth + 1, maxDepth, combinations);
+            combination[i] = false;
+        }
+    }
+
+    private record RowObject(
+        String value,
+        int index
+    ) implements Comparable<RowObject> {
+        @Override public int compareTo(RowObject o) {
+            return value.compareTo(o.value);
+        }
+    }
 
 
-
-
-	private List<List<String>> realworldAR(LinkedList<int[]> AR) throws Exception {
+    private List<List<String>> realworldAR(List<int[]> AR) {
 
         // The number of columns in the Armstrong Relation
-		int columnCount = AR.get(0).length;
+        int columnCount = AR.get(0).length;
 
-		// Step 1: Calculate distinct values required for each column
-		int[] distinct = calculateDistinctValues(AR, columnCount);
+        // Step 1: Calculate distinct values required for each column
+        int[] distinct = calculateDistinctValues(AR, columnCount);
 
-		// Step 2: Collect unique values for each column from CSV
-		List<Set<RowObject>> uniqueValues = collectUniqueValues(columnCount, distinct);
-		List<List<String>> uniqueOrderedLists = orderUniqueValues(uniqueValues);
+        // Step 2: Collect unique values for each column from CSV
+        List<Set<RowObject>> uniqueValues = collectUniqueValues(columnCount, distinct);
+        List<List<String>> uniqueOrderedLists = orderUniqueValues(uniqueValues);
 
-		// Step 3: Ensure each uniqueValues list has the required distinct values
-		List<List<String>> uniqueLists = ensureDistinctValues(uniqueOrderedLists, distinct);
+        // Step 3: Ensure each uniqueValues list has the required distinct values
+        List<List<String>> uniqueLists = ensureDistinctValues(uniqueOrderedLists, distinct);
 
-		// Step 4: Map AR indices to their corresponding values from uniqueLists
-		return mapIndicesToValues(AR, uniqueLists, columnCount);
-	}
+        // Step 4: Map AR indices to their corresponding values from uniqueLists
+        return mapIndicesToValues(AR, uniqueLists, columnCount);
+    }
 
-	private int[] calculateDistinctValues(List<int[]> AR, int columnCount) {
+    private int[] calculateDistinctValues(List<int[]> AR, int columnCount) {
 
         // Initialize list of {columnCount} sets.
-		List<Set<Integer>> uniqueValuesSet = new ArrayList<>(columnCount);
-		for (int i = 0; i < columnCount; i++) {
-			uniqueValuesSet.add(new TreeSet<>());
-		}
+        List<Set<Integer>> uniqueValuesSet = new ArrayList<>(columnCount);
+        for (int i = 0; i < columnCount; i++) {
+            uniqueValuesSet.add(new TreeSet<>());
+        }
 
         // Iterate over each LHS column in the Armstrong Relation
-		for (int[] lhsRow : AR) {
+        for (int[] lhsRow : AR) {
             // Add the columns values of the LHS to the sets in order
-			for (int col = 0; col < columnCount; col++) {
-				uniqueValuesSet.get(col).add(lhsRow[col]);
-			}
-		}
+            for (int col = 0; col < columnCount; col++) {
+                uniqueValuesSet.get(col).add(lhsRow[col]);
+            }
+        }
 
         // Add the size of each set to the distinct array
-		int[] distinct = new int[columnCount];
-		for (int i = 0; i < columnCount; i++) {
-			distinct[i] = uniqueValuesSet.get(i).size();
-		}
+        int[] distinct = new int[columnCount];
+        for (int i = 0; i < columnCount; i++) {
+            distinct[i] = uniqueValuesSet.get(i).size();
+        }
 
-		return distinct;
-	}
+        return distinct;
+    }
 
-	private List<Set<RowObject>> collectUniqueValues(int columnCount, int[] distinct) throws Exception {
+    private List<Set<RowObject>> collectUniqueValues(int columnCount, int[] distinct) {
 
         // Initialize list of {columnCount} sets of RowObject. This can hold the value and the index of the value.
-		List<Set<RowObject>> uniqueValues = new ArrayList<>();
-		for (int i = 0; i < columnCount; i++) {
-			uniqueValues.add(new TreeSet<>());
-		}
+        List<Set<RowObject>> uniqueValues = new ArrayList<>();
+        for (int i = 0; i < columnCount; i++) {
+            uniqueValues.add(new TreeSet<>());
+        }
 
         // Iterate over each line in the dataset
-        for(String[] line: this.dataset.getRows()) {
+        for (String[] line: dataset.getRows()) {
 
             boolean allRequirementsMet = true;
 
             // Iterate over each column in the current line
             for (int lineIdx = 0; lineIdx < line.length; lineIdx++) {
                 // Get the content of the current column
-				String rowValue = line[lineIdx];
+                String rowValue = line[lineIdx];
                 // If the content is null, set it to "NULL"
-				if (rowValue == null) {
-					rowValue = "NULL";
-				}
+                if (rowValue == null) {
+                    rowValue = "NULL";
+                }
 
                 // Get the set of RowObject for the current column index
-				Set<RowObject> rowObjectsSet = uniqueValues.get(lineIdx);
+                Set<RowObject> rowObjectsSet = uniqueValues.get(lineIdx);
 
                 // If the set size is less than the required distinct values for this column
-				if (rowObjectsSet.size() < distinct[lineIdx]) {
+                if (rowObjectsSet.size() < distinct[lineIdx]) {
                     // Add a new RowObject with the row value and its index in the set
-					rowObjectsSet.add(new RowObject(rowValue, rowObjectsSet.size()));
-				}
+                    rowObjectsSet.add(new RowObject(rowValue, rowObjectsSet.size()));
+                }
                 // Check if the set size meets the distinct requirement
-				if (rowObjectsSet.size() < distinct[lineIdx]) {
-					allRequirementsMet = false;
-				}
-			}
-			if (allRequirementsMet) {
-				break;
-			}
+                if (rowObjectsSet.size() < distinct[lineIdx]) {
+                    allRequirementsMet = false;
+                }
+            }
+            if (allRequirementsMet) {
+                break;
+            }
 
         }
-		return uniqueValues;
-	}
+        return uniqueValues;
+    }
 
     private List<List<String>> orderUniqueValues(List<Set<RowObject>> uniqueValues) {
         // Convert each set of RowObject into a List<String> where the index corresponds to the original index
-		List<List<String>> list = new ArrayList<>();
-		for (Set<RowObject> set : uniqueValues) {
-			int size = set.size();
-			String[] array = new String[size];
-			for (RowObject tuple : set) {
-				array[tuple.index] = tuple.value;
-			}
-			List<String> l = List.of(array);
-			list.add(l);
-		}
-		return list;
-	}
+        List<List<String>> list = new ArrayList<>();
+        for (Set<RowObject> set : uniqueValues) {
+            int size = set.size();
+            String[] array = new String[size];
+            for (RowObject tuple : set) {
+                array[tuple.index] = tuple.value;
+            }
+            List<String> l = List.of(array);
+            list.add(l);
+        }
+        return list;
+    }
 
 
-	private List<List<String>> ensureDistinctValues(List<List<String>> uniqueValues, int[] distinct) {
-		List<List<String>> uniqueLists = new ArrayList<>();
-		for (int i = 0; i < uniqueValues.size(); i++) {
-			List<String> columnList = new ArrayList<>(uniqueValues.get(i));
-			while (columnList.size() < distinct[i]) {
-				columnList.add("Dummy#" + columnList.size());
-			}
-			uniqueLists.add(columnList);
-		}
-		return uniqueLists;
-	}
+    private List<List<String>> ensureDistinctValues(List<List<String>> uniqueValues, int[] distinct) {
+        List<List<String>> uniqueLists = new ArrayList<>();
+        for (int i = 0; i < uniqueValues.size(); i++) {
+            List<String> columnList = new ArrayList<>(uniqueValues.get(i));
+            while (columnList.size() < distinct[i]) {
+                columnList.add("Dummy#" + columnList.size());
+            }
+            uniqueLists.add(columnList);
+        }
+        return uniqueLists;
+    }
 
-	private List<List<String>> mapIndicesToValues(List<int[]> AR, List<List<String>> uniqueLists, int columnCount) {
-		List<List<String>> result = new ArrayList<>();
-		int[] lastValue = new int[columnCount];
-		int[] currentIndex = new int[columnCount];
+    private List<List<String>> mapIndicesToValues(List<int[]> AR, List<List<String>> uniqueLists, int columnCount) {
+        List<List<String>> result = new ArrayList<>();
+        int[] lastValue = new int[columnCount];
+        int[] currentIndex = new int[columnCount];
 
-		for (int[] row : AR) {
-			List<String> newRow = new ArrayList<>();
-			for (int colIdx = 0; colIdx < columnCount; colIdx++) {
-				int value = row[colIdx];
-				if (value == 0) {
-					newRow.add(uniqueLists.get(colIdx).get(0));
-					continue;
-				}
-				if (value > lastValue[colIdx]) {
-					currentIndex[colIdx]++;
-					lastValue[colIdx] = value;
-				}
-				newRow.add(uniqueLists.get(colIdx).get(currentIndex[colIdx]));
-			}
-			result.add(newRow);
-		}
-		return result;
-	}
+        for (int[] row : AR) {
+            List<String> newRow = new ArrayList<>();
+            for (int colIdx = 0; colIdx < columnCount; colIdx++) {
+                int value = row[colIdx];
+                if (value == 0) {
+                    newRow.add(uniqueLists.get(colIdx).get(0));
+                    continue;
+                }
+                if (value > lastValue[colIdx]) {
+                    currentIndex[colIdx]++;
+                    lastValue[colIdx] = value;
+                }
+                newRow.add(uniqueLists.get(colIdx).get(currentIndex[colIdx]));
+            }
+            result.add(newRow);
+        }
+        return result;
+    }
 
 }

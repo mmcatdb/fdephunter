@@ -12,7 +12,7 @@ import de.uni.passau.core.example.ExampleDecision.DecisionColumnStatus;
 /**
  * Compute new maximal set based on the previous one and expert's decisions.
  */
-public class AdjustMaxSet {
+public class AdjustMaxSets {
 
     public static MaxSets run(
         /** The previous version of the max set. */
@@ -21,7 +21,7 @@ public class AdjustMaxSet {
         List<ExampleRow> exampleRows
     ) {
         try {
-            final var algorithm = new AdjustMaxSet(prev, exampleRows);
+            final var algorithm = new AdjustMaxSets(prev, exampleRows);
             return algorithm.innerRun();
         } catch (final Exception e) {
             throw AdjustMaxSetException.inner(e);
@@ -31,7 +31,7 @@ public class AdjustMaxSet {
     private final MaxSets prev;
     private final List<ExampleRow> exampleRows;
 
-    private AdjustMaxSet(MaxSets prev, List<ExampleRow> exampleRows) {
+    private AdjustMaxSets(MaxSets prev, List<ExampleRow> exampleRows) {
         this.prev = prev;
         this.exampleRows = exampleRows;
     }
@@ -42,42 +42,39 @@ public class AdjustMaxSet {
             .toList();
 
         final MaxSets newMaxSets = new MaxSets(newSets);
-        for (ExampleRow row : exampleRows) {
-            for (int forClass : row.rhsSet.toIntList()) {
+        for (final ExampleRow row : exampleRows) {
+            for (final int forClass : row.rhsSet.toIndexes()) {
                 final MaxSet newMaxSet = newMaxSets.sets().get(forClass);
 
                 if (row.decision.columns()[forClass].status() == DecisionColumnStatus.VALID) {
-                    /*
-                     * If the column C is marked as VALID, the FD lhsSet -> C does not hold.
-                     * This means lhsSet (or a superset of it) is part of the max set.
-                     * 
-                     * lhsSet should be a candidate in the previous max set and we move it to the
-                     * true max set.
-                     */
+                    // If the column C is marked as VALID, the FD lhsSet -> C does not hold.
+                    // This means lhsSet (or a superset of it) is part of the max set.
+                    //
+                    // lhsSet should be a candidate in the previous max set and we move it to the
+                    // true max set.
                     newMaxSet.moveToTrueMaxSet(row.lhsSet);
                 } else if (row.decision.columns()[forClass].status() == DecisionColumnStatus.INVALID) {
-                    /*
-                     * If the column C is marked as INVALID, the FD lhsSet -> C holds.
-                     * This means lhsSet (or a superset of it) is not part of the max set.
-                     * 
-                     * lhsSet should be a candidate in the previous max set and we remove it.
-                     */
+                    // If the column C is marked as INVALID, the FD lhsSet -> C holds.
+                    // This means lhsSet (or a superset of it) is not part of the max set.
+                    //
+                    // lhsSet should be a candidate in the previous max set and we remove it.
                     newMaxSet.removeCandidate(row.lhsSet);
 
                     // Reconstruct the "child" max sets, i.e., any subset of lhsSet that has exactly
                     // one column less than lhsSet
-                    for (int i = 0; i < row.lhsSet.size(); i++) {
-                        ColumnSet subset = row.lhsSet.clone();
+                    for (final int i: row.lhsSet.toIndexes()) {
+                        final ColumnSet subset = row.lhsSet.clone();
                         subset.clear(i);
                         // Simply add the subset to the new max set; it will be checked later
                         // TODO: We may be smarter and not add elements that we will just remove later.
-                        newMaxSet.addCombination(subset);
+                        newMaxSet.addElement(subset);
                     }
                 } else {
                     // ignore UNANSWERED columns (for now)
                     continue;
                 }
-                newMaxSet.finalize_RENAME_THIS();
+
+                newMaxSet.pruneSubsets();
             }
         }
 

@@ -23,40 +23,13 @@ public class ExampleRow {
     public boolean isPositive;
 
     /** If null, the row is still undecided. */
-    public @Nullable ExampleDecision decision;
+    public @Nullable ExampleDecision decision = null;
 
     public ExampleRow(String[] values, ColumnSet lhsSet, ColumnSet rhsSet, boolean isPositive) {
         this.values = values;
         this.lhsSet = lhsSet;
         this.rhsSet = rhsSet;
         this.isPositive = isPositive;
-        this.decision = null;
-        if (lhsSet == null || rhsSet == null) {
-            throw new IllegalArgumentException("lhsSet and rhsSet must not be null.");
-        }
-        if (lhsSet.isEmpty() || rhsSet.isEmpty()) {
-            throw new IllegalArgumentException("lhsSet and rhsSet must not be empty.");
-        }
-        if (lhsSet.intersects(rhsSet)) {
-            throw new IllegalArgumentException("lhsSet and rhsSet must be disjoint.");
-        }
     }
-
-    public void setDecision(ExampleDecision decision) {
-        if (decision == null) {
-            this.decision = null;
-            return;
-        }
-        // Every column in rhsSet needs to have a decision (and no other column).
-        int[] decisionColumnsArray = java.util.stream.IntStream.range(0, decision.columns().length)
-            .filter(i -> decision.columns()[i].status() != null)
-            .toArray();
-        if (!rhsSet.equals(ColumnSet.fromIndexes(decisionColumnsArray))){
-            throw new IllegalArgumentException("Decision columns must match the rhsSet.");
-        }
-
-        this.decision = decision;
-    }
-
 
 }
