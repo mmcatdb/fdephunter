@@ -28,6 +28,15 @@ public class AssignmentEntity {
     /** The example relation contains exactly one example row. */
     public ExampleRow exampleRow;
 
+    // Rejected can be (most likely) removed from the database. However, the time and memory saving is negligible (each such row corresponds to an user's decision).
+    // All new rows are active by default.
+    /**
+     * Whether the row is a part of the currently displayed Armstrong relation or not. We still want to keep the row in the database.
+     * If a row is rejected, it becomes inactive. It can never come back.
+     * If a row is make obsolete by a new row, it becomes inactive, but it can be made active again if the new row is rejected.
+     */
+    public boolean isActive = true;
+
     public static AssignmentEntity create(UUID workflowId, String[] columns, String[] referenceRow, ExampleRow exampleRow) {
         final var assignment = new AssignmentEntity();
 

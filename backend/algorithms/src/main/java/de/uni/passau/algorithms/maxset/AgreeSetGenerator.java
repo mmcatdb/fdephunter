@@ -36,7 +36,7 @@ public class AgreeSetGenerator {
             sum += sp.values.size();
 
             LOGGER.debug("-----");
-            LOGGER.debug("Attribute: " + sp.forClass);
+            LOGGER.debug("For class: " + sp.forClass);
             LOGGER.debug("Number of partitions: " + sp.values.size());
         }
 

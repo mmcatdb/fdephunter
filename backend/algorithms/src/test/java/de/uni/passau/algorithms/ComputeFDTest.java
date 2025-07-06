@@ -20,7 +20,7 @@ class ComputeFDTest {
         dataset.load();
 
         final var maxSets = ComputeMaxSets.run(dataset);
-        final FdSet result = ComputeFdSet.run(maxSets, dataset.getHeader());
+        final FdSet result = ComputeFds.run(maxSets, dataset.getHeader());
 
         assertNotNull(result);
         assertFalse(result.fds.isEmpty());

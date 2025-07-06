@@ -109,7 +109,7 @@ class ComputeARTest {
 
         // Run the ComputeAR algorithm
         Integer iteration = 1;
-        ArmstrongRelation ar = ComputeAR.run(maxSets, dataset, iteration);
+        ArmstrongRelation ar = ComputeAR.run(maxSets, dataset, null, false);
     }
 
 }

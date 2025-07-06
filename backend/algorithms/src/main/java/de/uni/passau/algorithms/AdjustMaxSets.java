@@ -14,10 +14,12 @@ import de.uni.passau.core.example.ExampleDecision.DecisionColumnStatus;
  */
 public class AdjustMaxSets {
 
+    /**
+     * @param prev - The previous version of the max set.
+     * @param exampleRows - Example rows, preferably with the expert's decisions.
+     */
     public static MaxSets run(
-        /** The previous version of the max set. */
         MaxSets prev,
-        /** Example rows, preferably with the expert's decisions. */
         List<ExampleRow> exampleRows
     ) {
         try {

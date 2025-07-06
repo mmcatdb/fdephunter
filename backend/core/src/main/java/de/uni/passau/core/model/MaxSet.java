@@ -10,7 +10,9 @@ public class MaxSet implements Cloneable {
 
     /** Index of the RHS column. */
     public final int forClass;
+    /** Elements that are confirmed to be in the max set (at least in the current version of max set). */
     private final Set<ColumnSet> confirmeds = new HashSet<>();
+    /** Elements that are speculatively added to the max set, but might be removed later (or moved to the confirmed category). */
     private final Set<ColumnSet> candidates = new HashSet<>();
 
     private MaxSet(int forClass, Iterable<ColumnSet> confirmeds, Iterable<ColumnSet> candidates) {

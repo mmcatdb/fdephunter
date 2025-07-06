@@ -1,10 +1,11 @@
 package de.uni.passau.server.service;
 
 import de.uni.passau.core.dataset.Dataset;
+import de.uni.passau.core.example.ArmstrongRelation;
 import de.uni.passau.core.model.MaxSets;
 import de.uni.passau.algorithms.AdjustMaxSets;
 import de.uni.passau.algorithms.ComputeAR;
-import de.uni.passau.algorithms.ComputeFdSet;
+import de.uni.passau.algorithms.ComputeFds;
 import de.uni.passau.algorithms.ComputeLattice;
 import de.uni.passau.algorithms.ComputeMaxSets;
 import de.uni.passau.algorithms.ExtendMaxSets;
@@ -20,6 +21,7 @@ import de.uni.passau.server.repository.JobRepository;
 import de.uni.passau.server.repository.WorkflowRepository;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -135,13 +137,13 @@ public class JobService {
 
         workflow.state = WorkflowState.NEGATIVE_EXAMPLES;
 
-        final var armstrongRelation = ComputeAR.run(maxSets, dataset, 0);
+        final var armstrongRelation = ComputeAR.run(maxSets, dataset, null, false);
 
         final var assignments = new ArrayList<AssignmentEntity>();
 
         // TODO These are not assignments, just the example rows.
         for (final var exampleRow : armstrongRelation.exampleRows) {
-            final var assignment = AssignmentEntity.create(job.workflowId, armstrongRelation.columns, armstrongRelation.referenceRow, exampleRow);
+            final var assignment = AssignmentEntity.create(job.workflowId, dataset.getHeader(), armstrongRelation.referenceRow, exampleRow);
             assignments.add(assignment);
         }
 
@@ -165,7 +167,7 @@ public class JobService {
 
         final var evaluatedRows = assignments.stream()
         // TODO Filter only the new ones.
-            .filter(assignment -> assignment.exampleRow.decision != null)
+            .filter(assignment -> assignment.isActive && assignment.exampleRow.decision != null)
             .map(assignment -> assignment.exampleRow)
             .toList();
 
@@ -179,10 +181,15 @@ public class JobService {
         workflow.iteration = workflow.iteration + 1;
         final int lhsSize = workflow.iteration;
 
+        // TODO
+        final var isEvaluatingPositives = workflow.state == WorkflowState.POSITIVE_EXAMPLES;
+
         final var extendedMaxSets = ExtendMaxSets.run(adjustedMaxSets, lhsSize);
         storageService.set(workflow.maxSetsId(), extendedMaxSets);
 
-        final var armstrongRelation = ComputeAR.run(maxSets, dataset, lhsSize);
+        final var prevAR = createPrevAR(assignments);
+
+        final var armstrongRelation = ComputeAR.run(maxSets, dataset, prevAR, isEvaluatingPositives);
 
         final var newAssigmnets = new ArrayList<AssignmentEntity>();
         for (final var exampleRow : armstrongRelation.exampleRows) {
@@ -191,7 +198,7 @@ public class JobService {
             if (exampleRow.lhsSet.size() != lhsSize)
                 continue;
 
-            final var assignment = AssignmentEntity.create(job.workflowId, armstrongRelation.columns, armstrongRelation.referenceRow, exampleRow);
+            final var assignment = AssignmentEntity.create(job.workflowId, dataset.getHeader(), armstrongRelation.referenceRow, exampleRow);
             newAssigmnets.add(assignment);
         }
 
@@ -204,6 +211,16 @@ public class JobService {
         workflowRepository.save(workflow);
 
         computeViews(workflow, maxSets, dataset);
+    }
+
+    private ArmstrongRelation createPrevAR(List<AssignmentEntity> assignments) {
+        // The list is not sorted, but we don't need it to be.
+        final var exampleRows = assignments.stream()
+            .filter(assignment -> assignment.isActive)
+            .map(assignment -> assignment.exampleRow)
+            .toList();
+
+        return new ArmstrongRelation(assignments.get(0).referenceRow, exampleRows);
     }
 
     private void computeViews(WorkflowEntity workflow, MaxSets maxSets, Dataset dataset) {
@@ -223,7 +240,7 @@ public class JobService {
         //     storageService.set(workflow.latticesId(), lattice);
         // }
 
-        final var fds = ComputeFdSet.run(maxSets, dataset.getHeader());
+        final var fds = ComputeFds.run(maxSets, dataset.getHeader());
         storageService.set(workflow.fdsId(), fds);
     }
 

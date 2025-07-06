@@ -17,13 +17,13 @@ import de.uni.passau.core.model.MaxSets;
 import de.uni.passau.core.model.FdSet.Fd;
 import de.uni.passau.core.model.ColumnSet;
 
-public class ComputeFdSet {
+public class ComputeFds {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ComputeFdSet.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ComputeFds.class);
 
     public static FdSet run(MaxSets maxSets, String[] columns) {
         try {
-            final var algorithm = new ComputeFdSet(maxSets, columns);
+            final var algorithm = new ComputeFds(maxSets, columns);
             return algorithm.innerRun();
         }
         catch (final Exception e) {
@@ -34,7 +34,7 @@ public class ComputeFdSet {
     private final MaxSets maxSets;
     private final String[] columns;
 
-    private ComputeFdSet(MaxSets maxSets, String[] columns) {
+    private ComputeFds(MaxSets maxSets, String[] columns) {
         this.maxSets = maxSets;
         this.columns = columns;
     }
@@ -54,7 +54,7 @@ public class ComputeFdSet {
         LOGGER.debug("size: " + lhss.size());
         for (int index = 0; index < numberOfColumns; index++) {
             List<ColumnSet> columnSets = lhss.get(index);
-            LOGGER.debug("Attribute: {}, size: {}, columSets:\n{}", index, columnSets.size(), columnSets);
+            LOGGER.debug("For class: {}, size: {}, columSets:\n{}", index, columnSets.size(), columnSets);
         }
 
         final var groupedFds = groupFdsByLhs(lhss);
