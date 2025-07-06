@@ -72,8 +72,8 @@ public class ComputeAR {
     // Let's say that M_X (max set for class X) contains an element LHS. By creating the row with LHS, we break all dependencies LHS => *.
     // For contradiction, let's say that LHS => Y holds for some class Y != X.
     // Therefore, combination LHS' = [ ...LHS, Y ] doesn't contain any new information because it can be derived from LHS.
-    // So, if a dependency LHS' => X did hold, the dependency LHS => X would also hold. But we know LHS => doesn't hold, so LHS' => X can't hold either.
-    // But if LHS' => X doesn't hold, it means that LHS' must be a part of M_X, which contradicts our assumption that LHS is an element of M_X.
+    // So, if a dependency LHS' => X did hold, the dependency LHS => X would also hold. But we know LHS => X doesn't hold, so LHS' => X can't hold either.
+    // Because LHS' => X doesn't hold, LHS' (or its superset) must be a part of M_X, which contradicts our assumption that LHS is an element of M_X.
     //
     // ### We break all FDs that don't hold.
     //
@@ -237,8 +237,11 @@ public class ComputeAR {
 
         private @Nullable String tryGetUniqueDatasetValue() {
             while (indexInDataset < datasetRows.size()) {
-                final String value = datasetRows.get(indexInDataset)[columnIndex];
+                final @Nullable String value = datasetRows.get(indexInDataset)[columnIndex];
                 indexInDataset++;
+
+                if (value == null || value.isEmpty())
+                    continue;
 
                 if (!usedValues.contains(value)) {
                     usedValues.add(value);
