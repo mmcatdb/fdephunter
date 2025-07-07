@@ -1,8 +1,11 @@
 # FDepHunter Frontend
 
-## Installation
+## Configuration
 
 - Copy the `.env.sample` file to `.env` file and fill all missing settings.
+
+## Installation
+
 - Run:
 ```bash
 npm install
