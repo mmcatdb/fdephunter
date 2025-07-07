@@ -1,13 +1,19 @@
 # FDepHunter
 
-## Setup (manual)
+## Setup
+
+### Manual
 
 - See [backend](./backend/README.md) and [frontend](./frontend/README.md) READMEs for more information.
 
-## Setup (Docker)
+### Docker
 
 - Follow the *Configuration* parts of the README files.
 - Run:
 ```bash
 docker compose up -d --build
 ```
+
+## Getting Started
+
+- After opening client, hit the *Reset DB* button to create example datasets.

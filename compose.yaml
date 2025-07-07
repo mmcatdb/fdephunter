@@ -19,6 +19,8 @@ services:
             dockerfile: docker/Dockerfile
         expose:
             - 5601
+        depends_on:
+            - mongodb
 
     frontend:
         container_name: "fdephunter-frontend"
