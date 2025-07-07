@@ -23,6 +23,7 @@ public class DatasetService {
     private ServerProperties server;
 
     public DatasetEntity createDataset(DatasetType type, String name, String fileName) {
+        // TODO Test if file exists here.
         final var source = Paths.get(server.datasetDirectory(), fileName).toString();
         final var dataset = DatasetEntity.create(type, name, source);
         return datasetRepository.save(dataset);
