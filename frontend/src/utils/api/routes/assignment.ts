@@ -1,4 +1,4 @@
-import { type ExampleDecision } from '@/types/armstrongRelation';
+import { type ExampleDecision } from '@/types/examples';
 import { GET, POST } from '../routeFunctions';
 import { type AssignmentResponse } from '@/types/assignment';
 import { type Id } from '@/types/id';

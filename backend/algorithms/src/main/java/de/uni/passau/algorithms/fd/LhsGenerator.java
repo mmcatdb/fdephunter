@@ -16,12 +16,12 @@ public class LhsGenerator {
      * @param maxSets The set of the complements of maximal sets (see Phase 2 for further information).
      * @return {@code List<List<OpenBitSet>>} - list of sets of all lefthand sides (ordered by their classes).
      */
-    public static List<List<ColumnSet>> run(List<ComplementMaxSet> maxSets, int numberOfColumns) {
+    public static List<List<ColumnSet>> run(List<ComplementMaxSet> maxSets) {
         final var algorithm = new LhsGenerator();
-        return algorithm.innerRun(maxSets, numberOfColumns);
+        return algorithm.innerRun(maxSets);
     }
 
-    private List<List<ColumnSet>> innerRun(List<ComplementMaxSet> maxSets, int numberOfColumns) {
+    private List<List<ColumnSet>> innerRun(List<ComplementMaxSet> maxSets) {
         final List<List<ColumnSet>> lhss = new ArrayList<>();
 
         // 1: for all attributes A in R do
@@ -60,7 +60,7 @@ public class LhsGenerator {
     private List<ColumnSet> findLhs(Set<ColumnSet> Li, ComplementMaxSet complementMaxSet) {
         final List<ColumnSet> lhs_i = new ArrayList<>();
         for (final ColumnSet l : Li) {
-            final boolean isLhs = !complementMaxSet.elements.stream().allMatch(combination -> l.intersects(combination));
+            final boolean isLhs = !complementMaxSet.elements.stream().allMatch(element -> l.intersects(element));
             if (isLhs)
                 lhs_i.add(l);
         }

@@ -2,7 +2,7 @@ import { memo, type ReactNode, useMemo, useState } from 'react';
 import { NODE_OPTIONS, type RFGraph, type RfNode, type RfEdge } from '@/types/functionalDependency';
 import { Handle, type NodeProps, Position, ReactFlow } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { computeColumnIndexesForLatticeRow, computeEdgesForLatticeCell, type Lattice, CellType } from '@/types/armstrongRelation';
+import { computeColumnIndexesForLatticeRow, computeEdgesForLatticeCell, type Lattice, CellType } from '@/types/examples';
 import { Button, cn, Divider, Popover, PopoverContent, PopoverTrigger, Select, SelectItem, type SharedSelection, Switch } from '@heroui/react';
 import clsx from 'clsx';
 

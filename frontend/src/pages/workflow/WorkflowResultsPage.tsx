@@ -5,7 +5,7 @@ import { routes } from '@/router';
 import { Page, TopbarContent } from '@/components/layout';
 import { useMemo, useState } from 'react';
 import { Workflow } from '@/types/workflow';
-import { type FdSet, type FdEdge } from '@/types/functionalDependency';
+import { FdSet, type FdEdge } from '@/types/functionalDependency';
 import { FdListDisplay } from '@/components/dataset/FdListDisplay';
 import { type Id } from '@/types/id';
 import { API } from '@/utils/api/api';
@@ -127,16 +127,17 @@ WorkflowFinalPage.loader = async ({ params: { workflowId } }: { params: Params<'
     if (!response.status)
         throw new Error('Failed to load functional dependencies');
 
-    return { fdSet: response.data };
+    return { fdSet: FdSet.fromResponse(response.data) };
 };
 
 export function createFdEdges(fdSet: FdSet): FdEdge[] {
-    return fdSet.fdClasses.flatMap((minimalFds, colIndex) => minimalFds.map(minimalFd => ({
-        id: minimalFd.id + '->' + colIndex,
+    console.log(fdSet);
+    return fdSet.fds.flatMap(fd => fd.rhs.columns.map(colIndex => ({
+        id: fd.lhs.id + '->' + colIndex,
         source: {
-            columns: minimalFd.map(fdSet.columns),
-            label: minimalFd.toString(fdSet.columns),
-            id: minimalFd.id,
+            columns: fd.lhs.map(fdSet.columns),
+            label: fd.lhs.toString(fdSet.columns),
+            id: fd.lhs.id,
         },
         target: {
             columns: [ fdSet.columns[colIndex] ],

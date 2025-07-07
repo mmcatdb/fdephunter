@@ -1,5 +1,5 @@
 import { type Dispatch, useState } from 'react';
-import { type ExampleRelation, DecisionColumnStatus, type ExampleDecision, DecisionStatus } from '@/types/armstrongRelation';
+import { DecisionColumnStatus, type ExampleDecision, DecisionStatus } from '@/types/examples';
 import { Button } from '@heroui/react';
 import { ColumnNameBadge } from './FdListDisplay';
 import clsx, { type ClassValue } from 'clsx';
@@ -10,20 +10,22 @@ import { type IconType } from 'react-icons';
 import { type Assignment } from '@/types/assignment';
 import { Link } from 'react-router';
 import { routes } from '@/router';
+import { type Workflow } from '@/types/workflow';
 
 type GridState = {
     isProgressCollapsed?: boolean;
     isMaxSetCollapsed?: boolean;
 };
 
-type ArmstrongRelationDisplayProps = {
+type AssignmentsDisplayProps = {
+    workflow: Workflow;
     assignments: Assignment[];
 };
 
-export function ArmstrongRelationDisplay({ assignments }: ArmstrongRelationDisplayProps) {
+export function AssignmentsDisplay({ workflow, assignments }: AssignmentsDisplayProps) {
     const [ state, setState ] = useState<GridState>({});
 
-    const columns = assignments[0].relation.columns;
+    const columns = assignments[0].columns;
 
     return (
         <div
@@ -83,11 +85,12 @@ export function ArmstrongRelationDisplay({ assignments }: ArmstrongRelationDispl
             </div>
 
 
-            <ReferenceRowDisplay rowValues={assignments[0].relation.referenceRow} />
+            <ReferenceRowDisplay rowValues={assignments[0].referenceRow} />
 
             {assignments.map((assignment, rowIndex) => (
                 <ExampleRowDisplay
                     key={assignment.id}
+                    workflow={workflow}
                     assignment={assignment}
                     gridState={state}
                     rowIndex={rowIndex}
@@ -138,21 +141,21 @@ function ReferenceRowDisplay({ rowValues }: ReferenceRowDisplayProps) {
 }
 
 type ExampleRowDisplayProps = {
+    workflow: Workflow;
     assignment: Assignment;
     gridState: GridState;
     rowIndex: number;
 };
 
-function ExampleRowDisplay({ assignment, gridState, rowIndex }: ExampleRowDisplayProps) {
-    const row = assignment.relation.exampleRow;
+function ExampleRowDisplay({ workflow, assignment, gridState, rowIndex }: ExampleRowDisplayProps) {
+    const row = assignment.exampleRow;
 
-    const lhsSetCols = row.lhsSet.map(assignment.relation.columns);
+    const lhsSetCols = row.lhsSet.map(assignment.columns);
     const exampleBgClass = row.isPositive ? 'bg-danger-400' : 'bg-warning-400';
     const { leftClass, rightClass } = getSpecialCellClasses(rowIndex);
 
-    // TODO Get this information somewhere.
-    // const isEvaluationAllowed = row.isPositive === relation.isEvaluatingPositives;
-    const isEvaluationAllowed = true;
+    // FIXME Get this information somewhere.
+    const isEvaluationAllowed = row.isPositive === workflow.evaluatingType && row.lhsSet.length === workflow.iteration;
 
     return (<>
         <div className={leftClass}>
@@ -161,18 +164,11 @@ function ExampleRowDisplay({ assignment, gridState, rowIndex }: ExampleRowDispla
             )}
 
             {isEvaluationAllowed && !gridState.isProgressCollapsed && (<>
-                {assignment ? (
-                    <Link to={routes.assignment.root.resolve({ assignmentId: assignment.id })}>
-                        <Button size='sm' className='h-6' disableAnimation>
-                            {!row.decision ? 'Evaluate' : 'Re-evaluate'}
-                        </Button>
-                    </Link>
-                ) : (
-                    <div>
-                        {/* TODO */}
-                        TODO GENERATE THE ASSIGNMENTS
-                    </div>
-                )}
+                <Link to={routes.assignment.root.resolve({ assignmentId: assignment.id })}>
+                    <Button size='sm' className='h-6' disableAnimation>
+                        {!row.decision ? 'Evaluate' : 'Re-evaluate'}
+                    </Button>
+                </Link>
             </>)}
         </div>
 
@@ -218,13 +214,13 @@ const decisionStatusData: Record<DecisionStatus, {
     [DecisionStatus.Unanswered]: { color: 'text-warning', icon: IoReloadCircleOutline },
 };
 
-type ExampleRelationDisplayProps = {
-    relation: ExampleRelation;
+type AssignmentDisplayProps = {
+    assignment: Assignment;
     selectedColIndex: number | undefined;
     setSelectedColIndex?: Dispatch<number | undefined>;
 };
 
-export function ExampleRelationDisplay({ relation: { columns, referenceRow, exampleRow }, selectedColIndex, setSelectedColIndex }: ExampleRelationDisplayProps) {
+export function AssignmentDisplay({ assignment: { columns, referenceRow, exampleRow }, selectedColIndex, setSelectedColIndex }: AssignmentDisplayProps) {
     const { decision } = useDecisionContext();
 
     return (

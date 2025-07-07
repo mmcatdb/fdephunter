@@ -24,7 +24,7 @@ public abstract class MaxSetGenerator {
             if (agreeSet.get(forClass))
                 continue;
 
-            result.addElement(agreeSet.cloneColumnSet());
+            result.addConfirmed(agreeSet.cloneColumnSet());
         }
 
         result.pruneSubsets();
@@ -34,21 +34,19 @@ public abstract class MaxSetGenerator {
 
     /** Returns complement max sets ordered by their classes. */
     public static List<ComplementMaxSet> generateComplementMaxSets(List<MaxSet> maxSets) {
-        final var output = new ArrayList<ComplementMaxSet>();
-        for (final MaxSet maxSet : maxSets)
-            output.add(generateComplementMaxSet(maxSet, maxSets.size()));
-
-        return output;
+        return maxSets.stream()
+            .map(maxSet -> generateComplementMaxSet(maxSet, maxSets.size()))
+            .toList();
     }
 
     private static ComplementMaxSet generateComplementMaxSet(MaxSet maxSet, int numberOfColumns) {
         final ComplementMaxSet result = new ComplementMaxSet(maxSet.forClass);
 
-        for (final ColumnSet il : maxSet.confirmedElements()) {
+        maxSet.elements().forEach(il -> {
             final ColumnSet inverse = ColumnSet.fromRange(0, numberOfColumns);
             inverse.xor(il);
-            result.addCombination(inverse);
-        }
+            result.addElement(inverse);
+        });
 
         return result;
     }

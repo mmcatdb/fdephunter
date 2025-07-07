@@ -43,10 +43,9 @@ public class AdjustMaxSets {
             .map(MaxSet::clone)
             .toList();
 
-        final MaxSets newMaxSets = new MaxSets(newSets);
         for (final ExampleRow row : exampleRows) {
             for (final int forClass : row.rhsSet.toIndexes()) {
-                final MaxSet newMaxSet = newMaxSets.sets().get(forClass);
+                final MaxSet newMaxSet = newSets.get(forClass);
 
                 if (row.decision.columns()[forClass].status() == DecisionColumnStatus.VALID) {
                     // If the column C is marked as VALID, the FD lhsSet -> C does not hold.
@@ -54,7 +53,7 @@ public class AdjustMaxSets {
                     //
                     // lhsSet should be a candidate in the previous max set and we move it to the
                     // true max set.
-                    newMaxSet.moveToTrueMaxSet(row.lhsSet);
+                    newMaxSet.moveCandidateToConfirmeds(row.lhsSet);
                 } else if (row.decision.columns()[forClass].status() == DecisionColumnStatus.INVALID) {
                     // If the column C is marked as INVALID, the FD lhsSet -> C holds.
                     // This means lhsSet (or a superset of it) is not part of the max set.
@@ -65,11 +64,14 @@ public class AdjustMaxSets {
                     // Reconstruct the "child" max sets, i.e., any subset of lhsSet that has exactly
                     // one column less than lhsSet
                     for (final int i: row.lhsSet.toIndexes()) {
+                        if (row.lhsSet.size() == 1)
+                            continue; // We don't want to create subsets of size 0.
+
                         final ColumnSet subset = row.lhsSet.clone();
                         subset.clear(i);
                         // Simply add the subset to the new max set; it will be checked later
                         // TODO: We may be smarter and not add elements that we will just remove later.
-                        newMaxSet.addElement(subset);
+                        newMaxSet.addConfirmed(subset);
                     }
                 } else {
                     // ignore UNANSWERED columns (for now)
@@ -80,7 +82,7 @@ public class AdjustMaxSets {
             }
         }
 
-        return newMaxSets;
+        return new MaxSets(newSets);
     }
 
 }

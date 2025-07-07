@@ -14,8 +14,8 @@ public class ComplementMaxSet {
         this.forClass = forClass;
     }
 
-    public void addCombination(ColumnSet combination) {
-        elements.add(combination);
+    public void addElement(ColumnSet element) {
+        elements.add(element);
     }
 
     @Override public String toString() {

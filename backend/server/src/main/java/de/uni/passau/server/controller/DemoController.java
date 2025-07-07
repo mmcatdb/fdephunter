@@ -1,16 +1,22 @@
 package de.uni.passau.server.controller;
 
+import de.uni.passau.core.model.MaxSets;
 import de.uni.passau.server.model.DatasetEntity;
+import de.uni.passau.server.model.WorkflowEntity;
 import de.uni.passau.server.model.DatasetEntity.DatasetType;
 import de.uni.passau.server.repository.DatasetRepository;
+import de.uni.passau.server.service.StorageService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,6 +30,16 @@ public class DemoController {
 
     @Autowired
     private MongoTemplate mongoTemplate;
+
+    @Autowired
+    private StorageService storageService;
+
+    @GetMapping("/demo/{workflowId}/maxsets")
+    public String demo(@PathVariable UUID workflowId) {
+        final var maxSets = storageService.get(WorkflowEntity.maxSetsId(workflowId), MaxSets.class);
+
+        return "<pre>" + maxSets.toString() + "</pre>";
+    }
 
     @PostMapping("/demo/reset-database")
     public String resetDatabase() {

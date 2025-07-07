@@ -49,6 +49,14 @@ export class Workflow {
             input.datasetId ?? undefined,
         );
     }
+
+    get evaluatingType(): boolean | undefined {
+        if (this.state === WorkflowState.PositiveExamples)
+            return true;
+        if (this.state === WorkflowState.NegativeExamples)
+            return false;
+        return undefined;
+    }
 }
 
 export type WorkflowStats = {

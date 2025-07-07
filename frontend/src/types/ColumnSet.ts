@@ -70,4 +70,8 @@ export class ColumnSet {
     get id(): string {
         return this.base64;
     }
+
+    get length(): number {
+        return this.columns.length;
+    }
 }

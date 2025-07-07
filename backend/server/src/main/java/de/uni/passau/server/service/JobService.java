@@ -2,6 +2,9 @@ package de.uni.passau.server.service;
 
 import de.uni.passau.core.dataset.Dataset;
 import de.uni.passau.core.example.ArmstrongRelation;
+import de.uni.passau.core.exception.NamedException;
+import de.uni.passau.core.exception.OtherException;
+import de.uni.passau.core.model.ColumnSet;
 import de.uni.passau.core.model.MaxSets;
 import de.uni.passau.algorithms.AdjustMaxSets;
 import de.uni.passau.algorithms.ComputeAR;
@@ -20,9 +23,10 @@ import de.uni.passau.server.repository.AssignmentRepository;
 import de.uni.passau.server.repository.JobRepository;
 import de.uni.passau.server.repository.WorkflowRepository;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,31 +96,31 @@ public class JobService {
     private void executeJob(UUID jobId) {
         var job = jobRepository.findById(jobId).get();
         if (job.state != JobState.WAITING) {
-            LOGGER.warn("Job {} is not in WAITING state, skipping execution.", jobId);
+            LOGGER.warn("Job { id: {}, name: '{}' } is not ready.", job.id(), job.description);
             return;
         }
 
         job.state = JobState.RUNNING;
         job.startedAt = new java.util.Date();
         job = jobRepository.save(job);
-        LOGGER.info("Job {} has started at {}.", job.id(), job.startedAt);
+        LOGGER.info("Job { id: {}, name: '{}' } started.", job.id(), job.description);
 
         try {
             executeJobPayload(job);
-        }
-        catch (Exception e) {
-            LOGGER.error("Error while executing job {}: {}", job.id(), e.getMessage(), e);
-            job.state = JobState.FAILED;
+            job.state = JobState.FINISHED;
             job.finishedAt = new java.util.Date();
             job = jobRepository.save(job);
-            LOGGER.info("Job {} has failed at {}.", job.id(), job.finishedAt);
-            return;
+            LOGGER.info("Job { id: {}, name: '{}' } finished.", job.id(), job.description);
         }
+        catch (Exception e) {
+            final NamedException finalException = e instanceof NamedException namedException ? namedException : new OtherException(e);
 
-        job.state = JobState.FINISHED;
-        job.finishedAt = new java.util.Date();
-        job = jobRepository.save(job);
-        LOGGER.info("Job {} has finished at {}.", job.id(), job.finishedAt);
+            LOGGER.error(String.format("Job { id: %s, name: '%s' } failed.", job.id(), job.description), finalException);
+            job.state = JobState.FAILED;
+            job.finishedAt = new java.util.Date();
+            job.error = finalException.toSerializedException();
+            job = jobRepository.save(job);
+        }
     }
 
     private void executeJobPayload(JobEntity job) {
@@ -133,47 +137,43 @@ public class JobService {
         final var dataset = datasetService.getLoadedDatasetById(payload.datasetId());
 
         final var maxSets = ComputeMaxSets.run(dataset);
-        storageService.set(workflow.maxSetsId(), maxSets);
 
         workflow.state = WorkflowState.NEGATIVE_EXAMPLES;
 
         final var armstrongRelation = ComputeAR.run(maxSets, dataset, null, false);
+        // All example rows are brand new, so we can create assignments for all of them.
+        final var assignments = armstrongRelation.exampleRows.stream()
+            .map(row -> AssignmentEntity.create(job.workflowId, dataset.getHeader(), armstrongRelation.referenceRow, row))
+            .toList();
 
-        final var assignments = new ArrayList<AssignmentEntity>();
-
-        // TODO These are not assignments, just the example rows.
-        for (final var exampleRow : armstrongRelation.exampleRows) {
-            final var assignment = AssignmentEntity.create(job.workflowId, dataset.getHeader(), armstrongRelation.referenceRow, exampleRow);
-            assignments.add(assignment);
-        }
-
-        // TODO Save the whole relation, not just the assignments.
-
+        storageService.set(workflow.maxSetsId(), maxSets);
         assignmentRepository.saveAll(assignments);
-
         workflowRepository.save(workflow);
 
         computeViews(workflow, maxSets, dataset);
     }
 
     private void executeIterationJob(JobEntity job) {
+        final var sb = new StringBuilder();
+        sb.append("Iteration job").append(job.workflowId).append("\n\n");
+
         final var workflow = workflowRepository.findById(job.workflowId).get();
         final var dataset = datasetService.getLoadedDatasetById(workflow.datasetId);
 
         // If there are any evaluated assignments, we have to adjust the max set. This should be the case for all iterations except the first one.
-        final var maxSets = storageService.get(workflow.maxSetsId(), MaxSets.class);
+        final var prevMaxSets = storageService.get(workflow.maxSetsId(), MaxSets.class);
+        sb.append("Prev: ").append(prevMaxSets).append("\n");
 
         final var assignments = assignmentRepository.findAllByWorkflowId(job.workflowId);
-
         final var evaluatedRows = assignments.stream()
-        // TODO Filter only the new ones.
             .filter(assignment -> assignment.isActive && assignment.exampleRow.decision != null)
             .map(assignment -> assignment.exampleRow)
             .toList();
 
-        final var adjustedMaxSets = AdjustMaxSets.run(maxSets, evaluatedRows);
+        final var adjustedMaxSets = AdjustMaxSets.run(prevMaxSets, evaluatedRows);
+        sb.append("Adjusted: ").append(adjustedMaxSets).append("\n");
 
-        // TODO Check if we can continue the workflow.
+        // FIXME Check if we can continue the workflow.
         // Also check if we have any assignments left to evaluate.
         // And whether we should switch to positive examples or finish the workflow.
         // If we are done with negative examples, change state to POSITIVE_EXAMPLES.
@@ -181,39 +181,44 @@ public class JobService {
         workflow.iteration = workflow.iteration + 1;
         final int lhsSize = workflow.iteration;
 
-        // TODO
+        // FIXME
         final var isEvaluatingPositives = workflow.state == WorkflowState.POSITIVE_EXAMPLES;
 
+        // Extend the max sets and compute a new Armstrong relation.
         final var extendedMaxSets = ExtendMaxSets.run(adjustedMaxSets, lhsSize);
-        storageService.set(workflow.maxSetsId(), extendedMaxSets);
+        sb.append("Extended: ").append(extendedMaxSets).append("\n");
 
-        final var prevAR = createPrevAR(assignments);
+        final var prevAR = loadPrevAR(assignments);
+        final var armstrongRelation = ComputeAR.run(extendedMaxSets, dataset, prevAR, isEvaluatingPositives);
 
-        final var armstrongRelation = ComputeAR.run(maxSets, dataset, prevAR, isEvaluatingPositives);
+        // We mark all assignment as inactive. Then we activate all those in the new Armstrong relation.
+        assignments.forEach(assignment -> assignment.isActive = false);
+        final Map<ColumnSet, AssignmentEntity> assignmentsByLhs = assignments.stream().collect(Collectors.toMap(a -> a.exampleRow.lhsSet, a -> a));
 
-        final var newAssigmnets = new ArrayList<AssignmentEntity>();
         for (final var exampleRow : armstrongRelation.exampleRows) {
-            // We don't need to create examples for each row.
-            // TODO Optimize this in the algorithm itself.
-            if (exampleRow.lhsSet.size() != lhsSize)
+            final var existingAssignment = assignmentsByLhs.get(exampleRow.lhsSet);
+            if (existingAssignment != null) {
+                // If the assignment already exists, we just update the example row.
+                existingAssignment.exampleRow = exampleRow;
+                existingAssignment.isActive = true;
                 continue;
+            }
 
-            final var assignment = AssignmentEntity.create(job.workflowId, dataset.getHeader(), armstrongRelation.referenceRow, exampleRow);
-            newAssigmnets.add(assignment);
+            // If the assignment doesn't exist, we create a new one.
+            final var newAssignment = AssignmentEntity.create(job.workflowId, dataset.getHeader(), armstrongRelation.referenceRow, exampleRow);
+            assignments.add(newAssignment);
         }
 
-
-        // TODO compute lattice
-
-        // TODO compute fds
-
-
+        storageService.set(workflow.maxSetsId(), extendedMaxSets);
         workflowRepository.save(workflow);
+        assignmentRepository.saveAll(assignments);
 
-        computeViews(workflow, maxSets, dataset);
+        computeViews(workflow, extendedMaxSets, dataset);
+
+        LOGGER.info(sb.toString());
     }
 
-    private ArmstrongRelation createPrevAR(List<AssignmentEntity> assignments) {
+    private ArmstrongRelation loadPrevAR(List<AssignmentEntity> assignments) {
         // The list is not sorted, but we don't need it to be.
         final var exampleRows = assignments.stream()
             .filter(assignment -> assignment.isActive)
@@ -233,7 +238,7 @@ public class JobService {
             initialMaxSets = storageService.get(workflow.initialMaxSetsId(), MaxSets.class);
         }
 
-        // TODO
+        // TODO Compute lattices
         // for (int classIndex = 0; classIndex < maxSets.sets().size(); classIndex++) {
         //     final var lattice = ComputeLattice.run(maxSets.sets().get(classIndex), initialMaxSets.sets().get(classIndex));
         //     // TODO save all lattices ... or save them by class, so that the use can load them one by one?

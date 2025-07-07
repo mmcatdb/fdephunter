@@ -1,10 +1,12 @@
-import { ExampleRelation, type ExampleRelationResponse } from './armstrongRelation';
+import { ExampleRow, type ExampleRowResponse } from './examples';
 import { type Id } from './id';
 
 export type AssignmentResponse = {
     id: Id;
     workflowId: Id;
-    relation: ExampleRelationResponse;
+    columns: string[];
+    referenceRow: string[];
+    exampleRow: ExampleRowResponse;
 };
 
 // TODO Replace by a simple type (if possible).
@@ -12,14 +14,20 @@ export class Assignment {
     private constructor(
         readonly id: Id,
         readonly workflowId: Id,
-        readonly relation: ExampleRelation,
+        /** Names of the columns. They are expected to be unique. */
+        readonly columns: string[],
+        /** Values of the reference row. */
+        readonly referenceRow: string[],
+        readonly exampleRow: ExampleRow,
     ) {}
 
     static fromResponse(input: AssignmentResponse): Assignment {
         return new Assignment(
             input.id,
             input.workflowId,
-            ExampleRelation.fromResponse(input.relation),
+            input.columns,
+            input.referenceRow,
+            ExampleRow.fromResponse(input.exampleRow),
         );
     }
 }

@@ -11,4 +11,6 @@ public interface AssignmentRepository extends MongoRepository<AssignmentEntity, 
 
     public List<AssignmentEntity> findAllByWorkflowId(UUID workflowId);
 
+    public List<AssignmentEntity> findAllByWorkflowIdAndIsActive(UUID workflowId, boolean isActive);
+
 }

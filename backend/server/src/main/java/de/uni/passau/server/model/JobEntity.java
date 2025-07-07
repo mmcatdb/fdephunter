@@ -29,13 +29,15 @@ public class JobEntity {
 
     public String description;
 
+    public JobPayload payload;
+
     public JobState state;
 
     public @Nullable Date startedAt;
 
     public @Nullable Date finishedAt;
 
-    public JobPayload payload;
+    public @Nullable Serializable error = null;
 
     public static JobEntity create(UUID workflowId, int index, String description, JobPayload payload) {
         final var job = new JobEntity();

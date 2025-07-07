@@ -5,8 +5,8 @@ import { routes } from '@/router';
 import { type Assignment } from '@/types/assignment';
 import { API } from '@/utils/api/api';
 import { Button, Card, CardBody, CardFooter, CardHeader, Switch } from '@heroui/react';
-import { ExampleRelationDisplay } from './dataset/ArmstrongRelationDisplay';
-import { type DecisionColumn, DecisionColumnStatus, DecisionStatus, type ExampleDecision, type ExampleRelation } from '@/types/armstrongRelation';
+import { AssignmentDisplay } from './dataset/AssignmentsDisplay';
+import { type DecisionColumn, DecisionColumnStatus, DecisionStatus, type ExampleDecision } from '@/types/examples';
 import { ColumnNameBadge } from './dataset/FdListDisplay';
 import { FaArrowRight } from 'react-icons/fa';
 
@@ -25,15 +25,15 @@ export function AssignmentEvaluation({ assignment, onEvaluated }: AssignmentEval
 
             {decision.phase !== DecisionPhase.JustFinished && (<>
                 <Card className='p-4 max-w-full'>
-                    <ExampleRelationDisplay
-                        relation={assignment.relation}
+                    <AssignmentDisplay
+                        assignment={assignment}
                         selectedColIndex={selectedColIndex}
                         setSelectedColIndex={setSelectedColIndex}
                     />
                 </Card>
 
                 {selectedColIndex !== undefined && (
-                    <DecisionCard relation={assignment.relation} selectedColIndex={selectedColIndex} />
+                    <DecisionCard assignment={assignment} selectedColIndex={selectedColIndex} />
                 )}
             </>)}
         </div>
@@ -61,7 +61,7 @@ function ControlCard({ assignment, onEvaluated }: ControlCardProps) {
                 const uniqueReasons = [ ...new Set(trimmedReasons) ];
 
                 return {
-                    status: col.status,
+                    status: (status === DecisionStatus.Rejected && col.status === DecisionColumnStatus.Undecided) ? DecisionColumnStatus.Invalid : col.status,
                     reasons: uniqueReasons,
                 };
             });
@@ -110,7 +110,7 @@ function ControlCard({ assignment, onEvaluated }: ControlCardProps) {
 
                 {decision.phase === DecisionPhase.Finished && (
                     <p>
-                        This example was evaluated as <AssignmentStateLabel decision={assignment.relation.exampleRow.decision} />. Do you want to re-evaluate it?
+                        This example was evaluated as <AssignmentStateLabel decision={assignment.exampleRow.decision} />. Do you want to re-evaluate it?
                     </p>
                 )}
             </CardBody>
@@ -206,20 +206,20 @@ const bodies: { [key in DecisionPhase]: ReactNode } = {
 };
 
 type DecisionCardProps = {
-    relation: ExampleRelation;
+    assignment: Assignment;
     selectedColIndex: number;
 };
 
-function DecisionCard({ relation, selectedColIndex }: DecisionCardProps) {
+function DecisionCard({ assignment, selectedColIndex }: DecisionCardProps) {
     const { decision } = useDecisionContext();
 
     return decision.phase === DecisionPhase.Evaluation
-        ? (<EditableDecisionCard relation={relation} selectedColIndex={selectedColIndex} />)
-        : (<FinalDecisionCard relation={relation} selectedColIndex={selectedColIndex} />);
+        ? (<EditableDecisionCard assignment={assignment} selectedColIndex={selectedColIndex} />)
+        : (<FinalDecisionCard assignment={assignment} selectedColIndex={selectedColIndex} />);
 }
 
-function EditableDecisionCard({ relation, selectedColIndex }: DecisionCardProps) {
-    const { exampleRow, columns } = relation;
+function EditableDecisionCard({ assignment, selectedColIndex }: DecisionCardProps) {
+    const { exampleRow, columns } = assignment;
     const { decision, setDecision } = useDecisionContext();
     const selected = decision.columns[selectedColIndex];
     const isValid = selected.status === DecisionColumnStatus.Valid;
@@ -248,7 +248,7 @@ function EditableDecisionCard({ relation, selectedColIndex }: DecisionCardProps)
                     If the value is possible, the following functional dependency must be fake:
                 </p>
 
-                <FdDisplay relation={relation} selectedColIndex={selectedColIndex} />
+                <FdDisplay assignment={assignment} selectedColIndex={selectedColIndex} />
 
                 {selected.status === DecisionColumnStatus.Undecided ? (
                     <div className='mt-6 flex gap-3'>
@@ -293,8 +293,8 @@ function EditableDecisionCard({ relation, selectedColIndex }: DecisionCardProps)
     );
 }
 
-function FinalDecisionCard({ relation, selectedColIndex }: DecisionCardProps) {
-    const { exampleRow, columns } = relation;
+function FinalDecisionCard({ assignment, selectedColIndex }: DecisionCardProps) {
+    const { exampleRow, columns } = assignment;
     const { decision } = useDecisionContext();
     const selected = decision.columns[selectedColIndex];
     const isValid = selected.status === DecisionColumnStatus.Valid;
@@ -331,13 +331,13 @@ function FinalDecisionCard({ relation, selectedColIndex }: DecisionCardProps) {
                     </>)}
                 </p>
 
-                <FdDisplay relation={relation} selectedColIndex={selectedColIndex} />
+                <FdDisplay assignment={assignment} selectedColIndex={selectedColIndex} />
             </CardBody>
         </Card>
     );
 }
 
-function FdDisplay({ relation: { exampleRow, columns }, selectedColIndex: selectedColIndex }: DecisionCardProps) {
+function FdDisplay({ assignment: { exampleRow, columns }, selectedColIndex: selectedColIndex }: DecisionCardProps) {
     const lhsSetCols = exampleRow.lhsSet.map(columns);
 
     return (

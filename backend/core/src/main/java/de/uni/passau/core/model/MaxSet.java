@@ -1,11 +1,24 @@
 package de.uni.passau.core.model;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+
+@JsonSerialize(using = MaxSet.Serializer.class)
+@JsonDeserialize(using = MaxSet.Deserializer.class)
 public class MaxSet implements Cloneable {
 
     /** Index of the RHS column. */
@@ -53,28 +66,36 @@ public class MaxSet implements Cloneable {
         );
     }
 
-    public void addElement(ColumnSet element) {
-        if (candidates.contains(element))
-            throw new IllegalArgumentException("Confirmed element already exists in candidates: " + element + ". \nUse moveToTrueMaxSet() to move it to the true max set.");
-
-        confirmeds.add(element);
+    public boolean hasConfirmed(ColumnSet set) {
+        return confirmeds.contains(set);
     }
 
-    public void addCandidate(ColumnSet candidate) {
-        if (confirmeds.contains(candidate))
-            throw new IllegalArgumentException("Candidate element already exists in confirmed: " + candidate);
+    // TODO these functions are not optimal. The problem is that it's not easy to distinguish whether an element is included in the max set or not.
+    // We can obv check if the element is in one of the sets, but we can't check whether it's a subset of an existing element.
+    // So, the burden of keeping this class consistent is on the caller.
+    // It might be ok to do it anyway, because we might be able to prune the subsets later (and this check would prevent the same superset from being in both sets - see the todo comment below).
 
-        candidates.add(candidate);
+    public boolean addConfirmed(ColumnSet confirmed) {
+        // return !candidates.contains(confirmed)
+        //     && confirmeds.add(confirmed);
+        return confirmeds.add(confirmed);
     }
 
-    public void removeCandidate(ColumnSet candidate) {
-        if (!candidates.remove(candidate))
-            throw new IllegalArgumentException("Candidate element does not exist: " + candidate);
+    public boolean addCandidate(ColumnSet candidate) {
+        // return !confirmeds.contains(candidate)
+        //     && candidates.add(candidate);
+        return candidates.add(candidate);
     }
 
-    public void moveToTrueMaxSet(ColumnSet candidate) {
-        removeCandidate(candidate);
-        confirmeds.add(candidate);
+    public boolean removeCandidate(ColumnSet candidate) {
+        return candidates.remove(candidate);
+    }
+
+    public boolean moveCandidateToConfirmeds(ColumnSet candidate) {
+        // return candidates.remove(candidate)
+        //     && confirmeds.add(candidate);
+        candidates.remove(candidate);
+        return confirmeds.add(candidate);
     }
 
     // We can't keep the information about calling this method because the set might be mofidied later.
@@ -107,6 +128,7 @@ public class MaxSet implements Cloneable {
             supersets.add(set);
         }
 
+        // TODO This doesn't work correctly if the same set is both confirmed and candidate. That shouldn't happen, but we don't enforce it (see the todo comment above).
         // Now we have all supersets, so we can filter the elements.
         confirmeds.removeIf(set -> !supersets.contains(set));
         candidates.removeIf(set -> !supersets.contains(set));
@@ -115,14 +137,64 @@ public class MaxSet implements Cloneable {
     @Override public String toString() {
         final StringBuilder sb = new StringBuilder();
 
-        sb.append("max(").append(forClass).append(": ");
+        sb.append("max(").append(forClass).append(", confirmeds: ");
         for (final ColumnSet set : confirmeds)
             sb.append(set).append(", ");
-        if (confirmeds.size() > 0)
+        if (confirmeds.size() == 0)
+            sb.append(", ");
+        sb.append("candidates: ");
+        for (final ColumnSet set : candidates)
+            sb.append(set).append(", ");
+        if (candidates.size() > 0)
             sb.setLength(sb.length() - 2); // Remove last comma and space.
+
         sb.append(")");
 
         return sb.toString();
     }
+
+    // region Serialization
+
+    public static class Serializer extends StdSerializer<MaxSet> {
+        public Serializer() { this(null); }
+        public Serializer(Class<MaxSet> t) { super(t); }
+
+        @Override public void serialize(MaxSet set, JsonGenerator generator, SerializerProvider provider) throws IOException {
+            generator.writeStartObject();
+            generator.writeNumberField("forClass", set.forClass);
+
+            generator.writeFieldName("confirmeds");
+            generator.getCodec().writeValue(generator, set.confirmeds);
+
+            generator.writeFieldName("candidates");
+            generator.getCodec().writeValue(generator, set.candidates);
+
+            generator.writeEndObject();
+        }
+    }
+
+    public static class Deserializer extends StdDeserializer<MaxSet> {
+        public Deserializer() { this(null); }
+        public Deserializer(Class<?> vc) { super(vc); }
+
+        @Override public MaxSet deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+            final var codec = parser.getCodec();
+            final JsonNode node = codec.readTree(parser);
+
+            final int forClass = node.get("forClass").asInt();
+
+            final List<ColumnSet> confirmedsList = new ArrayList<>();
+            for (final JsonNode item : node.get("confirmeds"))
+                confirmedsList.add(codec.treeToValue(item, ColumnSet.class));
+
+            final List<ColumnSet> candidatesList = new ArrayList<>();
+            for (final JsonNode item : node.get("candidates"))
+                candidatesList.add(codec.treeToValue(item, ColumnSet.class));
+
+            return new MaxSet(forClass, confirmedsList, candidatesList);
+        }
+    }
+
+    // endregion
 
 }

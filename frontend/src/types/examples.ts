@@ -1,30 +1,6 @@
 import { ColumnSet, type ColumnSetResponse } from './ColumnSet';
 
-export type ExampleRelationResponse = {
-    columns: string[];
-    referenceRow: string[];
-    exampleRow: ExampleRowResponse;
-}
-
-export class ExampleRelation {
-    private constructor(
-        /** Names of the columns. They are expected to be unique. */
-        readonly columns: string[],
-        /** Values of the reference row. */
-        readonly referenceRow: string[],
-        readonly exampleRow: ExampleRow,
-    ) {}
-
-    static fromResponse(input: ExampleRelationResponse): ExampleRelation {
-        return new ExampleRelation(
-            input.columns,
-            input.referenceRow,
-            ExampleRow.fromResponse(input.exampleRow),
-        );
-    }
-}
-
-type ExampleRowResponse = {
+export type ExampleRowResponse = {
     values: string[];
     lhsSet: ColumnSetResponse;
     rhsSet: ColumnSetResponse;
@@ -32,7 +8,7 @@ type ExampleRowResponse = {
     decision: ExampleDecision | null;
 };
 
-class ExampleRow {
+export class ExampleRow {
     private constructor(
         readonly values: string[],
         /**

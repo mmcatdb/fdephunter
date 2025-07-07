@@ -3,18 +3,18 @@ import { FdListDisplayBalanced } from '@/components/dataset/FdListDisplay';
 import { LatticeDisplay } from '@/components/dataset/FdGraphDisplay';
 import { Button, Card, CardBody, CardFooter, CardHeader, Tab, Tabs } from '@heroui/react';
 import { Page, TopbarContent } from '@/components/layout';
-import { ArmstrongRelationDisplay } from '@/components/dataset/ArmstrongRelationDisplay';
+import { AssignmentsDisplay } from '@/components/dataset/AssignmentsDisplay';
 import { Link, matchPath, Outlet, type Params, useLoaderData, useLocation, useNavigate, useRevalidator, useRouteLoaderData } from 'react-router';
 import { type WorkflowLoaded } from './WorkflowPage';
 import { routes } from '@/router';
 import { useMemo, useState } from 'react';
-import { type Lattice } from '@/types/armstrongRelation';
+import { type Lattice } from '@/types/examples';
 import clsx from 'clsx';
 import { Assignment } from '@/types/assignment';
 import { createFdEdges } from './WorkflowResultsPage';
 import { type Id } from '@/types/id';
 import { type DatasetData } from '@/types/dataset';
-import { type FdSet } from '@/types/functionalDependency';
+import { FdSet } from '@/types/functionalDependency';
 import { API } from '@/utils/api/api';
 
 export function WorkflowDashboardPage() {
@@ -166,7 +166,7 @@ export function WorkflowOverviewPage() {
             </Card>
 
             <Card className='max-w-full p-4 items-center'>
-                <ArmstrongRelationDisplay assignments={assignments} />
+                <AssignmentsDisplay workflow={workflow} assignments={assignments} />
             </Card>
         </div>
     );
@@ -226,7 +226,7 @@ WorkflowListPage.loader = async ({ params: { workflowId } }: { params: Params<'w
     if (!response.status)
         throw new Error('Failed to load functional dependencies');
 
-    return { fdSet: response.data };
+    return { fdSet: FdSet.fromResponse(response.data) };
 };
 
 export function WorkflowGraphPage() {

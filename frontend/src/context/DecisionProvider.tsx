@@ -1,5 +1,6 @@
 import { createContext, type Dispatch, type ReactNode, type SetStateAction, useContext, useState } from 'react';
-import { type DecisionColumn, DecisionColumnStatus, type ExampleDecision, type ExampleRelation } from '@/types/armstrongRelation';
+import { type DecisionColumn, DecisionColumnStatus, type ExampleDecision } from '@/types/examples';
+import { type Assignment } from '@/types/assignment';
 
 export enum DecisionPhase {
     Evaluation = 'EVALUATION',
@@ -21,12 +22,12 @@ const decisionContext = createContext<DecisionContext | undefined>(undefined);
 
 type DecisionProviderProps = {
     children: ReactNode;
-    relation: ExampleRelation;
+    assignment: Assignment;
     inputDecision: ExampleDecision | undefined;
 };
 
-export function DecisionProvider({ children, relation, inputDecision }: DecisionProviderProps) {
-    const [ decision, setDecision ] = useState<DecisionState>(createDefaultDecision(relation, inputDecision));
+export function DecisionProvider({ children, assignment, inputDecision }: DecisionProviderProps) {
+    const [ decision, setDecision ] = useState<DecisionState>(createDefaultDecision(assignment, inputDecision));
 
     return (
         <decisionContext.Provider value={{ decision, setDecision }}>
@@ -43,14 +44,14 @@ export function useDecisionContext(): DecisionContext {
     return context;
 }
 
-function createDefaultDecision(relation: ExampleRelation, inputDecision: ExampleDecision | undefined): DecisionState {
+function createDefaultDecision(assignment: Assignment, inputDecision: ExampleDecision | undefined): DecisionState {
     const columns = inputDecision
-        ? relation.columns.map((_, colIndex) => ({
+        ? assignment.columns.map((_, colIndex) => ({
             status: inputDecision.columns[colIndex].status,
             reasons: inputDecision.columns[colIndex].reasons,
         }))
-        : relation.columns.map((_, colIndex) => ({
-            status: relation.exampleRow.rhsSet.has(colIndex) ? DecisionColumnStatus.Undecided : undefined,
+        : assignment.columns.map((_, colIndex) => ({
+            status: assignment.exampleRow.rhsSet.has(colIndex) ? DecisionColumnStatus.Undecided : undefined,
             reasons: [],
         }));
 

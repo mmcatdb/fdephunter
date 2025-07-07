@@ -49,7 +49,7 @@ public class ComputeFds {
             LOGGER.debug("{}", complementMaxSets.get(index));
         }
 
-        final List<List<ColumnSet>> lhss = LhsGenerator.run(complementMaxSets, numberOfColumns);
+        final List<List<ColumnSet>> lhss = LhsGenerator.run(complementMaxSets);
         LOGGER.debug("----- LEFT HAND SIDES -----");
         LOGGER.debug("size: " + lhss.size());
         for (int index = 0; index < numberOfColumns; index++) {

@@ -5,8 +5,8 @@ export function getStringEnumValues<E extends EnumObject<string>>(enumObject: E)
     return Object.keys(enumObject).map(key => enumObject[key] as Enum<string, E>);
 }
 
-export function displayPercent(value: number) {
-    return value * 100 + ' %';
+export function displayPercent(value: number, precision = 0): string {
+    return (value * 100).toFixed(precision) + ' %';
 }
 
 /** Comparison of only ascii-like strings. */

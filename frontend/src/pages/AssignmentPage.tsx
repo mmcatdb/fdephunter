@@ -8,7 +8,7 @@ import { Button, Tab, Tabs } from '@heroui/react';
 import { Page, Sidebar, TopbarContent } from '@/components/layout';
 import { WorkflowProgressDisplay } from '@/components/worklow/WorkflowProgressDisplay';
 import { Workflow } from '@/types/workflow';
-import { type Lattice } from '@/types/armstrongRelation';
+import { type Lattice } from '@/types/examples';
 import { type Id } from '@/types/id';
 import { API } from '@/utils/api/api';
 
@@ -38,7 +38,7 @@ export function AssignmentPage() {
             </div>
         </TopbarContent>
 
-        <DecisionProvider relation={assignment.relation} inputDecision={assignment.relation.exampleRow.decision}>
+        <DecisionProvider assignment={assignment} inputDecision={assignment.exampleRow.decision}>
             <Page>
                 <Outlet />
             </Page>

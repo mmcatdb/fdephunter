@@ -2,7 +2,6 @@ package de.uni.passau.server.controller;
 
 import de.uni.passau.core.example.ExampleDecision;
 import de.uni.passau.server.model.AssignmentEntity;
-import de.uni.passau.server.model.WorkflowEntity;
 import de.uni.passau.server.repository.AssignmentRepository;
 
 import java.util.List;
@@ -33,7 +32,7 @@ public class AssignmentController {
 
     @GetMapping("/workflows/{workflowId}/assignments")
     public List<AssignmentEntity> getAssignments(@PathVariable UUID workflowId) {
-        return assignmentRepository.findAllByWorkflowId(workflowId);
+        return assignmentRepository.findAllByWorkflowIdAndIsActive(workflowId, true);
     }
 
     @PostMapping("/assignments/{assignmentId}/evaluate")

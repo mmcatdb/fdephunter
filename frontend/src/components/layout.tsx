@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { useState, type ReactNode, type SetStateAction, type Dispatch, createContext, useContext, useMemo, useEffect } from 'react';
+import { type ReactNode, type SetStateAction, type Dispatch, createContext, useContext, useMemo, useEffect } from 'react';
 import { TbHome, TbLayoutSidebarLeftCollapse, TbLayoutSidebarRightCollapse } from 'react-icons/tb';
 import { Button, cn, ScrollShadow } from '@heroui/react';
 import { Link, Outlet } from 'react-router';
@@ -8,6 +8,7 @@ import { MdOutlineDarkMode, MdOutlineLightMode } from 'react-icons/md';
 import { Portal } from './common/Portal';
 import { FaGithub } from 'react-icons/fa';
 import { FaDisplay } from 'react-icons/fa6';
+import { useLocalStorageBackup } from '@/utils/localStorage';
 
 type LayoutState = {
     /** Whether the sidebar is collapsed. */
@@ -42,8 +43,10 @@ function useLayout(): LayoutContext {
     return context;
 }
 
+const LAYOUT_LOCAL_STORAGE_KEY = 'layoutState';
+
 export function Layout() {
-    const [ state, setState ] = useState(defaultLayoutState);
+    const [ state, setState ] = useLocalStorageBackup(LAYOUT_LOCAL_STORAGE_KEY, defaultLayoutState);
     const context = useMemo(() => ({ state, setState }), [ state, setState ]);
 
     useEffect(() => {
