@@ -7,7 +7,8 @@ public class Configuration {
     @ConfigurationProperties("server")
     public record ServerProperties(
         Integer port,
-        String origin
+        String origin,
+        String datasetDirectory
     ) {}
 
     @ConfigurationProperties("database")

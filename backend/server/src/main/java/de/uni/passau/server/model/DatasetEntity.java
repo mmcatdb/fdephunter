@@ -17,19 +17,19 @@ public class DatasetEntity {
         return _id;
     }
 
-    public String name;
-
     public DatasetType type;
+
+    public String name;
 
     /** Connection string, filename, etc. */
     public String source;
 
-    public static DatasetEntity create(String name, DatasetType type, String source) {
+    public static DatasetEntity create(DatasetType type, String name, String source) {
         final var dataset = new DatasetEntity();
 
         dataset._id = UUID.randomUUID();
-        dataset.name = name;
         dataset.type = type;
+        dataset.name = name;
         dataset.source = source;
 
         return dataset;

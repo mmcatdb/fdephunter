@@ -27,5 +27,4 @@ COPY docker/app.conf /etc/nginx/sites-enabled/
 
 EXPOSE 80
 
-#CMD [ "tail", "-f", "/dev/null" ]
 CMD [ "nginx", "-g", "daemon off;" ]

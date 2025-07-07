@@ -1,14 +1,13 @@
 package de.uni.passau.server.controller;
 
 import de.uni.passau.core.model.MaxSets;
-import de.uni.passau.server.model.DatasetEntity;
+import de.uni.passau.server.Configuration.ServerProperties;
 import de.uni.passau.server.model.WorkflowEntity;
 import de.uni.passau.server.model.DatasetEntity.DatasetType;
-import de.uni.passau.server.repository.DatasetRepository;
+import de.uni.passau.server.service.DatasetService;
 import de.uni.passau.server.service.StorageService;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.file.Paths;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -26,7 +25,7 @@ public class DemoController {
     private static final Logger LOGGER = LoggerFactory.getLogger(DemoController.class);
 
     @Autowired
-    private DatasetRepository datasetRepository;
+    private DatasetService datasetService;
 
     @Autowired
     private MongoTemplate mongoTemplate;
@@ -34,8 +33,20 @@ public class DemoController {
     @Autowired
     private StorageService storageService;
 
+    @Autowired
+    private ServerProperties server;
+
+    @GetMapping("/demo")
+    public String demo() {
+        final var a = Paths.get(server.datasetDirectory(), "iris.csv");
+        System.out.println("Dataset path: " + a.toAbsolutePath());
+        System.out.println("Dataset path: " + a.toString());
+
+        return a.toString();
+    }
+
     @GetMapping("/demo/{workflowId}/maxsets")
-    public String demo(@PathVariable UUID workflowId) {
+    public String demoMaxsets(@PathVariable UUID workflowId) {
         final var maxSets = storageService.get(WorkflowEntity.maxSetsId(workflowId), MaxSets.class);
 
         return "<pre>" + maxSets.toString() + "</pre>";
@@ -63,32 +74,28 @@ public class DemoController {
     private void initializeDatasets() {
         LOGGER.info("Initializing datasets.");
 
-        List<DatasetEntity> datasets = new ArrayList<>();
-
-        datasets.add(DatasetEntity.create("iris", DatasetType.CSV, "../data/iris.csv"));
-        datasets.add(DatasetEntity.create("imdb sample", DatasetType.CSV, "../data/imdb-title-sample.csv"));
+        datasetService.createDataset(DatasetType.CSV, "iris", "iris.csv");
+        datasetService.createDataset(DatasetType.CSV, "imdb sample", "imdb-title-sample.csv");
         // NICE_TO_HAVE: Add more datasets here.
-        // datasets.add(DatasetEntity.create("balance-scale", DatasetType.CSV, "data/balance-scale.csv"));
-        // datasets.add(DatasetEntity.create("chess", DatasetType.CSV, "data/chess.csv"));
-        // datasets.add(DatasetEntity.create("abalone", DatasetType.CSV, "data/abalone.csv"));
-        // datasets.add(DatasetEntity.create("nursery", DatasetType.CSV, "data/nursery.csv"));
-        // datasets.add(DatasetEntity.create("breast-cancer-wisconsin", DatasetType.CSV, "data/breast-cancer-wisconsin.csv"));
-        // datasets.add(DatasetEntity.create("bridges", DatasetType.CSV, "data/bridges.csv"));
-        // datasets.add(DatasetEntity.create("echocardiogram", DatasetType.CSV, "data/echocardiogram.csv"));
-        // datasets.add(DatasetEntity.create("adult", DatasetType.CSV, "data/adult.csv"));
-        // datasets.add(DatasetEntity.create("letter", DatasetType.CSV, "data/letter.csv"));
-        // datasets.add(DatasetEntity.create("ncvoter", DatasetType.CSV, "data/ncvoter.csv"));
-        // datasets.add(DatasetEntity.create("hepatitis", DatasetType.CSV, "data/hepatitis.csv"));
-        // datasets.add(DatasetEntity.create("horse", DatasetType.CSV, "data/horse.csv"));
-        // datasets.add(DatasetEntity.create("fd-reduced-30", DatasetType.CSV, "data/fd-reduced-30.csv"));
-        // datasets.add(DatasetEntity.create("plista", DatasetType.CSV, "data/plista.csv"));
-        // datasets.add(DatasetEntity.create("flight", DatasetType.CSV, "data/flight.csv"));
-        // datasets.add(DatasetEntity.create("uniprot", DatasetType.CSV, "data/uniprot.csv"));
-        // datasets.add(DatasetEntity.create("lineitem", DatasetType.CSV, "data/lineitem.csv"));
+        // datasetService.createDataset(DatasetType.CSV, "balance-scale", "balance-scale.csv");
+        // datasetService.createDataset(DatasetType.CSV, "chess", "chess.csv");
+        // datasetService.createDataset(DatasetType.CSV, "abalone", "abalone.csv");
+        // datasetService.createDataset(DatasetType.CSV, "nursery", "nursery.csv");
+        // datasetService.createDataset(DatasetType.CSV, "breast-cancer-wisconsin", "breast-cancer-wisconsin.csv");
+        // datasetService.createDataset(DatasetType.CSV, "bridges", "bridges.csv");
+        // datasetService.createDataset(DatasetType.CSV, "echocardiogram", "echocardiogram.csv");
+        // datasetService.createDataset(DatasetType.CSV, "adult", "adult.csv");
+        // datasetService.createDataset(DatasetType.CSV, "letter", "letter.csv");
+        // datasetService.createDataset(DatasetType.CSV, "ncvoter", "ncvoter.csv");
+        // datasetService.createDataset(DatasetType.CSV, "hepatitis", "hepatitis.csv");
+        // datasetService.createDataset(DatasetType.CSV, "horse", "horse.csv");
+        // datasetService.createDataset(DatasetType.CSV, "fd-reduced-30", "fd-reduced-30.csv");
+        // datasetService.createDataset(DatasetType.CSV, "plista", "plista.csv");
+        // datasetService.createDataset(DatasetType.CSV, "flight", "flight.csv");
+        // datasetService.createDataset(DatasetType.CSV, "uniprot", "uniprot.csv");
+        // datasetService.createDataset(DatasetType.CSV, "lineitem", "lineitem.csv");
 
-        datasetRepository.saveAll(datasets);
-
-        LOGGER.info("Datasets initialized: {}", datasets.size());
+        LOGGER.info("Datasets initialized.");
     }
 
 }

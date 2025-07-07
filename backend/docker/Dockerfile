@@ -8,4 +8,4 @@ COPY . .
 
 RUN mvn clean package -DskipTests
 
-CMD ["java", "-jar", "server/target/server-BETA.jar"]
+CMD [ "java", "-jar", "server/target/server-BETA.jar" ]
