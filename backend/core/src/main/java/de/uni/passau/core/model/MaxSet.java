@@ -66,6 +66,10 @@ public class MaxSet implements Cloneable {
         );
     }
 
+    public Stream<ColumnSet> candidates() {
+        return candidates.stream();
+    }
+
     public boolean hasConfirmed(ColumnSet set) {
         return confirmeds.contains(set);
     }
@@ -137,7 +141,7 @@ public class MaxSet implements Cloneable {
     @Override public String toString() {
         final StringBuilder sb = new StringBuilder();
 
-        sb.append("max(").append(forClass).append(", confirmeds: ");
+        sb.append("max(rhs=").append(forClass).append(", confirmeds: ");
         for (final ColumnSet set : confirmeds)
             sb.append(set).append(", ");
         if (confirmeds.size() == 0)

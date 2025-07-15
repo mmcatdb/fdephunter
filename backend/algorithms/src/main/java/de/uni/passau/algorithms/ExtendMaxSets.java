@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import de.uni.passau.algorithms.exception.ExtendMaxSetException;
@@ -70,9 +71,59 @@ public class ExtendMaxSets {
         extended.pruneSubsets();
     }
 
+    /**
+     * Get a list of all possible subsets of the extended max set with size lhsSize - 1.
+     * For example if the extended max set is {1, 2, 3}, the subsets will be {1, 2}, {1, 3}, {2, 3}.
+     * This is used to generate new candidates for the max set.
+     * @param extended The extended max set.
+     * @return A list of all subsets of the extended max set with size lhsSize - 1.
+     */
+    private List<ColumnSet> getSubsets(MaxSet extended) {
+        final HashSet<ColumnSet> subsets = new HashSet<>();
+        for (final ColumnSet element : extended.elements().toList()) {
+            if (element.size() == lhsSize - 1) {
+                subsets.add(element);
+            }
+            // if (element.size() > lhsSize - 1)  we need to split the element into all possible subsets of size lhsSize - 1
+            else if (element.size() > lhsSize - 1) {
+                // Generate all subsets of size lhsSize - 1
+                final int[] indexes = element.toIndexes();
+                for (int i = 0; i < indexes.length; i++) {
+                    final int[] subsetIndexes = new int[lhsSize - 1];
+                    int indexCounter = 0;
+                    for (int j = 0; j < indexes.length; j++) {
+                        if (j != i) { // Skip the current index
+                            subsetIndexes[indexCounter++] = indexes[j];
+                        }
+                    }
+                    subsets.add(ColumnSet.fromIndexes(subsetIndexes));
+                }
+            }
+        }
+        return subsets.stream().toList();
+    }
+
+    /**
+     * Prune candidates from the extended max set.
+     * This is done by removing candidates that are already confirmed in the extended max set.
+     * @param extended The extended max set.
+     */
+    private void pruneCandidates(MaxSet extended) {
+        final List<ColumnSet> candidatesToRemove = new ArrayList<>();
+        for (final ColumnSet candidate : extended.candidates().toList()) {
+            if (extended.hasConfirmed(candidate)) {
+                candidatesToRemove.add(candidate);
+            }
+        }
+        for (final ColumnSet candidate : candidatesToRemove) {
+            extended.removeCandidate(candidate);
+        }
+    }
+
     private void extendMaxSet(MaxSet extended) {
         // Get all MaxSets for the class with size lhsSize - 1.
-        final var subsets = extended.elements().filter(element -> element.size() == lhsSize - 1).toList();
+        //final var subsets = extended.elements().filter(element -> element.size() == lhsSize - 1).toList();
+        final List<ColumnSet> subsets = getSubsets(extended);
 
         // If there are no max sets for the class with size lhsSize - 1, continue
         // In this case, all minimal FDs with size lhsSize - 1 are already confirmed
@@ -97,6 +148,9 @@ public class ExtendMaxSets {
                 extended.addCandidate(entry.getKey());
             }
         }
+
+        // Remove candidates that are already confirmed in the extended max set.
+        pruneCandidates(extended);
 
         extended.pruneSubsets();
     }
