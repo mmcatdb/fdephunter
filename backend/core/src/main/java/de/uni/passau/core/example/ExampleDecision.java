@@ -35,4 +35,21 @@ public record ExampleDecision(
         UNDECIDED,
     }
 
+    // Implement toString for better debugging
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("ExampleDecision{status=").append(status).append(", columns=[");
+        for (DecisionColumn column : columns) {
+            // If the column is null, we skip it
+            if (column == null) {
+                sb.append("null, ");
+                continue;
+            }
+            // Otherwise, we append the column's status and reasons
+            sb.append("{status=").append(column.status).append(", reasons=").append(column.reasons).append("}, ");
+        }
+        sb.append("]}");
+        return sb.toString();   
+    }
 }

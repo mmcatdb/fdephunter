@@ -1,0 +1,20 @@
+// https://containers.dev/implementors/json_reference
+{
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	"name": "fdephunter-devcontainer",
+	"remoteUser": "vscode",
+	"shutdownAction": "stopContainer",
+	"privileged": false,
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"mhutchie.git-graph",
+				"vscjava.vscode-java-pack",
+				"github.copilot",
+				"github.copilot-chat"
+			]
+		}
+	}
+}

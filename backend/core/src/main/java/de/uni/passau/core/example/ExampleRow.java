@@ -38,4 +38,18 @@ public class ExampleRow {
         this.isPositive = isPositive;
     }
 
+    // Override toString for better debugging
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("ExampleRow{values=")
+          .append(String.join(", ", values))
+          .append(", lhsSet=").append(lhsSet)
+          .append(", rhsSet=").append(rhsSet)
+          .append(", isPositive=").append(isPositive)
+          .append(", decision=").append(decision != null ? decision.toString() : "null")
+          .append("}");
+        return sb.toString();   
+    }
+
 }
