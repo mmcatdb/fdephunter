@@ -33,12 +33,12 @@ class ComputeARTest {
     private MaxSets maxSets;
     private static final String csvFilePath = "src/test/resources/imdb-title-sample.csv";
     private static final String jsonResultFilePath = "src/test/resources/imdb-title-sample-expected-workflow-ar-results.json";
-    private static final Boolean debug = false; // Set to true for debugging output
+    private static final Boolean debug = true; // Set to true for debugging output
 
     @BeforeEach
     public void setUp() throws IOException {
         // Load the dataset
-        Boolean hasHeader = true;
+        boolean hasHeader = true;
         dataset = new CSVDataset(csvFilePath, hasHeader);
         dataset.load();
 
@@ -50,13 +50,13 @@ class ComputeARTest {
 
     @Test
     void testWorkflowComputeAR() {
-        System.out.println("\n-- INITIAL STATE --");
+        System.out.println("-- INITIAL STATE --\n");
         // Run the ComputeAR algorithm
         ArmstrongRelation ar = ComputeAR.run(maxSets, dataset, null, false);
         if (debug) {
             // Print the initial Armstrong Relation
             System.out.println("Initial Armstrong relation:");
-            System.out.print(ar.exampleFdsToString());
+            System.out.println(ar.exampleFdsToString());
         }
         // Compare the exampleRows in ar with exampleRows in document "0" from file imdb-title-sample-expected-workflow-ar-results.json
         checkExampleRows(ar, "0", jsonResultFilePath);
@@ -266,11 +266,10 @@ class ComputeARTest {
      *
      * @param ar The current ArmstrongRelation.
      * @param iteration The current iteration number.
-     * @param debug Whether to print debug information.
      * @return The updated ArmstrongRelation after the iteration.
      */
     private ArmstrongRelation continueWorkflow(ArmstrongRelation ar, int iteration) {
-        System.out.println("\n-- CONTINUING WORKFLOW ITERATION " + iteration + " --");
+        System.out.println("\n-- CONTINUING WORKFLOW ITERATION " + iteration + " --\n");
         // 1. Get ExampleRows which have a decision
         List<ExampleRow> exampleRowsWithDecision = getExampleRowsWithDecision(ar);
         // 2. Adjust the MaxSets based on the ExampleRows with decision.
@@ -284,13 +283,14 @@ class ComputeARTest {
         if (debug) {
             System.out.println("ExampleRows with decision:");
             printExampleRowsWithDecision(exampleRowsWithDecision);
-            System.out.println("Adjusted MaxSets:");
+            System.out.println("\nAdjusted MaxSets:");
             printMaxSets(adjustedMaxSets);
-            System.out.println("Extended MaxSets:");
+            System.out.println("\nExtended MaxSets:");
             printMaxSets(extendedMaxSets);
-            System.out.println("New Armstrong Relation:");
-            System.out.println(ar.exampleFdsToString());
-            System.out.println(ar.tableToString());
+            System.out.println("\nNew Armstrong Relation:");
+            System.out.println(newAR.exampleFdsToString());
+            // System.out.println("");
+            // System.out.println(ar.tableToString());
         }
         return newAR;
     }
@@ -301,60 +301,55 @@ class ComputeARTest {
      * @param ar The ArmstrongRelation containing the ExampleRows to compare.
      * @param documentId The document ID (e.g., "0", "1", "2", etc.) in the JSON file.
      * @param jsonFilePath The path to the JSON file containing expected results.
-     * @return true if the comparison matches, false otherwise.
      */
     private void checkExampleRows(ArmstrongRelation ar, String documentId, String jsonFilePath) {
-            // Read and parse the JSON file
-            ObjectMapper objectMapper = new ObjectMapper();
+        // Read and parse the JSON file
+        final ObjectMapper objectMapper = new ObjectMapper();
 
-            JsonNode rootNode = assertDoesNotThrow(() -> {
-                String jsonContent = new String(Files.readAllBytes(Paths.get(jsonFilePath)));
-                return objectMapper.readTree(jsonContent);
-            });
+        final JsonNode rootNode = assertDoesNotThrow(() -> {
+            String jsonContent = new String(Files.readAllBytes(Paths.get(jsonFilePath)));
+            return objectMapper.readTree(jsonContent);
+        });
 
-            // Get the document for the specified ID
-            JsonNode documentNode = rootNode.get(documentId);
-            assertNotNull(documentNode, "Document with ID '" + documentId + "' not found in JSON file.");
+        // Get the document for the specified ID
+        final JsonNode documentNode = rootNode.get(documentId);
+        assertNotNull(documentNode, "Document with ID '" + documentId + "' not found in JSON file.");
 
-            // Get the expected example rows
-            JsonNode exampleRowsNode = documentNode.get("exampleRows");
-            assertNotNull(exampleRowsNode, "ExampleRows not found in document '" + documentId + "'.");
+        // Get the expected example rows
+        final JsonNode exampleRowsNode = documentNode.get("exampleRows");
+        assertNotNull(exampleRowsNode, "ExampleRows not found in document '" + documentId + "'.");
 
-            // Check if the number of example rows matches
-            assertEquals(ar.exampleRows.size(), exampleRowsNode.size(), "Number of example rows mismatch");
+        // Check if the number of example rows matches
+        assertEquals(ar.exampleRows.size(), exampleRowsNode.size(), "Number of example rows mismatch");
 
-            // Compare each example row
-            for (int i = 0; i < ar.exampleRows.size(); i++) {
-                ExampleRow actualRow = ar.exampleRows.get(i);
-                JsonNode expectedRowNode = exampleRowsNode.get(i);
+        // Compare each example row
+        for (int i = 0; i < ar.exampleRows.size(); i++) {
+            final ExampleRow actualRow = ar.exampleRows.get(i);
+            final JsonNode expectedRowNode = exampleRowsNode.get(i);
 
-                // Compare values
-                JsonNode expectedValuesNode = expectedRowNode.get("values");
-                String[] expectedValues = new String[expectedValuesNode.size()];
-                for (int j = 0; j < expectedValuesNode.size(); j++) {
-                    expectedValues[j] = expectedValuesNode.get(j).asText();
-                }
+            // Compare LHS
+            final JsonNode expectedLhsNode = expectedRowNode.get("lhs");
+            final ColumnSet expectedLhs = ColumnSet.fromIndexes();
+            for (int j = 0; j < expectedLhsNode.size(); j++)
+                expectedLhs.set(expectedLhsNode.get(j).asInt());
 
-                assertArrayEquals(actualRow.values, expectedValues, "Values mismatch at row " + i);
+            assertEquals(actualRow.lhsSet, expectedLhs, "LHS mismatch at row " + i);
 
-                // Compare LHS
-                JsonNode expectedLhsNode = expectedRowNode.get("lhs");
-                ColumnSet expectedLhs = ColumnSet.fromIndexes();
-                for (int j = 0; j < expectedLhsNode.size(); j++) {
-                    expectedLhs.set(expectedLhsNode.get(j).asInt());
-                }
+            // Compare RHS
+            final JsonNode expectedRhsNode = expectedRowNode.get("rhs");
+            final ColumnSet expectedRhs = ColumnSet.fromIndexes();
+            for (int j = 0; j < expectedRhsNode.size(); j++)
+                expectedRhs.set(expectedRhsNode.get(j).asInt());
 
-                assertEquals(actualRow.lhsSet, expectedLhs, "LHS mismatch at row " + i);
+            assertEquals(actualRow.rhsSet, expectedRhs, "RHS mismatch at row " + i);
 
+            // Compare values
+            final JsonNode expectedValuesNode = expectedRowNode.get("values");
+            final String[] expectedValues = new String[expectedValuesNode.size()];
+            for (int j = 0; j < expectedValuesNode.size(); j++)
+                expectedValues[j] = expectedValuesNode.get(j).asText();
 
-                // Compare RHS
-                JsonNode expectedRhsNode = expectedRowNode.get("rhs");
-                ColumnSet expectedRhs = ColumnSet.fromIndexes();
-                for (int j = 0; j < expectedRhsNode.size(); j++) {
-                    expectedRhs.set(expectedRhsNode.get(j).asInt());
-                }
-
-                assertEquals(actualRow.rhsSet, expectedRhs, "RHS mismatch at row " + i);
-            }
+            assertArrayEquals(actualRow.values, expectedValues, "Values mismatch at row " + i);
+        }
     }
 }

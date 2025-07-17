@@ -86,6 +86,10 @@ public class MaxSet implements Cloneable {
         return confirmeds.contains(set);
     }
 
+    public boolean hasCandidate(ColumnSet set) {
+        return candidates.contains(set);
+    }
+
     // TODO these functions are not optimal. The problem is that it's not easy to distinguish whether an element is included in the max set or not.
     // We can obv check if the element is in one of the sets, but we can't check whether it's a subset of an existing element.
     // So, the burden of keeping this class consistent is on the caller.
@@ -146,7 +150,7 @@ public class MaxSet implements Cloneable {
 
         // Now we have all supersets, so we can filter the elements.
         confirmeds.removeIf(set -> !supersets.contains(set));
-        candidates.removeIf(set -> !supersets.contains(set) && !confirmeds.contains(set));
+        candidates.removeIf(set -> !supersets.contains(set) || confirmeds.contains(set));
     }
 
     @Override public String toString() {

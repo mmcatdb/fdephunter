@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import de.uni.passau.algorithms.exception.ExtendMaxSetException;
+import de.uni.passau.core.Utils;
 import de.uni.passau.core.model.ColumnSet;
 import de.uni.passau.core.model.MaxSet;
 import de.uni.passau.core.model.MaxSets;
@@ -54,8 +56,8 @@ public class ExtendMaxSets {
                     extendMaxSet(extending);
             }
 
-            isExtendedMaxSetFinished(extending);
-            extending.setFinished();
+            if (isExtendedMaxSetFinished(extending))
+                extending.setFinished();
 
             extendedMaxSets.sets().add(extending);
         }
@@ -78,9 +80,25 @@ public class ExtendMaxSets {
         extending.pruneSubsets();
     }
 
+    // ## Extend max set for lhsSize > 1
+    //
+    // Let's define potential max set (P_X for some class X) as a M_X plus all subsets of all its elements (except the empty set).
+    //
+    // We need to find all lattice elements with size = lhsSize that don't violate any confirmed FD.
+    // Element e breaks an FD if and only if at least one of its subsets is not in P_X.
+    // - If a subset of e (let's call it LHS) is not in P_X, then it forms FD LHS -> X, which is going to be viollated by e -> X.
+    // - If none of the subsets of e is in P_X, then none such FD can be formed.
+    // - Obv, e itself violates FD e -> X, but that's the one we are trying to violate.
+    //
+    // Even if M_X is small, P_X can be quite large. Unfortunately, there seems to be no shortcut like "at least one subset of e must be in M_X" that would allow us to skip some elements.
+    // E.g., we might want to construct ABC with M_X elements ABXYZ, ACXYZ, and BCXYZ. ABC is a valid candidate, but none of its subsets (AB, AC, BC) is in M_X.
+    // There are multiple ways how to find the candidates without an explicit construction of P_X (to the depth of lhsSize - 1), but is looks like each of them has its own drawbacks. E.g., if the whole max set is just one element containing all columns, some methods will be quickly done, but they will struggle with a case where the max set is large.
+    // Also, in the worst case scenario, we still have to generate the whole row of the lattice, so we aren't going to be more efficient than that.
+
     private void extendMaxSet(MaxSet extending) {
         // Get all MaxSets for the class with size lhsSize - 1.
-        final var subsets = extending.elements().filter(element -> element.size() == lhsSize - 1).toList();
+        // final var subsets = extending.elements().filter(element -> element.size() == lhsSize - 1).toList();
+        final var subsets = computeSubsets(extending);
 
         final Map<ColumnSet, Integer> extensionMap = createExtensionMap(extending.forClass, subsets);
 
@@ -96,6 +114,26 @@ public class ExtendMaxSets {
         }
 
         extending.pruneSubsets();
+    }
+
+    /**
+     * Get a list of all possible subsets of the max set with size lhsSize - 1.
+     */
+    private List<ColumnSet> computeSubsets(MaxSet extendeding) {
+        final HashSet<ColumnSet> subsets = new HashSet<>();
+
+        for (final ColumnSet element : extendeding.elements().toList()) {
+            if (element.size() == lhsSize - 1) {
+                subsets.add(element);
+                continue;
+            }
+
+            // This should be ideal if there are very few larger elements. Otherwise, get ready for pain.
+            for (final var subset : Utils.getAllSubsetsWithSize(element, lhsSize - 1))
+                subsets.add(subset);
+        }
+
+        return subsets.stream().toList();
     }
 
     /**

@@ -1,9 +1,14 @@
 package de.uni.passau.core;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.IntStream;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import de.uni.passau.core.model.ColumnSet;
 
 public class Utils {
 
@@ -52,6 +57,44 @@ public class Utils {
         }
 
         return bytes;
+    }
+
+    /**
+     * Returns all subsets of set with given size.
+     * Make sure the size is smaller than the size of the se - nobody is going to check that for you.
+     */
+    public static List<ColumnSet> getAllSubsetsWithSize(ColumnSet set, int size) {
+        final List<ColumnSet> output = new ArrayList<>();
+
+        final int[] allIndexes = set.toIndexes();
+
+        final int[] indexes = IntStream.range(0, size).toArray();
+        final int[] maxIndexes = IntStream.range(set.size() - size, set.size()).toArray();
+
+        while (indexes[0] <= maxIndexes[0]) {
+            final var subset = ColumnSet.fromIndexes();
+            for (int i = 0; i < indexes.length; i++)
+                subset.set(allIndexes[indexes[i]]);
+            output.add(subset);
+
+            int position = size - 1;
+            indexes[position]++;
+
+            if (indexes[position] <= maxIndexes[position])
+                continue;
+
+            while (position > 0 && indexes[position] >= maxIndexes[position])
+                position--;
+
+            indexes[position]++;
+
+            while (position < size - 1) {
+                position++;
+                indexes[position] = indexes[position - 1] + 1;
+            }
+        }
+
+        return output;
     }
 
 }
