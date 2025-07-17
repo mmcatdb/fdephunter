@@ -5,15 +5,16 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import de.uni.passau.core.dataset.CSVDataset;
@@ -48,13 +49,6 @@ class ComputeARTest {
         //genImdbMaxSets();
     }
 
-
-    // @AfterEach
-    // public void tearDown() {
-    //     // Cleanup code for the test, if needed
-    // }
-
-
     @Test
     void testWorkflowComputeAR() {
         System.out.println("\n-- INITIAL STATE --");
@@ -62,17 +56,15 @@ class ComputeARTest {
         ArmstrongRelation ar = ComputeAR.run(maxSets, dataset, null, false);
         if (debug) {
             // Print the initial Armstrong Relation
-            System.out.println("Initial Armstrong Relation:");
-            printArmstrongRelation(ar);
+            System.out.println("Initial Armstrong relation:");
+            System.out.print(ar.exampleFdsToString());
         }
         // Compare the exampleRows in ar with exampleRows in document "0" from file imdb-title-sample-expected-workflow-ar-results.json
-        assertTrue(compareExampleRowsWithExpected(ar, "0", jsonResultFilePath));
+        checkExampleRows(ar, "0", jsonResultFilePath);
 
         // -- 1. ITERATION --
-        // Continue the workflow for the first iteration
         ar = continueWorkflow(ar, 1);
-        // Compare the exampleRows in ar with exampleRows in document "1" from file imdb-title-sample-expected-workflow-ar-results.json
-        assertTrue(compareExampleRowsWithExpected(ar, "1", jsonResultFilePath));
+        checkExampleRows(ar, "1", jsonResultFilePath);
 
         // Set decisions for the current iteration
         setDecision(
@@ -89,12 +81,9 @@ class ComputeARTest {
         );
 
         // -- 2. ITERATION --
-        // Continue the workflow for the next iteration
         ar = continueWorkflow(ar, 2);
-        // Compare the exampleRows in ar with exampleRows in document "2" from file imdb-title-sample-expected-workflow-ar-results.json
-        assertTrue(compareExampleRowsWithExpected(ar, "2", jsonResultFilePath));
+        checkExampleRows(ar, "2", jsonResultFilePath);
 
-        // Set decisions for the current iteration
         setDecision(
             ar,
             // Accepted sets
@@ -108,12 +97,9 @@ class ComputeARTest {
         );
 
         // -- 3. ITERATION --
-        // Continue the workflow for the next iteration
         ar = continueWorkflow(ar, 3);
-        // Compare the exampleRows in ar with exampleRows in document "3" from file imdb-title-sample-expected-workflow-ar-results.json
-        assertTrue(compareExampleRowsWithExpected(ar, "3", jsonResultFilePath));
+        checkExampleRows(ar, "3", jsonResultFilePath);
 
-        // Set decisions for the current iteration
         setDecision(
             ar,
             // Accepted sets
@@ -129,10 +115,8 @@ class ComputeARTest {
         );
 
         // -- 4. ITERATION --
-        // Continue the workflow for the next iteration
         ar = continueWorkflow(ar, 4);
-        // Compare the exampleRows in ar with exampleRows in document "4" from file imdb-title-sample-expected-workflow-ar-results.json
-        assertTrue(compareExampleRowsWithExpected(ar, "4", jsonResultFilePath));
+        checkExampleRows(ar, "4", jsonResultFilePath);
     }
 
 
@@ -210,13 +194,6 @@ class ComputeARTest {
         maxSets.sets().forEach(maxSet -> {
             System.out.println(maxSet.toString());
         });
-    }
-
-    private void printArmstrongRelation(ArmstrongRelation ar) {
-        System.out.println(String.join(", ", ar.referenceRow));
-        for (int i = 0; i < ar.exampleRows.size(); i++) {
-            System.out.println(i + ": " + ar.exampleRows.get(i).toString());
-        }
     }
 
     private List<ExampleRow> getExampleRowsWithDecision(ArmstrongRelation ar) {
@@ -313,7 +290,8 @@ class ComputeARTest {
             System.out.println("Extended MaxSets:");
             printMaxSets(extendedMaxSets);
             System.out.println("New Armstrong Relation:");
-            printArmstrongRelation(newAR);
+            System.out.println(ar.exampleFdsToString());
+            System.out.println(ar.tableToString());
         }
         return newAR;
     }
@@ -326,33 +304,25 @@ class ComputeARTest {
      * @param jsonFilePath The path to the JSON file containing expected results.
      * @return true if the comparison matches, false otherwise.
      */
-    private boolean compareExampleRowsWithExpected(ArmstrongRelation ar, String documentId, String jsonFilePath) {
-        try {
+    private void checkExampleRows(ArmstrongRelation ar, String documentId, String jsonFilePath) {
             // Read and parse the JSON file
             ObjectMapper objectMapper = new ObjectMapper();
-            String jsonContent = new String(Files.readAllBytes(Paths.get(jsonFilePath)));
-            JsonNode rootNode = objectMapper.readTree(jsonContent);
+
+            JsonNode rootNode = assertDoesNotThrow(() -> {
+                String jsonContent = new String(Files.readAllBytes(Paths.get(jsonFilePath)));
+                return objectMapper.readTree(jsonContent);
+            });
 
             // Get the document for the specified ID
             JsonNode documentNode = rootNode.get(documentId);
-            if (documentNode == null) {
-                System.err.println("Document with ID '" + documentId + "' not found in JSON file.");
-                return false;
-            }
+            assertNotNull(documentNode, "Document with ID '" + documentId + "' not found in JSON file.");
 
             // Get the expected example rows
             JsonNode exampleRowsNode = documentNode.get("exampleRows");
-            if (exampleRowsNode == null) {
-                System.err.println("ExampleRows not found in document '" + documentId + "'.");
-                return false;
-            }
+            assertNotNull(exampleRowsNode, "ExampleRows not found in document '" + documentId + "'.");
 
             // Check if the number of example rows matches
-            if (ar.exampleRows.size() != exampleRowsNode.size()) {
-                System.err.println("Number of example rows mismatch. Expected: " + exampleRowsNode.size() +
-                                 ", Actual: " + ar.exampleRows.size());
-                return false;
-            }
+            assertEquals(ar.exampleRows.size(), exampleRowsNode.size(), "Number of example rows mismatch");
 
             // Compare each example row
             for (int i = 0; i < ar.exampleRows.size(); i++) {
@@ -366,48 +336,26 @@ class ComputeARTest {
                     expectedValues[j] = expectedValuesNode.get(j).asText();
                 }
 
-                if (!Arrays.equals(actualRow.values, expectedValues)) {
-                    System.err.println("Values mismatch at row " + i + ". Expected: " +
-                                     Arrays.toString(expectedValues) + ", Actual: " + Arrays.toString(actualRow.values));
-                    return false;
-                }
+                assertArrayEquals(actualRow.values, expectedValues, "Values mismatch at row " + i);
 
                 // Compare LHS
                 JsonNode expectedLhsNode = expectedRowNode.get("lhs");
-                int[] expectedLhs = new int[expectedLhsNode.size()];
+                ColumnSet expectedLhs = ColumnSet.fromIndexes();
                 for (int j = 0; j < expectedLhsNode.size(); j++) {
-                    expectedLhs[j] = expectedLhsNode.get(j).asInt();
+                    expectedLhs.set(expectedLhsNode.get(j).asInt());
                 }
 
-                if (!Arrays.equals(actualRow.lhsSet.toIndexes(), expectedLhs)) {
-                    System.err.println("LHS mismatch at row " + i + ". Expected: " +
-                                     Arrays.toString(expectedLhs) + ", Actual: " + Arrays.toString(actualRow.lhsSet.toIndexes()));
-                    return false;
-                }
+                assertEquals(actualRow.lhsSet, expectedLhs, "LHS mismatch at row " + i);
+
 
                 // Compare RHS
                 JsonNode expectedRhsNode = expectedRowNode.get("rhs");
-                int[] expectedRhs = new int[expectedRhsNode.size()];
+                ColumnSet expectedRhs = ColumnSet.fromIndexes();
                 for (int j = 0; j < expectedRhsNode.size(); j++) {
-                    expectedRhs[j] = expectedRhsNode.get(j).asInt();
+                    expectedRhs.set(expectedRhsNode.get(j).asInt());
                 }
 
-                if (!Arrays.equals(actualRow.rhsSet.toIndexes(), expectedRhs)) {
-                    System.err.println("RHS mismatch at row " + i + ". Expected: " +
-                                     Arrays.toString(expectedRhs) + ", Actual: " + Arrays.toString(actualRow.rhsSet.toIndexes()));
-                    return false;
-                }
+                assertEquals(actualRow.rhsSet, expectedRhs, "RHS mismatch at row " + i);
             }
-
-            System.out.println("✓ Comparison with expected result in document '" + documentId + "' passed successfully!");
-            return true;
-
-        } catch (IOException e) {
-            System.err.println("Error reading JSON file: " + e.getMessage());
-            return false;
-        } catch (Exception e) {
-            System.err.println("Error during comparison: " + e.getMessage());
-            return false;
-        }
     }
 }

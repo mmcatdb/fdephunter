@@ -133,13 +133,14 @@ public class ColumnSet implements Comparable<ColumnSet> {
     }
 
     @Override public int compareTo(ColumnSet other) {
-        if (columns.size() != other.columns.size())
-            return columns.size() - other.columns.size();
+        final var lengthComparison = columns.cardinality() - other.columns.cardinality();
+        if (lengthComparison != 0)
+            return lengthComparison;
 
         final BitSet xor = (BitSet) columns.clone();
         xor.xor(other.columns);
 
-        final int firstDifferent = xor.length() - 1;
+        final int firstDifferent = xor.nextSetBit(0);
         if (firstDifferent == -1)
             return 0;
 
