@@ -82,7 +82,7 @@ public class WorkflowController {
     public CreateJobResponse continueWorkflow(@PathVariable UUID workflowId, @RequestBody ContinueWorkflowRequest init) {
         final var workflow = workflowRepository.findById(workflowId).get();
 
-        final var job = jobService.createIterationJob(workflow, init.description());
+        final var job = jobService.createEvaluationJob(workflow, init.description());
         jobService.executeJobAsync(job.id());
 
         return CreateJobResponse.fromEntities(workflow, job);

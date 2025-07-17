@@ -28,7 +28,7 @@ export enum WorkflowState {
 export type WorkflowResponse = {
     id: Id;
     state: WorkflowState;
-    iteration: number;
+    lhsSize: number;
     /** Is set after the dataset is uploaded so it's not known from the start. */
     datasetId: Id | null;
 };
@@ -37,7 +37,7 @@ export class Workflow {
     private constructor(
         readonly id: Id,
         readonly state: WorkflowState,
-        readonly iteration: number,
+        readonly lhsSize: number,
         readonly datasetId: Id | undefined,
     ) {}
 
@@ -45,7 +45,7 @@ export class Workflow {
         return new Workflow(
             input.id,
             input.state,
-            input.iteration,
+            input.lhsSize,
             input.datasetId ?? undefined,
         );
     }

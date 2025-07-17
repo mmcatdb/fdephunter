@@ -24,7 +24,7 @@ public class JobEntity {
 
     public UUID workflowId;
 
-    /** For ordering jobs in the workflow. */
+    /** For ordering jobs in the workflow. Used only in the repository. */
     public Integer index;
 
     public String description;
@@ -64,7 +64,7 @@ public class JobEntity {
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
     @JsonSubTypes({
         @JsonSubTypes.Type(value = DiscoveryJobPayload.class, name = "discovery"),
-        @JsonSubTypes.Type(value = IterationJobPayload.class, name = "iteration"),
+        @JsonSubTypes.Type(value = EvaluationJobPayload.class, name = "evaluation"),
     })
     public interface JobPayload extends Serializable {}
 
@@ -72,6 +72,6 @@ public class JobEntity {
         UUID datasetId
     ) implements JobPayload {}
 
-    public record IterationJobPayload() implements JobPayload {}
+    public record EvaluationJobPayload() implements JobPayload {}
 
 }

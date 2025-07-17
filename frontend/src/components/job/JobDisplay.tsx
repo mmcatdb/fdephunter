@@ -15,7 +15,7 @@ export function JobDisplay({ job }: JobDisplayProps) {
         <Card>
             <CardHeader className='justify-between'>
                 <h3 className='font-semibold'>
-                    Job #{job.id}
+                    {job.description}
                 </h3>
 
                 <span className={data.color}>
@@ -27,19 +27,34 @@ export function JobDisplay({ job }: JobDisplayProps) {
                 <div>
                     State: <span className={data.color}>{data.label}</span>
                 </div>
+
                 {job.startedAt && (
                     <div>
                         Started: {job.startedAt.toJSDate().toLocaleString()}
                     </div>
                 )}
+
                 {job.finishedAt && (
                     <div>
                         Finished: {job.finishedAt.toJSDate().toLocaleString()}
                     </div>
                 )}
+
                 <div>
                     Progress: {displayPercent(job.progress)}
                 </div>
+
+                {!!job.error && (
+                    <div>
+                        <div className='text-danger'>Error:</div>
+
+                        <pre>
+                            <code>
+                                {JSON.stringify(job.error, null, 4)}
+                            </code>
+                        </pre>
+                    </div>
+                )}
             </CardBody>
         </Card>
     );

@@ -64,7 +64,8 @@ export function WorkflowFinalPage() {
                 </CardHeader>
 
                 <CardBody className='grid grid-cols-3 gap-x-8 gap-y-2'>
-                    <div>Total iterations:<span className='px-2 text-primary font-semibold'>{workflow.iteration}</span></div>
+                    {/* FIXME this isn't it */}
+                    <div>Total iterations:<span className='px-2 text-primary font-semibold'>{workflow.lhsSize}</span></div>
 
                     {/* FIXME Use datasetName instead of id. */}
                     <div className='col-span-2 flex items-center'>Dataset:<div className='truncate px-2 text-primary font-semibold'>{workflow.datasetId}</div></div>

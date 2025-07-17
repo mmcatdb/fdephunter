@@ -23,7 +23,7 @@ public class AssignmentService {
         final var isEvaluatingPositives = workflow.state == WorkflowState.POSITIVE_EXAMPLES;
         final var openAssignments = assignmentRepository.findAllByWorkflowIdAndIsActive(workflow.id(), true).stream()
             .filter(assignment -> assignment.exampleRow.decision == null && assignment.exampleRow.isPositive == isEvaluatingPositives)
-            .filter(assignment -> assignment.exampleRow.lhsSet.size() == workflow.iteration)
+            .filter(assignment -> assignment.exampleRow.lhsSet.size() == workflow.lhsSize)
             .toList();
 
         for (final var assignment : openAssignments) {

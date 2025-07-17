@@ -157,7 +157,7 @@ public class ColumnSet implements Comparable<ColumnSet> {
         return columns.hashCode();
     }
 
-    // region Serialization
+    // #region Serialization
 
     public String toBase64String() {
         final byte[] bytes = columns.toByteArray();
@@ -188,6 +188,6 @@ public class ColumnSet implements Comparable<ColumnSet> {
         }
     }
 
-    // endregion
+    // #endregion
 
 }

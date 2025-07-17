@@ -70,7 +70,7 @@ export function WorkflowOverviewPage() {
 
     async function runRediscovery() {
         setFetching(FID_CONTINUE);
-        const description = workflow.iteration === 1 ? 'Wait for negative example generation ...' : 'Applying approved examples ...';
+        const description = workflow.lhsSize === 1 ? 'Wait for negative example generation ...' : 'Applying approved examples ...';
         const response = await API.workflow.continueWorkflow({ workflowId: workflow.id }, { description });
         if (!response.status) {
             setFetching(undefined);
@@ -137,7 +137,7 @@ export function WorkflowOverviewPage() {
                 </CardHeader>
 
                 <CardBody className='grid grid-cols-3 gap-x-8 gap-y-2'>
-                    <div>Iteration:<span className='px-2 text-primary font-semibold'>{workflow.iteration}</span></div>
+                    <div>LHS size:<span className='px-2 text-primary font-semibold'>{workflow.lhsSize}</span></div>
 
                     {/* FIXME Use datasetName instead of id. */}
                     <div className='col-span-2 flex items-center'>Dataset:<div className='truncate px-2 text-primary font-semibold'>{workflow.datasetId}</div></div>
@@ -202,7 +202,7 @@ export function WorkflowListPage() {
     const { workflow } = useRouteLoaderData<WorkflowLoaded>(routes.workflow.$id)!;
     const { fdSet } = useLoaderData<WorkflowListLoaded>();
 
-    const index = workflow.iteration === 0 ? 0 : 1;
+    const index = workflow.lhsSize === 0 ? 0 : 1;
     const fds = useMemo(() => createFdEdges(fdSet), [ index ]);
 
     return (

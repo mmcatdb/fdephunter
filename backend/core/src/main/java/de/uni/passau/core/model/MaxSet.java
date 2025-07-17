@@ -27,8 +27,10 @@ public class MaxSet implements Cloneable {
     private final Set<ColumnSet> confirmeds = new HashSet<>();
     /** Elements that are speculatively added to the max set, but might be removed later (or moved to the confirmed category). */
     private final Set<ColumnSet> candidates = new HashSet<>();
+    /** If true, the algorithm is finished (we have found the final set of functional dependencies). */
+    private boolean isFinished = false;
 
-    private MaxSet(int forClass, Iterable<ColumnSet> confirmeds, Iterable<ColumnSet> candidates) {
+    private MaxSet(int forClass, Iterable<ColumnSet> confirmeds, Iterable<ColumnSet> candidates, boolean isFinished) {
         this.forClass = forClass;
 
         for (final ColumnSet confirmed : confirmeds)
@@ -36,6 +38,8 @@ public class MaxSet implements Cloneable {
 
         for (final ColumnSet candidate : candidates)
             this.candidates.add(candidate);
+
+        this.isFinished = isFinished;
     }
 
     public MaxSet(int forClass) {
@@ -44,11 +48,19 @@ public class MaxSet implements Cloneable {
 
     /** Mostly for tests. */
     public MaxSet(int forClass, Iterable<ColumnSet> confirmeds) {
-        this(forClass, confirmeds, List.of());
+        this(forClass, confirmeds, List.of(), false);
     }
 
     @Override public MaxSet clone() {
-        return new MaxSet(forClass, confirmeds, candidates);
+        return new MaxSet(forClass, confirmeds, candidates, isFinished);
+    }
+
+    public boolean isFinished() {
+        return isFinished;
+    }
+
+    public void setFinished() {
+        this.isFinished = true;
     }
 
     public Iterable<ColumnSet> confirmedElements() {
@@ -57,6 +69,10 @@ public class MaxSet implements Cloneable {
 
     public int confirmedCount() {
         return confirmeds.size();
+    }
+
+    public int candidateCount() {
+        return candidates.size();
     }
 
     public Stream<ColumnSet> elements() {
@@ -153,7 +169,7 @@ public class MaxSet implements Cloneable {
         return sb.toString();
     }
 
-    // region Serialization
+    // #region Serialization
 
     public static class Serializer extends StdSerializer<MaxSet> {
         public Serializer() { this(null); }
@@ -168,6 +184,8 @@ public class MaxSet implements Cloneable {
 
             generator.writeFieldName("candidates");
             generator.getCodec().writeValue(generator, set.candidates);
+
+            generator.writeBooleanField("isFinished", set.isFinished);
 
             generator.writeEndObject();
         }
@@ -191,10 +209,12 @@ public class MaxSet implements Cloneable {
             for (final JsonNode item : node.get("candidates"))
                 candidatesList.add(codec.treeToValue(item, ColumnSet.class));
 
-            return new MaxSet(forClass, confirmedsList, candidatesList);
+            final boolean isFinished = node.get("isFinished").asBoolean();
+
+            return new MaxSet(forClass, confirmedsList, candidatesList, isFinished);
         }
     }
 
-    // endregion
+    // #endregion
 
 }

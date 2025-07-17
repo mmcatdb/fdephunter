@@ -2,9 +2,11 @@ package de.uni.passau.server.service;
 
 import de.uni.passau.core.dataset.Dataset;
 import de.uni.passau.core.example.ArmstrongRelation;
+import de.uni.passau.core.example.ExampleRow;
 import de.uni.passau.core.exception.NamedException;
 import de.uni.passau.core.exception.OtherException;
 import de.uni.passau.core.model.ColumnSet;
+import de.uni.passau.core.model.MaxSet;
 import de.uni.passau.core.model.MaxSets;
 import de.uni.passau.algorithms.AdjustMaxSets;
 import de.uni.passau.algorithms.ComputeAR;
@@ -12,9 +14,10 @@ import de.uni.passau.algorithms.ComputeFds;
 import de.uni.passau.algorithms.ComputeLattice;
 import de.uni.passau.algorithms.ComputeMaxSets;
 import de.uni.passau.algorithms.ExtendMaxSets;
+import de.uni.passau.server.exception.JobException;
 import de.uni.passau.server.model.AssignmentEntity;
 import de.uni.passau.server.model.JobEntity;
-import de.uni.passau.server.model.JobEntity.IterationJobPayload;
+import de.uni.passau.server.model.JobEntity.EvaluationJobPayload;
 import de.uni.passau.server.model.JobEntity.DiscoveryJobPayload;
 import de.uni.passau.server.model.JobEntity.JobState;
 import de.uni.passau.server.model.WorkflowEntity;
@@ -23,6 +26,7 @@ import de.uni.passau.server.repository.AssignmentRepository;
 import de.uni.passau.server.repository.JobRepository;
 import de.uni.passau.server.repository.WorkflowRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -68,9 +72,9 @@ public class JobService {
         return jobRepository.save(job);
     }
 
-    public JobEntity createIterationJob(WorkflowEntity workflow, String description) {
+    public JobEntity createEvaluationJob(WorkflowEntity workflow, String description) {
         final var prevJobsCount = jobRepository.countByWorkflowId(workflow.id());
-        final var payload = new IterationJobPayload();
+        final var payload = new EvaluationJobPayload();
         final var job = JobEntity.create(workflow.id(), prevJobsCount, description, payload);
         return jobRepository.save(job);
     }
@@ -127,8 +131,8 @@ public class JobService {
         // NICE_TO_HAVE Change this to switch once we are on a better java version.
         if (job.payload instanceof DiscoveryJobPayload)
             executeDiscoveryJob(job);
-        else if (job.payload instanceof IterationJobPayload)
-            executeIterationJob(job);
+        else if (job.payload instanceof EvaluationJobPayload)
+            executeEvaluationJob(job);
     }
 
     private void executeDiscoveryJob(JobEntity job) {
@@ -153,9 +157,11 @@ public class JobService {
         computeViews(workflow, maxSets, dataset);
     }
 
-    private void executeIterationJob(JobEntity job) {
+    // TODO Create a new service, instantiated per-request, just for this.
+
+    private void executeEvaluationJob(JobEntity job) {
         final var sb = new StringBuilder();
-        sb.append("Iteration job").append(job.workflowId).append("\n\n");
+        sb.append("Evaluation job").append(job.workflowId).append("\n\n");
 
         final var workflow = workflowRepository.findById(job.workflowId).get();
         final var dataset = datasetService.getLoadedDatasetById(workflow.datasetId);
@@ -165,32 +171,107 @@ public class JobService {
         sb.append("Prev: ").append(prevMaxSets).append("\n");
 
         final var assignments = assignmentRepository.findAllByWorkflowId(job.workflowId);
-        final var evaluatedRows = assignments.stream()
-            .filter(assignment -> assignment.isActive && assignment.exampleRow.decision != null)
-            .map(assignment -> assignment.exampleRow)
-            .toList();
+        final var evaluatedRows = loadEvaluatedRowsAndUpdateAssignments(assignments);
 
         final var adjustedMaxSets = AdjustMaxSets.run(prevMaxSets, evaluatedRows);
         sb.append("Adjusted: ").append(adjustedMaxSets).append("\n");
 
-        // FIXME Check if we can continue the workflow.
-        // Also check if we have any assignments left to evaluate.
-        // And whether we should switch to positive examples or finish the workflow.
-        // If we are done with negative examples, change state to POSITIVE_EXAMPLES.
-        // If we are done with positive examples, change state to FINAL.
-        workflow.iteration = workflow.iteration + 1;
-        final int lhsSize = workflow.iteration;
+        // Now we have adjusted the previous max sets, i.e., we have removed candidates with size = lhsSize.
+        // TODO if positives, we should subtract 1 ...
+        workflow.lhsSize = workflow.lhsSize + 1;
+        if (workflow.lhsSize == adjustedMaxSets.sets().size()) {
+            // We have processed the largest possible lattice elements. Let's continue with positive examples.
+            workflow.state = WorkflowState.POSITIVE_EXAMPLES;
+            workflow.lhsSize = findLhsSizeOfPositiveExamples(workflow, adjustedMaxSets);
 
-        // FIXME
-        final var isEvaluatingPositives = workflow.state == WorkflowState.POSITIVE_EXAMPLES;
+            if (workflow.lhsSize == 0) {
+                // If there are no positive examples, we can finish the workflow.
+                workflow.state = WorkflowState.FINAL;
+
+                // TODO end here!
+            }
+        }
 
         // Extend the max sets and compute a new Armstrong relation.
-        final var extendedMaxSets = ExtendMaxSets.run(adjustedMaxSets, lhsSize);
+        final var extendedMaxSets = ExtendMaxSets.run(adjustedMaxSets, workflow.lhsSize);
         sb.append("Extended: ").append(extendedMaxSets).append("\n");
 
-        final var prevAR = loadPrevAR(assignments);
-        final var armstrongRelation = ComputeAR.run(extendedMaxSets, dataset, prevAR, isEvaluatingPositives);
+        final var isAllFinished = extendedMaxSets.sets().stream().allMatch(MaxSet::isFinished);
+        if (isAllFinished) {
+            // The algorithm finished prematurely (giggity).
 
+            // TODO Try positive examples.
+            // If already there (or nothing to do), finish the workflow.
+        }
+
+        final var prevAR = loadPrevAR(assignments);
+        final var armstrongRelation = ComputeAR.run(extendedMaxSets, dataset, prevAR, workflow.state == WorkflowState.POSITIVE_EXAMPLES);
+
+        addNewAssignments(assignments, armstrongRelation, job, dataset);
+
+        storageService.set(workflow.maxSetsId(), extendedMaxSets);
+        workflowRepository.save(workflow);
+        assignmentRepository.saveAll(assignments);
+
+        computeViews(workflow, extendedMaxSets, dataset);
+
+        LOGGER.info(sb.toString());
+    }
+
+    private List<ExampleRow> loadEvaluatedRowsAndUpdateAssignments(List<AssignmentEntity> assignments) {
+        final List<ExampleRow> output = new ArrayList<>();
+
+        for (final var assignment : assignments) {
+            if (!assignment.isActive)
+                // Only active assignments are considered - others were already processed.
+                continue;
+            assignment.isActive = false;
+
+            if (assignment.exampleRow.decision == null)
+                // All assignments must be decided before we can continue with the workflow.
+                throw JobException.assignmentUndecided(assignment.id());
+
+            output.add(assignment.exampleRow);
+        }
+
+        return output;
+    }
+
+    /**
+     * Returns the size of the largest element from max set that is a positive example.
+     * If there are none, returns 0.
+     */
+    private int findLhsSizeOfPositiveExamples(WorkflowEntity workflow, MaxSets currentSets) {
+        final var initialSets = storageService.get(workflow.initialMaxSetsId(), MaxSets.class);
+
+        int lhsSize = 0;
+
+        for (int i = 0; i < currentSets.sets().size(); i++) {
+            final var initialSet = initialSets.sets().get(i);
+            final var currentSet = currentSets.sets().get(i);
+
+            for (final var initial : initialSet.confirmedElements()) {
+                if (currentSet.hasConfirmed(initial)) {
+                    // We found an initial set element that is still in the current set. That's the definition of a positive example!
+                    lhsSize = Math.max(lhsSize, initial.size());
+                }
+            }
+        }
+
+        return lhsSize;
+    }
+
+    private ArmstrongRelation loadPrevAR(List<AssignmentEntity> assignments) {
+        // The list is not sorted, but we don't need it to be.
+        final var exampleRows = assignments.stream()
+            .filter(assignment -> assignment.isActive)
+            .map(assignment -> assignment.exampleRow)
+            .toList();
+
+        return new ArmstrongRelation(assignments.get(0).referenceRow, exampleRows);
+    }
+
+    private void addNewAssignments(List<AssignmentEntity> assignments, ArmstrongRelation armstrongRelation, JobEntity job, Dataset dataset) {
         // We mark all assignment as inactive. Then we activate all those in the new Armstrong relation.
         assignments.forEach(assignment -> assignment.isActive = false);
         final Map<ColumnSet, AssignmentEntity> assignmentsByLhs = assignments.stream().collect(Collectors.toMap(a -> a.exampleRow.lhsSet, a -> a));
@@ -208,29 +289,11 @@ public class JobService {
             final var newAssignment = AssignmentEntity.create(job.workflowId, dataset.getHeader(), armstrongRelation.referenceRow, exampleRow);
             assignments.add(newAssignment);
         }
-
-        storageService.set(workflow.maxSetsId(), extendedMaxSets);
-        workflowRepository.save(workflow);
-        assignmentRepository.saveAll(assignments);
-
-        computeViews(workflow, extendedMaxSets, dataset);
-
-        LOGGER.info(sb.toString());
-    }
-
-    private ArmstrongRelation loadPrevAR(List<AssignmentEntity> assignments) {
-        // The list is not sorted, but we don't need it to be.
-        final var exampleRows = assignments.stream()
-            .filter(assignment -> assignment.isActive)
-            .map(assignment -> assignment.exampleRow)
-            .toList();
-
-        return new ArmstrongRelation(assignments.get(0).referenceRow, exampleRows);
     }
 
     private void computeViews(WorkflowEntity workflow, MaxSets maxSets, Dataset dataset) {
         MaxSets initialMaxSets;
-        if (workflow.iteration == 0) {
+        if (workflow.lhsSize == 0) {
             initialMaxSets = maxSets;
             storageService.set(workflow.initialMaxSetsId(), initialMaxSets);
         }

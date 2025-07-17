@@ -155,7 +155,7 @@ function ExampleRowDisplay({ workflow, assignment, gridState, rowIndex }: Exampl
     const { leftClass, rightClass } = getSpecialCellClasses(rowIndex);
 
     // FIXME Get this information somewhere.
-    const isEvaluationAllowed = row.isPositive === workflow.evaluatingType && row.lhsSet.length === workflow.iteration;
+    const isEvaluationAllowed = row.isPositive === workflow.evaluatingType && row.lhsSet.length === workflow.lhsSize;
 
     return (<>
         <div className={leftClass}>

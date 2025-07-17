@@ -44,7 +44,7 @@ public class ViewController {
 
     private List<Lattice> createMockLattices(UUID workflowId) {
         final var workflow = workflowRepository.findById(workflowId).get();
-        return workflow.iteration == 0
+        return workflow.lhsSize == 0
             ? createInitialMockLattices()
             : createFinalMockLattices();
     }

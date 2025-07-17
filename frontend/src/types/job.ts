@@ -12,11 +12,13 @@ export type JobResponse = {
     id: Id;
     state: JobState;
     description: string;
-    iteration: number;
+    // There is no need for payload right now, although it's already included in the response. If there ever is, we can add here.
     /** In UTC. */
     startedAt?: string;
     /** In UTC. */
     finishedAt?: string;
+    /** Something serializable. For debug purposes. */
+    error?: unknown;
 };
 
 export class Job {
@@ -24,10 +26,10 @@ export class Job {
         readonly id: Id,
         readonly state: JobState,
         readonly description: string,
-        readonly iteration: number,
         readonly startedAt: DateTime | undefined,
         readonly finishedAt: DateTime | undefined,
         readonly progress: number, // from 0 to 1
+        readonly error: unknown,
     ) {}
 
     static fromResponse(input: JobResponse): Job {
@@ -39,10 +41,10 @@ export class Job {
             input.id,
             input.state,
             input.description,
-            input.iteration,
             input.startedAt ? DateTime.fromISO(input.startedAt) : undefined,
             input.finishedAt ? DateTime.fromISO(input.finishedAt) : undefined,
             progress,
+            input.error,
         );
     }
 }

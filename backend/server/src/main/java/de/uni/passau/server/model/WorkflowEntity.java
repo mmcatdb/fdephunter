@@ -22,7 +22,11 @@ public class WorkflowEntity {
 
     public WorkflowState state;
 
-    public Integer iteration;
+    /**
+     * Size of the currently processed max set elements. Works for both negative and positive examples.
+     * I.e., it starts with 1, then goes up to the number of columns in the dataset, and then goes back to 1.
+     */
+    public Integer lhsSize;
 
     public static WorkflowEntity create() {
         final var workflow = new WorkflowEntity();
@@ -30,7 +34,7 @@ public class WorkflowEntity {
         workflow._id = UUID.randomUUID();
         workflow.datasetId = null; // No dataset selected yet.
         workflow.state = WorkflowState.INITIAL_SETTINGS;
-        workflow.iteration = 0;
+        workflow.lhsSize = 0;
 
         return workflow;
     }
