@@ -144,16 +144,15 @@ public class MaxSet implements Cloneable {
             supersets.add(set);
         }
 
-        // TODO This doesn't work correctly if the same set is both confirmed and candidate. That shouldn't happen, but we don't enforce it (see the todo comment above).
         // Now we have all supersets, so we can filter the elements.
         confirmeds.removeIf(set -> !supersets.contains(set));
-        candidates.removeIf(set -> !supersets.contains(set));
+        candidates.removeIf(set -> !supersets.contains(set) && !confirmeds.contains(set));
     }
 
     @Override public String toString() {
         final StringBuilder sb = new StringBuilder();
 
-        sb.append("max(").append(forClass).append(", confirmeds: ");
+        sb.append("max(rhs=").append(forClass).append(", confirmeds: ");
         for (final ColumnSet set : confirmeds)
             sb.append(set).append(", ");
         if (confirmeds.size() == 0)

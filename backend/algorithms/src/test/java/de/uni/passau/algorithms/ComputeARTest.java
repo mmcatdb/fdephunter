@@ -31,14 +31,13 @@ class ComputeARTest {
 
     private Dataset dataset;
     private MaxSets maxSets;
-    private String jsonResultFilePath;
-    private Boolean debug = false; // Set to true for debugging output
+    private static final String csvFilePath = "src/test/resources/imdb-title-sample.csv";
+    private static final String jsonResultFilePath = "src/test/resources/imdb-title-sample-expected-workflow-ar-results.json";
+    private static final Boolean debug = false; // Set to true for debugging output
 
     @BeforeEach
     public void setUp() throws IOException {
         // Load the dataset
-        String csvFilePath = "src/test/resources/imdb-title-sample.csv";
-        jsonResultFilePath = "src/test/resources/imdb-title-sample-expected-workflow-ar-results.json";
         Boolean hasHeader = true;
         dataset = new CSVDataset(csvFilePath, hasHeader);
         dataset.load();
