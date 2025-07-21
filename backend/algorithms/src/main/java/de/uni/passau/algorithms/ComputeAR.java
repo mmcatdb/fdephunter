@@ -84,7 +84,7 @@ public class ComputeAR {
         setupColumnProviders();
 
         final var requiredRows = computeRequiredRows();
-        final var prevByLhs = collecPrevRowsByLhs();
+        final var prevByLhs = collectPrevRowsByLhs();
 
         final var nextRows = createExampleRows(requiredRows, prevByLhs);
         nextRows.sort((a, b) -> a.lhsSet.compareTo(b.lhsSet));
@@ -118,7 +118,7 @@ public class ComputeAR {
         return output;
     }
 
-    private Map<ColumnSet, ExampleRow> collecPrevRowsByLhs() {
+    private Map<ColumnSet, ExampleRow> collectPrevRowsByLhs() {
         final Map<ColumnSet, ExampleRow> prevRows = new HashMap<>();
 
         if (prev != null) {

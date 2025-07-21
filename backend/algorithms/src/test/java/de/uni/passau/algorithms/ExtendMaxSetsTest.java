@@ -34,6 +34,21 @@ class ExtendMaxSetsTest {
         assertTrue(extended.sets().get(0).hasCandidate(expectedCandidate), "The expected candidate " + expectedCandidate + " was not generated.");
     }
 
+    @Test
+    void pruneByOtherClasses() {
+        final var initial = parseMaxSets(
+            "1 2 3", // 23 will be generated, but because the FD below, it should be replaced by 123.
+            "0 2", // 3 is missing - 23 is not going to be generated - 23 => 1 is FD.
+            "013",
+            "014"
+        );
+
+        final var extended = ExtendMaxSets.run(initial, 2);
+
+        System.out.println(extended);
+        System.out.println(extended);
+    }
+
     private MaxSets parseMaxSets(String ...classes) {
         final List<MaxSet> maxSets = new ArrayList<>();
 
