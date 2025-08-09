@@ -6,7 +6,7 @@ import { Link, useLoaderData, useNavigate, useRouteLoaderData } from 'react-rout
 import { routes } from '@/router';
 import { type WorkflowLoaded } from './WorkflowPage';
 import { WorkflowState } from '@/types/workflow';
-import { FileInput, type FileInputValue } from '@/components/common/FileInput';
+import { DatasetInput, type DatasetInputValue } from '@/components/dataset/DatasetInput';
 import { type DatasetResponse } from '@/types/dataset';
 
 export function WorkflowSettingsPage() {
@@ -86,32 +86,23 @@ type InitialSettingsFormProps = {
 function InitialSettingsForm({ datasets, onSubmit, fetching }: InitialSettingsFormProps) {
     const [ selected, setSelected ] = useState({
         dataset: new Set<string>(),
-        file: undefined as FileInputValue,
+        file: undefined as DatasetInputValue,
     });
-    const datasetOptions = useMemo(() => datasets.map(datasetToOption), []);
+    const datasetOptions = useMemo(() => datasets.map(datasetToOption), [ datasets ]);
 
     function submit() {
         if (!selected.dataset.size && !selected.file)
             return;
-        // const finalDatasets = [ ...selectedDatasets.values() ]
-        //     .map(dataset => datasets.find(d => d.name === dataset))
-        //     .filter((d): d is Dataset => !!d);
 
-        // if (finalDatasets.length === 0)
-        //     return;
+        const datasetId = selected.dataset.values().next().value;
+        const dataset = datasetId
+            ? datasets.find(d => d.id === datasetId)!
+            : selected.file!;
 
-        // FIXME Use file as dataset.
-        const datasetId = selected.dataset.values().next().value!;
-        const dataset = datasets.find(d => d.id === datasetId)!;
-
-        onSubmit({
-            // FIXME Use file as dataset.
-            // datasetName: selected.file?.originalName ?? selected.dataset.values().next().value!,
-            dataset,
-        });
+        onSubmit({ dataset });
     }
 
-    const setSelectedValue = useCallback((value: FileInputValue | SharedSelection) => {
+    const setSelectedValue = useCallback((value: DatasetInputValue | SharedSelection) => {
         if (value === 'all')
             return;
 
@@ -140,7 +131,7 @@ function InitialSettingsForm({ datasets, onSubmit, fetching }: InitialSettingsFo
 
         <p className='my-4 text-center'>... or upload your own!</p>
 
-        <FileInput value={selected.file} onChange={setSelectedValue} />
+        <DatasetInput value={selected.file} onChange={setSelectedValue} />
 
         <Button
             className='mt-8 w-full'

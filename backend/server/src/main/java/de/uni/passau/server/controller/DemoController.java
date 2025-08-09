@@ -74,6 +74,7 @@ public class DemoController {
     private void initializeDatasets() {
         LOGGER.info("Initializing datasets.");
 
+        // Make sure the names are unique. It's not checked neither in the service nor in the database.
         datasetService.createDataset(DatasetType.CSV, "iris", "iris.csv");
         datasetService.createDataset(DatasetType.CSV, "imdb sample", "imdb-title-sample.csv");
         // NICE_TO_HAVE: Add more datasets here.

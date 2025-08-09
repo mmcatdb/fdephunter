@@ -10,6 +10,7 @@ import de.uni.passau.server.service.JobService;
 
 import java.util.UUID;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,7 +90,7 @@ public class WorkflowController {
     }
 
     @GetMapping("/workflows/{workflowId}/last-job")
-    public JobEntity getLastJobByWorkflowId(@PathVariable UUID workflowId) {
+    public @Nullable JobEntity getLastJobByWorkflowId(@PathVariable UUID workflowId) {
         return jobRepository.findFirstByWorkflowId(workflowId);
     }
 

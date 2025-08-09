@@ -14,8 +14,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 public class DatasetController {
@@ -37,6 +39,20 @@ public class DatasetController {
         return datasetRepository.findAll();
     }
 
+    public record FileResponse(
+        UUID id,
+        String originalName,
+        String hashName,
+        long size
+    ) implements Serializable {}
+
+    @PostMapping("/datasets")
+    public DatasetEntity UploadDataset(@RequestParam("file") MultipartFile file) {
+        LOGGER.info("Uploaded dataset: {} with size: {}", file.getName(), file.getSize());
+
+        return datasetService.uploadDataset(file);
+    }
+
     public record DatasetData(String[] header, List<String[]> rows) implements Serializable {}
 
     @GetMapping("/workflows/{workflowId}/data")
@@ -55,11 +71,6 @@ public class DatasetController {
         System.out.println("size: " + dataset.getRows().size());
 
         return new DatasetData(dataset.getHeader(), dataset.getRows().stream().skip(numberOffset).limit(numberLimit).toList());
-    }
-
-    // TODO
-    public void UploadDataset() {
-        throw new UnsupportedOperationException("Not implemented yet.");
     }
 
 }

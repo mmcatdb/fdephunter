@@ -1,20 +1,23 @@
 import { type ReactNode, useCallback, useRef, useState } from 'react';
-import { type FileResponse } from '@/types/file';
 import clsx from 'clsx';
 import { LuPaperclip } from 'react-icons/lu';
 import { MdModeEdit } from 'react-icons/md';
 import { TbTrashX } from 'react-icons/tb';
 import { Spinner } from '@heroui/react';
+import { API } from '@/utils/api/api';
+import { type DatasetResponse } from '@/types/dataset';
 
-export type FileInputValue = FileResponse | undefined;
+export type DatasetInputValue = DatasetResponse | undefined;
 
-type FileInputProps = Readonly<{
+const ACCEPTED_MIME_TYPES = 'text/csv';
+
+type DatasetInputProps = Readonly<{
     id?: string;
-    value: FileInputValue;
-    onChange(value: FileInputValue): void;
+    value: DatasetInputValue;
+    onChange(value: DatasetInputValue): void;
 }>;
 
-export function FileInput({ id, value, onChange }: FileInputProps) {
+export function DatasetInput({ id, value, onChange }: DatasetInputProps) {
     const [ isFetching, setIsFetching ] = useState(false);
 
     const handleChange = useCallback(async (file: File | null) => {
@@ -27,33 +30,27 @@ export function FileInput({ id, value, onChange }: FileInputProps) {
         formData.append('file', file);
 
         setIsFetching(true);
-        // TODO This is not implemented yet on the backend!
-        // const response = await API.dataset.uploadFile({}, formData);
-        await new Promise(resolve => setTimeout(resolve, (1 + Math.random()) / 2 * 1000));
+        const response = await API.dataset.uploadDataset({}, formData);
         setIsFetching(false);
 
-        // if (!response.status) {
-        //     console.error('Failed to upload file');
-        //     return;
-        // }
+        if (!response.status) {
+            console.error('Failed to upload dataset');
+            return;
+        }
 
-        // onChange(response.data);
+        console.log('Dataset uploaded successfully:', response.data);
 
-        onChange({
-            id: '1',
-            originalName: file.name,
-            hashName: 'hash',
-            size: file.size,
-        });
+        onChange(response.data);
 
     }, [ onChange ]);
 
-    const fileName = value?.originalName;
+    const fileName = value?.name;
 
     return (
         <RawFileInput
             id={id}
             onChange={handleChange}
+            accept={ACCEPTED_MIME_TYPES}
             preview={fileName ? <FilePreview fileName={fileName} /> : undefined}
             isFetching={isFetching}
         />
@@ -75,17 +72,25 @@ function FilePreview({ fileName }: { fileName: string }) {
 type RawFileInputProps = Readonly<{
     id?: string;
     onChange: (fileList: File | null) => void;
+    /** Comma-separated MIME types. Will be checked by the html input. */
+    accept?: string;
     /** If present, will the input is considered full. */
     preview: ReactNode | undefined;
     isFetching?: boolean;
 }>;
 
-function RawFileInput({ id, onChange, preview, isFetching }: RawFileInputProps) {
+function RawFileInput({ id, onChange, accept, preview, isFetching }: RawFileInputProps) {
     const inputRef = useRef<HTMLInputElement>(null);
 
     function handleInput(fileList: FileList | null) {
         if (!fileList || fileList.length === 0)
             return;
+
+        const file = fileList[0];
+        if (accept && !accept.includes(file.type)) {
+            console.error(`File type ${file.type} is not allowed. Expected: ${accept}`);
+            return;
+        }
 
         onChange(fileList[0]);
     }
@@ -113,6 +118,7 @@ function RawFileInput({ id, onChange, preview, isFetching }: RawFileInputProps) 
                     e.target.value = '';
                 }}
                 ref={inputRef}
+                accept={accept}
                 className='hidden'
                 aria-hidden
                 tabIndex={-1}

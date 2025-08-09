@@ -2,6 +2,7 @@ package de.uni.passau.server.model;
 
 import java.util.UUID;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -19,18 +20,23 @@ public class DatasetEntity {
 
     public DatasetType type;
 
-    public String name;
-
     /** Connection string, filename, etc. */
     public String source;
 
-    public static DatasetEntity create(DatasetType type, String name, String source) {
+    /** Human-readable name. Unique. */
+    public String name;
+
+    /** The name under which we tried to create the dataset. Should be the same as {@name} unless this {@name} was already taken. */
+    public @Nullable String originalName;
+
+    public static DatasetEntity create(DatasetType type, String source, String name, @Nullable String originalName) {
         final var dataset = new DatasetEntity();
 
         dataset._id = UUID.randomUUID();
         dataset.type = type;
-        dataset.name = name;
         dataset.source = source;
+        dataset.name = name;
+        dataset.originalName = originalName;
 
         return dataset;
     }

@@ -9,8 +9,8 @@ import de.uni.passau.server.model.AssignmentEntity;
 
 public interface AssignmentRepository extends MongoRepository<AssignmentEntity, UUID> {
 
-    public List<AssignmentEntity> findAllByWorkflowId(UUID workflowId);
+    List<AssignmentEntity> findAllByWorkflowId(UUID workflowId);
 
-    public List<AssignmentEntity> findAllByWorkflowIdAndIsActive(UUID workflowId, boolean isActive);
+    List<AssignmentEntity> findAllByWorkflowIdAndIsActive(UUID workflowId, boolean isActive);
 
 }
