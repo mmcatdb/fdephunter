@@ -3,11 +3,15 @@ package de.uni.passau.server.controller;
 import de.uni.passau.server.model.JobEntity;
 import de.uni.passau.server.model.WorkflowEntity;
 import de.uni.passau.server.model.WorkflowEntity.WorkflowState;
+import de.uni.passau.server.repository.DatasetRepository;
 import de.uni.passau.server.repository.JobRepository;
 import de.uni.passau.server.repository.WorkflowRepository;
 import de.uni.passau.server.service.AssignmentService;
+import de.uni.passau.server.service.DatasetService;
 import de.uni.passau.server.service.JobService;
+import de.uni.passau.server.service.DatasetService.CsvDatasetInit;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -33,6 +37,12 @@ public class WorkflowController {
     private AssignmentService assignmentService;
 
     @Autowired
+    private DatasetRepository datasetRepository;
+
+    @Autowired
+    private DatasetService datasetService;
+
+    @Autowired
     private JobRepository jobRepository;
 
     @Autowired
@@ -51,39 +61,48 @@ public class WorkflowController {
     private record CreateJobResponse(
         WorkflowEntity workflow,
         JobEntity job
-    ) {
+    ) implements Serializable {
         static CreateJobResponse fromEntities(WorkflowEntity workflow, JobEntity job) {
             return new CreateJobResponse(workflow, job);
         }
     }
 
     private record StartWorkflowRequest(
-        String description,
-        UUID datasetId
-    ) {}
+        @Nullable UUID datasetId,
+        @Nullable CsvDatasetInit datasetInit
+    ) implements Serializable {}
 
     @PostMapping("/workflows/{workflowId}/start")
-    public CreateJobResponse startWorkflow(@PathVariable UUID workflowId, @RequestBody StartWorkflowRequest init) {
+    public CreateJobResponse startWorkflow(@PathVariable UUID workflowId, @RequestBody StartWorkflowRequest request) {
+        if (request.datasetId == null && request.datasetInit == null)
+            throw new IllegalArgumentException("Either datasetId or file must be provided.");
+
+        final var dataset = request.datasetId != null
+            ? datasetRepository.findById(request.datasetId).get()
+            : datasetService.createDataset(request.datasetInit);
+
         var workflow = workflowRepository.findById(workflowId).get();
-        workflow.datasetId = init.datasetId;
+        workflow.datasetId = dataset.id();
         workflow.state = WorkflowState.INITIAL_FD_DISCOVERY;
         workflow = workflowRepository.save(workflow);
 
-        final var job = jobService.createDiscoveryJob(workflow, init.description());
+        final String description = "Initial discovery for " + dataset.name;
+
+        final var job = jobService.createDiscoveryJob(workflow, description);
         jobService.executeJobAsync(job.id());
 
         return CreateJobResponse.fromEntities(workflow, job);
     }
 
-    private record ContinueWorkflowRequest(
-        String description
-    ) {}
-
     @PostMapping("/workflows/{workflowId}/continue")
-    public CreateJobResponse continueWorkflow(@PathVariable UUID workflowId, @RequestBody ContinueWorkflowRequest init) {
+    public CreateJobResponse continueWorkflow(@PathVariable UUID workflowId) {
         final var workflow = workflowRepository.findById(workflowId).get();
 
-        final var job = jobService.createEvaluationJob(workflow, init.description());
+        final String description = (workflow.state == WorkflowState.NEGATIVE_EXAMPLES && workflow.lhsSize == 0)
+            ? "Wait for negative example generation ..."
+            : "Applying approved examples ...";
+
+        final var job = jobService.createEvaluationJob(workflow, description);
         jobService.executeJobAsync(job.id());
 
         return CreateJobResponse.fromEntities(workflow, job);

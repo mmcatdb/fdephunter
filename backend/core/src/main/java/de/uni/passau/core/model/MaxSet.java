@@ -59,8 +59,8 @@ public class MaxSet implements Cloneable {
         return isFinished;
     }
 
-    public void setFinished() {
-        this.isFinished = true;
+    public void setIsFinished(boolean isFinished) {
+        this.isFinished = isFinished;
     }
 
     public Iterable<ColumnSet> confirmedElements() {
@@ -116,6 +116,13 @@ public class MaxSet implements Cloneable {
         //     && confirmeds.add(candidate);
         candidates.remove(candidate);
         return confirmeds.add(candidate);
+    }
+
+    public boolean moveConfirmedToCandidates(ColumnSet confirmed) {
+        // return confirmeds.remove(confirmed)
+        //     && candidates.add(confirmed);
+        confirmeds.remove(confirmed);
+        return candidates.add(confirmed);
     }
 
     // We can't keep the information about calling this method because the set might be mofidied later.

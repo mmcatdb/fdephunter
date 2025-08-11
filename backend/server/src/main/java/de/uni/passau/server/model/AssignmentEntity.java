@@ -33,7 +33,7 @@ public class AssignmentEntity {
     /**
      * Whether the row is a part of the currently displayed Armstrong relation or not. We still want to keep the row in the database.
      * If a row is rejected, it becomes inactive. It can never come back.
-     * If a row is make obsolete by a new row, it becomes inactive, but it can be made active again if the new row is rejected.
+     * If a row is made obsolete by a new row, it becomes inactive, but it can be made active again if the new row is rejected.
      */
     public boolean isActive = true;
 

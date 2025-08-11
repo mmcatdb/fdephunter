@@ -16,7 +16,7 @@ class ComputeFDTest {
     @Test
     public void testComputeFDEndToEnd() {
         final Path path = Paths.get("src", "test", "resources", "iris.csv");
-        final Dataset dataset = new CSVDataset(path.toString(), false);
+        final Dataset dataset = new CSVDataset(path.toString(), false, ',');
         dataset.load();
 
         final var maxSets = ComputeMaxSets.run(dataset);

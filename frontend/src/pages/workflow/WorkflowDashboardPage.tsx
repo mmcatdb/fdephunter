@@ -70,8 +70,7 @@ export function WorkflowOverviewPage() {
 
     async function runRediscovery() {
         setFetching(FID_CONTINUE);
-        const description = workflow.lhsSize === 1 ? 'Wait for negative example generation ...' : 'Applying approved examples ...';
-        const response = await API.workflow.continueWorkflow({ workflowId: workflow.id }, { description });
+        const response = await API.workflow.continueWorkflow({ workflowId: workflow.id });
         if (!response.status) {
             setFetching(undefined);
             return;

@@ -45,19 +45,22 @@ public class ExtendMaxSets {
         final MaxSets extendedMaxSets = new MaxSets(new ArrayList<>());
 
         for (final MaxSet original : maxSets.sets()) {
+            if (original.isFinished()) {
+                // If the max set is already finished, we don't need to extend it.
+                extendedMaxSets.sets().add(original);
+                continue;
+            }
+
             // Clone the original max set because we don't want to modify it.
             final MaxSet extending = original.clone();
 
-            // If the max set is already finished, we don't need to extend it.
-            if (!extending.isFinished()) {
-                if (lhsSize == 1)
-                    extendMaxSetForSizeOne(extending);
-                else
-                    extendMaxSet(extending);
-            }
+            if (lhsSize == 1)
+                extendMaxSetForSizeOne(extending);
+            else
+                extendMaxSet(extending);
 
             if (isExtendedMaxSetFinished(extending))
-                extending.setFinished();
+                extending.setIsFinished(true);
 
             extendedMaxSets.sets().add(extending);
         }

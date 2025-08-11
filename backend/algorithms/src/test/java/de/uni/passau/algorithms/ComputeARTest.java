@@ -39,7 +39,7 @@ class ComputeARTest {
     public void setUp() throws IOException {
         // Load the dataset
         boolean hasHeader = true;
-        dataset = new CSVDataset(csvFilePath, hasHeader);
+        dataset = new CSVDataset(csvFilePath, hasHeader, ',');
         dataset.load();
 
         // Initialize the MaxSets
@@ -273,7 +273,7 @@ class ComputeARTest {
         // 1. Get ExampleRows which have a decision
         List<ExampleRow> exampleRowsWithDecision = getExampleRowsWithDecision(ar);
         // 2. Adjust the MaxSets based on the ExampleRows with decision.
-        MaxSets adjustedMaxSets = AdjustMaxSets.run(maxSets, exampleRowsWithDecision);
+        MaxSets adjustedMaxSets = AdjustMaxSets.run(maxSets, exampleRowsWithDecision, false);
         // 3. Extend the MaxSets (create new candidates)
         MaxSets extendedMaxSets = ExtendMaxSets.run(adjustedMaxSets, iteration);
         maxSets = extendedMaxSets; // Update the maxSets for the next iteration

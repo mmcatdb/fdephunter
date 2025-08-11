@@ -1,13 +1,14 @@
 import { useCallback, useMemo, useState } from 'react';
 import { API } from '@/utils/api/api';
-import { Button, Card, CardBody, Select, SelectItem, type SharedSelection } from '@heroui/react';
+import { Button, Card, CardBody, Checkbox, Input, Select, SelectItem, type SharedSelection } from '@heroui/react';
 import { Page } from '@/components/layout';
 import { Link, useLoaderData, useNavigate, useRouteLoaderData } from 'react-router';
 import { routes } from '@/router';
 import { type WorkflowLoaded } from './WorkflowPage';
 import { WorkflowState } from '@/types/workflow';
-import { DatasetInput, type DatasetInputValue } from '@/components/dataset/DatasetInput';
+import { FileInput, type FileInputValue } from '@/components/dataset/FileInput';
 import { type DatasetResponse } from '@/types/dataset';
+import { type StartWorkflowRequest } from '@/utils/api/routes/workflow';
 
 export function WorkflowSettingsPage() {
     const { workflow } = useRouteLoaderData<WorkflowLoaded>(routes.workflow.$id)!;
@@ -16,12 +17,9 @@ export function WorkflowSettingsPage() {
     const [ fetching, setFetching ] = useState(false);
     const navigate = useNavigate();
 
-    async function runInitialDiscovery(settings: DiscoverySettings) {
+    async function runInitialDiscovery(init: StartWorkflowRequest) {
         setFetching(true);
-        const response = await API.workflow.startWorkflow({ workflowId: workflow.id }, {
-            description: `Initial discovery for ${settings.dataset.name}`,
-            datasetId: settings.dataset.id,
-        });
+        const response = await API.workflow.startWorkflow({ workflowId: workflow.id }, init);
         if (!response.status) {
             setFetching(false);
             return;
@@ -73,45 +71,49 @@ WorkflowSettingsPage.loader = async (): Promise<WorkflowSettingsLoaded> => {
     };
 };
 
-type DiscoverySettings = {
-    dataset: DatasetResponse;
-};
-
 type InitialSettingsFormProps = {
     datasets: DatasetResponse[];
-    onSubmit: (settings: DiscoverySettings) => void;
+    onSubmit: (settings: StartWorkflowRequest) => void;
     fetching: boolean;
 };
 
 function InitialSettingsForm({ datasets, onSubmit, fetching }: InitialSettingsFormProps) {
     const [ selected, setSelected ] = useState({
         dataset: new Set<string>(),
-        file: undefined as DatasetInputValue,
+        file: undefined as FileInputValue,
     });
     const datasetOptions = useMemo(() => datasets.map(datasetToOption), [ datasets ]);
 
+    const [ hasHeader, setHasHeader ] = useState(true);
+    const [ separator, setSeparator ] = useState(',');
+
     function submit() {
-        if (!selected.dataset.size && !selected.file)
+        if (selected.dataset.size) {
+            const datasetId = selected.dataset.values().next().value;
+            const dataset = datasets.find(d => d.id === datasetId)!;
+            onSubmit({ datasetId: dataset.id });
             return;
+        }
 
-        const datasetId = selected.dataset.values().next().value;
-        const dataset = datasetId
-            ? datasets.find(d => d.id === datasetId)!
-            : selected.file!;
-
-        onSubmit({ dataset });
+        if (selected.file)
+            onSubmit({ datasetInit: { file: selected.file, hasHeader, separator } });
     }
 
-    const setSelectedValue = useCallback((value: DatasetInputValue | SharedSelection) => {
+    const setSelectedValue = useCallback((value: FileInputValue | SharedSelection) => {
         if (value === 'all')
             return;
 
-        if (value instanceof Set)
+        if (value instanceof Set) {
             setSelected(() => ({ dataset: value as Set<string>, file: undefined }));
-        else
+        }
+        else {
             setSelected(() => ({ dataset: new Set(), file: value }));
-
+            setHasHeader(true);
+            setSeparator(',');
+        }
     }, []);
+
+    const isValid = selected.dataset.size || (selected.file && separator.length === 1);
 
     return (<>
         <p className='mb-4 text-center'>Pick from the predefined options ...</p>
@@ -131,14 +133,39 @@ function InitialSettingsForm({ datasets, onSubmit, fetching }: InitialSettingsFo
 
         <p className='my-4 text-center'>... or upload your own!</p>
 
-        <DatasetInput value={selected.file} onChange={setSelectedValue} />
+        <FileInput value={selected.file} onChange={setSelectedValue} />
+
+        {selected.file && (
+            <div className='mt-4 grid grid-cols-2 items-center gap-4'>
+                <div>
+                    <Input
+                        value={separator}
+                        onValueChange={setSeparator}
+                        autoFocus
+                        size='sm'
+                        label='Separator'
+                        labelPlacement='outside-left'
+                        classNames={{ input: 'w-8 text-center' }}
+                    />
+                </div>
+
+                <Checkbox
+                    isSelected={hasHeader}
+                    className='gap-1'
+                    classNames={{ label: 'text-base/5' }}
+                    onValueChange={setHasHeader}
+                >
+                    Has header
+                </Checkbox>
+            </div>
+        )}
 
         <Button
             className='mt-8 w-full'
             color='primary'
             onPress={submit}
             isLoading={fetching}
-            isDisabled={!selected.dataset.size && !selected.file}
+            isDisabled={!isValid}
         >
             Run!
         </Button>

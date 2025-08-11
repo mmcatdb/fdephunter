@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import de.uni.passau.algorithms.AdjustMaxSets;
 import de.uni.passau.algorithms.ComputeAR;
 import de.uni.passau.algorithms.ComputeFds;
+import de.uni.passau.algorithms.ContractMaxSets;
 import de.uni.passau.algorithms.ExtendMaxSets;
 import de.uni.passau.core.dataset.Dataset;
 import de.uni.passau.core.example.ArmstrongRelation;
@@ -51,6 +52,7 @@ public class EvaluationJobAlgorithm {
     private WorkflowEntity workflow;
     private Dataset dataset;
     private List<AssignmentEntity> assignments;
+    private MaxSets initialMaxSets;
 
     private MaxSets maxSets;
 
@@ -64,6 +66,8 @@ public class EvaluationJobAlgorithm {
             return;
         dataset = datasetService.getLoadedDatasetById(workflow.datasetId);
         assignments = assignmentRepository.findAllByWorkflowId(job.workflowId);
+        // They are going to be needed later, one way or another.
+        initialMaxSets = storageService.get(workflow.initialMaxSetsId(), MaxSets.class);
 
         adjustMaxSets();
 
@@ -88,6 +92,7 @@ public class EvaluationJobAlgorithm {
         final var prevMaxSets = storageService.get(workflow.maxSetsId(), MaxSets.class);
         LOGGER.debug("Previous max sets:\n{}", prevMaxSets);
 
+        final var isEvaluatingPositives = workflow.state == WorkflowState.POSITIVE_EXAMPLES;
         final var evaluatedRows = new ArrayList<ExampleRow>();
 
         for (final var assignment : assignments) {
@@ -96,7 +101,6 @@ public class EvaluationJobAlgorithm {
                 continue;
             assignment.isActive = false;
 
-            final var isEvaluatingPositives = workflow.state == WorkflowState.POSITIVE_EXAMPLES;
             if (assignment.exampleRow.isPositive != isEvaluatingPositives)
                 // If the assignment is not currently evaluated, we skip it.
                 continue;
@@ -108,7 +112,7 @@ public class EvaluationJobAlgorithm {
             evaluatedRows.add(assignment.exampleRow);
         }
 
-        maxSets = AdjustMaxSets.run(prevMaxSets, evaluatedRows);
+        maxSets = AdjustMaxSets.run(prevMaxSets, evaluatedRows, isEvaluatingPositives);
         LOGGER.debug("Adjusted max sets:\n{}", maxSets);
     }
 
@@ -156,18 +160,16 @@ public class EvaluationJobAlgorithm {
             return;
         }
 
-        // TODO positive examples!
+        maxSets = ContractMaxSets.run(maxSets, initialMaxSets, workflow.lhsSize);
     }
 
     private void switchToPositives() {
-        final var initialSets = storageService.get(workflow.initialMaxSetsId(), MaxSets.class);
-
         // This should be the size of the largest element from any max set that is a positive example.
         // Or 0 if there are none.
         int lhsSize = 0;
 
         for (int i = 0; i < maxSets.sets().size(); i++) {
-            final var initialSet = initialSets.sets().get(i);
+            final var initialSet = initialMaxSets.sets().get(i);
             final var currentSet = maxSets.sets().get(i);
 
             for (final var initial : initialSet.confirmedElements()) {
@@ -177,6 +179,10 @@ public class EvaluationJobAlgorithm {
                 }
             }
         }
+
+        // If the sets are, in fact, finished, they will be marked as such in the contracting algorithm. So we can just reset them here.
+        if (lhsSize != 0)
+            maxSets.sets().forEach(set -> set.setIsFinished(false));
 
         workflow.state = WorkflowState.POSITIVE_EXAMPLES;
         // The positive examples start by decrementing the lhs size, so we need to add 1 to it now.
@@ -196,10 +202,10 @@ public class EvaluationJobAlgorithm {
 
     private void addNewAssignments(ArmstrongRelation armstrongRelation) {
         // Map current assignments by their lhs, so that we can pair them with the rows from AR.
-        final Map<ColumnSet, AssignmentEntity> assignmentsByLhs = assignments.stream().collect(Collectors.toMap(a -> a.exampleRow.lhsSet, a -> a));
+        final Map<ColumnSet, AssignmentEntity> existingAssignmentsByLhs = assignments.stream().collect(Collectors.toMap(a -> a.exampleRow.lhsSet, a -> a));
 
         for (final var exampleRow : armstrongRelation.exampleRows) {
-            final var existingAssignment = assignmentsByLhs.get(exampleRow.lhsSet);
+            final var existingAssignment = existingAssignmentsByLhs.get(exampleRow.lhsSet);
             if (existingAssignment != null) {
                 // If the assignment already exists, we just update the example row.
                 existingAssignment.exampleRow = exampleRow;
@@ -214,8 +220,6 @@ public class EvaluationJobAlgorithm {
     }
 
     private void computeViews() {
-        final var initialMaxSets = storageService.get(workflow.initialMaxSetsId(), MaxSets.class);
-
         // TODO Compute lattices
         // for (int classIndex = 0; classIndex < maxSets.sets().size(); classIndex++) {
         //     final var lattice = ComputeLattice.run(maxSets.sets().get(classIndex), initialMaxSets.sets().get(classIndex));

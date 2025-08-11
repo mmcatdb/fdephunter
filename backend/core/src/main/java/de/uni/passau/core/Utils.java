@@ -44,6 +44,19 @@ public class Utils {
         return sb.toString();
     }
 
+    public static @Nullable String isHexString(String string, int length) {
+        if (string.length() != length)
+            return "String is not of expected length " + length + ", but " + string.length() + ".";
+
+        for (int i = 0; i < string.length(); i++) {
+            final char c = string.charAt(i);
+            if (!Character.isDigit(c) && (c < 'a' || c > 'f') && (c < 'A' || c > 'F'))
+                return "Character '" + c + "' at position " + i + " is not a valid hex character.";
+        }
+
+        return null; // No errors.
+    }
+
     public static byte[] hexStringToBytes(String string) {
         // The string array is expected to be of even length, so we can divide it by 2.
         final int length = string.length() / 2;

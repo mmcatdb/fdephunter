@@ -4,6 +4,7 @@ import de.uni.passau.server.model.DatasetEntity;
 import de.uni.passau.server.repository.DatasetRepository;
 import de.uni.passau.server.repository.WorkflowRepository;
 import de.uni.passau.server.service.DatasetService;
+import de.uni.passau.server.service.DatasetService.FileResponse;
 
 import java.io.Serializable;
 import java.util.List;
@@ -39,20 +40,6 @@ public class DatasetController {
         return datasetRepository.findAll();
     }
 
-    public record FileResponse(
-        UUID id,
-        String originalName,
-        String hashName,
-        long size
-    ) implements Serializable {}
-
-    @PostMapping("/datasets")
-    public DatasetEntity UploadDataset(@RequestParam("file") MultipartFile file) {
-        LOGGER.info("Uploaded dataset: {} with size: {}", file.getName(), file.getSize());
-
-        return datasetService.uploadDataset(file);
-    }
-
     public record DatasetData(String[] header, List<String[]> rows) implements Serializable {}
 
     @GetMapping("/workflows/{workflowId}/data")
@@ -71,6 +58,14 @@ public class DatasetController {
         System.out.println("size: " + dataset.getRows().size());
 
         return new DatasetData(dataset.getHeader(), dataset.getRows().stream().skip(numberOffset).limit(numberLimit).toList());
+    }
+
+    /**
+     * Doesn't create a new dataset, only uploads the file. The dataset will be created later, because more information is needed.
+     */
+    @PostMapping("/files")
+    public FileResponse uploadFile(@RequestParam("file") MultipartFile file) {
+        return datasetService.uploadFile(file);
     }
 
 }

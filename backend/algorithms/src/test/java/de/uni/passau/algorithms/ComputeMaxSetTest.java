@@ -16,7 +16,7 @@ class ComputeMaxSetTest {
     @Test
     void testComputeMaxSetEndToEnd() {
         Path path = Paths.get("src", "test", "resources", "iris.csv");
-        Dataset dataset = new CSVDataset(path.toString(), false);
+        Dataset dataset = new CSVDataset(path.toString(), false, ',');
         dataset.load();
         List<MaxSet> result = ComputeMaxSets.run(dataset).sets();
         assertNotNull(result);

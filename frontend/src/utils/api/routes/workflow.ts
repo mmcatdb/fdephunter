@@ -3,6 +3,7 @@ import { GET, POST } from '../routeFunctions';
 import type { JobResponse } from '@/types/job';
 import { type WorkflowResponse } from '@/types/workflow';
 import { type Id } from '@/types/id';
+import { type FileResponse } from './dataset';
 
 export const workflow = {
     createWorkflow: POST<Empty, WorkflowResponse>(
@@ -14,7 +15,7 @@ export const workflow = {
     startWorkflow: POST<{ workflowId: Id }, CreateJobResponse, StartWorkflowRequest>(
         u => `/workflows/${u.workflowId}/start`,
     ),
-    continueWorkflow: POST<{ workflowId: Id }, CreateJobResponse, ContinueWorkflowRequest>(
+    continueWorkflow: POST<{ workflowId: Id }, CreateJobResponse>(
         u => `/workflows/${u.workflowId}/continue`,
     ),
     acceptAllAssignments: POST<{ workflowId: Id }, WorkflowResponse>(
@@ -26,13 +27,16 @@ export const workflow = {
 };
 
 export type StartWorkflowRequest = {
-    description: string;
     datasetId: Id;
+} | {
+    datasetInit: CsvDatasetInit;
 };
 
-export type ContinueWorkflowRequest = {
-    description: string;
-};
+export type CsvDatasetInit = {
+    file: FileResponse;
+    hasHeader: boolean;
+    separator: string;
+}
 
 export type CreateJobResponse = {
     workflow: WorkflowResponse;

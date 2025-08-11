@@ -35,7 +35,7 @@ class CSVDatasetMetadataTest {
         for (String[] row : TEST_DATA)
             Files.write(testFilePath, (String.join(",", row) + "\n").getBytes(), java.nio.file.StandardOpenOption.APPEND);
 
-        dataset = new CSVDataset(testFile.getAbsolutePath(), true);
+        dataset = new CSVDataset(testFile.getAbsolutePath(), true, ',');
     }
 
     @AfterEach

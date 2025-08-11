@@ -140,6 +140,7 @@ public class ComputeAR {
             final var prevRow = prevByLhs.get(lhsSet);
             if (prevRow != null) {
                 // If the row already exists in the previous Armstrong relation, we can just use it.
+                // This also keeps its initial positive state (if it's positive).
                 // However, its RHS might have changed.
                 prevRow.rhsSet = rhsSet;
                 output.add(prevRow);

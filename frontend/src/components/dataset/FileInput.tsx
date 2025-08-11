@@ -5,19 +5,19 @@ import { MdModeEdit } from 'react-icons/md';
 import { TbTrashX } from 'react-icons/tb';
 import { Spinner } from '@heroui/react';
 import { API } from '@/utils/api/api';
-import { type DatasetResponse } from '@/types/dataset';
+import { type FileResponse } from '@/utils/api/routes/dataset';
 
-export type DatasetInputValue = DatasetResponse | undefined;
+export type FileInputValue = FileResponse | undefined;
 
 const ACCEPTED_MIME_TYPES = 'text/csv';
 
-type DatasetInputProps = Readonly<{
+type FileInputProps = Readonly<{
     id?: string;
-    value: DatasetInputValue;
-    onChange(value: DatasetInputValue): void;
+    value: FileInputValue;
+    onChange(value: FileInputValue): void;
 }>;
 
-export function DatasetInput({ id, value, onChange }: DatasetInputProps) {
+export function FileInput({ id, value, onChange }: FileInputProps) {
     const [ isFetching, setIsFetching ] = useState(false);
 
     const handleChange = useCallback(async (file: File | null) => {
@@ -30,41 +30,39 @@ export function DatasetInput({ id, value, onChange }: DatasetInputProps) {
         formData.append('file', file);
 
         setIsFetching(true);
-        const response = await API.dataset.uploadDataset({}, formData);
+        const response = await API.dataset.uploadFile({}, formData);
         setIsFetching(false);
 
         if (!response.status) {
-            console.error('Failed to upload dataset');
+            console.error('Failed to upload file');
             return;
         }
-
-        console.log('Dataset uploaded successfully:', response.data);
 
         onChange(response.data);
 
     }, [ onChange ]);
 
-    const fileName = value?.name;
+    const filename = value?.originalName;
 
     return (
         <RawFileInput
             id={id}
             onChange={handleChange}
             accept={ACCEPTED_MIME_TYPES}
-            preview={fileName ? <FilePreview fileName={fileName} /> : undefined}
+            preview={filename ? <FilePreview filename={filename} /> : undefined}
             isFetching={isFetching}
         />
     );
 }
 
-function FilePreview({ fileName }: { fileName: string }) {
+function FilePreview({ filename }: { filename: string }) {
     return (<>
         <div className='shrink-0'>
             <LuPaperclip size={18} />
         </div>
 
         <div className='grow min-w-0 break-words'>
-            {fileName}
+            {filename}
         </div>
     </>);
 }

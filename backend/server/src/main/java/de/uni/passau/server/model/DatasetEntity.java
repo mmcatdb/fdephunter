@@ -7,6 +7,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @Document("dataset")
 public class DatasetEntity {
@@ -18,7 +20,7 @@ public class DatasetEntity {
         return _id;
     }
 
-    public DatasetType type;
+    public DatasetSettings settings;
 
     /** Connection string, filename, etc. */
     public String source;
@@ -29,11 +31,11 @@ public class DatasetEntity {
     /** The name under which we tried to create the dataset. Should be the same as {@name} unless this {@name} was already taken. */
     public @Nullable String originalName;
 
-    public static DatasetEntity create(DatasetType type, String source, String name, @Nullable String originalName) {
+    public static DatasetEntity create(DatasetSettings settings, String source, String name, @Nullable String originalName) {
         final var dataset = new DatasetEntity();
 
         dataset._id = UUID.randomUUID();
-        dataset.type = type;
+        dataset.settings = settings;
         dataset.source = source;
         dataset.name = name;
         dataset.originalName = originalName;
@@ -41,14 +43,15 @@ public class DatasetEntity {
         return dataset;
     }
 
-    public static enum DatasetType {
-        CSV,
-        JSON,
-        XML,
-        LABELED_GRAPH,
-        RELATIONAL,
-        ARRAY,
-        RDF,
-    }
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+    @JsonSubTypes({
+        @JsonSubTypes.Type(value = CsvSettings.class, name = "CSV"),
+    })
+    public interface DatasetSettings {}
+
+    public record CsvSettings(
+        boolean hasHeader,
+        char separator
+    ) implements DatasetSettings {}
 
 }
