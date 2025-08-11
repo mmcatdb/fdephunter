@@ -132,6 +132,15 @@ public class ColumnSet implements Comparable<ColumnSet> {
         columns.xor(other.columns);
     }
 
+    /** Returns new column set with the given size that has all bits inverted (if the bit isn't defined in the initial set, it's considered 0). */
+    public ColumnSet toInverse(int size) {
+        final BitSet output = new BitSet(size);
+        output.set(0, size);
+        output.xor(columns);
+
+        return new ColumnSet(output);
+    }
+
     @Override public int compareTo(ColumnSet other) {
         final var lengthComparison = columns.cardinality() - other.columns.cardinality();
         if (lengthComparison != 0)

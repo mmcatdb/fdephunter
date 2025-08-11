@@ -21,9 +21,42 @@ public class FdSet {
         this.fds = fds;
     }
 
+    public String toComparableString() {
+        final var stringFds = fds.stream()
+            .map(Fd::toComparableString)
+            .sorted()
+            .toList();
+
+        final StringBuilder sb = new StringBuilder();
+
+        for (final String column : columns)
+            sb.append(column);
+
+        for (final String fd : stringFds)
+            sb.append("\n").append(fd);
+
+        return sb.toString();
+    }
+
     public record Fd(
         ColumnSet lhs,
         ColumnSet rhs
-    ) {}
+    ) {
+
+        public String toComparableString() {
+            final StringBuilder sb = new StringBuilder();
+
+            for (final int index : lhs.toIndexes())
+                sb.append(index);
+
+            sb.append(" -> ");
+
+            for (final int index : rhs.toIndexes())
+                sb.append(index);
+
+            return sb.toString();
+        }
+
+    }
 
 }

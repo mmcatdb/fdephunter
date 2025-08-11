@@ -26,7 +26,7 @@ class CSVDatasetMetadataTest {
     private CSVDataset dataset;
 
     @BeforeEach
-    public void setUp() throws IOException {
+    void setUp() throws IOException {
         final Path testFilePath = Files.createTempFile(TEST_FILE_NAME, "");
         final File testFile = testFilePath.toFile();
         ACTUAL_FILE_NAME = testFile.getName();
@@ -39,7 +39,7 @@ class CSVDatasetMetadataTest {
     }
 
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         dataset.free();
     }
 

@@ -163,7 +163,7 @@ public class MaxSet implements Cloneable {
     @Override public String toString() {
         final StringBuilder sb = new StringBuilder();
 
-        sb.append("max(rhs=").append(forClass).append(", confirmeds: ");
+        sb.append("max(class=").append(forClass).append(", confirmeds: ");
         for (final ColumnSet set : confirmeds)
             sb.append(set).append(", ");
         if (confirmeds.size() == 0)

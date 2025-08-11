@@ -36,7 +36,7 @@ class ComputeARTest {
     private static final Boolean debug = true; // Set to true for debugging output
 
     @BeforeEach
-    public void setUp() throws IOException {
+    void setUp() throws IOException {
         // Load the dataset
         boolean hasHeader = true;
         dataset = new CSVDataset(csvFilePath, hasHeader, ',');

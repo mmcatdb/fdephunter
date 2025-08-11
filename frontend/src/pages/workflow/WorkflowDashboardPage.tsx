@@ -159,7 +159,7 @@ export function WorkflowOverviewPage() {
                         Continue
                     </Button>
                     <Button color='secondary' onPress={acceptAll} isDisabled={!isAcceptAllEnabled || !!fetching} isLoading={fetching === FID_ACCEPT_ALL}>
-                        Accept all
+                        Accept all remaining
                     </Button>
                 </CardFooter>
             </Card>

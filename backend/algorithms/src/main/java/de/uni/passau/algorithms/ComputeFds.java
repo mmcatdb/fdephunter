@@ -1,25 +1,20 @@
 package de.uni.passau.algorithms;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import de.uni.passau.algorithms.exception.ComputeFDException;
-import de.uni.passau.algorithms.fd.LhsGenerator;
-import de.uni.passau.algorithms.maxset.MaxSetGenerator;
-import de.uni.passau.core.model.ComplementMaxSet;
 import de.uni.passau.core.model.FdSet;
+import de.uni.passau.core.model.MaxSet;
 import de.uni.passau.core.model.MaxSets;
 import de.uni.passau.core.model.FdSet.Fd;
 import de.uni.passau.core.model.ColumnSet;
 
 public class ComputeFds {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ComputeFds.class);
 
     public static FdSet run(MaxSets maxSets, String[] columns) {
         try {
@@ -33,29 +28,18 @@ public class ComputeFds {
 
     private final MaxSets maxSets;
     private final String[] columns;
+    private final int numberOfColumns;
 
     private ComputeFds(MaxSets maxSets, String[] columns) {
         this.maxSets = maxSets;
         this.columns = columns;
+        this.numberOfColumns = maxSets.sets().size();
     }
 
     private FdSet innerRun() {
-        final int numberOfColumns = maxSets.sets().size();
-
-        final List<ComplementMaxSet> complementMaxSets = MaxSetGenerator.generateComplementMaxSets(maxSets.sets());
-        LOGGER.debug("----- COMPLEMENTS OF MAXIMAL SETS -----");
-        LOGGER.debug("size: " + complementMaxSets.size());
-        for (int index = 0; index < complementMaxSets.size(); index++) {
-            LOGGER.debug("{}", complementMaxSets.get(index));
-        }
-
-        final List<List<ColumnSet>> lhss = LhsGenerator.run(complementMaxSets);
-        LOGGER.debug("----- LEFT HAND SIDES -----");
-        LOGGER.debug("size: " + lhss.size());
-        for (int index = 0; index < numberOfColumns; index++) {
-            List<ColumnSet> columnSets = lhss.get(index);
-            LOGGER.debug("For class: {}, size: {}, columSets:\n{}", index, columnSets.size(), columnSets);
-        }
+        final List<Set<ColumnSet>> lhss = new ArrayList<>();
+        for (final MaxSet maxSet : maxSets.sets())
+            lhss.add(computeLhssForMaxSet(maxSet));
 
         final var groupedFds = groupFdsByLhs(lhss);
 
@@ -69,12 +53,66 @@ public class ComputeFds {
         return new FdSet(columns, fdsList);
     }
 
-    private static Map<ColumnSet, ColumnSet> groupFdsByLhs(List<List<ColumnSet>> lhss) {
+    private Set<ColumnSet> computeLhssForMaxSet(MaxSet set) {
+        final Set<ColumnSet> output = computeLhssForSizeOne(set);
+
+        // For each max set element, we add all one-larger supersets to the output.
+        // Then we will need to prune the output.
+
+        set.elements()
+            // Sort the elements so that the smallest ones are processed first. We do this because only a smaller set can be a subset of a larger one.
+            .sorted((a, b) -> a.size() - b.size())
+            .forEach(element -> {
+                final var inverse = element.toInverse(numberOfColumns);
+                // This one would be turned on by the previous line, but we don't want it.
+                inverse.clear(set.forClass);
+
+                for (final var index : inverse.toIndexes()) {
+                    final var superset = element.clone();
+                    superset.set(index);
+
+                    // The pruning is done here. If there is already a smaller LHS, we don't need to add this one.
+                    boolean isSuperset = false;
+                    for (final var outputElement : output) {
+                        if (superset.isSupersetOf(outputElement)) {
+                            isSuperset = true;
+                            break;
+                        }
+                    }
+
+                    if (!isSuperset)
+                        output.add(superset);
+                }
+            });
+
+        return output;
+
+    }
+
+    private Set<ColumnSet> computeLhssForSizeOne(MaxSet maxSet) {
+        Set<ColumnSet> output = new HashSet<>();
+
+        // Each not-used index will represent a single column in the LHS
+        final var usedIndexes = ColumnSet.fromIndexes();
+
+        maxSet.elements().forEach(element -> usedIndexes.or(element));
+
+        final var unusedIndexes = usedIndexes.toInverse(numberOfColumns);
+        // This one would be turned on by the previous line, but we don't want it.
+        unusedIndexes.clear(maxSet.forClass);
+
+        for (final int index : unusedIndexes.toIndexes())
+            output.add(ColumnSet.fromIndexes(index));
+
+        return output;
+    }
+
+    private static Map<ColumnSet, ColumnSet> groupFdsByLhs(List<Set<ColumnSet>> lhss) {
         /** Map of lhs to rhs so that lhs -> rhs is a functional dependency. */
         final var fdsByLhs = new TreeMap<ColumnSet, ColumnSet>();
 
         for (int classIndex = 0; classIndex < lhss.size(); classIndex++) {
-            final List<ColumnSet> lhssforClass = lhss.get(classIndex);
+            final Set<ColumnSet> lhssforClass = lhss.get(classIndex);
 
             for (final ColumnSet lhs : lhssforClass) {
                 final var rhs = fdsByLhs.get(lhs);
@@ -91,4 +129,5 @@ public class ComputeFds {
 
         return fdsByLhs;
     }
+
 }

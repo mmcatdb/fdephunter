@@ -22,7 +22,7 @@ class CSVDatasetHeaderTest {
     private CSVDataset dataset;
 
     @BeforeEach
-    public void setUp() throws IOException {
+    void setUp() throws IOException {
         final Path testFilePath = Files.createTempFile(TEST_FILE_NAME, "");
         final File testFile = testFilePath.toFile();
         testFile.deleteOnExit();
@@ -34,7 +34,7 @@ class CSVDatasetHeaderTest {
     }
 
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         dataset.free();
     }
 

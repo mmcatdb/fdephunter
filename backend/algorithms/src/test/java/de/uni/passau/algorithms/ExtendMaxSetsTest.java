@@ -1,15 +1,11 @@
 package de.uni.passau.algorithms;
 
-import de.uni.passau.core.model.ColumnSet;
-import de.uni.passau.core.model.MaxSet;
-import de.uni.passau.core.model.MaxSets;
+import static de.uni.passau.algorithms.TestUtils.parseMaxSets;
+import static de.uni.passau.algorithms.TestUtils.parseColumnSet;
 
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.util.ArrayList;
-import java.util.List;
 
 class ExtendMaxSetsTest {
 
@@ -49,28 +45,4 @@ class ExtendMaxSetsTest {
         System.out.println(extended);
     }
 
-    private MaxSets parseMaxSets(String ...classes) {
-        final List<MaxSet> maxSets = new ArrayList<>();
-
-        for (int forClass = 0; forClass < classes.length; forClass++) {
-            final var maxSet = new MaxSet(forClass);
-            maxSets.add(maxSet);
-
-            final var elements = classes[forClass].trim().split("\\s+");
-
-            for (String columns : elements)
-                maxSet.addConfirmed(parseColumnSet(columns));
-        }
-
-        return new MaxSets(maxSets);
-    }
-
-    private ColumnSet parseColumnSet(String columns) {
-        final var columnSet = ColumnSet.fromIndexes();
-        for (int i = 0; i < columns.length(); i++) {
-            int column = Integer.parseInt(columns.substring(i, i + 1));
-            columnSet.set(column);
-        }
-        return columnSet;
-    }
 }
