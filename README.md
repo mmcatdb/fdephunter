@@ -1,7 +1,7 @@
 # FDepHunter
 
-> This repository hosts the implementation of **FDepHunter**, a data profiling tool published at VLDB 2025.
->
+This repository hosts the implementation of **FDepHunter**, a data profiling tool published at VLDB 2025.
+
 > Pavel Koupil, Jáchym Bártík, Stefan Klessinger, André Conrad, and Stefanie Scherzinger. "FDepHunter: Harnessing Negative Examples to Expose Fakes and Reveal Ghosts." *PVLDB*, 18(12): 5227-5230, 2025. [https://doi.org/10.14778/3750601.3750612](https://doi.org/10.14778/3750601.3750612)
 
 ## Table of Contents
