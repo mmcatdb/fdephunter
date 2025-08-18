@@ -10,6 +10,7 @@ This repository hosts the implementation of **FDepHunter**, a data profiling too
 - [Setup](#setup)
 - [Getting Started](#getting-started)
 - [How to Cite](#how-to-cite)
+- [License](#license)
 
 ## About FDepHunter
 
@@ -57,6 +58,11 @@ Please cite FDepHunter as follows:
   number    = {12},
   pages     = {5227--5230},
   year      = {2025},
-  doi       = {10.14778/3750601.3750612}
+  doi       = {10.14778/3750601.3750612},
+  note      = {Code available at https://github.com/mmcatdb/fdephunter}
 }
 ```
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
