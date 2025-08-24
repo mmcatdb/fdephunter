@@ -36,7 +36,6 @@ FDepHunter is a client–server web application accessed in the browser. The fro
 1. Follow the *Configuration* sections in the backend and frontend README files.
    - **Note:** Pay close attention to the environment files (`.env`), as there are differences between local development and Docker.
 2. Build and start the containers:
-
    ```bash
    docker compose up -d --build
    ```

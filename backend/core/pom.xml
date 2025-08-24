@@ -37,17 +37,9 @@
         </dependency>
 
         <dependency>
-            <groupId>fastutil</groupId>
+            <groupId>it.unimi.dsi</groupId>
             <artifactId>fastutil</artifactId>
-            <version>5.0.9</version>
-        </dependency>
-
-        <dependency>
-            <!-- Probably not needed? -->
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>33.4.8-jre</version>
-            <scope>compile</scope>
+            <version>8.5.12</version>
         </dependency>
     </dependencies>
 </project>

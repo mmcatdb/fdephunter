@@ -1,4 +1,4 @@
-FROM maven:3.8-openjdk-17-slim
+FROM maven:3.9.5-eclipse-temurin-21-alpine
 
 # Create a user with UID 1000 to match your host user
 RUN groupadd -g 1000 vscode && \
