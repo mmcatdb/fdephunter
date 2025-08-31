@@ -2,7 +2,7 @@ import { memo, type ReactNode, useMemo, useState } from 'react';
 import { NODE_OPTIONS, type RFGraph, type RfNode, type RfEdge } from '@/types/functionalDependency';
 import { Handle, type NodeProps, Position, ReactFlow } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { computeColumnIndexesForLatticeRow, computeEdgesForLatticeCell, type Lattice, CellType } from '@/types/examples';
+import { computeColumnIndexesForLatticeRow, computeEdgesForLatticeCell, type Lattice, CellType, nChooseK } from '@/types/examples';
 import { Button, cn, Divider, Popover, PopoverContent, PopoverTrigger, Select, SelectItem, type SharedSelection, Switch } from '@heroui/react';
 import clsx from 'clsx';
 
@@ -83,17 +83,17 @@ export function LatticeDisplay({ lattices }: { lattices: Lattice[] }) {
 function Legend() {
     return (
         <div className='grid grid-cols-[repeat(3,auto)] gap-x-8 gap-y-2'>
-            <LegendItem type={CellType.Final} text={<>Final <McCharacter /> element (initial)</>} />
-            <LegendItem type={CellType.Genuine} text='Genuine FD' />
-            <LegendItem type={CellType.Eliminated} text={<>Final <McCharacter /> element (eliminated FD)</>} />
+            <LegendItem type={CellType.GenuineFinal} text='Genuine FD' />
+            <LegendItem type={CellType.InvalidFinal} text={<>Final <McCharacter /> element (initial)</>} />
+            <LegendItem type={CellType.FakeFinal} text={<>Final <McCharacter /> element (eliminated FD)</>} />
 
-            <LegendItem type={CellType.Initial} text={<>Initial <McCharacter /> element</>} />
-            <LegendItem type={CellType.Candidate} text='Candidate for genuine FD' />
-            <LegendItem type={CellType.Targeted} text='Targeted FD' />
+            <LegendItem type={CellType.GenuineTemp} text='Candidate for genuine FD' />
+            <LegendItem type={CellType.InvalidTemp} text={<>Initial <McCharacter /> element</>} />
+            <LegendItem type={CellType.FakeTemp} text='Targeted FD' />
 
-            <LegendItem type={CellType.Subset} text={<>Subset of <McCharacter /> element</>} />
-            <LegendItem type={CellType.Derived} text='Derived FD' />
-            <LegendItem type={CellType.Coincidental} text={<>Subset of <McCharacter /> element (eliminated FD)</>} />
+            <LegendItem type={CellType.GenuineDerived} text='Derived FD' />
+            <LegendItem type={CellType.InvalidDerived} text={<>Subset of <McCharacter /> element</>} />
+            <LegendItem type={CellType.FakeDerived} text={<>Subset of <McCharacter /> element (eliminated FD)</>} />
         </div>
     );
 }
@@ -203,12 +203,12 @@ function createRowEdges(lattice: Lattice, columnIndexes: number[][]): RfEdge[] {
     });
 }
 
-const bold = [ CellType.Final, CellType.Genuine, CellType.Eliminated ];
-const white = [ CellType.Subset, CellType.Derived, CellType.Coincidental ];
+const bold = [ CellType.InvalidFinal, CellType.GenuineFinal, CellType.FakeFinal ];
+const white = [ CellType.InvalidDerived, CellType.GenuineDerived, CellType.FakeDerived ];
 
-const red = [ CellType.Final, CellType.Initial, CellType.Subset ];
-const blue = [ CellType.Genuine, CellType.Candidate, CellType.Derived ];
-const yellow = [ CellType.Eliminated, CellType.Targeted, CellType.Coincidental ];
+const red = [ CellType.InvalidFinal, CellType.InvalidTemp, CellType.InvalidDerived ];
+const blue = [ CellType.GenuineFinal, CellType.GenuineTemp, CellType.GenuineDerived ];
+const yellow = [ CellType.FakeFinal, CellType.FakeTemp, CellType.FakeDerived ];
 
 function getCellTypeClassName(type: CellType): string {
     return cn(
@@ -237,26 +237,11 @@ function getRowHeight(rowIndex: number): number {
 function getRowWidth(rowIndex: number, columnCount: number): number {
     const n = columnCount;
     const k = rowIndex + 1;
-    const nodes = factorial(n) / (factorial(k) * factorial(n - k));
+    const nodes = nChooseK(n, k);
 
     return nodes * (NODE_SIZE + NODE_X_GAP) - NODE_X_GAP;
 }
 
-const factorialCache = new Map<number, number>();
-
-function factorial(x: number): number {
-    if (x <= 1)
-        return 1;
-
-    const cached = factorialCache.get(x);
-    if (cached !== undefined)
-        return cached;
-
-    const result = x * factorial(x - 1);
-    factorialCache.set(x, result);
-
-    return result;
-}
 
 const NodeComponent = memo(CustomNodeComponent);
 const nodeTypes = {

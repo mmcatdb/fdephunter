@@ -29,7 +29,7 @@ export function AssignmentsDisplay({ workflow, assignments }: AssignmentsDisplay
 
     return (
         <div
-            className='grid overflow-x-auto pb-4 leading-5'
+            className='max-w-full grid overflow-x-auto pb-4 leading-5'
             style={{ gridTemplateColumns: `repeat(${columns.length + 2}, max-content)` }}
         >
             <div className='sticky left-0 p-1 flex items-center gap-2 bg-content1 border-r border-foreground-500'>
@@ -61,7 +61,8 @@ export function AssignmentsDisplay({ workflow, assignments }: AssignmentsDisplay
                 </div>
             ))}
 
-            <div className='sticky right-0 p-1 flex items-center gap-2 bg-content1 border-l border-foreground-500'>
+            {/* The right position is off by 1 px - a workaround for a weird bug in chrome (probably caused by a rounding error). */}
+            <div className='sticky -right-px p-1 flex items-center gap-2 bg-content1 border-l border-foreground-500'>
                 <Button
                     isIconOnly
                     className='!w-7 !h-6 !min-w-6'
@@ -83,7 +84,6 @@ export function AssignmentsDisplay({ workflow, assignments }: AssignmentsDisplay
                     </span>
                 )}
             </div>
-
 
             <ReferenceRowDisplay rowValues={assignments[0].referenceRow} />
 
@@ -116,7 +116,8 @@ function getSpecialCellClasses(rowIndex: number) {
 
     return {
         leftClass: clsx('sticky left-0 px-2 flex items-center gap-2 border-r border-foreground-500', bgClass),
-        rightClass: clsx('sticky right-0 p-[10px] border-l border-foreground-500', bgClass),
+        // The right position is off by 1 px - a workaround for a weird bug in chrome (probably caused by a rounding error).
+        rightClass: clsx('sticky -right-px p-[10px] border-l border-foreground-500', bgClass),
     };
 }
 

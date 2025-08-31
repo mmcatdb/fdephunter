@@ -75,7 +75,7 @@ public class ExtendMaxSets {
                 continue; // Skip the class column
 
             // Add the column as a candidate to the extended max set (only if it's not a confirmed element already).
-            final ColumnSet columnSet = ColumnSet.fromIndexes(i);
+            final ColumnSet columnSet = ColumnSet.fromIndex(i);
             if (!extending.hasConfirmed(columnSet))
                 extending.addCandidate(columnSet);
         }

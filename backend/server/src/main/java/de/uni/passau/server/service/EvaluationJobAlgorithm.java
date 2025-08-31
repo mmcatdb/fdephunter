@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import de.uni.passau.algorithms.AdjustMaxSets;
 import de.uni.passau.algorithms.ComputeAR;
 import de.uni.passau.algorithms.ComputeFds;
+import de.uni.passau.algorithms.ComputeLattices;
 import de.uni.passau.algorithms.ContractMaxSets;
 import de.uni.passau.algorithms.ExtendMaxSets;
 import de.uni.passau.core.dataset.Dataset;
@@ -220,12 +221,14 @@ public class EvaluationJobAlgorithm {
     }
 
     private void computeViews() {
-        // TODO Compute lattices
-        // for (int classIndex = 0; classIndex < maxSets.sets().size(); classIndex++) {
-        //     final var lattice = ComputeLattice.run(maxSets.sets().get(classIndex), initialMaxSets.sets().get(classIndex));
-        //     // TODO save all lattices ... or save them by class, so that the use can load them one by one?
-        //     storageService.set(workflow.latticesId(), lattice);
-        // }
+        final var lattices = ComputeLattices.run(
+            dataset.getHeader(),
+            maxSets,
+            initialMaxSets,
+            workflow.state == WorkflowState.POSITIVE_EXAMPLES,
+            workflow.lhsSize
+        );
+        storageService.set(workflow.latticesId(), lattices);
 
         final var fds = ComputeFds.run(maxSets, dataset.getHeader());
         storageService.set(workflow.fdsId(), fds);

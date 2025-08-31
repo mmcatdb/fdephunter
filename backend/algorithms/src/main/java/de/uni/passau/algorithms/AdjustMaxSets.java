@@ -4,7 +4,6 @@ import java.util.List;
 
 import de.uni.passau.algorithms.exception.AdjustMaxSetException;
 import de.uni.passau.core.example.ExampleRow;
-import de.uni.passau.core.model.ColumnSet;
 import de.uni.passau.core.model.MaxSet;
 import de.uni.passau.core.model.MaxSets;
 import de.uni.passau.core.example.ExampleDecision.DecisionColumnStatus;
@@ -64,25 +63,22 @@ public class AdjustMaxSets {
                     newMaxSet.removeCandidate(row.lhsSet);
 
                     // Reconstruct the "child" max sets, i.e., any subset of lhsSet that has exactly one column less than lhsSet.
-                    for (final int i: row.lhsSet.toIndexes()) {
-                        if (row.lhsSet.size() == 1)
-                            continue; // We don't want to create subsets of size 0.
+                    // We don't want to create subsets of size 0.
+                    if (row.lhsSet.size() > 1) {
+                        for (final var subset : row.lhsSet.toSubsets()) {
+                            // We can simply add the subset to the new max set, it will be checked later.
+                            if (isEvaluatingPositives) {
+                                // The evaluated element was rejected, so it's subsets might be invalid as well.
+                                // We should check them in the next iteration, so we add them as candidates.
+                                newMaxSet.addCandidate(subset);
+                            }
+                            else {
+                                // The evaluated element was rejected, but it was based on confirmed elements, so we can add them back to the confimeds.
+                                newMaxSet.addConfirmed(subset);
+                            }
 
-                        final ColumnSet subset = row.lhsSet.clone();
-                        subset.clear(i);
-
-                        // We can simply add the subset to the new max set, it will be checked later.
-                        if (isEvaluatingPositives) {
-                            // The evaluated element was rejected, so it's subsets might be invalid as well.
-                            // We should check them in the next iteration, so we add them as candidates.
-                            newMaxSet.addCandidate(subset);
+                            // NICE_TO_HAVE We may be smarter and not add elements that we will just remove later.
                         }
-                        else {
-                            // The evaluated element was rejected, but it was based on confirmed elements, so we can add them back to the confimeds.
-                            newMaxSet.addConfirmed(subset);
-                        }
-
-                        // NICE_TO_HAVE We may be smarter and not add elements that we will just remove later.
                     }
                 } else {
                     // ignore UNANSWERED columns (for now)

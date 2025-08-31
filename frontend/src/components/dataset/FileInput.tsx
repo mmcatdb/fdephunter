@@ -85,12 +85,10 @@ function RawFileInput({ id, onChange, accept, preview, isFetching }: RawFileInpu
             return;
 
         const file = fileList[0];
-        if (accept && !accept.includes(file.type)) {
-            console.error(`File type ${file.type} is not allowed. Expected: ${accept}`);
-            return;
-        }
 
-        onChange(fileList[0]);
+        // We don't check the file type here, because users might upload csv files named "data.out" which wouldn't have the correct mime type.
+
+        onChange(file);
     }
 
     if (isFetching) {

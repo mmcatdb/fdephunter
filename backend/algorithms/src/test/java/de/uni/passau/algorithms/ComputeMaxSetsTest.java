@@ -11,10 +11,10 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ComputeMaxSetTest {
+class ComputeMaxSetsTest {
 
     @Test
-    void testComputeMaxSetEndToEnd() {
+    void testComputeMaxSetsEndToEnd() {
         Path path = Paths.get("src", "test", "resources", "iris.csv");
         Dataset dataset = new CSVDataset(path.toString(), false, ',');
         dataset.load();

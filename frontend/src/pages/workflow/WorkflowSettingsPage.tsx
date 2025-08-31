@@ -131,7 +131,7 @@ function InitialSettingsForm({ datasets, onSubmit, fetching }: InitialSettingsFo
             </Select>
         </div>
 
-        <p className='my-4 text-center'>... or upload your own!</p>
+        <p className='my-4 text-center'>... or upload your own csv file!</p>
 
         <FileInput value={selected.file} onChange={setSelectedValue} />
 

@@ -129,7 +129,7 @@ export function WorkflowOverviewPage() {
     }, []);
 
     return (
-        <div className='mx-auto w-fit flex flex-col gap-8'>
+        <div className='mx-auto max-w-full w-fit flex flex-col gap-8'>
             <Card className='w-full'>
                 <CardHeader>
                     <h1 className='text-lg'>Workflow overview</h1>
@@ -248,5 +248,5 @@ WorkflowGraphPage.loader = async ({ params: { workflowId } }: { params: Params<'
     if (!response.status)
         throw new Error('Failed to load lattices');
 
-    return { lattices: response.data };
+    return { lattices: response.data.lattices };
 };

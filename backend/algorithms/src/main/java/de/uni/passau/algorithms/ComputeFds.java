@@ -63,13 +63,10 @@ public class ComputeFds {
             // Sort the elements so that the smallest ones are processed first. We do this because only a smaller set can be a subset of a larger one.
             .sorted((a, b) -> a.size() - b.size())
             .forEach(element -> {
-                final var inverse = element.toInverse(numberOfColumns);
-                // This one would be turned on by the previous line, but we don't want it.
-                inverse.clear(set.forClass);
-
-                for (final var index : inverse.toIndexes()) {
-                    final var superset = element.clone();
-                    superset.set(index);
+                for (final var superset : element.toSupersets(numberOfColumns)) {
+                    // We don't want this one.
+                    if (superset.get(set.forClass))
+                        continue;
 
                     // The pruning is done here. If there is already a smaller LHS, we don't need to add this one.
                     boolean isSuperset = false;
@@ -93,7 +90,7 @@ public class ComputeFds {
         Set<ColumnSet> output = new HashSet<>();
 
         // Each not-used index will represent a single column in the LHS
-        final var usedIndexes = ColumnSet.fromIndexes();
+        final var usedIndexes = ColumnSet.empty();
 
         maxSet.elements().forEach(element -> usedIndexes.or(element));
 
@@ -102,7 +99,7 @@ public class ComputeFds {
         unusedIndexes.clear(maxSet.forClass);
 
         for (final int index : unusedIndexes.toIndexes())
-            output.add(ColumnSet.fromIndexes(index));
+            output.add(ColumnSet.fromIndex(index));
 
         return output;
     }
@@ -118,7 +115,7 @@ public class ComputeFds {
                 final var rhs = fdsByLhs.get(lhs);
                 if (rhs == null) {
                     // If there is no rhs for this lhs, we create a new one.
-                    fdsByLhs.put(lhs, ColumnSet.fromIndexes(classIndex));
+                    fdsByLhs.put(lhs, ColumnSet.fromIndex(classIndex));
                 }
                 else {
                     // If there is already a rhs for this lhs, we add the class index to it.

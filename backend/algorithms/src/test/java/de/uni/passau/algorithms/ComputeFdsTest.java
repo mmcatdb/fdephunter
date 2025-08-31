@@ -15,7 +15,7 @@ import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ComputeFdTest {
+class ComputeFdsTest {
 
     @Test
     void testComputeFdsEndToEnd() {

@@ -2,33 +2,40 @@ package de.uni.passau.core;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.stream.IntStream;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import de.uni.passau.core.model.ColumnSet;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 
 public class Utils {
 
-    private static Map<Integer, Integer> factorialCache = new TreeMap<>();
+    /**
+     * @param n 0 or larger (up to 31)
+     * @param k 0 or larger (up to 31)
+     */
+    public static int nChooseK(int n, int k) {
+        if (k > n)
+            return 0;
+
+        return factorial(n) / (factorial(k) * factorial(n - k));
+    }
+
+    // Factorial of 0 is 1.
+    private static IntList factorialCache = new IntArrayList(new int[] { 1 });
 
     /**
      * Don't use with numbers larger than 31!
      */
     public static int factorial(int x) {
-        if (x <= 1)
-            return 1;
+        while (x >= factorialCache.size()) {
+            final int next = factorialCache.size() * factorialCache.getInt(factorialCache.size() - 1);
+            factorialCache.add(next);
+        }
 
-        final @Nullable Integer cached = factorialCache.get(x);
-        if (cached != null)
-            return cached;
-
-        final int result = x * factorial(x - 1);
-        factorialCache.put(x, result);
-
-        return result;
+        return factorialCache.getInt(x);
     }
 
     public static String bytesToHexString(byte[] bytes) {
@@ -85,7 +92,7 @@ public class Utils {
         final int[] maxIndexes = IntStream.range(set.size() - size, set.size()).toArray();
 
         while (indexes[0] <= maxIndexes[0]) {
-            final var subset = ColumnSet.fromIndexes();
+            final var subset = ColumnSet.empty();
             for (int i = 0; i < indexes.length; i++)
                 subset.set(allIndexes[indexes[i]]);
             output.add(subset);
@@ -108,6 +115,79 @@ public class Utils {
         }
 
         return output;
+    }
+
+    /**
+     * A cached computer of combination indexes.
+     */
+    public static class CombinationIndexer {
+        /** On index [n][k] contains the value of n choose k. Some elements might not be used (if the value for them isn't needed). */
+        private final int[][] nChooseKCache;
+        /** Indexed from 1 to n. The zeroth element is not used. */
+        private final int[] maxIndexCache;
+        public final int n;
+
+        /**
+         * @param n The total number of elements to choose from.
+         */
+        public CombinationIndexer(int n) {
+            this.n = n;
+            final int maxK = n;
+
+            nChooseKCache = new int[n][];
+            maxIndexCache = new int[maxK + 1];
+
+
+            // The largest N is going to be n - 0 - 1, i.e., n - 1. The smallest N will be n - (n - 1) - 1, i.e., 0.
+            for (int N = 0; N < n; N++) {
+                this.nChooseKCache[N] = new int[maxK + 1];
+
+                // The largest K is going to be k - 0, i.e., k. The smallest K will be k - (k - 1), i.e., 1. But we can also compute (N 0), just for simplicity.
+                for (int K = 0; K <= maxK; K++)
+                    this.nChooseKCache[N][K] = nChooseK(N, K);
+            }
+
+            for (int K = 1; K <= maxK; K++)
+                this.maxIndexCache[K] = nChooseK(n, K) - 1;
+        }
+
+        /**
+         * Returns the index (0-based) of the given combination in the lexicographically ordered list of all combinations of size k from n elements.
+         * Based on {@link https://en.wikipedia.org/wiki/Combinatorial_number_system}, but adapted to our needs. The original algorithm sorts the combinations by their largest element, not the smallest, so it produces a little different ordering.
+         * The column set is expected to include values from 0 to n - 1 (not all of them ofc).
+         * I.e., don't use the specially-indexed column sets from max sets that omit the class column.
+         */
+        public int getIndex(ColumnSet c) {
+            int sum = 0;
+            final var indexes = c.toIndexes();
+            final var k = indexes.length;
+            final var cache = this.nChooseKCache;
+
+            for (int i = 0; i < k; i++)
+                sum += cache[n - indexes[i] - 1][k - i];
+
+            return this.maxIndexCache[k] - sum;
+        }
+
+        // For example, lets say n = 5 and k = 3. Then the combinations with their indexes are:
+        // 0: {0,1,2}
+        // 1: {0,1,3}
+        // 2: {0,1,4}
+        // 3: {0,2,3}
+        // 4: {0,2,4}
+        // 5: {0,3,4}
+        // 6: {1,2,3}
+        // 7: {1,2,4}
+        // 8: {1,3,4}
+        // 9: {2,3,4}
+
+        /** Returns the number of combinations (without repetition) of <code>k</code> elements choosen from <code>n</code> elements (i.e., n choose k). */
+        public int getNumberOfCombinations(int k) {
+            if (k < 1 || k > n)
+                throw new IllegalArgumentException("k must be between 0 and n (inclusive), but is " + k + ".");
+
+            return this.maxIndexCache[k] + 1;
+        }
     }
 
 }

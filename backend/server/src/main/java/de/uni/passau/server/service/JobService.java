@@ -6,6 +6,7 @@ import de.uni.passau.core.exception.OtherException;
 import de.uni.passau.core.model.MaxSets;
 import de.uni.passau.algorithms.ComputeAR;
 import de.uni.passau.algorithms.ComputeFds;
+import de.uni.passau.algorithms.ComputeLattices;
 import de.uni.passau.algorithms.ComputeMaxSets;
 import de.uni.passau.server.model.AssignmentEntity;
 import de.uni.passau.server.model.JobEntity;
@@ -143,6 +144,7 @@ public class JobService {
             .toList();
 
         storageService.set(workflow.maxSetsId(), maxSets);
+        storageService.set(workflow.initialMaxSetsId(), maxSets);
         assignmentRepository.saveAll(assignments);
         workflowRepository.save(workflow);
 
@@ -152,22 +154,14 @@ public class JobService {
     // TODO Create a new service, instantiated per-request, just for this.
 
     private void computeViews(WorkflowEntity workflow, MaxSets maxSets, Dataset dataset) {
-        // TODO unify with the algorithm
-        MaxSets initialMaxSets;
-        if (workflow.lhsSize == 0) {
-            initialMaxSets = maxSets;
-            storageService.set(workflow.initialMaxSetsId(), initialMaxSets);
-        }
-        else {
-            initialMaxSets = storageService.get(workflow.initialMaxSetsId(), MaxSets.class);
-        }
-
-        // TODO Compute lattices
-        // for (int classIndex = 0; classIndex < maxSets.sets().size(); classIndex++) {
-        //     final var lattice = ComputeLattice.run(maxSets.sets().get(classIndex), initialMaxSets.sets().get(classIndex));
-        //     // TODO save all lattices ... or save them by class, so that the use can load them one by one?
-        //     storageService.set(workflow.latticesId(), lattice);
-        // }
+        final var lattices = ComputeLattices.run(
+            dataset.getHeader(),
+            maxSets,
+            maxSets,
+            workflow.state == WorkflowState.POSITIVE_EXAMPLES,
+            workflow.lhsSize
+        );
+        storageService.set(workflow.latticesId(), lattices);
 
         final var fds = ComputeFds.run(maxSets, dataset.getHeader());
         storageService.set(workflow.fdsId(), fds);

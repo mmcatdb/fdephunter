@@ -1,8 +1,10 @@
 package de.uni.passau.core.model;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.BitSet;
+import java.util.List;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -30,6 +32,17 @@ public class ColumnSet implements Comparable<ColumnSet> {
 
     private ColumnSet(BitSet columns) {
         this.columns = columns;
+    }
+
+    public static ColumnSet empty() {
+        return new ColumnSet();
+    }
+
+    public static ColumnSet fromIndex(int column) {
+        final BitSet bitSet = new BitSet();
+        bitSet.set(column);
+
+        return new ColumnSet(bitSet);
     }
 
     public static ColumnSet fromIndexes(int ...columns) {
@@ -137,6 +150,73 @@ public class ColumnSet implements Comparable<ColumnSet> {
         final BitSet output = new BitSet(size);
         output.set(0, size);
         output.xor(columns);
+
+        return new ColumnSet(output);
+    }
+
+    /** Returns all one-large sets (we try to extend the set by columns with index less than <code>size</code> */
+    public List<ColumnSet> toSupersets(int size) {
+        final List<ColumnSet> output = new ArrayList<>();
+
+        for (final var index : toInverse(size).toIndexes()) {
+            final var superset = clone();
+            superset.set(index);
+            output.add(superset);
+        }
+
+        return output;
+    }
+
+    /** Returns all one-smaller sets. */
+    public List<ColumnSet> toSubsets() {
+        final List<ColumnSet> output = new ArrayList<>();
+
+        for (final var index : toIndexes()) {
+            final var subset = clone();
+            subset.clear(index);
+            output.add(subset);
+        }
+
+        return output;
+    }
+
+    /**
+     * In the class representation, the index of the class is skipped (and >= indexes are shifted).
+     * E.g., if the columns are {0,1,2,4} (in the UR) and the class is 2, then they will be {0,1,3,5} (in the CR).
+     */
+    public ColumnSet toClassRepresentation(int forClass) {
+        final BitSet output = (BitSet) columns.clone();
+
+        // Either forClass, or the first set index after forClass, or -1 if there is none.
+        int index = columns.nextSetBit(forClass);
+        if (index == -1)
+            return new ColumnSet(output);
+
+        output.clear(index, output.length());
+        while (index != -1) {
+            output.set(index + 1);
+            index = columns.nextSetBit(index + 1);
+        }
+
+        return new ColumnSet(output);
+    }
+
+    /**
+     * Reverse of {@link #toClassRepresentation(int)}.
+     */
+    public ColumnSet toUniversalRepresentation(int forClass) {
+        final BitSet output = (BitSet) columns.clone();
+
+        // There can be no index at forClass - everything on that index or after is shifted up by one.
+        int index = columns.nextSetBit(forClass + 1);
+        if (index == -1)
+            return new ColumnSet(output);
+
+        output.clear(index, output.length());
+        while (index != -1) {
+            output.set(index - 1);
+            index = columns.nextSetBit(index + 1);
+        }
 
         return new ColumnSet(output);
     }

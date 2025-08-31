@@ -24,7 +24,7 @@ public class WorkflowEntity {
 
     /**
      * Size of the currently processed max set elements. Works for both negative and positive examples.
-     * I.e., it starts with 1, then goes up to the number of columns in the dataset, and then goes back to 1.
+     * I.e., it starts with 1 (once the processing starts), then goes up to the number of columns in the dataset, and then goes back to 1.
      */
     public Integer lhsSize;
 

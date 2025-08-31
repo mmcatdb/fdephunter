@@ -109,7 +109,7 @@ public class ComputeAR {
         for (final MaxSet maxSet : maxSets.sets()) {
             // For each LHS in the max set, we need to create a row.
             maxSet.elements().forEach(lhsSet -> {
-                final var rhsSet = output.computeIfAbsent(lhsSet, x -> ColumnSet.fromIndexes());
+                final var rhsSet = output.computeIfAbsent(lhsSet, x -> ColumnSet.empty());
                 // The RHS sets consist of all classes that have the LHS in their max set.
                 rhsSet.set(maxSet.forClass);
             });
