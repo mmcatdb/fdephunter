@@ -1,0 +1,101 @@
+Animal,Height (cm),Weight (kg),Color,Lifespan (years),Diet,Family,Top Speed (km/h),Social Structure
+Aardvark,105-130,40-65,Grey,20-30,Insectivore,Orycteropodidae,40,Solitary
+Aardwolf,40-50,8-14,Yellow-brown,10-12,Insectivore,Hyaenidae,40,Solitary
+African Elephant,270-310,2700-6000,Grey,60-70,Herbivore,Elephantidae,40,Herd-based
+African Lion,80-110,120-250,Tan,10-14,Carnivore,Felidae,80,Group-based
+African Wild Dog,75-80,18-36,Multicolored,10-12,Carnivore,Canidae,56,Group-based
+Alpine Ibex,67-101,19-120,Brown,15-20,Herbivore,Bovidae,56-64,Group-based
+Amazon Rainforest Frog,2-13,Up to 0.5,Various,4-17,Insectivore,Dendrobatidae,0.8,Solitary
+American Bison,152-186,318-1+000,Brown,15-20,Herbivore,Bovidae,56,Group-based
+Anteater,52-91,22-41,Brown+White,15-20,Insectivore,Myrmecophagidae,24,Solitary
+Arabian Horse,140-160,380-1000,Various,25-30,Herbivore,Equidae,65,Herd-based
+Arabian Oryx,70-90,65-90,White,10-20,Herbivore,Bovidae,55,Herd-based
+Arctic Fox,25-30,2.5-9,White,3-6,Omnivore,Canidae,60,Solitary
+Arowana,Up to 120,Up to 6.7,Silver+Gold+Green,10-20,Carnivore+Piscivore,Osteoglossidae,32,Solitary
+Asian Elephant,200-300,2000-5000,Grey,60-80,Herbivore,Elephantidae,40,Herd-based
+Atlantic Puffin,25-30,500-620,Black+White,20-25,Carnivore+Piscivore,Alcidae,80,Colony-based
+Atlantic Spotted Dolphin,200-250,120-140,Gray+White,20-25,Carnivore,Delphinidae,40-64,Group-based
+Australian Fur Seal,112-160,18-40,Brown+Gray,14-17,Carnivore,Otariidae,24-40,Group-based
+Axolotl,Up to 30,Up to 300,Various,10-15,Carnivore,Ambystomatidae,0.2-0.3,Solitary
+Aye-Aye,35-37,2.2-2.7,Black+Brown,20-23,Omnivore+Insectivore,Daubentoniidae,32,Solitary
+Baird's Tapir,76-107,150-400,Brown+Black,25-30,Herbivore,Tapiridae,48,Solitary
+Bald Eagle,70-102,3-6,Brown+White,20-30,Carnivore,Accipitridae,120,Solitary
+Banded Palm Civet,41-71,2-5,Brown+Black+White,7-10,Omnivore,Viverridae,16,Solitary
+Barbary Macaque,Up to 75,5-13,Brown+Gray,Up to 30,Herbivore+Omnivore,Cercopithecidae,30,Group-based
+Basking Shark,Up to 1100,400-700,Gray+Brown,20-25,Carnivore,Cetorhinidae,14-28,Solitary
+Bearded Dragon,Up to 60,Up to 600,Various,6-15,Omnivore,Agamidae,40-64,Solitary
+Bengal Fox,35-40,2.5-4,Yellowish-gray,6-8,Omnivore,Canidae,40,Solitary
+Bengal Tiger,90-110,220-260,Orange+Black,10-15,Carnivore,Felidae,65,Solitary
+Black Rhinoceros,132-180,800-1+400,Gray+Black,35-50,Herbivore,Rhinocerotidae,56,Solitary
+Blobfish,Up to 30,Up to 10,Pinkish-gray,Up to 100,Carnivore,Psychrolutidae,Not Applicable,Solitary
+Blobfish,Not Applicable,Not Applicable,Pinkish-gray,Up to 130,Carnivore,Psychrolutidae,Not Applicable,Solitary
+Blue Jay,22-30,0.07-0.12,Blue+White,6-15,Omnivore,Corvidae,32,Flocks
+Blue Morpho Butterfly,Up to 15,Up to 0.028,Blue,1-2 weeks,Herbivore,Nymphalidae,Not Applicable,Solitary
+Blue Whale,Up to 33.5m,Up to 200 tons,Blue-grey,70-90,Filter Feeder,Balaenopteridae,39,Solitary
+Blue-Footed Booby,81-85,1.5-3,Blue+White,12-17,Piscivore,Sulidae,25-35,Group-based
+Blue-Ringed Octopus,Up to 20,Up to 0.3,Blue+Brown,6-8 months,Carnivore,Octopodidae,Not Applicable,Solitary
+Bonobo,Up to 150,30-40,Black,40-60,Omnivore,Hominidae,40-60,Social groups
+Bornean Orangutan,96-150,30-82,Reddish-brown,35-45,Omnivore,Hominidae,40-64,Solitary
+Bottlenose Dolphin,200-400,150-650,Grey,20-50,Carnivore,Delphinidae,64,Social pods
+Boxer Dog,53-63,25-32,Fawn+Brindle,10-12,Omnivore,Canidae,64,Social groups
+Brazilian Wandering Spider,Up to 5,Up to 0.006,Brown,1-2,Carnivore,Ctenidae,Not Applicable,Solitary
+Brown Bear,70-120,70-780,Brown,20-30,Omnivore,Ursidae,48,Solitary
+Burmese Python,Up to 460,Up to 90,Brown+Black,20-25,Carnivore,Pythonidae,1.6-2.4,Solitary
+Capybara,50-62,35-66,Brown,8-10,Herbivore,Caviidae,35,Group-based
+Cheetah,70-90,20-72,Tan with Black Spots,10-12,Carnivore,Felidae,112,Solitary
+Chimpanzee,Up to 160,26-70,Black,40-50,Omnivore,Hominidae,40,Social groups
+Chinese Giant Salamander,Up to 180,Up to 65,Dark Brown,Up to 70,Carnivore,Cryptobranchidae,Not Applicable,Solitary
+Clownfish,7-10,50-300,Orange,6-10,Omnivore,Pomacentridae,1.6,Group-based
+Coelacanth,Up to 200,Up to 90,Brown+Grey,Up to 60,Carnivore,Latimeriidae,Not Applicable,Solitary
+Common Dolphin,200-250,100-135,Gray+Yellow,20-25,Carnivore,Delphinidae,60,Group-based
+Common Snapping Turtle,20-36,4.5-16,Brown+Gray,30-50,Omnivore,Chelydridae,Not Applicable,Solitary
+Coquerel's Sifaka,40-50,3-6,White+Black,15-18,Herbivore,Indriidae,30,Group-based
+Dalmatian Dog,50-61,23-32,White+Black,10-13,Omnivore,Canidae,37,Pack-based
+Dhole,50-55,12-21,Red+Brown,10-15,Carnivore,Canidae,56,Pack-based
+Dingo,48-58,13-20,Tan+Brown,10-15,Carnivore,Canidae,48-64,Group-based
+Dugong,Up to 300,Up to 420,Gray,70-80,Herbivore,Dugongidae,27,Solitary
+Eastern Gorilla,140-188,73-204,Black,40-50,Herbivore,Hominidae,40,Social groups
+Echidna,30-45,2.5-6.5,Brown+Tan,15-20,Insectivore,Tachyglossidae,16-56,Solitary
+Electric Eel,Up to 270,Up to 20,Grayish-brown,10-15,Carnivore,Gymnotidae,4.8,Solitary
+Emperor Penguin,100,22-45,Black+White,15-20,Carnivore,Spheniscidae,9,Colony-based
+Emperor Tamarin,23-26,300-400,Black+White,10-15,Omnivore,Callitrichidae,32,Group-based
+European Hedgehog,14-30,0.6-1.2,Brown+Spiny,2-5,Omnivore,Erinaceidae,4-6,Solitary
+Fennec Fox,20-40,0.8-1.6,Cream,10-14,Omnivore,Canidae,32,Solitary
+Fire Salamander,15-25,Up to 55,Black+Yellow,10-15,Carnivore,Salamandridae,0.8,Solitary
+Flying Fox,Up to 40,Up to 1.1,Brown+Gray,15-23,Herbivore,Pteropodidae,40-50,Group-based
+Fossa,70-90,5-8,Brown+Reddish-brown,15-20,Carnivore,Eupleridae,45-48,Solitary
+Frilled Lizard,Up to 90,Up to 0.5,Brown+Grey,10-15,Insectivore+Herbivore,Agamidae,29,Solitary
+GalÃ¡pagos Penguin,49-53,1.5-2.5,Black+White,Up to 15,Carnivore,Spheniscidae,24-35,Solitary
+Galápagos Penguin,48-53,1.7-2.6,Black+White,15-20,Carnivore+Piscivore,Spheniscidae,35,Colony-based
+Galápagos Tortoise,Up to 183,Up to 417,Brown+Grey,100-150,Herbivore,Testudinidae,0.3,Solitary
+Galliformes,Varies,Varies,Varies,Varies,Omnivore,Phasianidae,Varies,Varies
+Gaur,180-300,600-1300,Dark Brown+Black,20-25,Herbivore,Bovidae,30-40,Herd-based
+Gerenuk,80-105,28-52,Brown+White,8-10,Herbivore,Bovidae,95,Solitary
+Gharial,Up to 600,Up to 1500,Brownish-gray,40-60,Carnivore,Gavialidae,32,Solitary
+Giant Pacific Octopus,Up to 5,Up to 25,Red+Brown,3-5,Carnivore,Enteroctopodidae,24,Solitary
+Giant Panda,70-90,70-125,Black+White,20-30,Herbivore,Ursidae,32,Solitary
+Gila Monster,Up to 60,Up to 2.3,Black+Orange,Up to 20,Carnivore,Helodermatidae,Not Applicable,Solitary
+Glass Frog,2.2-7.7,Up to 0.03,Green+Transparent,10-14 days,Insectivore,Centrolenidae,Not Applicable,Solitary
+Goblin Shark,Up to 320,Up to 210,Pinkish-gray,30-35,Carnivore,Mitsukurinidae,Not Applicable,Solitary
+Goblin Shark,Up to 366,Up to 210,Pinkish-gray,30-35,Carnivore,Mitsukurinidae,Not Applicable,Solitary
+Golden Lion Tamarin,Up to 35,Up to 0.7,Golden+Reddish-brown,10-15,Omnivore,Callitrichidae,8-13,Social groups
+Golden Poison Dart Frog,3-6,Up to 2.4,Various,10-17,Insectivore,Dendrobatidae,0.3,Solitary
+Great White Shark,Up to 610,Up to 2268,Grey,30-40,Carnivore,Lamnidae,56,Solitary
+Great White Shark,Up to 670,Up to 2268,Gray+White,70,Carnivore,Lamnidae,56,Solitary
+Green Anaconda,Up to 550,Up to 97.5,Olive-green,10-15,Carnivore,Boidae,24,Solitary
+Green Sea Turtle,Up to 120,Up to 200,Greenish-brown,80-100,Herbivore,Cheloniidae,35,Solitary
+Green Sea Turtle,70-120,68-190,Green,80,Herbivore,Cheloniidae,35,Solitary
+Grevy's Zebra,130-160,350-450,White+Black,20-30,Herbivore,Equidae,64,Herd-based
+Hagfish,Up to 127,Up to 0.7,Pink+Gray,Up to 300,Scavenger,Myxinidae,Not Applicable,Solitary
+Hagfish,Up to 127,Up to 0.6,Pinkish-gray,Up to 30,Carnivore,Myxinidae,Not Applicable,Solitary
+Harp Seal,Up to 180,Up to 160,Silver+Gray,20-35,Carnivore,Phocidae,28,Group-based
+Harpy Eagle,86-107,4.5-9,Black+White,25-35,Carnivore,Accipitridae,50,Solitary
+Hippopotamus,120-160,1300-3200,Grey,40-50,Herbivore,Hippopotamidae,30,Group-based
+Horseshoe Crab,Up to 56,Up to 2.3,Brownish-gray,Up to 20 years,Carnivore+Scavenger,Limulidae,Not Applicable,Solitary
+Hummingbird,7.5-13,2-20,Various,3-5,Nectar+Insects,Trochilidae,80,Solitary
+Humpback Whale,Up to 1700,Up to 30000,Black+White,45-50,Omnivore,Balaenopteridae,24-27,Solitary
+Iberian Lynx,60-70,9-14,Yellowish-brown,10-13,Carnivore,Felidae,70-80,Solitary
+Indri,Up to 70,Up to 6,Black+White,15-18,Herbivore,Indridae,24-27,Solitary
+Japanese Giant Hornet,35-55,Up to 6,Yellow+Black,3-6,Carnivore+Insectivore,Vespidae,Not Applicable,Colony-based
+Japanese Macaque,50-60,10-14,Brown,20-30,Omnivore,Cercopithecidae,30,Social groups
+Kakapo,Up to 60,Up to 4,Green,60,Herbivore,Strigopidae,2.4,Solitary
