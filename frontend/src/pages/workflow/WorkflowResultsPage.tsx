@@ -107,9 +107,10 @@ export function WorkflowFinalPage() {
                     Go again!
                 </Button>
 
-                <Button color='secondary' className='min-w-80 md:w-1/2 lg:w-1/3'>
+                {/* TODO */}
+                {/* <Button color='secondary' className='min-w-80 md:w-1/2 lg:w-1/3'>
                     Provide feedback
-                </Button>
+                </Button> */}
             </div>
         </div>
     );

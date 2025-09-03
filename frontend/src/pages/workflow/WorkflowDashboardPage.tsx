@@ -16,6 +16,7 @@ import { type Id } from '@/types/id';
 import { type DatasetResponse, type DatasetData } from '@/types/dataset';
 import { FdSet } from '@/types/functionalDependency';
 import { API } from '@/utils/api/api';
+import { WorkflowState } from '@/types/workflow';
 
 export function WorkflowDashboardPage() {
     const { workflow } = useRouteLoaderData<WorkflowLoaded>(routes.workflow.$id)!;
@@ -152,9 +153,12 @@ export function WorkflowOverviewPage() {
                     <Button color='primary' onPress={runRediscovery} isDisabled={!isContinueEnabled || !!fetching} isLoading={fetching === FID_CONTINUE}>
                         Continue
                     </Button>
-                    <Button color='secondary' onPress={acceptAll} isDisabled={!isAcceptAllEnabled || !!fetching} isLoading={fetching === FID_ACCEPT_ALL}>
-                        Accept all remaining
-                    </Button>
+
+                    {((workflow.state === WorkflowState.NegativeExamples && workflow.lhsSize > 0) || workflow.state === WorkflowState.PositiveExamples) && (
+                        <Button color='secondary' onPress={acceptAll} isDisabled={!isAcceptAllEnabled || !!fetching} isLoading={fetching === FID_ACCEPT_ALL}>
+                            Accept all remaining
+                        </Button>
+                    )}
                 </CardFooter>
             </Card>
 

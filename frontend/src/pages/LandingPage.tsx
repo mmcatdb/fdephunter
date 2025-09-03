@@ -6,6 +6,8 @@ import { Page } from '@/components/layout';
 import { useState } from 'react';
 import { API } from '@/utils/api/api';
 
+const PAPER_HREF = 'https://vldb.org/pvldb/volumes/18/paper/FDepHunter%3A%20Harnessing%20Negative%20Examples%20to%20Expose%20Fakes%20and%20Reveal%20Ghosts';
+
 export function LandingPage() {
     const [ isFetching, setIsFetching ] = useState(false);
     const navigate = useNavigate();
@@ -40,9 +42,11 @@ export function LandingPage() {
                     Sure thing!
                 </Button>
 
-                <Button color='secondary' className='md:w-1/2 lg:w-1/3'>
-                    Read documentation
-                </Button>
+                <a href={PAPER_HREF} className='md:w-1/2 lg:w-1/3' target='_blank' rel='noreferrer'>
+                    <Button color='secondary' className='w-full'>
+                        Read the paper
+                    </Button>
+                </a>
             </div>
         </Page>
     );

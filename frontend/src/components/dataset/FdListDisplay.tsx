@@ -8,6 +8,12 @@ type FdListDisplayProps = {
 };
 
 export function FdListDisplay({ edges }: FdListDisplayProps) {
+    if (edges.length === 0) {
+        return (
+            <p className='text-center'>No functional dependencies found.</p>
+        );
+    }
+
     return (
         <div className='grid grid-cols-[min-content,80px,min-content] justify-center gap-2'>
             {edges.map(edge => (
