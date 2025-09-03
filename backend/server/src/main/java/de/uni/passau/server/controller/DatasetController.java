@@ -40,6 +40,12 @@ public class DatasetController {
         return datasetRepository.findAll();
     }
 
+    @GetMapping("/workflows/{workflowId}/dataset")
+    public DatasetEntity getDataset(@PathVariable UUID workflowId) {
+        final var workflow = workflowRepository.findById(workflowId).get();
+        return datasetRepository.findById(workflow.datasetId).get();
+    }
+
     public record DatasetData(String[] header, List<String[]> rows) implements Serializable {}
 
     @GetMapping("/workflows/{workflowId}/data")

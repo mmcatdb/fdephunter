@@ -9,6 +9,7 @@ import { FdSet, type FdEdge } from '@/types/functionalDependency';
 import { FdListDisplay } from '@/components/dataset/FdListDisplay';
 import { type Id } from '@/types/id';
 import { API } from '@/utils/api/api';
+import { type DatasetResponse } from '@/types/dataset';
 
 export function WorkflowResultsPage() {
     const { workflow } = useRouteLoaderData<WorkflowLoaded>(routes.workflow.$id)!;
@@ -40,7 +41,7 @@ function WorkflowResultsTabs({ workflowId }: { workflowId: Id }) {
 
 export function WorkflowFinalPage() {
     const { workflow } = useRouteLoaderData<WorkflowLoaded>(routes.workflow.$id)!;
-    const { fdSet } = useLoaderData<WorkflowFinalLoaded>();
+    const { fdSet, dataset } = useLoaderData<WorkflowFinalLoaded>();
 
     const [ isFetching, setIsFetching ] = useState(false);
 
@@ -54,7 +55,7 @@ export function WorkflowFinalPage() {
         window.open(routes.workflow.settings.resolve({ workflowId: Workflow.fromResponse(response.data).id }), '_blank');
     }
 
-    const fds = useMemo(() => createFdEdges(fdSet), []);
+    const fds = useMemo(() => createFdEdges(fdSet), [ fdSet ]);
 
     return (
         <div className='mx-auto w-fit flex flex-col gap-8'>
@@ -64,11 +65,9 @@ export function WorkflowFinalPage() {
                 </CardHeader>
 
                 <CardBody className='grid grid-cols-3 gap-x-8 gap-y-2'>
-                    {/* FIXME this isn't it */}
-                    <div>Total iterations:<span className='px-2 text-primary font-semibold'>{workflow.lhsSize}</span></div>
+                    <div>Total iterations:<span className='px-2 text-primary font-semibold'>{workflow.totalIterations}</span></div>
 
-                    {/* FIXME Use datasetName instead of id. */}
-                    <div className='col-span-2 flex items-center'>Dataset:<div className='truncate px-2 text-primary font-semibold'>{workflow.datasetId}</div></div>
+                    <div className='col-span-2 flex items-center'>Dataset:<div className='truncate px-2 text-primary font-semibold'>{dataset.name}</div></div>
 
                     <div>Minimal FDs:<span className='px-2 text-primary font-semibold'>{4}</span></div>
 
@@ -118,17 +117,26 @@ export function WorkflowFinalPage() {
 
 type WorkflowFinalLoaded = {
     fdSet: FdSet;
+    dataset: DatasetResponse;
 };
 
 WorkflowFinalPage.loader = async ({ params: { workflowId } }: { params: Params<'workflowId'> }): Promise<WorkflowFinalLoaded> => {
     if (!workflowId)
         throw new Error('Missing workflow ID');
 
-    const response = await API.view.getFds(undefined, { workflowId });
-    if (!response.status)
+    const [ fdSetResponse, datasetResponse ] = await Promise.all([
+        API.view.getFds(undefined, { workflowId }),
+        API.dataset.getDataset(undefined, { workflowId }),
+    ]);
+    if (!fdSetResponse.status)
         throw new Error('Failed to load functional dependencies');
+    if (!datasetResponse.status)
+        throw new Error('Failed to load dataset');
 
-    return { fdSet: FdSet.fromResponse(response.data) };
+    return {
+        fdSet: FdSet.fromResponse(fdSetResponse.data),
+        dataset: datasetResponse.data,
+    };
 };
 
 export function createFdEdges(fdSet: FdSet): FdEdge[] {

@@ -1,5 +1,5 @@
 import { DatasetTable } from '@/components/dataset/DatasetTableDisplay';
-import { FdListDisplayBalanced } from '@/components/dataset/FdListDisplay';
+import { FdListDisplay } from '@/components/dataset/FdListDisplay';
 import { LatticeDisplay } from '@/components/dataset/FdGraphDisplay';
 import { Button, Card, CardBody, CardFooter, CardHeader, Tab, Tabs } from '@heroui/react';
 import { Page, TopbarContent } from '@/components/layout';
@@ -8,12 +8,12 @@ import { Link, matchPath, Outlet, type Params, useLoaderData, useLocation, useNa
 import { type WorkflowLoaded } from './WorkflowPage';
 import { routes } from '@/router';
 import { useMemo, useState } from 'react';
-import { type Lattice } from '@/types/examples';
+import { DecisionStatus, type Lattice } from '@/types/examples';
 import clsx from 'clsx';
 import { Assignment } from '@/types/assignment';
 import { createFdEdges } from './WorkflowResultsPage';
 import { type Id } from '@/types/id';
-import { type DatasetData } from '@/types/dataset';
+import { type DatasetResponse, type DatasetData } from '@/types/dataset';
 import { FdSet } from '@/types/functionalDependency';
 import { API } from '@/utils/api/api';
 
@@ -35,18 +35,26 @@ export function WorkflowDashboardPage() {
 
 type WorkflowDashboardLoaded = {
     assignments: Assignment[];
+    dataset: DatasetResponse;
 };
 
 WorkflowDashboardPage.loader = async ({ params: { workflowId } }: { params: Params<'workflowId'> }): Promise<WorkflowDashboardLoaded> => {
     if (!workflowId)
         throw new Error('Missing workflow ID');
 
-    const response = await API.assignment.getAssignments(undefined, { workflowId });
-    if (!response.status)
+    const [ assignmentsResponse, datasetResponse ] = await Promise.all([
+        API.assignment.getAssignments(undefined, { workflowId }),
+        API.dataset.getDataset(undefined, { workflowId }),
+    ]);
+
+    if (!assignmentsResponse.status)
         throw new Error('Failed to load assignments');
+    if (!datasetResponse.status)
+        throw new Error('Failed to load dataset');
 
     return {
-        assignments: response.data.map(Assignment.fromResponse),
+        assignments: assignmentsResponse.data.map(Assignment.fromResponse),
+        dataset: datasetResponse.data,
     };
 };
 
@@ -63,7 +71,7 @@ function WorkflowDashboardTabs({ workflowId, selectedKey }: { workflowId: Id, se
 
 export function WorkflowOverviewPage() {
     const { workflow } = useRouteLoaderData<WorkflowLoaded>(routes.workflow.$id)!;
-    const { assignments } = useRouteLoaderData<WorkflowDashboardLoaded>(routes.workflow.dashboard.$id)!;
+    const { assignments, dataset } = useRouteLoaderData<WorkflowDashboardLoaded>(routes.workflow.dashboard.$id)!;
 
     const navigate = useNavigate();
     const [ fetching, setFetching ] = useState<string>();
@@ -75,12 +83,6 @@ export function WorkflowOverviewPage() {
             setFetching(undefined);
             return;
         }
-
-        // TODO Is this needed?
-        // onNextStep(
-        //     Workflow.fromResponse(response.data.workflow),
-        //     Job.fromResponse(response.data.job),
-        // );
 
         void navigate(routes.workflow.job.resolve({ workflowId: workflow.id }));
     }
@@ -99,34 +101,27 @@ export function WorkflowOverviewPage() {
         setFetching(undefined);
     }
 
-    // const isContinueEnabled = useMemo(() => relation.exampleRows.filter(row => row.isPositive === relation.isEvaluatingPositives).every(row => row.decision), [ relation ]);
-    // const isAcceptAllEnabled = !isContinueEnabled;
-    const isContinueEnabled = true; // TODO this
-    const isAcceptAllEnabled = true; // TODO this
+    const isContinueEnabled = useMemo(() => assignments
+        .filter(a => a.exampleRow.isEvaluationAllowed(workflow))
+        .every(a => a.exampleRow.decision && a.exampleRow.decision.status !== DecisionStatus.Unanswered),
+    [ assignments, workflow ]);
+    const isAcceptAllEnabled = !isContinueEnabled;
 
     const stats = useMemo(() => {
-        // TODO stats
-        // const positive = relation.exampleRows.filter(row => row.isPositive).length;
-        // const negative = relation.exampleRows.filter(row => !row.isPositive).length;
-        // const unanswered = relation.exampleRows.filter(row => row.isPositive === relation.isEvaluatingPositives && (!row.decision || row.decision.status === DecisionStatus.Unanswered)).length;
-
-        // return {
-        //     positive,
-        //     negative,
-        //     unanswered,
-        // };
+        const positive = assignments.filter(a => a.exampleRow.isPositive).length;
+        const negative = assignments.filter(a => !a.exampleRow.isPositive).length;
+        const unanswered = assignments
+            .filter(a => a.exampleRow.isEvaluationAllowed(workflow))
+            .filter(a => !a.exampleRow.decision || a.exampleRow.decision.status === DecisionStatus.Unanswered)
+            .length;
 
         return {
-            positive: 1,
-            negative: 2,
-            unanswered: 3,
-
-            minimalFds: 4,
-            otherFds: 5,
-            lhsSize: 6,
+            positive,
+            negative,
+            unanswered,
+            lhsSize: workflow.lhsSize,
         };
-    // }, [ relation ]);
-    }, []);
+    }, [ workflow, assignments ]);
 
     return (
         <div className='mx-auto max-w-full w-fit flex flex-col gap-8'>
@@ -138,12 +133,11 @@ export function WorkflowOverviewPage() {
                 <CardBody className='grid grid-cols-3 gap-x-8 gap-y-2'>
                     <div>LHS size:<span className='px-2 text-primary font-semibold'>{workflow.lhsSize}</span></div>
 
-                    {/* FIXME Use datasetName instead of id. */}
-                    <div className='col-span-2 flex items-center'>Dataset:<div className='truncate px-2 text-primary font-semibold'>{workflow.datasetId}</div></div>
+                    <div className='col-span-2 flex items-center'>Dataset:<div className='truncate px-2 text-primary font-semibold'>{dataset.name}</div></div>
 
-                    <div>Minimal FDs:<span className='px-2 text-primary font-semibold'>{stats.minimalFds}</span></div>
+                    <div>Minimal FDs:<span className='px-2 text-primary font-semibold'>{workflow.minimalFds}</span></div>
 
-                    <div>All FDs:<span className='px-2 text-primary font-semibold'>{stats.minimalFds + stats.otherFds}</span></div>
+                    <div>All FDs:<span className='px-2 text-primary font-semibold'>{workflow.totalFds}</span></div>
 
                     <div>LHS size:<span className='px-2 text-primary font-semibold'>{stats.lhsSize}</span></div>
 
@@ -198,16 +192,14 @@ WorkflowDatasetPage.loader = async ({ params: { workflowId } }: { params: Params
 };
 
 export function WorkflowListPage() {
-    const { workflow } = useRouteLoaderData<WorkflowLoaded>(routes.workflow.$id)!;
     const { fdSet } = useLoaderData<WorkflowListLoaded>();
 
-    const index = workflow.lhsSize === 0 ? 0 : 1;
-    const fds = useMemo(() => createFdEdges(fdSet), [ index ]);
+    const fds = useMemo(() => createFdEdges(fdSet), [ fdSet ]);
 
     return (
         <Card className='mx-auto w-fit'>
             <CardBody>
-                <FdListDisplayBalanced edges={fds} />
+                <FdListDisplay edges={fds} />
             </CardBody>
         </Card>
     );

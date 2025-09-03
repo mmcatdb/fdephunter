@@ -155,8 +155,7 @@ function ExampleRowDisplay({ workflow, assignment, gridState, rowIndex }: Exampl
     const exampleBgClass = row.isPositive ? 'bg-danger-400' : 'bg-warning-400';
     const { leftClass, rightClass } = getSpecialCellClasses(rowIndex);
 
-    // FIXME Get this information somewhere.
-    const isEvaluationAllowed = row.isPositive === workflow.evaluatingType && row.lhsSet.length === workflow.lhsSize;
+    const isEvaluationAllowed = row.isEvaluationAllowed(workflow);
 
     return (<>
         <div className={leftClass}>
@@ -165,11 +164,15 @@ function ExampleRowDisplay({ workflow, assignment, gridState, rowIndex }: Exampl
             )}
 
             {isEvaluationAllowed && !gridState.isProgressCollapsed && (<>
-                <Link to={routes.assignment.root.resolve({ assignmentId: assignment.id })}>
-                    <Button size='sm' className='h-6' disableAnimation>
-                        {!row.decision ? 'Evaluate' : 'Re-evaluate'}
-                    </Button>
-                </Link>
+                <Button
+                    as={Link}
+                    to={routes.assignment.root.resolve({ assignmentId: assignment.id })}
+                    size='sm'
+                    className='h-6'
+                    disableAnimation
+                >
+                    {!row.decision ? 'Evaluate' : 'Re-evaluate'}
+                </Button>
             </>)}
         </div>
 
@@ -247,7 +250,7 @@ export function AssignmentDisplay({ assignment: { columns, referenceRow, example
                 // If the selection function isn't provided, the cells aren't interactive. Also, if the status isn't defined, the cell isn't in the rhs set so it can't be selected either.
                 if (!setSelectedColIndex || !status) {
                     return (
-                        <div key={colIndex} className={getCellClass(0, colIndex, !status)}>
+                        <div key={colIndex} className={getCellClass(0, colIndex, exampleRow.lhsSet.has(colIndex))}>
                             {value}
                         </div>
                     );

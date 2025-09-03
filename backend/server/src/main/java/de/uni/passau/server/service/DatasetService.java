@@ -64,11 +64,18 @@ public class DatasetService {
     }
 
     public DatasetEntity createDataset(DatasetSettings settings, String uniqueName, String filename) {
-        // TODO Test if file exists here.
         final var source = Paths.get(server.datasetDirectory(), filename).toString();
         // We expect no collisions here, so we can use the uniqueName as is.
-        final var dataset = DatasetEntity.create(settings, source, uniqueName, uniqueName);
-        return datasetRepository.save(dataset);
+        final var entity = DatasetEntity.create(settings, source, uniqueName, uniqueName);
+
+        try {
+            getSpecificDataset(entity);
+        }
+        catch (Exception e) {
+            throw new IllegalArgumentException("Failed to create dataset from the provided settings and source.", e);
+        }
+
+        return datasetRepository.save(entity);
     }
 
     public record CsvDatasetInit(
@@ -203,4 +210,5 @@ public class DatasetService {
             throw new RuntimeException("Failed to save dataset file", e);
         }
     }
+
 }

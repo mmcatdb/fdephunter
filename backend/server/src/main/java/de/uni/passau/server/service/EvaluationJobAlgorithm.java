@@ -49,7 +49,6 @@ public class EvaluationJobAlgorithm {
     @Autowired
     private StorageService storageService;
 
-    private JobEntity job;
     private WorkflowEntity workflow;
     private Dataset dataset;
     private List<AssignmentEntity> assignments;
@@ -60,7 +59,6 @@ public class EvaluationJobAlgorithm {
     public void execute(JobEntity job) {
         LOGGER.debug("Evaluation job {} for workflow {}", job.id(), job.workflowId);
 
-        this.job = job;
         workflow = workflowRepository.findById(job.workflowId).get();
         if (workflow.state == WorkflowState.FINAL)
             // This should not happen, but just in case.
@@ -80,11 +78,12 @@ public class EvaluationJobAlgorithm {
 
         addNewAssignments(nextAR);
 
+        computeViews(dataset, workflow, maxSets, initialMaxSets, storageService);
+        workflow.totalIterations++;
+
         storageService.set(workflow.maxSetsId(), maxSets);
         workflowRepository.save(workflow);
         assignmentRepository.saveAll(assignments);
-
-        computeViews();
     }
 
     private void adjustMaxSets() {
@@ -215,12 +214,12 @@ public class EvaluationJobAlgorithm {
             }
 
             // If the assignment doesn't exist, we create a new one.
-            final var newAssignment = AssignmentEntity.create(job.workflowId, dataset.getHeader(), armstrongRelation.referenceRow, exampleRow);
+            final var newAssignment = AssignmentEntity.create(workflow.id(), dataset.getHeader(), armstrongRelation.referenceRow, exampleRow);
             assignments.add(newAssignment);
         }
     }
 
-    private void computeViews() {
+    static void computeViews(Dataset dataset, WorkflowEntity workflow, MaxSets maxSets, MaxSets initialMaxSets, StorageService storageService) {
         final var lattices = ComputeLattices.run(
             dataset.getHeader(),
             maxSets,
@@ -229,6 +228,28 @@ public class EvaluationJobAlgorithm {
             workflow.lhsSize
         );
         storageService.set(workflow.latticesId(), lattices);
+
+        int minimalFds = 0;
+        int totalFds = 0;
+        for (final var lattice : lattices.lattices()) {
+            for (final var row : lattice.rows) {
+                for (final var cell : row) {
+                    switch (cell) {
+                        case GENUINE_FINAL:
+                        case GENUINE_TEMP:
+                            minimalFds++;
+                            // Yep, this is intentional fallthrough.
+                        case GENUINE_DERIVED:
+                            totalFds++;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+        workflow.minimalFds = minimalFds;
+        workflow.totalFds = totalFds;
 
         final var fds = ComputeFds.run(maxSets, dataset.getHeader());
         storageService.set(workflow.fdsId(), fds);

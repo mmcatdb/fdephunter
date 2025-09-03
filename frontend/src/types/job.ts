@@ -51,7 +51,7 @@ export class Job {
 
 const progressCache = new Map<string, number>();
 
-// FIXME Implement on the backend later.
+// NICE_TO_HAVE Implement on the backend later.
 
 /** @returns A number from 0 to 1. Or NaN for error. */
 function computeNextProgress(prev: number, state: JobState): number {

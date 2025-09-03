@@ -1,23 +1,13 @@
 package de.uni.passau.server.service;
 
-import de.uni.passau.core.dataset.Dataset;
 import de.uni.passau.core.exception.NamedException;
 import de.uni.passau.core.exception.OtherException;
-import de.uni.passau.core.model.MaxSets;
-import de.uni.passau.algorithms.ComputeAR;
-import de.uni.passau.algorithms.ComputeFds;
-import de.uni.passau.algorithms.ComputeLattices;
-import de.uni.passau.algorithms.ComputeMaxSets;
-import de.uni.passau.server.model.AssignmentEntity;
 import de.uni.passau.server.model.JobEntity;
 import de.uni.passau.server.model.JobEntity.EvaluationJobPayload;
 import de.uni.passau.server.model.JobEntity.DiscoveryJobPayload;
 import de.uni.passau.server.model.JobEntity.JobState;
 import de.uni.passau.server.model.WorkflowEntity;
-import de.uni.passau.server.model.WorkflowEntity.WorkflowState;
-import de.uni.passau.server.repository.AssignmentRepository;
 import de.uni.passau.server.repository.JobRepository;
-import de.uni.passau.server.repository.WorkflowRepository;
 
 import java.util.UUID;
 
@@ -37,19 +27,10 @@ public class JobService {
     private JobRepository jobRepository;
 
     @Autowired
-    private WorkflowRepository workflowRepository;
-
-    @Autowired
-    private DatasetService datasetService;
-
-    @Autowired
-    private AssignmentRepository assignmentRepository;
-
-    @Autowired
-    private StorageService storageService;
-
-    @Autowired
     private TaskExecutor asyncExecutor;
+
+    @Autowired
+    private ObjectProvider<DiscoveryJobAlgorithm> discoveryJobAlgorithmProvider;
 
     @Autowired
     private ObjectProvider<EvaluationJobAlgorithm> evaluationJobAlgorithmProvider;
@@ -88,6 +69,7 @@ public class JobService {
         @Override public void run() {
             executeJob(jobId);
         }
+
     }
 
     private void executeJob(UUID jobId) {
@@ -123,48 +105,9 @@ public class JobService {
     private void executeJobPayload(JobEntity job) {
         // NICE_TO_HAVE Change this to switch once we are on a better java version.
         if (job.payload instanceof DiscoveryJobPayload)
-            executeDiscoveryJob(job);
+            discoveryJobAlgorithmProvider.getObject().execute(job);
         else if (job.payload instanceof EvaluationJobPayload)
             evaluationJobAlgorithmProvider.getObject().execute(job);
-    }
-
-    private void executeDiscoveryJob(JobEntity job) {
-        final var payload = (DiscoveryJobPayload) job.payload;
-        final var workflow = workflowRepository.findById(job.workflowId).get();
-        final var dataset = datasetService.getLoadedDatasetById(payload.datasetId());
-
-        final var maxSets = ComputeMaxSets.run(dataset);
-
-        workflow.state = WorkflowState.NEGATIVE_EXAMPLES;
-
-        final var armstrongRelation = ComputeAR.run(maxSets, dataset, null, false);
-        // All example rows are brand new, so we can create assignments for all of them.
-        final var assignments = armstrongRelation.exampleRows.stream()
-            .map(row -> AssignmentEntity.create(job.workflowId, dataset.getHeader(), armstrongRelation.referenceRow, row))
-            .toList();
-
-        storageService.set(workflow.maxSetsId(), maxSets);
-        storageService.set(workflow.initialMaxSetsId(), maxSets);
-        assignmentRepository.saveAll(assignments);
-        workflowRepository.save(workflow);
-
-        computeViews(workflow, maxSets, dataset);
-    }
-
-    // TODO Create a new service, instantiated per-request, just for this.
-
-    private void computeViews(WorkflowEntity workflow, MaxSets maxSets, Dataset dataset) {
-        final var lattices = ComputeLattices.run(
-            dataset.getHeader(),
-            maxSets,
-            maxSets,
-            workflow.state == WorkflowState.POSITIVE_EXAMPLES,
-            workflow.lhsSize
-        );
-        storageService.set(workflow.latticesId(), lattices);
-
-        final var fds = ComputeFds.run(maxSets, dataset.getHeader());
-        storageService.set(workflow.fdsId(), fds);
     }
 
 }

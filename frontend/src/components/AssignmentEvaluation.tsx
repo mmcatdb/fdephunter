@@ -87,7 +87,7 @@ function ControlCard({ assignment, onEvaluated }: ControlCardProps) {
             return;
         }
 
-        // FIXME This is wery inefficient, reloading the whole page takes forever.
+        // NICE_TO_HAVE This is wery inefficient, reloading the whole page takes forever.
         await navigate(0);
     }
 

@@ -7,6 +7,7 @@ import { WorkflowSettingsPage } from './pages/workflow/WorkflowSettingsPage';
 import { WorkflowJobPage } from './pages/workflow/WorkflowJobPage';
 import { WorkflowOverviewPage, WorkflowDashboardPage, WorkflowDatasetPage, WorkflowGraphPage, WorkflowListPage } from './pages/workflow/WorkflowDashboardPage';
 import { WorkflowFinalPage, WorkflowResultsPage } from './pages/workflow/WorkflowResultsPage';
+import { DevPage } from './pages/DevPage';
 
 export class NamedRoute<T extends string = never> {
     constructor(
@@ -31,6 +32,7 @@ export type NamedParams<TRoute> = TRoute extends NamedRoute<infer TParams> ? Rec
 export const routes = {
     root: '/',
     landing: '/',
+    dev: '/dev',
     workflow: {
         $id: 'workflow',
         root: new NamedRoute<'workflowId'>('/workflows/:workflowId'),
@@ -61,6 +63,9 @@ export const router = createBrowserRouter([ {
     children: [ {
         index: true,
         element: <LandingPage />,
+    }, {
+        path: routes.dev,
+        element: <DevPage />,
     }, {
         path: routes.workflow.root.path,
         element: <WorkflowPage />,

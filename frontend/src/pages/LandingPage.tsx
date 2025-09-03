@@ -21,10 +21,6 @@ export function LandingPage() {
         void navigate(routes.workflow.settings.resolve({ workflowId: Workflow.fromResponse(response.data).id }));
     }
 
-    function resetDatabase() {
-        void API.resetDatabase({});
-    }
-
     return (
         <Page>
             <h1 className='text-lg'>FDepHunter</h1>
@@ -46,13 +42,6 @@ export function LandingPage() {
 
                 <Button color='secondary' className='md:w-1/2 lg:w-1/3'>
                     Read documentation
-                </Button>
-            </div>
-
-            {/* FIXME Remove this once finished. */}
-            <div>
-                <Button color='danger' onPress={resetDatabase}>
-                    Reset DB
                 </Button>
             </div>
         </Page>

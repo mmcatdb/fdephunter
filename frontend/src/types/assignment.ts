@@ -9,7 +9,6 @@ export type AssignmentResponse = {
     exampleRow: ExampleRowResponse;
 };
 
-// TODO Replace by a simple type (if possible).
 export class Assignment {
     private constructor(
         readonly id: Id,

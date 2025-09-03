@@ -28,6 +28,12 @@ public class WorkflowEntity {
      */
     public Integer lhsSize;
 
+    // Stats
+    /** The total number of evaluation jobs the user had to od. */
+    public int totalIterations = 0;
+    public int minimalFds = 0;
+    public int totalFds = 0;
+
     public static WorkflowEntity create() {
         final var workflow = new WorkflowEntity();
 

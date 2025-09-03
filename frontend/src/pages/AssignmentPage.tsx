@@ -4,19 +4,22 @@ import { DecisionProvider } from '@/context/DecisionProvider';
 import { routes } from '@/router';
 import { Assignment } from '@/types/assignment';
 import { Link, matchPath, Outlet, type Params, useLoaderData, useLocation, useRevalidator, useRouteLoaderData } from 'react-router';
-import { Button, Tab, Tabs } from '@heroui/react';
+import { Button, Card, CardBody, Tab, Tabs } from '@heroui/react';
 import { Page, Sidebar, TopbarContent } from '@/components/layout';
 import { WorkflowProgressDisplay } from '@/components/worklow/WorkflowProgressDisplay';
 import { Workflow } from '@/types/workflow';
 import { type Lattice } from '@/types/examples';
 import { type Id } from '@/types/id';
 import { API } from '@/utils/api/api';
+import { FdSet } from '@/types/functionalDependency';
+import { FdListDisplay } from '@/components/dataset/FdListDisplay';
+import { useMemo } from 'react';
+import { createFdEdges } from './workflow/WorkflowResultsPage';
 
 export function AssignmentPage() {
     const { assignment, workflow } = useLoaderData<AssignmentLoaded>();
 
     return (<>
-        {/* FIXME This shouldn't be here ... */}
         <Sidebar>
             <WorkflowProgressDisplay currentStep={workflow.state} />
         </Sidebar>
@@ -25,16 +28,9 @@ export function AssignmentPage() {
             <div className='space-x-4'>
                 <AssignmentTabs assignmentId={assignment.id} />
 
-                {/* FIXME */}
                 <Button as={Link} to={routes.workflow.dashboard.root.resolve({ workflowId: assignment.workflowId })}>
                     Back to Workflow
                 </Button>
-
-                <Link to={routes.workflow.dashboard.root.resolve({ workflowId: assignment.workflowId })}>
-                    <Button>
-                        Back to Workflow
-                    </Button>
-                </Link>
             </div>
         </TopbarContent>
 
@@ -50,6 +46,7 @@ type AssignmentLoaded = {
     assignment: Assignment;
     workflow: Workflow;
     lattices: Lattice[];
+    fdSet: FdSet;
 };
 
 AssignmentPage.loader = async ({ params: { assignmentId } }: { params: Params<'assignmentId'> }): Promise<AssignmentLoaded> => {
@@ -60,18 +57,26 @@ AssignmentPage.loader = async ({ params: { assignmentId } }: { params: Params<'a
     if (!response.status)
         throw new Error('Failed to load assignment');
 
-    const workflowResponse = await API.workflow.getWorkflow(undefined, { workflowId: response.data.workflowId });
+    const workflowId =  response.data.workflowId;
+
+    const [ workflowResponse, latticesResponse, fdSetResponse ] = await Promise.all([
+        API.workflow.getWorkflow(undefined, { workflowId }),
+        API.view.getLattices(undefined, { workflowId }),
+        API.view.getFds(undefined, { workflowId }),
+    ]);
+
     if (!workflowResponse.status)
         throw new Error('Failed to load workflow');
-
-    const latticesResponse = await API.view.getLattices(undefined, { workflowId: response.data.workflowId });
     if (!latticesResponse.status)
         throw new Error('Failed to load lattices');
+    if (!fdSetResponse.status)
+        throw new Error('Failed to load functional dependencies');
 
     return {
         assignment: Assignment.fromResponse(response.data),
         workflow: Workflow.fromResponse(workflowResponse.data),
-        lattices: latticesResponse.data,
+        lattices: latticesResponse.data.lattices,
+        fdSet: FdSet.fromResponse(fdSetResponse.data),
     };
 };
 
@@ -98,16 +103,16 @@ export function AssignmentEvaluationPage() {
 }
 
 export function AssignmentListPage() {
-    // FIXME This needs to work.
+    const { fdSet } = useRouteLoaderData<AssignmentLoaded>(routes.assignment.$id)!;
 
-    // const { assignment } = useRouteLoaderData<AssignmentLoaded>(routes.assignment.$id)!;
-
-    // return (
-    //     <FdListDisplay graph={assignment.jobResult.fdGraph.edges} />
-    // );
+    const fds = useMemo(() => createFdEdges(fdSet), [ fdSet ]);
 
     return (
-        <div />
+        <Card className='mx-auto w-fit'>
+            <CardBody>
+                <FdListDisplay edges={fds} />
+            </CardBody>
+        </Card>
     );
 }
 

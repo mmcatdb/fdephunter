@@ -31,6 +31,9 @@ export type WorkflowResponse = {
     lhsSize: number;
     /** Is set after the dataset is uploaded so it's not known from the start. */
     datasetId: Id | null;
+    totalIterations: number;
+    minimalFds: number;
+    totalFds: number;
 };
 
 export class Workflow {
@@ -39,6 +42,9 @@ export class Workflow {
         readonly state: WorkflowState,
         readonly lhsSize: number,
         readonly datasetId: Id | undefined,
+        readonly totalIterations: number,
+        readonly minimalFds: number,
+        readonly totalFds: number,
     ) {}
 
     static fromResponse(input: WorkflowResponse): Workflow {
@@ -47,6 +53,9 @@ export class Workflow {
             input.state,
             input.lhsSize,
             input.datasetId ?? undefined,
+            input.totalIterations,
+            input.minimalFds,
+            input.totalFds,
         );
     }
 
@@ -58,11 +67,3 @@ export class Workflow {
         return undefined;
     }
 }
-
-export type WorkflowStats = {
-    FdsInitial: number;
-    FdsRemaining: number;
-    examplesPositive: number;
-    examplesNegative: number;
-    // examplesTotal = examplesPositive + examplesNegative
-};

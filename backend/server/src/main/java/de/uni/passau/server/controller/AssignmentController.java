@@ -47,7 +47,7 @@ public class AssignmentController {
     }
 
     @PostMapping("/assignments/{assignmentId}/reset")
-    public AssignmentEntity resetAssignment(@PathVariable String assignmentId, @RequestBody ExampleDecision decision) {
+    public AssignmentEntity resetAssignment(@PathVariable String assignmentId) {
         AssignmentEntity assignment = assignmentRepository.findById(UUID.fromString(assignmentId)).get();
 
         assignment.exampleRow.decision = null;

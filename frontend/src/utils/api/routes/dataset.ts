@@ -12,6 +12,9 @@ export const dataset = {
     getDatasets: GET<Empty, DatasetResponse[]>(
         () => `/datasets`,
     ),
+    getDataset: GET<{ workflowId: Id }, DatasetResponse>(
+        u => `/workflows/${u.workflowId}/dataset`,
+    ),
     getDatasetData: GET<{ workflowId: Id }, DatasetData, { offset?: number, limit?: number }>(
         u => `/workflows/${u.workflowId}/data`,
     ),

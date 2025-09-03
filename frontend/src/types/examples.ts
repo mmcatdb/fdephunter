@@ -1,4 +1,5 @@
 import { ColumnSet, type ColumnSetResponse } from './ColumnSet';
+import { type Workflow } from './workflow';
 
 export type ExampleRowResponse = {
     values: string[];
@@ -36,6 +37,10 @@ export class ExampleRow {
             input.isPositive,
             input.decision ?? undefined,
         );
+    }
+
+    isEvaluationAllowed(workflow: Workflow): boolean {
+        return this.isPositive === workflow.evaluatingType && this.lhsSet.length === workflow.lhsSize;
     }
 }
 
