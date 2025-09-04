@@ -81,10 +81,9 @@ public class DemoController {
         datasetService.createDataset(new CsvSettings(true, ','), "airline (13 cols, 168 fds)", "airline_sample_168fds_13col.csv");
         datasetService.createDataset(new CsvSettings(true, ','), "animal (9 cols, 66 fds)", "animal_sample_66fds_9col.csv");
         datasetService.createDataset(new CsvSettings(true, ','), "circuits (8 cols, 47 fds)", "circuits_sample_47fds_8col.csv");
-        // FIXME These two throw errors!
-        // datasetService.createDataset(new CsvSettings(true, ','), "flights (19 cols, 1374 fds)", "flights_sample_1374fds_19col.csv");
+        datasetService.createDataset(new CsvSettings(true, ','), "flights (19 cols, 1374 fds)", "flights_sample_1374fds_19col.csv");
         datasetService.createDataset(new CsvSettings(true, ','), "F1 drivers (8 cols, 33 fds)", "drivers_sample_33fds_8col.csv");
-        // datasetService.createDataset(new CsvSettings(true, ','), "F1 races (16 cols, 196 fds)", "races_sample_196fds_16col.csv");
+        datasetService.createDataset(new CsvSettings(true, ','), "F1 races (16 cols, 196 fds)", "races_sample_196fds_16col.csv");
         datasetService.createDataset(new CsvSettings(true, ','), "F1 results (11 cols, 100 fds)", "results_sample_100fds_11col.csv");
         datasetService.createDataset(new CsvSettings(true, ','), "iris (metanome)", "iris.csv");
 
