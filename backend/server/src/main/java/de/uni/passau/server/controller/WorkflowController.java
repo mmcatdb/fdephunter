@@ -88,12 +88,8 @@ public class WorkflowController {
 
         final String description = "Initial discovery for " + dataset.name;
 
-        LOGGER.info("Create job.");
         final var job = jobService.createDiscoveryJob(workflow, description);
-        LOGGER.info("Job saved {}.", job.state);
         jobService.executeJobAsync(job.id());
-
-        LOGGER.info("Job executed {}.", job.state);
 
         return CreateJobResponse.fromEntities(workflow, job);
     }

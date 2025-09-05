@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import de.uni.passau.algorithms.ComputeAR;
 import de.uni.passau.algorithms.ComputeMaxSets;
 import de.uni.passau.core.dataset.Dataset;
-import de.uni.passau.core.model.MaxSets;
 import de.uni.passau.server.model.AssignmentEntity;
 import de.uni.passau.server.model.JobEntity;
 import de.uni.passau.server.model.JobEntity.DiscoveryJobPayload;

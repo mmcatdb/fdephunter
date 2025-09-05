@@ -75,20 +75,66 @@ export enum DecisionColumnStatus {
 }
 
 export type LatticesResponse = {
-    lattices: Lattice[];
+    lattices: LatticeResponse[];
 };
+
+type LatticeResponse = {
+    classColumn: string;
+    columns: string[];
+    /** Base64 encoded bytes of {@link CellType}. */
+    rows: string[];
+}
 
 /**
  * The lattice of of elements for a specific class. Each element is a set of columns, the class is also a column. Each element then corresponds to an element of the max set for the class (max set of attributes of on the LHS that do not form a functional dependency with the class on the RHS).
  */
-export type Lattice = {
-    /** Name of the class column. */
-    classColumn: string;
-    /** Names of the columns. They are expected to be unique. */
-    columns: string[];
-    /** States of the cells in the rows. Each cell max set should be computable form its cell and row index. */
-    rows: CellType[][];
-};
+export class Lattice {
+    private constructor(
+        /** Name of the class column. */
+        readonly classColumn: string,
+        /** Names of the columns. They are expected to be unique. */
+        readonly columns: string[],
+        /** States of the cells in the rows. Each cell max set should be computable form its cell and row index. */
+        readonly rows: CellType[][],
+    ) {}
+
+    /** Too large lattices can't be displayed on FE. */
+    get isPlaceholder(): boolean {
+        return this.rows.length === 0;
+    }
+
+    static fromResponse(input: LatticeResponse): Lattice {
+        return new Lattice(
+            input.classColumn,
+            input.columns,
+            input.rows.map(Lattice.cellTypesFromBase64String),
+        );
+    }
+
+    private static cellTypesFromBase64String(input: string): CellType[] {
+        // NICE_TO_HAVE use Uint8Array.fromBase64 once fully supported.
+        const bytes = Uint8Array.from(atob(input), c => c.charCodeAt(0));
+
+        const isOdd = (bytes[bytes.length - 1] & 0x0F) === 0x0F; // Check if the last half-byte is padded with 1s.
+        const evenBytesLength = bytes.length - (isOdd ? 1 : 0);
+
+        const evenLength = evenBytesLength * 2;
+        const totalLength = evenLength + (isOdd ? 1 : 0);
+
+        const types: CellType[] = [];
+
+        for (let i = 0; i < evenBytesLength; i++) {
+            const j = i * 2;
+            types[j] = cellTypesByValue[bytes[i] >> 4];
+            types[j + 1] = cellTypesByValue[bytes[i] & 0x0F];
+        }
+
+        if (isOdd)
+            types[totalLength - 1] = cellTypesByValue[bytes[bytes.length - 1] >> 4];
+
+        return types;
+    }
+}
 
 /** A type of an element from the max set for a class. */
 export enum CellType {
@@ -101,6 +147,12 @@ export enum CellType {
     FakeFinal = 6,
     FakeTemp = 7,
     FakeDerived = 8,
+}
+
+const cellTypesByValue: CellType[] = [];
+for (const type of Object.values(CellType)) {
+    if (typeof type === 'number')
+        cellTypesByValue[type] = type;
 }
 
 /**

@@ -1,5 +1,5 @@
 import { AssignmentEvaluation } from '@/components/AssignmentEvaluation';
-import { LatticeDisplay } from '@/components/dataset/FdGraphDisplay';
+import { LatticesDisplay } from '@/components/dataset/LatticesDisplay';
 import { DecisionProvider } from '@/context/DecisionProvider';
 import { routes } from '@/router';
 import { Assignment } from '@/types/assignment';
@@ -8,7 +8,7 @@ import { Button, Card, CardBody, Tab, Tabs } from '@heroui/react';
 import { Page, Sidebar, TopbarContent } from '@/components/layout';
 import { WorkflowProgressDisplay } from '@/components/worklow/WorkflowProgressDisplay';
 import { Workflow } from '@/types/workflow';
-import { type Lattice } from '@/types/examples';
+import { Lattice } from '@/types/examples';
 import { type Id } from '@/types/id';
 import { API } from '@/utils/api/api';
 import { FdSet } from '@/types/functionalDependency';
@@ -75,7 +75,7 @@ AssignmentPage.loader = async ({ params: { assignmentId } }: { params: Params<'a
     return {
         assignment: Assignment.fromResponse(response.data),
         workflow: Workflow.fromResponse(workflowResponse.data),
-        lattices: latticesResponse.data.lattices,
+        lattices: latticesResponse.data.lattices.map(Lattice.fromResponse),
         fdSet: FdSet.fromResponse(fdSetResponse.data),
     };
 };
@@ -120,6 +120,6 @@ export function AssignmentGraphPage() {
     const { lattices } = useRouteLoaderData<AssignmentLoaded>(routes.assignment.$id)!;
 
     return (
-        <LatticeDisplay lattices={lattices} />
+        <LatticesDisplay lattices={lattices} />
     );
 }

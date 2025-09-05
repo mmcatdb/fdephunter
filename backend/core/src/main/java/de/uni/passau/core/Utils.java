@@ -7,35 +7,39 @@ import java.util.stream.IntStream;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import de.uni.passau.core.model.ColumnSet;
-import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntList;
 
 public class Utils {
 
-    /**
-     * @param n 0 or larger (up to 31)
-     * @param k 0 or larger (up to 31)
-     */
-    public static int nChooseK(int n, int k) {
-        if (k > n)
-            return 0;
+    /** Max n for which n choose k for all possible values of k fits into integer (something above 2e9). */
+    private static final int MAX_N = 33;
 
-        return factorial(n) / (factorial(k) * factorial(n - k));
+    /** On index [n][k] contains the value of n choose k. Some elements might not be used (if the value for them isn't needed). */
+    private static int[][] nChooseKCache = new int[MAX_N + 1][];
+
+    static {
+        nChooseKCache[0] = new int[MAX_N + 1];
+        nChooseKCache[0][0] = 1; // 0 choose 0 = 1
+        for (int k = 1; k <= MAX_N; k++)
+            nChooseKCache[0][k] = 0; // 0 choose k = 0 for k > 0
+
+        for (int n = 1; n <= MAX_N; n++) {
+            nChooseKCache[n] = new int[MAX_N + 1];
+            nChooseKCache[n][0] = 1; // n choose 0 = 1
+            nChooseKCache[n][n] = 1; // n choose n = 1
+
+            for (int k = 1; k < n; k++)
+                nChooseKCache[n][k] = nChooseKCache[n - 1][k - 1] + nChooseKCache[n - 1][k];
+            for (int k = n + 1; k <= MAX_N; k++)
+                nChooseKCache[n][k] = 0; // n choose k = 0 for k > n
+        }
     }
 
-    // Factorial of 0 is 1.
-    private static IntList factorialCache = new IntArrayList(new int[] { 1 });
-
     /**
-     * Don't use with numbers larger than 31!
+     * @param n from 0 to 33 (both inclusive)
+     * @param k from 0 to 33 (both inclusive)
      */
-    public static int factorial(int x) {
-        while (x >= factorialCache.size()) {
-            final int next = factorialCache.size() * factorialCache.getInt(factorialCache.size() - 1);
-            factorialCache.add(next);
-        }
-
-        return factorialCache.getInt(x);
+    public static int nChooseK(int n, int k) {
+        return nChooseKCache[n][k];
     }
 
     public static String bytesToHexString(byte[] bytes) {
@@ -121,34 +125,20 @@ public class Utils {
      * A cached computer of combination indexes.
      */
     public static class CombinationIndexer {
-        /** On index [n][k] contains the value of n choose k. Some elements might not be used (if the value for them isn't needed). */
-        private final int[][] nChooseKCache;
-        /** Indexed from 1 to n. The zeroth element is not used. */
-        private final int[] maxIndexCache;
         public final int n;
+
+        private CombinationIndexer(int n) {
+            this.n = n;
+        }
 
         /**
          * @param n The total number of elements to choose from.
          */
-        public CombinationIndexer(int n) {
-            this.n = n;
-            final int maxK = n;
+        public static CombinationIndexer create(int n) {
+            if (n < 1 || n > MAX_N)
+                throw new IllegalArgumentException("n must be between 1 and " + MAX_N + " (both inclusive), but is " + n + ".");
 
-            nChooseKCache = new int[n][];
-            maxIndexCache = new int[maxK + 1];
-
-
-            // The largest N is going to be n - 0 - 1, i.e., n - 1. The smallest N will be n - (n - 1) - 1, i.e., 0.
-            for (int N = 0; N < n; N++) {
-                this.nChooseKCache[N] = new int[maxK + 1];
-
-                // The largest K is going to be k - 0, i.e., k. The smallest K will be k - (k - 1), i.e., 1. But we can also compute (N 0), just for simplicity.
-                for (int K = 0; K <= maxK; K++)
-                    this.nChooseKCache[N][K] = nChooseK(N, K);
-            }
-
-            for (int K = 1; K <= maxK; K++)
-                this.maxIndexCache[K] = nChooseK(n, K) - 1;
+            return new CombinationIndexer(n);
         }
 
         /**
@@ -158,15 +148,15 @@ public class Utils {
          * I.e., don't use the specially-indexed column sets from max sets that omit the class column.
          */
         public int getIndex(ColumnSet c) {
-            int sum = 0;
+            // At the end, we would have subtracted 1 from the nChooseK value, so we start with 1.
+            int sum = 1;
             final var indexes = c.toIndexes();
             final var k = indexes.length;
-            final var cache = this.nChooseKCache;
 
             for (int i = 0; i < k; i++)
-                sum += cache[n - indexes[i] - 1][k - i];
+                sum += nChooseK(n - indexes[i] - 1, k - i);
 
-            return this.maxIndexCache[k] - sum;
+            return nChooseK(n, k) - sum;
         }
 
         // For example, lets say n = 5 and k = 3. Then the combinations with their indexes are:
@@ -184,9 +174,9 @@ public class Utils {
         /** Returns the number of combinations (without repetition) of <code>k</code> elements choosen from <code>n</code> elements (i.e., n choose k). */
         public int getNumberOfCombinations(int k) {
             if (k < 1 || k > n)
-                throw new IllegalArgumentException("k must be between 0 and n (inclusive), but is " + k + ".");
+                throw new IllegalArgumentException("k must be between 1 and n (both inclusive), but is " + k + ".");
 
-            return this.maxIndexCache[k] + 1;
+            return nChooseK(n, k);
         }
     }
 

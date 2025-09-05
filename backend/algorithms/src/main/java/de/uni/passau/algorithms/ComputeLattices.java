@@ -49,7 +49,7 @@ public class ComputeLattices {
         this.isEvaluatingPositives = isEvaluatingPositives;
         this.lhsSize = lhsSize;
 
-        indexer = new CombinationIndexer(allColumns.length - 1);
+        indexer = CombinationIndexer.create(allColumns.length - 1);
     }
 
     private Lattices innerRun(MaxSets maxSets, MaxSets initialMaxSets) {
@@ -68,6 +68,18 @@ public class ComputeLattices {
     private CellType[][] lattice;
 
     private Lattice computeLattice(MaxSet maxSet, MaxSet initialMaxSet) {
+        final String className = allColumns[maxSet.forClass];
+        final var columns = new String[indexer.n];
+        for (int i = 0, j = 0; i < allColumns.length; i++) {
+            if (i != maxSet.forClass)
+                columns[j++] = allColumns[i];
+        }
+
+        if (allColumns.length > Lattice.MAX_COLUMNS)
+            return Lattice.createPlaceholder(className, columns);
+
+        // The lattice is small enough, let's compute the rows.
+
         computeCommonObjects(maxSet, initialMaxSet);
 
         lattice = createEmptyLattice();
@@ -84,14 +96,7 @@ public class ComputeLattices {
             }
         }
 
-        // Finishing the lattice ...
-        final var columns = new String[indexer.n];
-        for (int i = 0, j = 0; i < allColumns.length; i++) {
-            if (i != maxSet.forClass)
-                columns[j++] = allColumns[i];
-        }
-
-        return new Lattice(allColumns[maxSet.forClass], columns, lattice);
+        return new Lattice(className, columns, lattice);
     }
 
     // Common objects used in the computation. They are all in the universal representation.

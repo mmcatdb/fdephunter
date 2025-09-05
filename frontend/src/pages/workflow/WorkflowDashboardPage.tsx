@@ -1,6 +1,6 @@
 import { DatasetTable } from '@/components/dataset/DatasetTableDisplay';
 import { FdListDisplay } from '@/components/dataset/FdListDisplay';
-import { LatticeDisplay } from '@/components/dataset/FdGraphDisplay';
+import { LatticesDisplay } from '@/components/dataset/LatticesDisplay';
 import { Button, Card, CardBody, CardFooter, CardHeader, Tab, Tabs } from '@heroui/react';
 import { Page, TopbarContent } from '@/components/layout';
 import { AssignmentsDisplay } from '@/components/dataset/AssignmentsDisplay';
@@ -8,7 +8,7 @@ import { Link, matchPath, Outlet, type Params, useLoaderData, useLocation, useNa
 import { type WorkflowLoaded } from './WorkflowPage';
 import { routes } from '@/router';
 import { useMemo, useState } from 'react';
-import { DecisionStatus, type Lattice } from '@/types/examples';
+import { DecisionStatus, Lattice } from '@/types/examples';
 import clsx from 'clsx';
 import { Assignment } from '@/types/assignment';
 import { createFdEdges } from './WorkflowResultsPage';
@@ -228,7 +228,7 @@ export function WorkflowGraphPage() {
     const { lattices } = useLoaderData<WorkflowGraphLoaded>();
 
     return (
-        <LatticeDisplay lattices={lattices} />
+        <LatticesDisplay lattices={lattices} />
     );
 }
 
@@ -244,5 +244,7 @@ WorkflowGraphPage.loader = async ({ params: { workflowId } }: { params: Params<'
     if (!response.status)
         throw new Error('Failed to load lattices');
 
-    return { lattices: response.data.lattices };
+    return {
+        lattices: response.data.lattices.map(Lattice.fromResponse),
+    };
 };

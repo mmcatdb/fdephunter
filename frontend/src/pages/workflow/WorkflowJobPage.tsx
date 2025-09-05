@@ -31,6 +31,9 @@ export function WorkflowJobPage() {
         const route = workflow.state === WorkflowState.DisplayFinalFds
             ? routes.workflow.results.root
             : routes.workflow.dashboard.root;
+        // FIXME This doesn't cause the workflow to reload. That should be ok since there should be at least one reload from the job revalidation.
+        // If the job is executed immediately (still don't know how that's possible), it will cause problems.
+        // We can fix it now but let's just wait for Tanstack router and query.
         void navigate(route.resolve({ workflowId: workflow.id }));
     }
 

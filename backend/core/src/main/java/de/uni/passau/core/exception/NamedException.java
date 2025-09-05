@@ -25,6 +25,7 @@ public abstract class NamedException extends RuntimeException {
         this.data = data;
     }
 
+    // Unfortunately, this is not a provided and configured object mapper, but what can we do ...
     private static final ObjectMapper mapper = new ObjectMapper();
 
     private static String createMessage(String name, Serializable data) {

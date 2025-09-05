@@ -3,10 +3,10 @@ import { NODE_OPTIONS, type RFGraph, type RfNode, type RfEdge } from '@/types/fu
 import { Handle, type NodeProps, Position, ReactFlow } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { computeColumnIndexesForLatticeRow, computeEdgesForLatticeCell, type Lattice, CellType, nChooseK } from '@/types/examples';
-import { Button, cn, Divider, Popover, PopoverContent, PopoverTrigger, Select, SelectItem, type SharedSelection, Switch } from '@heroui/react';
+import { Button, Card, CardBody, cn, Divider, Popover, PopoverContent, PopoverTrigger, Select, SelectItem, type SharedSelection, Switch } from '@heroui/react';
 import clsx from 'clsx';
 
-export function LatticeDisplay({ lattices }: { lattices: Lattice[] }) {
+export function LatticesDisplay({ lattices }: { lattices: Lattice[] }) {
     const [ classIndex, setClassIndex ] = useState(new Set([ '0' ]));
     const classItems = useMemo(() => lattices.map((lattice, index) => ({ value: index, label: lattice.classColumn })), [ lattices ]);
     const lattice = lattices[Number(classIndex.values().next().value!)];
@@ -43,39 +43,48 @@ export function LatticeDisplay({ lattices }: { lattices: Lattice[] }) {
                     )}
                 </Select>
 
-                <Switch isSelected={showAllRows} onValueChange={setShowAllRows}>
-                    Show all rows?
-                </Switch>
+                {!lattice.isPlaceholder && (<>
+                    <Switch isSelected={showAllRows} onValueChange={setShowAllRows}>
+                        Show all rows?
+                    </Switch>
 
-                {!showAllRows && (<>
-                    <Divider orientation='vertical' />
+                    {!showAllRows && (<>
+                        <Divider orientation='vertical' />
 
-                    <div>
-                        Row:{' '}
-                        <span className='tabular-nums text-lg font-bold'>
-                            {rowIndex + 1}
-                        </span>
-                    </div>
+                        <div>
+                            Row:{' '}
+                            <span className='tabular-nums text-lg font-bold'>
+                                {rowIndex + 1}
+                            </span>
+                        </div>
 
-                    <div className='space-x-2'>
-                        <Button onPress={() => setRowIndex(prev => Math.max(0, prev - 1))} isDisabled={showAllRows || rowIndex === 0}>
-                            Previous
-                        </Button>
+                        <div className='space-x-2'>
+                            <Button onPress={() => setRowIndex(prev => Math.max(0, prev - 1))} isDisabled={showAllRows || rowIndex === 0}>
+                                Previous
+                            </Button>
 
-                        <Button onPress={() => setRowIndex(prev => Math.min(lattice.rows.length - 1, prev + 1))} isDisabled={showAllRows || rowIndex === lattice.rows.length - 1}>
-                            Next
-                        </Button>
-                    </div>
+                            <Button onPress={() => setRowIndex(prev => Math.min(lattice.rows.length - 1, prev + 1))} isDisabled={showAllRows || rowIndex === lattice.rows.length - 1}>
+                                Next
+                            </Button>
+                        </div>
+                    </>)}
                 </>)}
             </div>
-            <div className='w-full h-full'>
-                <ReactFlow
-                    fitView
-                    nodeTypes={nodeTypes}
-                    nodes={rfGraph.nodes}
-                    edges={rfGraph.edges}
-                />
-            </div>
+
+            {lattice.isPlaceholder ? (
+                <div className='mt-8 mx-auto text-danger-500'>
+                        The lattice is too large to be displayed.
+                </div>
+            ) : (
+                <div className='w-full h-full'>
+                    <ReactFlow
+                        fitView
+                        nodeTypes={nodeTypes}
+                        nodes={rfGraph.nodes}
+                        edges={rfGraph.edges}
+                    />
+                </div>
+            )}
         </div>
     );
 }
