@@ -9,7 +9,8 @@ services:
         expose:
             - 27017
         ports:
-            - 5602:27017
+            # Allows only localhost to access the database. This is important for security reasons, as it prevents external access to the database.
+            - "127.0.0.1:5602:27017"
 
     backend:
         container_name: "fdephunter-backend"
